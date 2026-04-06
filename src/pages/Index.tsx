@@ -4,6 +4,7 @@ import BottomNav, { type Tab } from "@/components/BottomNav";
 import DiscoveryFeed from "@/components/DiscoveryFeed";
 import CreatorProfile from "@/components/CreatorProfile";
 import TrendingPage from "@/components/TrendingPage";
+import CreatorAnalyticsDashboard from "@/components/CreatorAnalyticsDashboard";
 import { Upload, Lock, User } from "lucide-react";
 import WalletIndicator from "@/components/WalletIndicator";
 
@@ -21,9 +22,19 @@ const Index = () => {
   const [verified, setVerified] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   if (!verified) {
     return <AgeVerification onVerified={() => setVerified(true)} />;
+  }
+
+  if (showDashboard) {
+    return (
+      <>
+        <CreatorAnalyticsDashboard onBack={() => setShowDashboard(false)} />
+        <BottomNav active={activeTab} onNavigate={(tab) => { setShowDashboard(false); setActiveTab(tab); }} />
+      </>
+    );
   }
 
   if (selectedCreator) {
@@ -43,7 +54,20 @@ const Index = () => {
       {activeTab === "trending" && <TrendingPage onCreatorClick={handleCreatorClick} />}
       {activeTab === "upload" && <PlaceholderPage icon={Upload} title="Upload" />}
       {activeTab === "vaults" && <PlaceholderPage icon={Lock} title="My Vaults" />}
-      {activeTab === "profile" && <PlaceholderPage icon={User} title="My Profile" />}
+      {activeTab === "profile" && (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
+          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+            <User className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">My Profile</h2>
+          <button
+            onClick={() => setShowDashboard(true)}
+            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium neon-glow hover:brightness-110 transition-all"
+          >
+            Open Creator Dashboard
+          </button>
+        </div>
+      )}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );

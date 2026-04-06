@@ -1,6 +1,9 @@
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
+import CreatorMediaGrid from "@/components/CreatorMediaGrid";
+import CustomRequestModal from "@/components/CustomRequestModal";
 
 interface Vault {
   name: string;
@@ -19,6 +22,8 @@ const VAULTS: Vault[] = [
 ];
 
 const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: () => void }) => {
+  const [showRequest, setShowRequest] = useState(false);
+
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
@@ -58,6 +63,25 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         </div>
       </div>
 
+      {/* Custom Request Button */}
+      <div className="px-4 mt-6">
+        <Button
+          variant="gold"
+          size="lg"
+          className="w-full text-base font-semibold gap-2"
+          onClick={() => setShowRequest(true)}
+        >
+          <Palette className="w-5 h-5" />
+          Request Custom Media
+        </Button>
+        <p className="text-center text-xs text-muted-foreground mt-1.5">
+          Premium commissions from $100 — $1,000 • Secure escrow
+        </p>
+      </div>
+
+      {/* Media Grid */}
+      <CreatorMediaGrid />
+
       {/* Vault Grid */}
       <div className="px-4 mt-8">
         <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -78,7 +102,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <p className="text-xs text-muted-foreground mt-1">{vault.videoCount} videos</p>
               <div className="mt-3 flex items-center gap-1.5">
                 <Lock className="w-3 h-3 text-primary" />
-                <span className="text-sm font-bold text-primary">${vault.price}</span>
+                <span className="text-sm font-bold text-primary">{vault.price} Bit-Tokens</span>
               </div>
             </button>
           ))}
@@ -89,12 +113,17 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       <div className="px-4 mt-6">
         <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2">
           <Sparkles className="w-5 h-5" />
-          Full Access Bundle — $39.99
+          6 Bit-Token Mega Pack
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-2">
           Unlock all {VAULTS.reduce((a, v) => a + v.videoCount, 0)} videos across {VAULTS.length} vaults
         </p>
       </div>
+
+      {/* Custom Request Modal */}
+      {showRequest && (
+        <CustomRequestModal creatorName={creatorName} onClose={() => setShowRequest(false)} />
+      )}
     </div>
   );
 };
