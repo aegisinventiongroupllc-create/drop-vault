@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
+  Lightbulb, Lock, Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -29,12 +30,17 @@ const CUSTOM_REQUESTS = [
   { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const },
 ];
 
-const MEDIA_ITEMS = [
-  { id: "1", type: "video" as const, title: "Cosplay Reveal — Marin", views: 12400, date: "Apr 2" },
-  { id: "2", type: "photo" as const, title: "Beach Shoot Set", views: 8900, date: "Mar 28" },
-  { id: "3", type: "video" as const, title: "Gym Session #12", views: 6200, date: "Mar 25" },
-  { id: "4", type: "photo" as const, title: "BTS — Studio Lighting", views: 4300, date: "Mar 20" },
-  { id: "5", type: "video" as const, title: "Q&A with Fans", views: 15600, date: "Mar 18" },
+const PUBLIC_TEASERS = [
+  { id: "t1", type: "video" as const, title: "Cosplay Reveal — 15s Teaser", views: 42300, date: "Apr 2", visibility: "public" as const },
+  { id: "t2", type: "video" as const, title: "Gym Motivation — Teaser", views: 18900, date: "Mar 30", visibility: "public" as const },
+];
+
+const VAULT_CONTENT = [
+  { id: "v1", type: "video" as const, title: "Cosplay Full Shoot — 18 min", views: 12400, date: "Apr 2", visibility: "locked" as const },
+  { id: "v2", type: "photo" as const, title: "Beach Shoot — Full Set (24 photos)", views: 8900, date: "Mar 28", visibility: "locked" as const },
+  { id: "v3", type: "video" as const, title: "Gym Session #12 — Full 22 min", views: 6200, date: "Mar 25", visibility: "locked" as const },
+  { id: "v4", type: "photo" as const, title: "BTS — Studio Lighting Set", views: 4300, date: "Mar 20", visibility: "locked" as const },
+  { id: "v5", type: "video" as const, title: "Q&A Uncut — 45 min", views: 15600, date: "Mar 18", visibility: "locked" as const },
 ];
 
 type Section = "overview" | "verification" | "requests" | "media";
