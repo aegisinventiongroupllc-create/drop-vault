@@ -90,6 +90,17 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         ))}
       </div>
 
+      {/* Strategy Tip Banner */}
+      <div className="mx-4 mb-4 bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-4 flex gap-3">
+        <Lightbulb className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
+        <div>
+          <h4 className="text-sm font-bold text-foreground mb-1">Strategy Tip</h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Maximize your Revenue: Upload a high-energy 15-second teaser to the public feed, then lock your full 15+ minute exclusive videos behind your Profile Paywall.
+          </p>
+        </div>
+      </div>
+
       {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
