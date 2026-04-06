@@ -68,9 +68,9 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/60 backdrop-blur-xl">
           <Lock className="w-12 h-12 text-primary animate-pulse-glow" />
           <h3 className="text-xl font-semibold text-foreground">Preview ended</h3>
-          <Button variant="neon" size="lg" className="text-base px-8">
-            Unlock Full Video for $0.50
-          </Button>
+           <Button variant="neon" size="lg" className="text-base px-8">
+             Unlock with 1 Bit-Token
+           </Button>
           <div className="flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-secondary/80 border border-border">
             <span className="text-xs text-primary font-medium">Creator keeps 90%</span>
             <span className="text-xs text-muted-foreground">• Platform fee 10%</span>
