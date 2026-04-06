@@ -5,7 +5,8 @@ import DiscoveryFeed from "@/components/DiscoveryFeed";
 import CreatorProfile from "@/components/CreatorProfile";
 import TrendingPage from "@/components/TrendingPage";
 import CreatorAnalyticsDashboard from "@/components/CreatorAnalyticsDashboard";
-import { Upload, Lock, User } from "lucide-react";
+import MasterAdminPanel from "@/components/MasterAdminPanel";
+import { Upload, Lock, User, Shield } from "lucide-react";
 import WalletIndicator from "@/components/WalletIndicator";
 
 const PlaceholderPage = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
@@ -23,9 +24,14 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   if (!verified) {
     return <AgeVerification onVerified={() => setVerified(true)} />;
+  }
+
+  if (showAdmin) {
+    return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
   }
 
   if (showDashboard) {
@@ -65,6 +71,13 @@ const Index = () => {
             className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium neon-glow hover:brightness-110 transition-all"
           >
             Open Creator Dashboard
+          </button>
+          <button
+            onClick={() => setShowAdmin(true)}
+            className="flex items-center gap-2 px-5 py-2 bg-secondary border border-border rounded-full text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            Master Admin Panel
           </button>
         </div>
       )}

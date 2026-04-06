@@ -248,13 +248,13 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">External Wallet Address</label>
+              <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
               <input
                 type="text"
-                placeholder="Enter your wallet or payout address..."
-                className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Enter your Litecoin wallet address (e.g. ltc1q...)"
+                className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-xs"
               />
-              <p className="text-xs text-muted-foreground">Supports crypto wallets and bank transfer details</p>
+              <p className="text-xs text-muted-foreground">Payouts are sent exclusively via Litecoin (LTC)</p>
             </div>
 
             <Button variant="neon" className="w-full mt-4">
