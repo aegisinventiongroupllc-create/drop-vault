@@ -73,6 +73,10 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
             <span className="text-xs text-primary font-medium">Creator keeps 90%</span>
             <span className="text-xs text-muted-foreground">• Platform fee 10%</span>
           </div>
+          <a href="mailto:dropthatthingmedia@gmail.com" className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Mail className="w-3 h-3" />
+            Support
+          </a>
         </div>
       )}
 
