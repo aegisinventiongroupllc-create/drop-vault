@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
-  ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard, CheckCircle, AlertCircle, Clock,
+  ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
+  CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -8,37 +9,52 @@ import WalletIndicator from "@/components/WalletIndicator";
 const STATS = [
   { label: "Followers", value: "48.2K", change: "+2.3%", icon: Users },
   { label: "Total Views", value: "1.8M", change: "+12.5%", icon: Eye },
-  { label: "Vault Revenue", value: "$12,450", change: "+8.1%", icon: BarChart3 },
+  { label: "Bit-Token Revenue", value: "2,450 BT", change: "+8.1%", icon: BarChart3 },
   { label: "Growth Rate", value: "15.4%", change: "+3.2%", icon: TrendingUp },
 ];
 
-const WEEKLY_DATA = [
-  { day: "Mon", views: 45 },
-  { day: "Tue", views: 62 },
-  { day: "Wed", views: 78 },
-  { day: "Thu", views: 55 },
-  { day: "Fri", views: 91 },
-  { day: "Sat", views: 110 },
-  { day: "Sun", views: 86 },
+const REVENUE_DATA = [
+  { month: "Jan", earned: 320, withdrawn: 200 },
+  { month: "Feb", earned: 480, withdrawn: 350 },
+  { month: "Mar", earned: 620, withdrawn: 400 },
+  { month: "Apr", earned: 750, withdrawn: 500 },
+  { month: "May", earned: 890, withdrawn: 600 },
+  { month: "Jun", earned: 1100, withdrawn: 780 },
 ];
 
+const CUSTOM_REQUESTS = [
+  { id: "1", fan: "VaultKing99", description: "Custom cosplay photoshoot — Tifa Lockhart", amount: 500, status: "pending" as const },
+  { id: "2", fan: "NeonWhale", description: "Exclusive gym workout video — 10 min", amount: 250, status: "pending" as const },
+  { id: "3", fan: "DiamondFan", description: "Premium behind-the-scenes content", amount: 1000, status: "accepted" as const },
+  { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const },
+];
+
+const MEDIA_ITEMS = [
+  { id: "1", type: "video" as const, title: "Cosplay Reveal — Marin", views: 12400, date: "Apr 2" },
+  { id: "2", type: "photo" as const, title: "Beach Shoot Set", views: 8900, date: "Mar 28" },
+  { id: "3", type: "video" as const, title: "Gym Session #12", views: 6200, date: "Mar 25" },
+  { id: "4", type: "photo" as const, title: "BTS — Studio Lighting", views: 4300, date: "Mar 20" },
+  { id: "5", type: "video" as const, title: "Q&A with Fans", views: 15600, date: "Mar 18" },
+];
+
+type Section = "overview" | "verification" | "requests" | "media";
+
 const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
-  const [activeSection, setActiveSection] = useState<"overview" | "verification" | "payouts">("overview");
-  const [idFront, setIdFront] = useState<string | null>(null);
-  const [idBack, setIdBack] = useState<string | null>(null);
-  const [selfie, setSelfie] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState("");
+  const [activeSection, setActiveSection] = useState<Section>("overview");
+  const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified">("none");
+  const [idUploaded, setIdUploaded] = useState(false);
 
-  const maxViews = Math.max(...WEEKLY_DATA.map((d) => d.views));
+  const maxEarned = Math.max(...REVENUE_DATA.map((d) => d.earned));
 
-  const sections = [
-    { id: "overview" as const, label: "Overview", icon: BarChart3 },
-    { id: "verification" as const, label: "Identity", icon: Shield },
-    { id: "payouts" as const, label: "Payouts", icon: CreditCard },
+  const sections: { id: Section; label: string; icon: React.ElementType }[] = [
+    { id: "overview", label: "Analytics", icon: BarChart3 },
+    { id: "verification", label: "Verify", icon: Shield },
+    { id: "requests", label: "Requests", icon: FileText },
+    { id: "media", label: "Media", icon: Image },
   ];
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-24">
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -68,7 +84,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         ))}
       </div>
 
-      {/* Overview */}
+      {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -84,19 +100,40 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             ))}
           </div>
 
-          {/* Mini chart */}
+          {/* Revenue Chart */}
           <div className="bg-card border border-border rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Weekly Views</h3>
-            <div className="flex items-end gap-2 h-32">
-              {WEEKLY_DATA.map((d) => (
-                <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
-                  <div
-                    className="w-full rounded-t bg-primary/80 neon-glow-sm transition-all"
-                    style={{ height: `${(d.views / maxViews) * 100}%` }}
-                  />
-                  <span className="text-[10px] text-muted-foreground">{d.day}</span>
+            <h3 className="text-sm font-semibold text-foreground mb-1">Bit-Token Revenue</h3>
+            <p className="text-xs text-muted-foreground mb-4">Earned vs. Withdrawn</p>
+            <div className="flex items-end gap-3 h-36">
+              {REVENUE_DATA.map((d) => (
+                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex flex-col items-center gap-0.5" style={{ height: "100%" }}>
+                    <div className="w-full flex items-end gap-0.5" style={{ height: "100%" }}>
+                      <div
+                        className="flex-1 rounded-t bg-primary/80 neon-glow-sm"
+                        style={{ height: `${(d.earned / maxEarned) * 100}%` }}
+                        title={`Earned: ${d.earned} BT`}
+                      />
+                      <div
+                        className="flex-1 rounded-t bg-gold/60"
+                        style={{ height: `${(d.withdrawn / maxEarned) * 100}%` }}
+                        title={`Withdrawn: ${d.withdrawn} BT`}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{d.month}</span>
                 </div>
               ))}
+            </div>
+            <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-primary/80" />
+                <span className="text-[10px] text-muted-foreground">Earned</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-gold/60" />
+                <span className="text-[10px] text-muted-foreground">Withdrawn</span>
+              </div>
             </div>
           </div>
 
@@ -105,7 +142,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             <h3 className="text-sm font-semibold text-foreground">Recent Activity</h3>
             {[
               { text: "New vault unlock — Cosplay Vault", time: "2m ago", icon: CheckCircle },
-              { text: "Custom request received — $250", time: "15m ago", icon: CreditCard },
+              { text: "Custom request received — $500", time: "15m ago", icon: CreditCard },
               { text: "+124 new followers today", time: "1h ago", icon: Users },
             ].map((a, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -120,86 +157,83 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         </div>
       )}
 
-      {/* Identity & Age Verification */}
+      {/* Verification Center */}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Identity & Age Verification</h3>
+              <h3 className="text-base font-semibold text-foreground">Verification Center</h3>
             </div>
 
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground">
-                Upload a valid government-issued ID to verify your identity and age. This is required before you can receive payouts.
+                Upload a valid government-issued ID to verify your identity and age. Required before receiving payouts or accepting custom requests.
               </p>
             </div>
 
-            {/* Upload slots */}
-            <div className="space-y-3">
-              {[
-                { label: "Government ID — Front", state: idFront, setter: setIdFront },
-                { label: "Government ID — Back", state: idBack, setter: setIdBack },
-                { label: "Selfie with ID", state: selfie, setter: setSelfie },
-              ].map((slot) => (
-                <div key={slot.label} className="border border-border rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {slot.state ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
-                    ) : (
-                      <Upload className="w-5 h-5 text-muted-foreground" />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{slot.label}</p>
-                      <p className="text-xs text-muted-foreground">{slot.state ? "Uploaded" : "Required"}</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={slot.state ? "outline" : "default"}
-                    size="sm"
-                    onClick={() => slot.setter("uploaded")}
-                  >
-                    {slot.state ? "Replace" : "Upload"}
-                  </Button>
-                </div>
-              ))}
+            {/* Upload button */}
+            <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/40 transition-colors">
+              <Upload className="w-8 h-8 text-muted-foreground" />
+              <p className="text-sm font-medium text-foreground">Identity & Age Documents</p>
+              <p className="text-xs text-muted-foreground text-center">Government-issued ID, Passport, or Driver's License</p>
+              <Button
+                variant={idUploaded ? "outline" : "neon"}
+                size="sm"
+                onClick={() => {
+                  setIdUploaded(true);
+                  setVerificationStatus("pending");
+                }}
+              >
+                {idUploaded ? "Re-upload" : "Upload Documents"}
+              </Button>
             </div>
 
             {/* Status */}
             <div className="mt-4 flex items-center gap-2 bg-secondary/50 rounded-lg p-3">
-              <Clock className="w-4 h-4 text-gold" />
-              <p className="text-xs text-muted-foreground">
-                Verification status: <span className="text-gold font-medium">Pending Review</span>
-              </p>
+              {verificationStatus === "verified" ? (
+                <>
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <p className="text-xs text-muted-foreground">
+                    Status: <span className="text-green-400 font-medium">Verified ✓</span>
+                  </p>
+                </>
+              ) : verificationStatus === "pending" ? (
+                <>
+                  <Clock className="w-4 h-4 text-gold" />
+                  <p className="text-xs text-muted-foreground">
+                    Status: <span className="text-gold font-medium">Pending Review</span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    Status: <span className="text-muted-foreground font-medium">Not Submitted</span>
+                  </p>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Payout Settings */}
-      {activeSection === "payouts" && (
-        <div className="px-4 space-y-4">
+          {/* Payout Settings */}
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
               <CreditCard className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Payout Settings</h3>
             </div>
 
-            {/* Balance */}
             <div className="bg-secondary/50 rounded-xl p-4 mb-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
               <p className="text-3xl font-bold text-primary">$2,340.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
             </div>
 
-            {/* Wallet address */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">External Wallet Address</label>
               <input
                 type="text"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
                 placeholder="Enter your wallet or payout address..."
                 className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
@@ -209,27 +243,106 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             <Button variant="neon" className="w-full mt-4">
               Request Payout
             </Button>
+          </div>
+        </div>
+      )}
 
-            {/* History */}
-            <div className="mt-6 space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Payout History</h4>
-              {[
-                { amount: "$1,200.00", date: "Mar 28, 2026", status: "Completed" },
-                { amount: "$890.00", date: "Mar 14, 2026", status: "Completed" },
-                { amount: "$650.00", date: "Feb 28, 2026", status: "Completed" },
-              ].map((p, i) => (
-                <div key={i} className="flex items-center justify-between border border-border rounded-lg p-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{p.amount}</p>
-                    <p className="text-xs text-muted-foreground">{p.date}</p>
+      {/* Request Vault */}
+      {activeSection === "requests" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <FileText className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">The Request Vault</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Custom Media Requests from fans</p>
+
+            <div className="space-y-3">
+              {CUSTOM_REQUESTS.map((req) => (
+                <div key={req.id} className="border border-border rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{req.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">From: {req.fan}</p>
+                    </div>
+                    <div className="flex items-center gap-1 bg-primary/10 border border-primary/30 rounded-full px-2.5 py-1">
+                      <DollarSign className="w-3 h-3 text-primary" />
+                      <span className="text-sm font-bold text-primary">{req.amount}</span>
+                    </div>
                   </div>
-                  <span className="text-xs text-green-400 font-medium">{p.status}</span>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      req.status === "pending" ? "bg-gold/10 text-gold border border-gold/30" :
+                      req.status === "accepted" ? "bg-primary/10 text-primary border border-primary/30" :
+                      "bg-green-400/10 text-green-400 border border-green-400/30"
+                    }`}>
+                      {req.status === "pending" ? "Awaiting Response" : req.status === "accepted" ? "In Progress" : "Completed"}
+                    </span>
+                    {req.status === "pending" && (
+                      <Button variant="neon" size="sm">Accept & Create</Button>
+                    )}
+                    {req.status === "accepted" && (
+                      <Button variant="neon" size="sm">Submit Content</Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              All payments are held in secure escrow until content is delivered and verified. Funds are released within 48 hours of approval.
+            </p>
+          </div>
         </div>
       )}
+
+      {/* Media Manager */}
+      {activeSection === "media" && (
+        <div className="px-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-foreground">Media Manager</h3>
+            <Button variant="neon" size="sm" className="gap-1.5">
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {MEDIA_ITEMS.map((item) => (
+              <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                  {item.type === "video" ? (
+                    <Video className="w-6 h-6 text-primary" />
+                  ) : (
+                    <Image className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views</span>
+                    <span className="text-xs text-muted-foreground">• {item.date}</span>
+                  </div>
+                </div>
+                <button className="text-muted-foreground hover:text-destructive transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Support footer */}
+      <div className="px-4 mt-8 pb-4 text-center">
+        <a href="mailto:dropthatthingmedia@gmail.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+          <Mail className="w-3 h-3" />
+          Official Support: dropthatthingmedia@gmail.com
+        </a>
+      </div>
     </div>
   );
 };
