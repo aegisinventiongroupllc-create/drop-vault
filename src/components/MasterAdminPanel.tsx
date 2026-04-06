@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ADMIN_PASSWORD = "DTTadmin2025";
+const ADMIN_PASSWORD = "052417";
 
 const VERIFICATION_QUEUE = [
   { id: "1", creator: "LunaCosplay", submitted: "Apr 3, 2026", docType: "Passport", status: "pending" as const },
