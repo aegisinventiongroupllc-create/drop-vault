@@ -1,0 +1,370 @@
+import { useState } from "react";
+import {
+  ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
+  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const ADMIN_PASSWORD = "DTTadmin2025";
+
+const VERIFICATION_QUEUE = [
+  { id: "1", creator: "LunaCosplay", submitted: "Apr 3, 2026", docType: "Passport", status: "pending" as const },
+  { id: "2", creator: "FitJessie", submitted: "Apr 2, 2026", docType: "Driver's License", status: "pending" as const },
+  { id: "3", creator: "BlondieVibes", submitted: "Mar 30, 2026", docType: "National ID", status: "approved" as const },
+  { id: "4", creator: "TwinFlames", submitted: "Mar 28, 2026", docType: "Passport", status: "rejected" as const },
+  { id: "5", creator: "PetiteSophie", submitted: "Mar 27, 2026", docType: "Driver's License", status: "pending" as const },
+];
+
+const SITE_REVENUE = [
+  { month: "Jan", sales: 4200, payouts: 3780 },
+  { month: "Feb", sales: 6800, payouts: 6120 },
+  { month: "Mar", sales: 9400, payouts: 8460 },
+  { month: "Apr", sales: 12100, payouts: 10890 },
+  { month: "May", sales: 15600, payouts: 14040 },
+  { month: "Jun", sales: 19800, payouts: 17820 },
+];
+
+const USER_DATABASE = [
+  { id: "1", name: "LunaCosplay", email: "luna@email.com", wallet: "ltc1q8x...k4m2", earned: 4820, role: "creator" },
+  { id: "2", name: "FitJessie", email: "jessie@email.com", wallet: "ltc1qr7...n3p9", earned: 3210, role: "creator" },
+  { id: "3", name: "BlondieVibes", email: "blondie@email.com", wallet: "ltc1qa2...j7w5", earned: 6540, role: "creator" },
+  { id: "4", name: "TwinFlames", email: "twins@email.com", wallet: "ltc1qm5...d8x1", earned: 8920, role: "creator" },
+  { id: "5", name: "PetiteSophie", email: "sophie@email.com", wallet: "ltc1qk9...f2t6", earned: 2150, role: "creator" },
+  { id: "6", name: "VaultKing99", email: "vaultking@email.com", wallet: "—", earned: 0, role: "fan" },
+  { id: "7", name: "NeonWhale", email: "neonwhale@email.com", wallet: "—", earned: 0, role: "fan" },
+  { id: "8", name: "DiamondFan", email: "diamond@email.com", wallet: "—", earned: 0, role: "fan" },
+];
+
+const PLATFORM_FEES = [
+  { type: "Vault Unlocks", transactions: 1240, totalVolume: 18600, fee: 1860 },
+  { type: "Video Unlocks", transactions: 3480, totalVolume: 1740, fee: 174 },
+  { type: "Custom Requests", transactions: 86, totalVolume: 32400, fee: 3240 },
+  { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
+];
+
+type Section = "verification" | "analytics" | "users" | "revenue";
+
+const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [activeSection, setActiveSection] = useState<Section>("verification");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [queue, setQueue] = useState(VERIFICATION_QUEUE);
+
+  const maxSales = Math.max(...SITE_REVENUE.map((d) => d.sales));
+  const totalFees = PLATFORM_FEES.reduce((sum, f) => sum + f.fee, 0);
+
+  const filteredUsers = USER_DATABASE.filter(
+    (u) =>
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      setError(false);
+    } else {
+      setError(true);
+    }
+  };
+
+  const handleVerification = (id: string, action: "approved" | "rejected") => {
+    setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, status: action } : item)));
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-8">
+        <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+          <Shield className="w-8 h-8 text-primary" />
+        </div>
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-foreground mb-1">Master Admin Panel</h1>
+          <p className="text-sm text-muted-foreground">Enter admin password to continue</p>
+        </div>
+        <div className="w-full max-w-xs space-y-3">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(false); }}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            placeholder="Admin password"
+            className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          {error && <p className="text-xs text-destructive text-center">Incorrect password</p>}
+          <Button variant="neon" className="w-full" onClick={handleLogin}>
+            Access Panel
+          </Button>
+        </div>
+        <button onClick={onBack} className="text-xs text-muted-foreground hover:text-primary transition-colors mt-4">
+          ← Back to app
+        </button>
+      </div>
+    );
+  }
+
+  const sections: { id: Section; label: string; icon: React.ElementType }[] = [
+    { id: "verification", label: "Verify", icon: Shield },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "users", label: "Users", icon: Users },
+    { id: "revenue", label: "Revenue", icon: DollarSign },
+  ];
+
+  return (
+    <div className="min-h-screen pb-24">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3">
+        <button onClick={onBack} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-lg font-bold text-foreground">Master Admin Panel</h1>
+          <p className="text-xs text-muted-foreground">Platform Management</p>
+        </div>
+      </div>
+
+      {/* Section tabs */}
+      <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
+        {sections.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => setActiveSection(s.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              activeSection === s.id
+                ? "bg-primary text-primary-foreground neon-glow-sm"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <s.icon className="w-3.5 h-3.5" />
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Creator Verification Queue */}
+      {activeSection === "verification" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Shield className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">Creator Verification Queue</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Review uploaded identity & age documents</p>
+
+            <div className="space-y-3">
+              {queue.map((item) => (
+                <div key={item.id} className="border border-border rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{item.creator}</p>
+                      <p className="text-xs text-muted-foreground">{item.docType} • Submitted {item.submitted}</p>
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        item.status === "pending"
+                          ? "bg-gold/10 text-gold border border-gold/30"
+                          : item.status === "approved"
+                          ? "bg-green-400/10 text-green-400 border border-green-400/30"
+                          : "bg-destructive/10 text-destructive border border-destructive/30"
+                      }`}
+                    >
+                      {item.status === "pending" ? "Pending" : item.status === "approved" ? "Approved" : "Rejected"}
+                    </span>
+                  </div>
+
+                  {/* Placeholder document preview */}
+                  <div className="w-full h-20 rounded-lg bg-secondary/50 border border-border flex items-center justify-center mb-3">
+                    <p className="text-xs text-muted-foreground">Document Preview — {item.docType}</p>
+                  </div>
+
+                  {item.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="neon"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                        onClick={() => handleVerification(item.id, "approved")}
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                        onClick={() => handleVerification(item.id, "rejected")}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Master Analytics */}
+      {activeSection === "analytics" && (
+        <div className="px-4 space-y-4">
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Total Bit-Token Sales", value: "$68,900", icon: DollarSign, change: "+18.4%" },
+              { label: "Total Payouts", value: "$61,110", icon: TrendingUp, change: "+16.2%" },
+              { label: "Active Creators", value: "342", icon: Users, change: "+24" },
+              { label: "Platform Revenue", value: `$${totalFees.toLocaleString()}`, icon: Percent, change: "+22.1%" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <stat.icon className="w-4 h-4 text-primary" />
+                  <span className="text-[10px] text-muted-foreground">{stat.label}</span>
+                </div>
+                <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                <span className="text-xs text-green-400">{stat.change}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Revenue chart */}
+          <div className="bg-card border border-border rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-1">Bit-Token Sales vs. Payouts</h3>
+            <p className="text-xs text-muted-foreground mb-4">Site-wide monthly breakdown</p>
+            <div className="flex items-end gap-3 h-36">
+              {SITE_REVENUE.map((d) => (
+                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex items-end gap-0.5" style={{ height: "100%" }}>
+                    <div
+                      className="flex-1 rounded-t bg-primary/80 neon-glow-sm"
+                      style={{ height: `${(d.sales / maxSales) * 100}%` }}
+                      title={`Sales: $${d.sales}`}
+                    />
+                    <div
+                      className="flex-1 rounded-t bg-gold/60"
+                      style={{ height: `${(d.payouts / maxSales) * 100}%` }}
+                      title={`Payouts: $${d.payouts}`}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{d.month}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-primary/80" />
+                <span className="text-[10px] text-muted-foreground">Sales</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm bg-gold/60" />
+                <span className="text-[10px] text-muted-foreground">Payouts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User/Creator Database */}
+      {activeSection === "users" && (
+        <div className="px-4 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name or email..."
+              className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto] gap-2 px-4 py-2.5 bg-secondary/50 border-b border-border">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">User</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Earned</span>
+            </div>
+            <div className="divide-y divide-border">
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="px-4 py-3">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          user.role === "creator"
+                            ? "bg-primary/10 text-primary border border-primary/20"
+                            : "bg-secondary text-muted-foreground border border-border"
+                        }`}>
+                          {user.role}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
+                      {user.wallet !== "—" && (
+                        <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">LTC: {user.wallet}</p>
+                      )}
+                    </div>
+                    <p className="text-sm font-bold text-foreground">${user.earned.toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+              {filteredUsers.length === 0 && (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">No users found</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revenue Monitor */}
+      {activeSection === "revenue" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
+            <p className="text-xs text-muted-foreground mb-1">Total Platform Revenue (10% Fee)</p>
+            <p className="text-4xl font-bold text-primary">${totalFees.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">Across all transaction types</p>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 bg-secondary/50 border-b border-border">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Type</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Volume</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">10% Fee</span>
+            </div>
+            <div className="divide-y divide-border">
+              {PLATFORM_FEES.map((fee) => (
+                <div key={fee.type} className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-3 items-center">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{fee.type}</p>
+                    <p className="text-xs text-muted-foreground">{fee.transactions.toLocaleString()} transactions</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-right">${fee.totalVolume.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-primary text-right">${fee.fee.toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <Percent className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              The platform collects a 10% service fee on all Bit-Token transactions, vault unlocks, custom media requests, and bundle purchases. Creator payouts are processed after fee deduction.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Support footer */}
+      <div className="px-4 mt-8 pb-4 text-center">
+        <a href="mailto:dropthatthingmedia@gmail.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+          <Mail className="w-3 h-3" />
+          Official Support: dropthatthingmedia@gmail.com
+        </a>
+      </div>
+    </div>
+  );
+};
+
+export default MasterAdminPanel;
