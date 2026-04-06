@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, Heart, MessageCircle, Share2, Bookmark, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MessageCircle, Share2, Bookmark, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
-
-const CATEGORIES = ["All", "Cosplay", "Short Girls", "Blondes", "Groups", "Gym"];
 
 interface VideoItem {
   id: string;
