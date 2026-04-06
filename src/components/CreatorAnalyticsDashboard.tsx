@@ -318,37 +318,88 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
 
       {/* Media Manager */}
       {activeSection === "media" && (
-        <div className="px-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-foreground">Media Manager</h3>
-            <Button variant="neon" size="sm" className="gap-1.5">
-              <Upload className="w-3.5 h-3.5" />
-              Upload
-            </Button>
+        <div className="px-4 space-y-6">
+          {/* Public Teasers */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                <h3 className="text-base font-semibold text-foreground">Public Teasers</h3>
+              </div>
+              <Button variant="neon" size="sm" className="gap-1.5">
+                <Upload className="w-3.5 h-3.5" />
+                Upload Teaser
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">Short previews visible on the public discovery feed.</p>
+            <div className="space-y-3">
+              {PUBLIC_TEASERS.map((item) => (
+                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Video className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views</span>
+                      <span className="text-xs text-muted-foreground">• {item.date}</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] text-primary font-medium mt-1">
+                      <Globe className="w-2.5 h-2.5" /> Public
+                    </span>
+                  </div>
+                  <button className="text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {MEDIA_ITEMS.map((item) => (
-              <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                  {item.type === "video" ? (
-                    <Video className="w-6 h-6 text-primary" />
-                  ) : (
-                    <Image className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views</span>
-                    <span className="text-xs text-muted-foreground">• {item.date}</span>
-                  </div>
-                </div>
-                <button className="text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+          {/* Locked Vault Content */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-gold" />
+                <h3 className="text-base font-semibold text-foreground">Locked Vault Content</h3>
               </div>
-            ))}
+              <Button variant="gold" size="sm" className="gap-1.5">
+                <Upload className="w-3.5 h-3.5" />
+                Upload to Vault
+              </Button>
+            </div>
+            <div className="bg-secondary/50 border border-gold/20 rounded-lg p-3 mb-3 flex items-start gap-2">
+              <Lock className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Vault content is only visible to customers who have unlocked your profile with a Bit-Token or the 14-day access fee.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {VAULT_CONTENT.map((item) => (
+                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                    {item.type === "video" ? (
+                      <Video className="w-6 h-6 text-gold" />
+                    ) : (
+                      <Image className="w-6 h-6 text-gold" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views</span>
+                      <span className="text-xs text-muted-foreground">• {item.date}</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] text-gold font-medium mt-1">
+                      <Lock className="w-2.5 h-2.5" /> Locked
+                    </span>
+                  </div>
+                  <button className="text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
