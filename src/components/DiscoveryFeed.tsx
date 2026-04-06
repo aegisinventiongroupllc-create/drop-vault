@@ -118,9 +118,6 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
 };
 
 const DiscoveryFeed = ({ onCreatorClick }: { onCreatorClick: (name: string) => void }) => {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [searchOpen, setSearchOpen] = useState(false);
-
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
@@ -129,46 +126,12 @@ const DiscoveryFeed = ({ onCreatorClick }: { onCreatorClick: (name: string) => v
           <h1 className="font-display text-lg font-bold tracking-wider">
             DROP<span className="text-primary">THAT</span>THING
           </h1>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(!searchOpen)} className="text-foreground hover:text-primary transition-colors">
-              <Search className="w-5 h-5" />
-            </button>
-            <WalletIndicator />
-          </div>
-        </div>
-
-        {/* Search */}
-        {searchOpen && (
-          <div className="px-4 pb-2">
-            <input
-              type="text"
-              placeholder="Search creators, videos..."
-              className="w-full bg-secondary rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              autoFocus
-            />
-          </div>
-        )}
-
-        {/* Categories */}
-        <div className="flex gap-2 px-4 overflow-x-auto scrollbar-hide">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                activeCategory === cat
-                  ? "bg-primary text-primary-foreground neon-glow-sm"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          <WalletIndicator />
         </div>
       </div>
 
       {/* Video feed */}
-      <div className="flex-1 snap-y snap-mandatory overflow-y-auto pt-28 pb-16">
+      <div className="flex-1 snap-y snap-mandatory overflow-y-auto pt-16 pb-16">
         {MOCK_VIDEOS.map((video) => (
           <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} />
         ))}
