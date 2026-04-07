@@ -1,4 +1,3 @@
-import { TrendingUp, Flame } from "lucide-react";
 import WalletIndicator from "@/components/WalletIndicator";
 
 const TRENDING = [
@@ -16,9 +15,8 @@ const TrendingPage = ({ onCreatorClick }: { onCreatorClick: (name: string) => vo
   return (
     <div className="min-h-screen pb-20">
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          Trending Now
+        <h1 className="text-xl font-bold text-foreground tracking-wider font-display">
+          TRENDING
         </h1>
         <WalletIndicator />
       </div>
@@ -40,8 +38,7 @@ const TrendingPage = ({ onCreatorClick }: { onCreatorClick: (name: string) => vo
               <p className="font-semibold text-foreground">@{item.creator}</p>
               <p className="text-xs text-muted-foreground">{item.category}</p>
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Flame className="w-4 h-4 text-primary" />
+            <div className="text-muted-foreground">
               <span className="text-sm font-medium">{item.views}</span>
             </div>
           </button>
