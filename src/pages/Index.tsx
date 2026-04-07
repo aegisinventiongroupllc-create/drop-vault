@@ -6,18 +6,7 @@ import CreatorProfile from "@/components/CreatorProfile";
 import TrendingPage from "@/components/TrendingPage";
 import CreatorAnalyticsDashboard from "@/components/CreatorAnalyticsDashboard";
 import MasterAdminPanel from "@/components/MasterAdminPanel";
-import { Upload, Lock, User, Shield } from "lucide-react";
 import WalletIndicator from "@/components/WalletIndicator";
-
-const PlaceholderPage = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
-    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
-      <Icon className="w-8 h-8 text-primary" />
-    </div>
-    <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-    <p className="text-sm text-muted-foreground">Coming soon</p>
-  </div>
-);
 
 const Index = () => {
   const [verified, setVerified] = useState(false);
@@ -58,26 +47,26 @@ const Index = () => {
     <div className="h-screen overflow-hidden">
       {activeTab === "home" && <DiscoveryFeed onCreatorClick={handleCreatorClick} />}
       {activeTab === "trending" && <TrendingPage onCreatorClick={handleCreatorClick} />}
-      {activeTab === "upload" && <PlaceholderPage icon={Upload} title="Upload" />}
-      {activeTab === "vaults" && <PlaceholderPage icon={Lock} title="My Vaults" />}
+      {activeTab === "vaults" && (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
+          <h2 className="text-xl font-bold text-foreground tracking-wider font-display">MY VAULTS</h2>
+          <p className="text-sm text-muted-foreground">Coming soon</p>
+        </div>
+      )}
       {activeTab === "profile" && (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
-          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
-            <User className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground">My Profile</h2>
+          <h2 className="text-xl font-bold text-foreground tracking-wider font-display">PROFILE</h2>
           <button
             onClick={() => setShowDashboard(true)}
-            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium neon-glow hover:brightness-110 transition-all"
+            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-bold tracking-wider neon-glow hover:brightness-110 transition-all"
           >
-            Open Creator Dashboard
+            CREATOR DASHBOARD
           </button>
           <button
             onClick={() => setShowAdmin(true)}
-            className="flex items-center gap-2 px-5 py-2 bg-secondary border border-border rounded-full text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+            className="px-5 py-2 bg-secondary border border-border rounded-full text-xs font-bold tracking-wider text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
           >
-            <Shield className="w-3.5 h-3.5" />
-            Master Admin Panel
+            MASTER ADMIN PANEL
           </button>
         </div>
       )}

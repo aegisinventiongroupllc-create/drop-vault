@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
@@ -23,6 +23,16 @@ const VAULTS: Vault[] = [
 
 const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: () => void }) => {
   const [showRequest, setShowRequest] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setProfileImage(url);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -36,11 +46,24 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <WalletIndicator />
         </div>
 
-        {/* Avatar */}
+        {/* Avatar with upload */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <div className="w-24 h-24 rounded-full bg-secondary border-4 border-background flex items-center justify-center text-2xl font-bold text-primary neon-glow">
-            {creatorName.slice(0, 2).toUpperCase()}
-          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="relative w-24 h-24 rounded-full bg-secondary border-4 border-background flex items-center justify-center overflow-hidden neon-glow group"
+          >
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-2xl font-bold text-primary">
+                {creatorName.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+            <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera className="w-6 h-6 text-primary" />
+            </div>
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleProfileUpload} />
         </div>
       </div>
 

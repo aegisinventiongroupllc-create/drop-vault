@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
-  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail,
+  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  canExecutePayout, formatPayoutCooldown,
+  type PayoutState,
+} from "@/lib/paymentSplit";
 
 const ADMIN_PASSWORD = "052417";
 
@@ -25,14 +29,14 @@ const SITE_REVENUE = [
 ];
 
 const USER_DATABASE = [
-  { id: "1", name: "LunaCosplay", email: "luna@email.com", wallet: "ltc1q8x...k4m2", earned: 4820, role: "creator" },
-  { id: "2", name: "FitJessie", email: "jessie@email.com", wallet: "ltc1qr7...n3p9", earned: 3210, role: "creator" },
-  { id: "3", name: "BlondieVibes", email: "blondie@email.com", wallet: "ltc1qa2...j7w5", earned: 6540, role: "creator" },
-  { id: "4", name: "TwinFlames", email: "twins@email.com", wallet: "ltc1qm5...d8x1", earned: 8920, role: "creator" },
-  { id: "5", name: "PetiteSophie", email: "sophie@email.com", wallet: "ltc1qk9...f2t6", earned: 2150, role: "creator" },
-  { id: "6", name: "VaultKing99", email: "vaultking@email.com", wallet: "—", earned: 0, role: "fan" },
-  { id: "7", name: "NeonWhale", email: "neonwhale@email.com", wallet: "—", earned: 0, role: "fan" },
-  { id: "8", name: "DiamondFan", email: "diamond@email.com", wallet: "—", earned: 0, role: "fan" },
+  { id: "1", name: "LunaCosplay", email: "luna@email.com", wallet: "ltc1q8x...k4m2", earned: 4820, pending: 1240, role: "creator" },
+  { id: "2", name: "FitJessie", email: "jessie@email.com", wallet: "ltc1qr7...n3p9", earned: 3210, pending: 890, role: "creator" },
+  { id: "3", name: "BlondieVibes", email: "blondie@email.com", wallet: "ltc1qa2...j7w5", earned: 6540, pending: 2100, role: "creator" },
+  { id: "4", name: "TwinFlames", email: "twins@email.com", wallet: "ltc1qm5...d8x1", earned: 8920, pending: 3400, role: "creator" },
+  { id: "5", name: "PetiteSophie", email: "sophie@email.com", wallet: "ltc1qk9...f2t6", earned: 2150, pending: 560, role: "creator" },
+  { id: "6", name: "VaultKing99", email: "vaultking@email.com", wallet: "—", earned: 0, pending: 0, role: "fan" },
+  { id: "7", name: "NeonWhale", email: "neonwhale@email.com", wallet: "—", earned: 0, pending: 0, role: "fan" },
+  { id: "8", name: "DiamondFan", email: "diamond@email.com", wallet: "—", earned: 0, pending: 0, role: "fan" },
 ];
 
 const PLATFORM_FEES = [
@@ -52,8 +56,32 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [queue, setQueue] = useState(VERIFICATION_QUEUE);
 
+  // Payout control state
+  const [payoutState, setPayoutState] = useState<PayoutState>({
+    lastPayoutAt: null,
+    cooldownMs: 24 * 60 * 60 * 1000,
+  });
+  const [payoutMessage, setPayoutMessage] = useState("");
+  const [cooldownDisplay, setCooldownDisplay] = useState("");
+
+  useEffect(() => {
+    if (!payoutState.lastPayoutAt) return;
+    const interval = setInterval(() => {
+      const result = canExecutePayout(payoutState);
+      if (result.allowed) {
+        setCooldownDisplay("");
+        setPayoutMessage("");
+        clearInterval(interval);
+      } else {
+        setCooldownDisplay(formatPayoutCooldown(result.remainingMs));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [payoutState.lastPayoutAt]);
+
   const maxSales = Math.max(...SITE_REVENUE.map((d) => d.sales));
   const totalFees = PLATFORM_FEES.reduce((sum, f) => sum + f.fee, 0);
+  const totalPending = USER_DATABASE.reduce((sum, u) => sum + u.pending, 0);
 
   const filteredUsers = USER_DATABASE.filter(
     (u) =>
@@ -74,6 +102,16 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, status: action } : item)));
   };
 
+  const handleExecutePayout = () => {
+    const result = canExecutePayout(payoutState);
+    if (result.allowed) {
+      setPayoutState({ ...payoutState, lastPayoutAt: Date.now() });
+      setPayoutMessage("PAYOUTS EXECUTED.");
+    } else {
+      setPayoutMessage(`PAYOUTS COMPLETED. NEXT EXECUTION AVAILABLE IN: [${formatPayoutCooldown(result.remainingMs)}]`);
+    }
+  };
+
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-8">
@@ -81,7 +119,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <Shield className="w-8 h-8 text-primary" />
         </div>
         <div className="text-center">
-          <h1 className="text-xl font-bold text-foreground mb-1">Master Admin Panel</h1>
+          <h1 className="text-xl font-bold text-foreground mb-1 tracking-wider font-display">ADMIN PANEL</h1>
           <p className="text-sm text-muted-foreground">Enter admin password to continue</p>
         </div>
         <div className="w-full max-w-xs space-y-3">
@@ -105,11 +143,11 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     );
   }
 
-  const sections: { id: Section; label: string; icon: React.ElementType }[] = [
-    { id: "verification", label: "Verify", icon: Shield },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-    { id: "users", label: "Users", icon: Users },
-    { id: "revenue", label: "Revenue", icon: DollarSign },
+  const sections: { id: Section; label: string }[] = [
+    { id: "verification", label: "VERIFY" },
+    { id: "analytics", label: "ANALYTICS" },
+    { id: "users", label: "USERS" },
+    { id: "revenue", label: "REVENUE" },
   ];
 
   return (
@@ -120,24 +158,23 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-foreground">Master Admin Panel</h1>
+          <h1 className="text-lg font-bold text-foreground tracking-wider font-display">ADMIN PANEL</h1>
           <p className="text-xs text-muted-foreground">Platform Management</p>
         </div>
       </div>
 
-      {/* Section tabs */}
+      {/* Section tabs — text only */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
         {sections.map((s) => (
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest whitespace-nowrap transition-all ${
               activeSection === s.id
                 ? "bg-primary text-primary-foreground neon-glow-sm"
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            <s.icon className="w-3.5 h-3.5" />
             {s.label}
           </button>
         ))}
@@ -174,7 +211,6 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                     </span>
                   </div>
 
-                  {/* Placeholder document preview */}
                   <div className="w-full h-20 rounded-lg bg-secondary/50 border border-border flex items-center justify-center mb-3">
                     <p className="text-xs text-muted-foreground">Document Preview — {item.docType}</p>
                   </div>
@@ -211,7 +247,6 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Master Analytics */}
       {activeSection === "analytics" && (
         <div className="px-4 space-y-4">
-          {/* Quick stats */}
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: "Total Bit-Token Sales", value: "$68,900", icon: DollarSign, change: "+18.4%" },
@@ -230,7 +265,6 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
             ))}
           </div>
 
-          {/* Revenue chart */}
           <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="text-sm font-semibold text-foreground mb-1">Bit-Token Sales vs. Payouts</h3>
             <p className="text-xs text-muted-foreground mb-4">Site-wide monthly breakdown</p>
@@ -306,7 +340,12 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                         <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">LTC: {user.wallet}</p>
                       )}
                     </div>
-                    <p className="text-sm font-bold text-foreground">${user.earned.toLocaleString()}</p>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-foreground">${user.earned.toLocaleString()}</p>
+                      {user.pending > 0 && (
+                        <p className="text-[10px] text-gold">Pending: ${user.pending.toLocaleString()}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -345,6 +384,48 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* EXECUTE CREATOR PAYOUTS button */}
+          <div className="bg-card border border-primary/30 rounded-xl p-5 space-y-4">
+            <div className="text-center">
+              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">FOUNDER PAYOUT CONTROL</p>
+              <p className="text-2xl font-bold text-primary">${totalPending.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Total Pending Creator Balances</p>
+            </div>
+
+            <Button
+              variant="neon"
+              size="lg"
+              className="w-full text-sm font-bold tracking-widest"
+              onClick={handleExecutePayout}
+            >
+              EXECUTE CREATOR PAYOUTS
+            </Button>
+
+            {payoutMessage && (
+              <div className={`text-center p-3 rounded-lg border ${
+                payoutMessage.startsWith("PAYOUTS EXECUTED")
+                  ? "bg-green-400/10 border-green-400/30"
+                  : "bg-gold/10 border-gold/30"
+              }`}>
+                <p className={`text-xs font-bold tracking-wider ${
+                  payoutMessage.startsWith("PAYOUTS EXECUTED") ? "text-green-400" : "text-gold"
+                }`}>
+                  {payoutMessage}
+                </p>
+              </div>
+            )}
+
+            {cooldownDisplay && (
+              <p className="text-[10px] text-muted-foreground text-center">
+                Next execution available in: [{cooldownDisplay}]
+              </p>
+            )}
+
+            <p className="text-[10px] text-muted-foreground text-center">
+              This button can be executed once every 24 hours. It releases all verified pending creator balances to their linked LTC wallets.
+            </p>
           </div>
 
           <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">

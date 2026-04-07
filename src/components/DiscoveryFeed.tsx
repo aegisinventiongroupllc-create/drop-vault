@@ -43,17 +43,14 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
 
   return (
     <div className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
-      {/* Video placeholder bg */}
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
 
-      {/* Animated shimmer to simulate playing video */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-6xl font-display text-foreground/5 tracking-widest select-none">▶</div>
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted">
         <div
           className="h-full bg-primary transition-all duration-1000 neon-glow-sm"
@@ -61,7 +58,6 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
         />
       </div>
 
-      {/* Blur overlay */}
       {locked && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/60 backdrop-blur-xl">
           <Lock className="w-12 h-12 text-primary animate-pulse-glow" />
@@ -80,7 +76,6 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
         </div>
       )}
 
-      {/* Right action bar */}
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
         <button className="flex flex-col items-center gap-1">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">
@@ -103,7 +98,6 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
         </button>
       </div>
 
-      {/* Bottom info */}
       <div className="absolute bottom-4 left-4 right-16 z-20">
         <button
           className="text-base font-semibold text-foreground hover:text-primary transition-colors"
@@ -120,7 +114,7 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
 const DiscoveryFeed = ({ onCreatorClick }: { onCreatorClick: (name: string) => void }) => {
   return (
     <div className="flex flex-col h-full">
-      {/* Top bar */}
+      {/* Top bar — text only, no icons */}
       <div className="fixed top-0 left-0 right-0 z-30 bg-gradient-to-b from-background via-background/80 to-transparent pb-4">
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
           <h1 className="font-display text-lg font-bold tracking-wider">
@@ -130,7 +124,6 @@ const DiscoveryFeed = ({ onCreatorClick }: { onCreatorClick: (name: string) => v
         </div>
       </div>
 
-      {/* Video feed */}
       <div className="flex-1 snap-y snap-mandatory overflow-y-auto pt-16 pb-16">
         {MOCK_VIDEOS.map((video) => (
           <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} />
