@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe,
+  Lightbulb, Lock, Globe, Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
+import {
+  getCreatorSplitState, formatCountdown, DEFAULT_SPLIT, INCENTIVE_SPLIT,
+  type CreatorSplitState,
+} from "@/lib/paymentSplit";
 
 const STATS = [
   { label: "Followers", value: "48.2K", change: "+2.3%", icon: Users },
@@ -49,15 +53,46 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [activeSection, setActiveSection] = useState<Section>("overview");
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified">("none");
   const [idUploaded, setIdUploaded] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Payment split state — simulated 48,200 followers (under 100K)
+  const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
+    getCreatorSplitState("creator-1", 48200)
+  );
+  const [countdown, setCountdown] = useState("");
+
+  useEffect(() => {
+    if (!splitState.incentiveActive || !splitState.incentiveEndsAt) return;
+    const interval = setInterval(() => {
+      const remaining = splitState.incentiveEndsAt! - Date.now();
+      if (remaining <= 0) {
+        setSplitState((prev) => getCreatorSplitState(prev.creatorId, prev.followerCount, prev));
+        setCountdown("");
+        clearInterval(interval);
+      } else {
+        setCountdown(formatCountdown(remaining));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [splitState.incentiveActive, splitState.incentiveEndsAt]);
 
   const maxEarned = Math.max(...REVENUE_DATA.map((d) => d.earned));
 
-  const sections: { id: Section; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: "Analytics", icon: BarChart3 },
-    { id: "verification", label: "Verify", icon: Shield },
-    { id: "requests", label: "Requests", icon: FileText },
-    { id: "media", label: "Media", icon: Image },
+  const sections: { id: Section; label: string }[] = [
+    { id: "overview", label: "ANALYTICS" },
+    { id: "verification", label: "VERIFY" },
+    { id: "requests", label: "REQUESTS" },
+    { id: "media", label: "MEDIA" },
   ];
+
+  const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setProfileImage(url);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -67,27 +102,81 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           <button onClick={onBack} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-foreground">Creator Dashboard</h1>
+          {/* Profile picture */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="relative w-10 h-10 rounded-full bg-secondary border-2 border-primary/50 flex items-center justify-center overflow-hidden group"
+          >
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            )}
+            <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera className="w-4 h-4 text-primary" />
+            </div>
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleProfileUpload} />
+          <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <WalletIndicator />
       </div>
 
-      {/* Section tabs */}
+      {/* Section tabs — text only */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
         {sections.map((s) => (
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest whitespace-nowrap transition-all ${
               activeSection === s.id
                 ? "bg-primary text-primary-foreground neon-glow-sm"
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            <s.icon className="w-3.5 h-3.5" />
             {s.label}
           </button>
         ))}
+      </div>
+
+      {/* Payment Split Banner */}
+      <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold tracking-wider text-foreground">REVENUE SPLIT</span>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+            splitState.incentiveActive
+              ? "bg-primary/20 text-primary border border-primary/30"
+              : "bg-secondary text-muted-foreground"
+          }`}>
+            {splitState.currentSplit.creator}/{splitState.currentSplit.platform}
+          </span>
+        </div>
+        <div className="w-full h-2 rounded-full bg-secondary overflow-hidden mb-2">
+          <div
+            className="h-full bg-primary rounded-full neon-glow-sm transition-all duration-500"
+            style={{ width: `${splitState.currentSplit.creator}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-[10px] text-muted-foreground">
+          <span>Creator: {splitState.currentSplit.creator}%</span>
+          <span>Platform: {splitState.currentSplit.platform}%</span>
+        </div>
+        {splitState.incentiveActive && countdown && (
+          <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
+            <p className="text-xs font-bold text-primary tracking-wider">97/3 INCENTIVE ACTIVE: [{countdown}]</p>
+            <p className="text-[10px] text-muted-foreground">90/10 LOGIC RESUMES IN: [{countdown}]</p>
+          </div>
+        )}
+        {!splitState.milestoneReached && (
+          <p className="text-[10px] text-muted-foreground mt-2 text-center">
+            Reach 100K followers to unlock the 97/3 incentive split for 7 days
+          </p>
+        )}
+        {splitState.milestoneReached && !splitState.incentiveActive && (
+          <p className="text-[10px] text-muted-foreground mt-2 text-center">
+            Incentive period completed — permanent 90/10 split active
+          </p>
+        )}
       </div>
 
       {/* Strategy Tip Banner */}
@@ -190,7 +279,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               </p>
             </div>
 
-            {/* Upload button */}
             <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/40 transition-colors">
               <Upload className="w-8 h-8 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground">Identity & Age Documents</p>
@@ -207,7 +295,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               </Button>
             </div>
 
-            {/* Status */}
             <div className="mt-4 flex items-center gap-2 bg-secondary/50 rounded-lg p-3">
               {verificationStatus === "verified" ? (
                 <>
