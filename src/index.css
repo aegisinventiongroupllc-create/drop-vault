@@ -39,6 +39,9 @@
     --gold: 43 96% 56%;
     --gold-foreground: 0 0% 0%;
 
+    --vault-blue: 210 80% 55%;
+    --vault-silver: 210 10% 70%;
+
     --neon-glow: 0 0 12px hsl(330, 100%, 50%), 0 0 30px hsl(330, 100%, 50%, 0.3);
     --neon-glow-sm: 0 0 8px hsl(330, 100%, 50%, 0.6);
 
