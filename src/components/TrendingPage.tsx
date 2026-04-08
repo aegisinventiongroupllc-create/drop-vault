@@ -1,6 +1,7 @@
 import WalletIndicator from "@/components/WalletIndicator";
+import type { VaultType } from "@/lib/tokenEconomy";
 
-const TRENDING = [
+const TRENDING_WOMEN = [
   { rank: 1, creator: "LunaCosplay", views: "1.2M", category: "Cosplay" },
   { rank: 2, creator: "FitJessie", views: "890K", category: "Gym" },
   { rank: 3, creator: "BlondieVibes", views: "756K", category: "Blondes" },
@@ -11,7 +12,17 @@ const TRENDING = [
   { rank: 8, creator: "DuoVibes", views: "398K", category: "Groups" },
 ];
 
-const TrendingPage = ({ onCreatorClick }: { onCreatorClick: (name: string) => void }) => {
+const TRENDING_MEN = [
+  { rank: 1, creator: "AlphaFlex", views: "980K", category: "Fitness" },
+  { rank: 2, creator: "KingCole", views: "870K", category: "Lifestyle" },
+  { rank: 3, creator: "RexFitness", views: "650K", category: "Gym" },
+  { rank: 4, creator: "StormChaser", views: "520K", category: "Adventure" },
+  { rank: 5, creator: "NovaKing", views: "490K", category: "Fashion" },
+];
+
+const TrendingPage = ({ onCreatorClick, vault }: { onCreatorClick: (name: string) => void; vault: VaultType }) => {
+  const trending = vault === "women" ? TRENDING_WOMEN : TRENDING_MEN;
+
   return (
     <div className="min-h-screen pb-20">
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
@@ -22,7 +33,7 @@ const TrendingPage = ({ onCreatorClick }: { onCreatorClick: (name: string) => vo
       </div>
 
       <div className="px-4 space-y-3">
-        {TRENDING.map((item) => (
+        {trending.map((item) => (
           <button
             key={item.rank}
             onClick={() => onCreatorClick(item.creator)}

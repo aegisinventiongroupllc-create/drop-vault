@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { X, Shield, Lock, CheckCircle, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { calculateRequestTokens } from "@/lib/tokenEconomy";
 
 const TIERS = [
   { label: "Standard", price: 100, delivery: "7 days", description: "Basic custom media piece" },
@@ -12,65 +13,78 @@ const TIERS = [
 const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onClose: () => void }) => {
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [description, setDescription] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
   const [step, setStep] = useState<"select" | "details" | "confirm">("select");
 
   const tier = selectedTier !== null ? TIERS[selectedTier] : null;
+  const activePrice = tier?.price ?? Number(customAmount) || 0;
+  const tokenCalc = calculateRequestTokens(activePrice);
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center">
       <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">Custom Request</h2>
-          </div>
+          <h2 className="text-lg font-bold text-foreground font-display tracking-wider">CUSTOM REQUEST</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Escrow badge */}
-        <div className="mx-4 mt-4 flex items-center gap-2 bg-secondary/60 border border-primary/20 rounded-lg px-3 py-2">
-          <Shield className="w-4 h-4 text-primary flex-shrink-0" />
-          <p className="text-xs text-muted-foreground">
-            <span className="text-primary font-medium">Secure Escrow</span> — Payment held safely until delivery is confirmed
-          </p>
+        {/* Token Calculator */}
+        <div className="mx-4 mt-4 bg-secondary/60 border border-primary/20 rounded-lg px-3 py-2">
+          <p className="text-[10px] text-muted-foreground mb-1">SMART TOKEN CALCULATOR</p>
+          <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
+            {[100, 250, 500, 1000].map(usd => {
+              const calc = calculateRequestTokens(usd);
+              return (
+                <div key={usd} className="bg-card rounded p-1.5">
+                  <p className="text-foreground font-bold">${usd}</p>
+                  <p className="text-primary">{calc.total} BT</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">Includes +1 Bit-Token platform convenience fee</p>
         </div>
 
         {step === "select" && (
           <div className="p-4 space-y-3">
-            <p className="text-sm text-muted-foreground">Select a commission tier for <span className="text-foreground font-medium">@{creatorName}</span></p>
-            {TIERS.map((t, i) => (
-              <button
-                key={t.label}
-                onClick={() => { setSelectedTier(i); setStep("details"); }}
-                className={`w-full text-left bg-secondary/50 border rounded-xl p-4 transition-all hover:border-primary/50 ${
-                  selectedTier === i ? "border-primary" : "border-border"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-foreground">{t.label}</span>
-                  <span className="text-primary font-bold">${t.price}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
-                <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                  <Lock className="w-3 h-3" />
-                  Est. delivery: {t.delivery}
-                </div>
-              </button>
-            ))}
+            <p className="text-sm text-muted-foreground">Select a tier for <span className="text-foreground font-medium">@{creatorName}</span></p>
+            {TIERS.map((t, i) => {
+              const calc = calculateRequestTokens(t.price);
+              return (
+                <button
+                  key={t.label}
+                  onClick={() => { setSelectedTier(i); setStep("details"); }}
+                  className={`w-full text-left bg-secondary/50 border rounded-xl p-4 transition-all hover:border-primary/50 ${
+                    selectedTier === i ? "border-primary" : "border-border"
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-foreground">{t.label}</span>
+                    <div className="text-right">
+                      <span className="text-primary font-bold">${t.price}</span>
+                      <p className="text-[10px] text-muted-foreground">{calc.total} Tokens</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {step === "details" && tier && (
+        {step === "details" && (
           <div className="p-4 space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 flex justify-between items-center">
               <div>
-                <p className="font-semibold text-foreground">{tier.label}</p>
-                <p className="text-xs text-muted-foreground">Delivery: {tier.delivery}</p>
+                <p className="font-semibold text-foreground">{tier?.label ?? "Custom"}</p>
+                <p className="text-xs text-muted-foreground">Delivery: {tier?.delivery ?? "TBD"}</p>
               </div>
-              <span className="text-primary font-bold text-lg">${tier.price}</span>
+              <div className="text-right">
+                <span className="text-primary font-bold text-lg">${activePrice}</span>
+                <p className="text-xs text-muted-foreground">{tokenCalc.total} BT total</p>
+              </div>
             </div>
 
             <div>
@@ -84,23 +98,17 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             </div>
 
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep("select")}>Back</Button>
-              <Button
-                variant="neon"
-                className="flex-1"
-                disabled={!description.trim()}
-                onClick={() => setStep("confirm")}
-              >
-                Review & Pay
+              <Button variant="outline" className="flex-1" onClick={() => setStep("select")}>BACK</Button>
+              <Button variant="neon" className="flex-1" disabled={!description.trim()} onClick={() => setStep("confirm")}>
+                REVIEW
               </Button>
             </div>
           </div>
         )}
 
-        {step === "confirm" && tier && (
+        {step === "confirm" && (
           <div className="p-4 space-y-4 text-center">
-            <CheckCircle className="w-16 h-16 text-primary mx-auto animate-pulse-glow" />
-            <h3 className="text-lg font-semibold text-foreground">Confirm Commission</h3>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">CONFIRM REQUEST</h3>
 
             <div className="bg-secondary/50 rounded-xl p-4 text-left space-y-2">
               <div className="flex justify-between text-sm">
@@ -109,27 +117,26 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tier</span>
-                <span className="text-foreground font-medium">{tier.label}</span>
+                <span className="text-foreground font-medium">{tier?.label ?? "Custom"}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Delivery</span>
-                <span className="text-foreground font-medium">{tier.delivery}</span>
+                <span className="text-muted-foreground">Base Cost</span>
+                <span className="text-foreground font-medium">{tokenCalc.baseTokens} BT</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Platform Fee</span>
+                <span className="text-primary font-medium">+{tokenCalc.fee} BT</span>
               </div>
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="text-foreground font-semibold">Total</span>
-                <span className="text-primary font-bold text-lg">${tier.price}.00</span>
+                <span className="text-primary font-bold text-lg">{tokenCalc.total} Bit-Tokens</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Shield className="w-3.5 h-3.5 text-primary" />
-              Funds held in secure escrow until delivery confirmed
-            </div>
-
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep("details")}>Back</Button>
-              <Button variant="gold" className="flex-1" onClick={onClose}>
-                Submit & Pay ${tier.price}
+              <Button variant="outline" className="flex-1" onClick={() => setStep("details")}>BACK</Button>
+              <Button variant="neon" className="flex-1" onClick={onClose}>
+                SUBMIT REQUEST
               </Button>
             </div>
           </div>
