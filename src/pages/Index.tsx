@@ -68,7 +68,7 @@ const Index = () => {
   if (showDashboard) {
     return (
       <>
-        <CreatorAnalyticsDashboard onBack={() => setShowDashboard(false)} vault={vaultSelected} />
+        <CreatorAnalyticsDashboard onBack={() => setShowDashboard(false)} />
         <BottomNav active={activeTab} onNavigate={(tab) => { setShowDashboard(false); setActiveTab(tab); }} />
       </>
     );

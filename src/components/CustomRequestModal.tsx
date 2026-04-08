@@ -17,7 +17,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const [step, setStep] = useState<"select" | "details" | "confirm">("select");
 
   const tier = selectedTier !== null ? TIERS[selectedTier] : null;
-  const activePrice = tier?.price ?? Number(customAmount) || 0;
+  const activePrice = tier?.price ?? (Number(customAmount) || 0);
   const tokenCalc = calculateRequestTokens(activePrice);
 
   return (
