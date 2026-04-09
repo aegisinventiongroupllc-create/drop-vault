@@ -1,4 +1,7 @@
-import { corsHeaders } from '@supabase/supabase-js/cors'
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 const NOWPAYMENTS_API_URL = 'https://api.nowpayments.io/v1';
 const PLATFORM_LTC_ADDRESS = 'W4DXFRS-EW14FWG-J3KW30R-KFJ3NSK';
