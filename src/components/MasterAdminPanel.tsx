@@ -399,8 +399,11 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               size="lg"
               className="w-full text-sm font-bold tracking-widest"
               onClick={handleExecutePayout}
+              disabled={!canExecutePayout(payoutState).allowed}
             >
-              EXECUTE CREATOR PAYOUTS
+              {canExecutePayout(payoutState).allowed
+                ? "EXECUTE CREATOR PAYOUTS"
+                : `LOCKED — NEXT IN [${cooldownDisplay || "..."}]`}
             </Button>
 
             {payoutMessage && (

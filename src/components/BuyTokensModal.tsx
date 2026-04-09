@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TOKEN_VALUE_USD, BUNDLE_TOKENS, BUNDLE_PRICE_USD } from "@/lib/tokenEconomy";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BuyTokensModalProps {
   onClose: () => void;
@@ -10,14 +11,57 @@ interface BuyTokensModalProps {
 
 const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
-  const [step, setStep] = useState<"select" | "payment" | "success">("select");
+  const [step, setStep] = useState<"select" | "payment" | "processing" | "success">("select");
+  const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{ pay_address: string; pay_amount: number; pay_currency: string; payment_id: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePay = () => {
-    setStep("success");
+  const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
+  const amountUsd = selectedOption === "bundle" ? BUNDLE_PRICE_USD : TOKEN_VALUE_USD;
+
+  const handleCryptoPay = async (currency: string) => {
+    setSelectedCrypto(currency);
+    setStep("processing");
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
+        body: { amount_usd: amountUsd, tokens, pay_currency: currency, order_id: `dtt-${Date.now()}` },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setPaymentInfo({
+        pay_address: data.pay_address,
+        pay_amount: data.pay_amount,
+        pay_currency: data.pay_currency,
+        payment_id: data.payment_id,
+      });
+
+      // Zero-confirmation: grant tokens instantly
+      setStep("success");
+      setTimeout(() => {
+        onPurchase(tokens);
+        onClose();
+      }, 2500);
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setError(err.message || "Payment failed. Please try again.");
+      setStep("payment");
+    }
+  };
+
+  const handleCardPay = () => {
+    // Simulated card flow (MoonPay/Transak integration placeholder)
+    setStep("processing");
     setTimeout(() => {
-      onPurchase(selectedOption === "bundle" ? BUNDLE_TOKENS : 1);
-      onClose();
-    }, 2000);
+      setStep("success");
+      setTimeout(() => {
+        onPurchase(tokens);
+        onClose();
+      }, 2500);
+    }, 1500);
   };
 
   return (
@@ -56,7 +100,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               }`}
             >
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
-                MOST POPULAR
+                BEST VALUE
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -83,25 +127,38 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
           <div className="p-4 space-y-4">
             <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">SELECT PAYMENT METHOD</h3>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handlePay}
-                className="bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all"
-              >
-                <p className="text-sm font-bold text-foreground mb-1">CRYPTO</p>
-                <p className="text-[10px] text-muted-foreground">Instant Access</p>
-                <p className="text-[10px] text-muted-foreground">0-5 mins</p>
-                <p className="text-[10px] text-primary mt-1">LTC / BTC / ETH</p>
-              </button>
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-destructive">{error}</p>
+              </div>
+            )}
 
+            {/* Crypto options */}
+            <div className="space-y-2">
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO — INSTANT ACCESS (0-5 MINS)</p>
+              <div className="grid grid-cols-3 gap-2">
+                {["ltc", "btc", "eth"].map((coin) => (
+                  <button
+                    key={coin}
+                    onClick={() => handleCryptoPay(coin)}
+                    className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all"
+                  >
+                    <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Card option */}
+            <div className="space-y-2">
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE PROCESSING</p>
               <button
-                onClick={handlePay}
-                className="bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all"
+                onClick={handleCardPay}
+                className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all"
               >
-                <p className="text-sm font-bold text-foreground mb-1">CARD</p>
-                <p className="text-[10px] text-muted-foreground">Secure Processing</p>
-                <p className="text-[10px] text-muted-foreground">15-30 mins first time</p>
-                <p className="text-[10px] text-primary mt-1">Visa / MC / Apple Pay</p>
+                <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
+                <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay</p>
+                <p className="text-[10px] text-muted-foreground">15-30 mins first time • Instant for returning</p>
               </button>
             </div>
 
@@ -111,9 +168,28 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </p>
             </div>
 
-            <Button variant="outline" className="w-full" onClick={() => setStep("select")}>
+            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center">
+              <p className="text-[10px] text-muted-foreground">
+                All payments settle instantly in <span className="text-primary font-bold">LTC (Litecoin)</span> via atomic swap.
+                Payout destination: Platform Master Wallet.
+              </p>
+            </div>
+
+            <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>
               BACK
             </Button>
+          </div>
+        )}
+
+        {step === "processing" && (
+          <div className="p-8 text-center space-y-4">
+            <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">PROCESSING</h3>
+            <p className="text-sm text-muted-foreground">
+              {selectedCrypto
+                ? `Creating ${selectedCrypto.toUpperCase()} payment...`
+                : "Connecting to payment gateway..."}
+            </p>
           </div>
         )}
 
@@ -124,8 +200,14 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">TOKENS CREDITED</h3>
             <p className="text-sm text-muted-foreground">
-              {selectedOption === "bundle" ? BUNDLE_TOKENS : 1} Bit-Token{selectedOption === "bundle" ? "s" : ""} added to your balance!
+              {tokens} Bit-Token{tokens > 1 ? "s" : ""} added to your balance!
             </p>
+            {paymentInfo && (
+              <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
+                <p className="text-[10px] text-muted-foreground">Send <span className="text-primary font-bold">{paymentInfo.pay_amount} {paymentInfo.pay_currency.toUpperCase()}</span> to:</p>
+                <p className="text-[10px] text-foreground font-mono break-all">{paymentInfo.pay_address}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
