@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, Lock, Mail, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -26,13 +26,29 @@ const MOCK_VIDEOS: VideoItem[] = [
   { id: "8", creator: "RexFitness", creatorAvatar: "RF", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men" },
 ];
 
-const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
+const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const [following, setFollowing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
+  // Lazy load: only activate timer & media when in viewport
   useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Only run the preview timer when visible
+  useEffect(() => {
+    if (!isVisible || locked) return;
     const interval = setInterval(() => {
       setSeconds((s) => {
         if (s >= 15) {
@@ -44,19 +60,22 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isVisible, locked]);
 
-  const formatCount = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString();
+  const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
 
   return (
-    <div className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
+    <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
 
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-6xl font-display text-foreground/5 tracking-widest select-none">▶</div>
+      {/* Only render heavy content when visible (lazy loading) */}
+      {isVisible && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-6xl font-display text-foreground/5 tracking-widest select-none">▶</div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 15s progress bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted">
@@ -130,7 +149,7 @@ const VideoCard = ({ video, onCreatorClick }: { video: VideoItem; onCreatorClick
       </div>
     </div>
   );
-};
+});
 
 const DiscoveryFeed = ({ onCreatorClick, vault, onSearch }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void }) => {
   const filteredVideos = MOCK_VIDEOS.filter(v => v.vault === vault);
