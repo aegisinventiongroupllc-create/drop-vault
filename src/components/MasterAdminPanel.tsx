@@ -106,6 +106,22 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, status: action } : item)));
   };
 
+  const fetchLegalLogs = async (search = "") => {
+    setLegalLoading(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/legal-logs?search=${encodeURIComponent(search)}`;
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      setLegalLogs(Array.isArray(data) ? data : []);
+    } catch {
+      setLegalLogs([]);
+    }
+    setLegalLoading(false);
+  };
+
   const handleExecutePayout = () => {
     const result = canExecutePayout(payoutState);
     if (result.allowed) {
