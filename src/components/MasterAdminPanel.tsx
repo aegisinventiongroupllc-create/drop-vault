@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
-  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera,
+  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   canExecutePayout, formatPayoutCooldown,
