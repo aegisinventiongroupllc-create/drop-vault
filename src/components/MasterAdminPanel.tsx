@@ -168,7 +168,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "analytics", label: "ANALYTICS" },
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
-  ];
+    { id: "legal", label: "LEGAL LOGS" },
+  ] as const;
 
   return (
     <div className="min-h-screen pb-24">
