@@ -47,7 +47,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
