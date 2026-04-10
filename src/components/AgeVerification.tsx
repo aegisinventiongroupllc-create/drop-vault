@@ -2,9 +2,36 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+const CONSENT_TEXT = "I agree to the Terms of Service and Privacy Policy of DTT Media. I understand that all card transactions are final and handled via a secure third-party processor. I certify I am 18+ and agree to hold DTT Media LLC and its affiliates harmless and waive all rights to legal action.";
 
 const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const [agreed, setAgreed] = useState(false);
+
+  const handleEnter = async () => {
+    if (!agreed) return;
+
+    // Record consent in audit trail
+    try {
+      let ipAddress = "unknown";
+      try {
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const ipData = await ipRes.json();
+        ipAddress = ipData.ip;
+      } catch {}
+
+      await supabase.from("legal_consents").insert({
+        ip_address: ipAddress,
+        user_agent: navigator.userAgent,
+        terms_version: "1.0",
+        consent_text: CONSENT_TEXT,
+        consent_type: "age_verification_hold_harmless",
+      });
+    } catch {}
+
+    onVerified();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
@@ -32,7 +59,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
             className="mt-0.5 shrink-0"
           />
           <label htmlFor="age-agree" className="text-[11px] leading-relaxed text-muted-foreground cursor-pointer select-none">
-            I agree to the Terms of Service and Privacy Policy of DTT Media. I understand that all card transactions are final and handled via a secure third-party processor. I certify I am 18+ and waive all rights to sue for disbursement or technical delays.
+            {CONSENT_TEXT}
           </label>
         </div>
 
@@ -41,7 +68,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
             variant="neon"
             size="lg"
             className="w-full text-base font-semibold"
-            onClick={onVerified}
+            onClick={handleEnter}
             disabled={!agreed}
           >
             I AM 18 OR OLDER — ENTER
