@@ -37,12 +37,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         price_amount: amount_usd,
         price_currency: 'usd',
-        pay_currency: pay_currency, // ltc, btc, eth, etc.
+        pay_currency: pay_currency,
         payout_address: PLATFORM_LTC_ADDRESS,
         payout_currency: 'ltc',
         order_id: order_id || `dtt-${Date.now()}`,
         order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
-        ipn_callback_url: '', // Will be set when IPN webhook is configured
+        is_fixed_rate: true,
+        is_fee_paid_by_user: true,
       }),
     });
 
