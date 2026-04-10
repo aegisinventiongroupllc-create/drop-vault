@@ -56,6 +56,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [searchQuery, setSearchQuery] = useState("");
   const [queue, setQueue] = useState(VERIFICATION_QUEUE);
+  const [legalLogs, setLegalLogs] = useState<any[]>([]);
+  const [legalSearch, setLegalSearch] = useState("");
+  const [legalLoading, setLegalLoading] = useState(false);
 
   // Payout control state
   const [payoutState, setPayoutState] = useState<PayoutState>({
