@@ -4,7 +4,7 @@ const corsHeaders = {
 };
 
 const NOWPAYMENTS_API_URL = 'https://api.nowpayments.io/v1';
-const PLATFORM_LTC_ADDRESS = 'W4DXFRS-EW14FWG-J3KW30R-KFJ3NSK';
+// Payout address configured in NOWPayments dashboard settings
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -38,8 +38,6 @@ Deno.serve(async (req) => {
         price_amount: amount_usd,
         price_currency: 'usd',
         pay_currency: pay_currency,
-        payout_address: PLATFORM_LTC_ADDRESS,
-        payout_currency: 'ltc',
         order_id: order_id || `dtt-${Date.now()}`,
         order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
         is_fixed_rate: true,
