@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
-  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera,
+  CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   canExecutePayout, formatPayoutCooldown,
@@ -46,7 +47,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -55,6 +56,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [searchQuery, setSearchQuery] = useState("");
   const [queue, setQueue] = useState(VERIFICATION_QUEUE);
+  const [legalLogs, setLegalLogs] = useState<any[]>([]);
+  const [legalSearch, setLegalSearch] = useState("");
+  const [legalLoading, setLegalLoading] = useState(false);
 
   // Payout control state
   const [payoutState, setPayoutState] = useState<PayoutState>({
@@ -100,6 +104,22 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
   const handleVerification = (id: string, action: "approved" | "rejected") => {
     setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, status: action } : item)));
+  };
+
+  const fetchLegalLogs = async (search = "") => {
+    setLegalLoading(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/legal-logs?search=${encodeURIComponent(search)}`;
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      setLegalLogs(Array.isArray(data) ? data : []);
+    } catch {
+      setLegalLogs([]);
+    }
+    setLegalLoading(false);
   };
 
   const handleExecutePayout = () => {
@@ -148,7 +168,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "analytics", label: "ANALYTICS" },
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
-  ];
+    { id: "legal", label: "LEGAL LOGS" },
+  ] as const;
 
   return (
     <div className="min-h-screen pb-24">
@@ -437,6 +458,75 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               The platform collects a 10% service fee on all Bit-Token transactions, vault unlocks, custom media requests, and bundle purchases. Creator payouts are processed after fee deduction.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Legal Logs */}
+      {activeSection === "legal" && (
+        <div className="px-4 space-y-4">
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={legalSearch}
+                onChange={(e) => setLegalSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && fetchLegalLogs(legalSearch)}
+                placeholder="Search by username or email..."
+                className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+            <Button variant="neon" size="sm" className="shrink-0" onClick={() => fetchLegalLogs(legalSearch)}>
+              SEARCH
+            </Button>
+          </div>
+
+          {legalLoading && (
+            <div className="text-center py-8 text-sm text-muted-foreground">Loading legal records...</div>
+          )}
+
+          {!legalLoading && legalLogs.length === 0 && (
+            <div className="bg-card border border-border rounded-xl p-8 text-center">
+              <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Click SEARCH to load consent records</p>
+            </div>
+          )}
+
+          {!legalLoading && legalLogs.length > 0 && (
+            <div className="space-y-3">
+              {legalLogs.map((log: any) => (
+                <div key={log.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{log.username || "Anonymous"}</p>
+                      <p className="text-xs text-muted-foreground">{log.email || "No email"}</p>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+                      v{log.terms_version}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
+                    <div>
+                      <span className="font-semibold uppercase tracking-wider">IP:</span> {log.ip_address || "—"}
+                    </div>
+                    <div>
+                      <span className="font-semibold uppercase tracking-wider">Type:</span> {log.consent_type}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/70">
+                    {new Date(log.created_at).toLocaleString("en-US", {
+                      year: "numeric", month: "short", day: "numeric",
+                      hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short",
+                    })}
+                  </p>
+                  <details className="text-[10px]">
+                    <summary className="text-muted-foreground cursor-pointer hover:text-primary">View consent text</summary>
+                    <p className="mt-1 text-muted-foreground/70 leading-relaxed">{log.consent_text}</p>
+                  </details>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
