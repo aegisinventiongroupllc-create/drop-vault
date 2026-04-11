@@ -47,7 +47,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue" | "legal";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -59,6 +59,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [legalLogs, setLegalLogs] = useState<any[]>([]);
   const [legalSearch, setLegalSearch] = useState("");
   const [legalLoading, setLegalLoading] = useState(false);
+  const [payoutProcessing, setPayoutProcessing] = useState(false);
+  const [payoutResult, setPayoutResult] = useState<{ success?: boolean; message: string } | null>(null);
 
   // Payout control state
   const [payoutState, setPayoutState] = useState<PayoutState>({
@@ -168,6 +170,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "analytics", label: "ANALYTICS" },
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
+    { id: "payouts", label: "PAYOUTS" },
     { id: "legal", label: "LEGAL LOGS" },
   ] as const;
 
