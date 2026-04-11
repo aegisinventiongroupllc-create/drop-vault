@@ -182,8 +182,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-foreground tracking-wider font-display">ADMIN PANEL</h1>
-          <p className="text-xs text-muted-foreground">Platform Management</p>
+          <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DTT ADMIN</h1>
+          <p className="text-xs text-muted-foreground">DropThatThing — Platform Management</p>
         </div>
       </div>
 
