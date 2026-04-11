@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      creator_wallets: {
+        Row: {
+          created_at: string
+          id: string
+          ltc_address: string | null
+          pending_balance: number
+          total_earned: number
+          total_paid: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ltc_address?: string | null
+          pending_balance?: number
+          total_earned?: number
+          total_paid?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ltc_address?: string | null
+          pending_balance?: number
+          total_earned?: number
+          total_paid?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           consent_text: string
@@ -50,6 +83,81 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      payout_batches: {
+        Row: {
+          admin_user_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          nowpayments_batch_id: string | null
+          payout_details: Json | null
+          status: string
+          total_amount: number
+          total_creators: number
+        }
+        Insert: {
+          admin_user_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          nowpayments_batch_id?: string | null
+          payout_details?: Json | null
+          status?: string
+          total_amount?: number
+          total_creators?: number
+        }
+        Update: {
+          admin_user_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          nowpayments_batch_id?: string | null
+          payout_details?: Json | null
+          status?: string
+          total_amount?: number
+          total_creators?: number
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount_usd: number
+          buyer_id: string | null
+          created_at: string
+          creator_id: string
+          creator_share_percent: number
+          creator_share_usd: number
+          id: string
+          payment_id: string | null
+          platform_share_usd: number
+          status: string
+        }
+        Insert: {
+          amount_usd: number
+          buyer_id?: string | null
+          created_at?: string
+          creator_id: string
+          creator_share_percent?: number
+          creator_share_usd: number
+          id?: string
+          payment_id?: string | null
+          platform_share_usd: number
+          status?: string
+        }
+        Update: {
+          amount_usd?: number
+          buyer_id?: string | null
+          created_at?: string
+          creator_id?: string
+          creator_share_percent?: number
+          creator_share_usd?: number
+          id?: string
+          payment_id?: string | null
+          platform_share_usd?: number
+          status?: string
         }
         Relationships: []
       }
