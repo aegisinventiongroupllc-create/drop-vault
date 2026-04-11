@@ -464,6 +464,93 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
         </div>
       )}
 
+      {/* Mass Payout */}
+      {activeSection === "payouts" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
+            <p className="text-xs text-muted-foreground mb-1">PROCESS MASS PAYOUT</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              This will fetch all creators with a pending balance &gt; $0 and send LTC to their saved wallet addresses via NOWPayments Mass Payout API.
+            </p>
+          </div>
+
+          <div className="bg-card border border-primary/30 rounded-xl p-5 space-y-4">
+            <div className="text-center">
+              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">CREATOR PAYOUT CONTROL</p>
+              <p className="text-2xl font-bold text-primary">${totalPending.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Estimated Pending (from mock data)</p>
+            </div>
+
+            <Button
+              variant="neon"
+              size="lg"
+              className="w-full text-sm font-bold tracking-widest"
+              disabled={payoutProcessing || !canExecutePayout(payoutState).allowed}
+              onClick={async () => {
+                const result = canExecutePayout(payoutState);
+                if (!result.allowed) {
+                  setPayoutResult({ success: false, message: `LOCKED — Next in [${formatPayoutCooldown(result.remainingMs)}]` });
+                  return;
+                }
+                setPayoutProcessing(true);
+                setPayoutResult(null);
+                try {
+                  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/mass-payout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_password: ADMIN_PASSWORD }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setPayoutState({ ...payoutState, lastPayoutAt: Date.now() });
+                    setPayoutResult({ success: true, message: `PAYOUTS SENT — ${data.creators_paid} creators, $${data.total_amount} total` });
+                  } else if (data.message) {
+                    setPayoutResult({ success: true, message: data.message });
+                  } else {
+                    setPayoutResult({ success: false, message: data.error || 'Payout failed' });
+                  }
+                } catch (err) {
+                  setPayoutResult({ success: false, message: 'Network error — check edge function logs' });
+                }
+                setPayoutProcessing(false);
+              }}
+            >
+              {payoutProcessing
+                ? "PROCESSING..."
+                : canExecutePayout(payoutState).allowed
+                ? "PROCESS MASS PAYOUT"
+                : `LOCKED — NEXT IN [${cooldownDisplay || "..."}]`}
+            </Button>
+
+            {payoutResult && (
+              <div className={`text-center p-3 rounded-lg border ${
+                payoutResult.success
+                  ? "bg-green-400/10 border-green-400/30"
+                  : "bg-destructive/10 border-destructive/30"
+              }`}>
+                <p className={`text-xs font-bold tracking-wider ${
+                  payoutResult.success ? "text-green-400" : "text-destructive"
+                }`}>
+                  {payoutResult.message}
+                </p>
+              </div>
+            )}
+
+            <p className="text-[10px] text-muted-foreground text-center">
+              This button triggers the NOWPayments Mass Payout API. All pending creator balances are sent as LTC to their saved wallet addresses. Balances are marked as paid once confirmed. 24-hour cooldown applies.
+            </p>
+          </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <DollarSign className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              The 90/10 split (Creator/Platform) is applied at transaction time. Each sale records the creator's share in the <strong>transactions</strong> ledger. This payout only releases the already-calculated creator share.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Legal Logs */}
       {activeSection === "legal" && (
         <div className="px-4 space-y-4">
