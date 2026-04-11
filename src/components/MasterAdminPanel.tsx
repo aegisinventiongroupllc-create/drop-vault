@@ -141,8 +141,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <Shield className="w-8 h-8 text-primary" />
         </div>
         <div className="text-center">
-          <h1 className="text-xl font-bold text-foreground mb-1 tracking-wider font-display">ADMIN PANEL</h1>
-          <p className="text-sm text-muted-foreground">Enter admin password to continue</p>
+          <h1 className="text-xl font-bold text-foreground mb-1 tracking-wider font-display">DTT ADMIN PANEL</h1>
+          <p className="text-sm text-muted-foreground">DropThatThing — Enter admin password</p>
         </div>
         <div className="w-full max-w-xs space-y-3">
           <input
