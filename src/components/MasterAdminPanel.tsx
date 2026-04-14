@@ -578,6 +578,99 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
         </div>
       )}
 
+      {/* Power Week Monitor */}
+      {activeSection === "powerweek" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
+            <Zap className="w-8 h-8 text-primary mx-auto mb-2" />
+            <h3 className="text-lg font-bold text-foreground tracking-wider">POWER WEEK MONITOR</h3>
+            <p className="text-xs text-muted-foreground mt-1">Track creators with active 97/3 splits and milestone progress (Men's & Women's side)</p>
+          </div>
+
+          {/* Active Power Weeks */}
+          <div className="bg-card border border-primary/30 rounded-xl p-4">
+            <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              ACTIVE POWER WEEKS
+            </h4>
+            <div className="space-y-3">
+              {POWER_WEEK_CREATORS.filter(c => c.active).map((creator, i) => (
+                <div key={i} className="border border-primary/20 bg-primary/5 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground">{creator.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                        creator.side === "Women"
+                          ? "bg-pink-500/10 text-pink-400 border border-pink-400/20"
+                          : "bg-blue-500/10 text-blue-400 border border-blue-400/20"
+                      }`}>{creator.side}</span>
+                    </div>
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">97/3</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Milestone: {(creator.milestone / 1000).toFixed(0)}K</span>
+                    <span>Followers: {creator.followers.toLocaleString()}</span>
+                  </div>
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-2 text-center mt-2">
+                    <p className="text-[10px] text-muted-foreground">Time Remaining</p>
+                    <p className="text-sm font-bold text-primary font-mono">{creator.endsIn}</p>
+                  </div>
+                </div>
+              ))}
+              {POWER_WEEK_CREATORS.filter(c => c.active).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No active Power Weeks</p>
+              )}
+            </div>
+          </div>
+
+          {/* Milestone Progress (all creators) */}
+          <div className="bg-card border border-border rounded-xl p-4">
+            <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <Target className="w-4 h-4 text-gold" />
+              MILESTONE PROGRESS — ALL CREATORS
+            </h4>
+            <div className="space-y-3">
+              {POWER_WEEK_CREATORS.map((creator, i) => {
+                const progress = getMilestoneProgress(creator.followers);
+                const nextMilestone = (Math.floor(creator.followers / FOLLOWER_MILESTONE) + 1) * FOLLOWER_MILESTONE;
+                return (
+                  <div key={i} className="border border-border rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{creator.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          creator.side === "Women"
+                            ? "bg-pink-500/10 text-pink-400"
+                            : "bg-blue-500/10 text-blue-400"
+                        }`}>{creator.side}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{creator.followers.toLocaleString()} / {nextMilestone.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-gold to-primary rounded-full transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[10px] text-muted-foreground">{progress.toFixed(1)}% to next Power Week</span>
+                      {creator.active && <span className="text-[10px] font-bold text-primary">⚡ ACTIVE</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              Every 100,000 new followers triggers a 168-hour (7-day) Power Week where the platform fee drops from 10% to 3%. This is recurring — it triggers again at 200K, 300K, etc. The fee automatically reverts when the timer expires.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Market Demand */}
       {activeSection === "demand" && (
         <div className="px-4 space-y-4">
