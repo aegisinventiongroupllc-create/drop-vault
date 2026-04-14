@@ -1,5 +1,5 @@
 // Payment split engine for DROPTHATTHING platform
-// Handles 90/10 default split and 97/3 incentive milestone
+// Handles 90/10 default split and recurring 97/3 Power Week every 100K followers
 
 export interface CreatorSplitState {
   creatorId: string;
@@ -9,6 +9,8 @@ export interface CreatorSplitState {
   incentiveStartedAt: number | null; // timestamp ms
   incentiveEndsAt: number | null; // timestamp ms
   milestoneReached: boolean;
+  lastMilestone: number; // e.g. 100000, 200000, 300000
+  nextMilestone: number; // the next 100K target
 }
 
 export interface PayoutState {
@@ -16,12 +18,30 @@ export interface PayoutState {
   cooldownMs: number; // 24 hours in ms
 }
 
-const INCENTIVE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const INCENTIVE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 168 hours
 const PAYOUT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 const FOLLOWER_MILESTONE = 100_000;
 
 const DEFAULT_SPLIT = { creator: 90, platform: 10 };
 const INCENTIVE_SPLIT = { creator: 97, platform: 3 };
+
+/**
+ * Computes the current milestone bracket for a follower count.
+ * E.g. 248,000 → lastMilestone=200000, nextMilestone=300000
+ */
+function getMilestoneBracket(followers: number) {
+  const lastMilestone = Math.floor(followers / FOLLOWER_MILESTONE) * FOLLOWER_MILESTONE;
+  const nextMilestone = lastMilestone + FOLLOWER_MILESTONE;
+  return { lastMilestone, nextMilestone };
+}
+
+/**
+ * Progress toward next 100K milestone (0–100).
+ */
+export function getMilestoneProgress(followers: number): number {
+  const within = followers % FOLLOWER_MILESTONE;
+  return Math.min(100, (within / FOLLOWER_MILESTONE) * 100);
+}
 
 export function getCreatorSplitState(
   creatorId: string,
@@ -29,9 +49,13 @@ export function getCreatorSplitState(
   previousState?: CreatorSplitState
 ): CreatorSplitState {
   const now = Date.now();
+  const { lastMilestone, nextMilestone } = getMilestoneBracket(followerCount);
 
-  // Check if milestone just reached
-  if (followerCount >= FOLLOWER_MILESTONE && (!previousState || !previousState.milestoneReached)) {
+  // Check if a NEW milestone was just crossed (recurring every 100K)
+  const previousMilestone = previousState?.lastMilestone ?? 0;
+  const justCrossedNew = lastMilestone > 0 && lastMilestone > previousMilestone;
+
+  if (justCrossedNew && (!previousState?.incentiveActive)) {
     return {
       creatorId,
       followerCount,
@@ -40,6 +64,8 @@ export function getCreatorSplitState(
       incentiveStartedAt: now,
       incentiveEndsAt: now + INCENTIVE_DURATION_MS,
       milestoneReached: true,
+      lastMilestone,
+      nextMilestone,
     };
   }
 
@@ -51,14 +77,18 @@ export function getCreatorSplitState(
         followerCount,
         currentSplit: INCENTIVE_SPLIT,
         incentiveActive: true,
+        lastMilestone,
+        nextMilestone,
       };
     } else {
-      // Incentive expired — revert permanently
+      // Incentive expired — revert to 90/10
       return {
         ...previousState,
         followerCount,
         currentSplit: DEFAULT_SPLIT,
         incentiveActive: false,
+        lastMilestone,
+        nextMilestone,
       };
     }
   }
@@ -71,6 +101,8 @@ export function getCreatorSplitState(
     incentiveStartedAt: previousState?.incentiveStartedAt ?? null,
     incentiveEndsAt: previousState?.incentiveEndsAt ?? null,
     milestoneReached: previousState?.milestoneReached ?? false,
+    lastMilestone,
+    nextMilestone,
   };
 }
 
@@ -93,7 +125,8 @@ export function formatCountdown(ms: number): string {
   const days = Math.floor(ms / (24 * 60 * 60 * 1000));
   const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
   const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
-  return `${days}D:${String(hours).padStart(2, "0")}H:${String(minutes).padStart(2, "0")}M`;
+  const seconds = Math.floor((ms % (60 * 1000)) / 1000);
+  return `${days}D:${String(hours).padStart(2, "0")}H:${String(minutes).padStart(2, "0")}M:${String(seconds).padStart(2, "0")}S`;
 }
 
 export function formatPayoutCooldown(ms: number): string {
