@@ -387,16 +387,51 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <p className="text-3xl font-bold text-primary">$2,340.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
             </div>
+
+            {/* LTC Warning */}
+            <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 mb-4">
+              <p className="text-xs font-bold text-gold text-center tracking-wider">
+                ⚠ LTC ONLY. YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.
+              </p>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                All payouts are sent as Litecoin. Settlements take 4–5 business days.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
               <input
                 type="text"
+                value={ltcAddress}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  setLtcAddress(val);
+                  setLtcSaved(false);
+                  // Validate LTC address format (ltc1, L, M, or 3 prefix)
+                  if (val && !/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(val)) {
+                    setLtcError("Invalid LTC address. Must start with ltc1, L, M, or 3.");
+                  } else {
+                    setLtcError("");
+                  }
+                }}
                 placeholder="Enter your Litecoin wallet address (e.g. ltc1q...)"
                 className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-xs"
               />
+              {ltcError && <p className="text-xs text-destructive">{ltcError}</p>}
+              {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved</p>}
               <p className="text-xs text-muted-foreground">Payouts are sent exclusively via Litecoin (LTC)</p>
             </div>
-            <Button variant="neon" className="w-full mt-4">Request Payout</Button>
+            <Button
+              variant="neon"
+              className="w-full mt-4"
+              disabled={!ltcAddress || !!ltcError}
+              onClick={() => {
+                setLtcSaved(true);
+                // TODO: Save to creator_wallets table when auth is wired
+              }}
+            >
+              SAVE WALLET & REQUEST PAYOUT
+            </Button>
           </div>
         </div>
       )}
