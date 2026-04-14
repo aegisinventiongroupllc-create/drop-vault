@@ -62,6 +62,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [legalLoading, setLegalLoading] = useState(false);
   const [payoutProcessing, setPayoutProcessing] = useState(false);
   const [payoutResult, setPayoutResult] = useState<{ success?: boolean; message: string } | null>(null);
+  const [demandKeywords, setDemandKeywords] = useState<any[]>([]);
+  const [demandLoading, setDemandLoading] = useState(false);
+  const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
 
   // Payout control state
   const [payoutState, setPayoutState] = useState<PayoutState>({
