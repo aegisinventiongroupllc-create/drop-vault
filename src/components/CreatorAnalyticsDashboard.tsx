@@ -483,7 +483,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 <Globe className="w-4 h-4 text-primary" />
                 <h3 className="text-base font-semibold text-foreground">Public Teasers</h3>
               </div>
-              <Button variant="neon" size="sm" className="gap-1.5">
+              <Button variant="neon" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
                 <Upload className="w-3.5 h-3.5" />
                 Upload Teaser
               </Button>
