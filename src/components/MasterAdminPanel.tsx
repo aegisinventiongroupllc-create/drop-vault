@@ -175,6 +175,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "demand", label: "DEMAND" },
+    { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
   ] as const;
 
