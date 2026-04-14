@@ -22,6 +22,7 @@ const ALL_CREATORS: SearchResult[] = [
 
 const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: string) => void; onClose: () => void }) => {
   const [query, setQuery] = useState("");
+  const [demandSent, setDemandSent] = useState(false);
 
   const results = query.trim()
     ? ALL_CREATORS.filter(c =>
@@ -29,6 +30,19 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
         c.category.toLowerCase().includes(query.toLowerCase())
       )
     : [];
+
+  const noResults = query.trim().length > 0 && results.length === 0;
+
+  const handleRequestDemand = async () => {
+    if (!query.trim() || demandSent) return;
+    const prefs = localStorage.getItem("dtt_user_prefs");
+    const email = prefs ? JSON.parse(prefs).email : null;
+    await supabase.from("market_demand").insert({
+      keyword: query.trim().toLowerCase(),
+      user_email: email,
+    });
+    setDemandSent(true);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background">
@@ -42,7 +56,7 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
             autoFocus
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setDemandSent(false); }}
             placeholder="Search creators by name or category..."
             className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
@@ -73,9 +87,26 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
             </Button>
           </button>
         ))}
-        {query.trim() && results.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">No creators found for "{query}"</p>
+
+        {noResults && (
+          <div className="text-center py-8 space-y-3">
+            <Lightbulb className="w-8 h-8 text-gold mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              Niche not found — <span className="text-foreground font-semibold">Request this content?</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              We'll let creators know there's demand for "<span className="text-primary font-medium">{query}</span>"
+            </p>
+            {demandSent ? (
+              <p className="text-xs text-green-400 font-bold tracking-wider">✓ REQUEST LOGGED</p>
+            ) : (
+              <Button variant="neon" size="sm" onClick={handleRequestDemand}>
+                REQUEST THIS NICHE
+              </Button>
+            )}
+          </div>
         )}
+
         {!query.trim() && (
           <p className="text-center text-sm text-muted-foreground py-8">Start typing to discover creators</p>
         )}
