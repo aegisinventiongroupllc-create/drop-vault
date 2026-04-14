@@ -116,6 +116,29 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setRequestActions(prev => ({ ...prev, [id]: action }));
   };
 
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const bucket = mediaTargetRef.current;
+    setUploading(bucket);
+    setUploadMsg("");
+    // Use a placeholder user ID until auth is wired
+    const userId = "creator-1";
+    const result = await uploadMedia(file, bucket, userId);
+    if ("error" in result) {
+      setUploadMsg(`Upload failed: ${result.error}`);
+    } else {
+      setUploadMsg(`Uploaded to ${bucket}: ${file.name}`);
+    }
+    setUploading(null);
+    e.target.value = "";
+  };
+
+  const triggerMediaUpload = (bucket: MediaBucket) => {
+    mediaTargetRef.current = bucket;
+    mediaInputRef.current?.click();
+  };
+
   // Show safety modal on first load
   if (showSafetyModal && !safetyAgreed) {
     return <CreatorSafetyModal onAgree={() => { setSafetyAgreed(true); setShowSafetyModal(false); }} />;
