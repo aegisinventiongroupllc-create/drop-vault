@@ -454,14 +454,25 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Media Manager */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
+          {/* Upload status */}
+          {(uploading || uploadMsg) && (
+            <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
+              uploading ? "bg-primary/10 border border-primary/30 text-primary" : uploadMsg.startsWith("Upload failed") ? "bg-destructive/10 border border-destructive/30 text-destructive" : "bg-green-400/10 border border-green-400/30 text-green-400"
+            }`}>
+              {uploading ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Uploading to {uploading}...</span> : uploadMsg}
+            </div>
+          )}
+
           {/* Profile Trailer Upload */}
           <div className="bg-card border border-primary/30 rounded-xl p-4">
             <h3 className="text-sm font-bold text-foreground mb-2">PROFILE TRAILER (15s)</h3>
-            <p className="text-xs text-muted-foreground mb-3">This video loops at the top of your locked profile. Only media visible to non-paying users.</p>
+            <p className="text-xs text-muted-foreground mb-3">This video loops at the top of your locked profile. Stored in cloud storage for scalability.</p>
             <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/50 transition-colors">
               <Upload className="w-6 h-6 text-primary" />
-              <Button variant="neon" size="sm">UPLOAD PROFILE TRAILER</Button>
-              <p className="text-[10px] text-muted-foreground">MP4, max 15 seconds</p>
+              <Button variant="neon" size="sm" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
+                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD PROFILE TRAILER"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">MP4, max 15 seconds • Stored in cloud</p>
             </div>
           </div>
 
