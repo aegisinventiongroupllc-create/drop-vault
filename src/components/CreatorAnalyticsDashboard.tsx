@@ -64,6 +64,9 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [activeSection, setActiveSection] = useState<Section>("overview");
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified">("none");
   const [idUploaded, setIdUploaded] = useState(false);
+  const [ltcAddress, setLtcAddress] = useState("");
+  const [ltcError, setLtcError] = useState("");
+  const [ltcSaved, setLtcSaved] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
