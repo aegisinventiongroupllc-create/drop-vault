@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import SuggestionBox from "@/components/SuggestionBox";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
+import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import {
   getCreatorSplitState, formatCountdown, DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
