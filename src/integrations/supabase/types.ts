@@ -146,6 +146,42 @@ export type Database = {
         }
         Relationships: []
       }
+      power_weeks: {
+        Row: {
+          active: boolean
+          created_at: string
+          creator_id: string
+          ends_at: string
+          id: string
+          milestone_followers: number
+          split_creator: number
+          split_platform: number
+          started_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          creator_id: string
+          ends_at: string
+          id?: string
+          milestone_followers: number
+          split_creator?: number
+          split_platform?: number
+          started_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          creator_id?: string
+          ends_at?: string
+          id?: string
+          milestone_followers?: number
+          split_creator?: number
+          split_platform?: number
+          started_at?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_usd: number
