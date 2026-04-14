@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
-  canExecutePayout, formatPayoutCooldown,
+  canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
 } from "@/lib/paymentSplit";
 
@@ -48,7 +48,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts" | "health" | "demand";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts" | "health" | "demand" | "powerweek";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -169,12 +169,23 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     );
   }
 
+  // Mock power week data for creators (men's & women's side)
+  const POWER_WEEK_CREATORS = [
+    { name: "LunaCosplay", side: "Women", followers: 148200, milestone: 100000, active: true, endsIn: "3D:14H:22M" },
+    { name: "FitJessie", side: "Women", followers: 97400, milestone: 100000, active: false, endsIn: "" },
+    { name: "BlondieVibes", side: "Women", followers: 212000, milestone: 200000, active: true, endsIn: "6D:02H:10M" },
+    { name: "AlphaFlex", side: "Men", followers: 103800, milestone: 100000, active: true, endsIn: "1D:08H:45M" },
+    { name: "IronMike", side: "Men", followers: 85600, milestone: 100000, active: false, endsIn: "" },
+    { name: "TwinFlames", side: "Men", followers: 299100, milestone: 200000, active: false, endsIn: "" },
+  ];
+
   const sections: { id: Section; label: string }[] = [
     { id: "verification", label: "VERIFY" },
     { id: "analytics", label: "ANALYTICS" },
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
