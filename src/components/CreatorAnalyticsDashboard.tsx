@@ -511,7 +511,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 <Lock className="w-4 h-4 text-gold" />
                 <h3 className="text-base font-semibold text-foreground">Locked Vault Content</h3>
               </div>
-              <Button variant="gold" size="sm" className="gap-1.5">
+              <Button variant="gold" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("vault")} disabled={!!uploading}>
                 <Upload className="w-3.5 h-3.5" />
                 Upload to Vault
               </Button>
