@@ -257,11 +257,33 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           </div>
           <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser, lock your full content behind a paywall.</p>
         </div>
-        <div className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow">
+        <div className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow min-w-[120px]">
           <Crown className="w-4 h-4 text-gold mx-auto mb-1" />
-          <p className="text-xs font-bold text-gold">{loyaltyTokens}</p>
-          <p className="text-[10px] text-muted-foreground">Loyalty Tokens</p>
-          <p className="text-[8px] text-muted-foreground/60">Gift to fans</p>
+          <p className="text-xs font-bold text-gold">{remainingLoyalty}</p>
+          <p className="text-[10px] text-muted-foreground">Loyalty Bits</p>
+          <div className="mt-2 space-y-1">
+            <input
+              type="text"
+              value={giftUsername}
+              onChange={(e) => { setGiftUsername(e.target.value); setGiftSent(false); }}
+              placeholder="@fan"
+              className="w-full bg-secondary rounded-lg px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-gold/50"
+            />
+            <button
+              disabled={!giftUsername.trim() || remainingLoyalty <= 0}
+              onClick={() => {
+                if (remainingLoyalty > 0 && giftUsername.trim()) {
+                  setRemainingLoyalty(prev => prev - 1);
+                  setGiftSent(true);
+                  setGiftUsername("");
+                }
+              }}
+              className="w-full bg-gold/20 hover:bg-gold/30 text-gold text-[10px] font-bold rounded-lg py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              GIFT 1 BIT
+            </button>
+            {giftSent && <p className="text-[8px] text-green-400 font-bold">✓ Sent!</p>}
+          </div>
         </div>
       </div>
 
