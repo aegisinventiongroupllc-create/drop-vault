@@ -4,7 +4,6 @@ const corsHeaders = {
 };
 
 const NOWPAYMENTS_API_URL = 'https://api.nowpayments.io/v1';
-// Payout address configured in NOWPayments dashboard settings
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -19,30 +18,75 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { amount_usd, tokens, order_id, pay_currency } = await req.json();
+    const { amount_usd, tokens, order_id, pay_currency, is_fiat } = await req.json();
 
-    if (!amount_usd || !tokens || !pay_currency) {
-      return new Response(JSON.stringify({ error: 'Missing required fields: amount_usd, tokens, pay_currency' }), {
+    if (!amount_usd || !tokens) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: amount_usd, tokens' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Create payment via NOWPayments API
+    // Build payment request body
+    const paymentBody: Record<string, unknown> = {
+      price_amount: amount_usd,
+      price_currency: 'usd',
+      pay_currency: pay_currency || 'ltc',
+      order_id: order_id || `dtt-${Date.now()}`,
+      order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
+      is_fixed_rate: true,
+      is_fee_paid_by_user: true,
+      // Force all settlements to LTC regardless of input currency
+      outcome_currency: 'ltc',
+    };
+
+    // For fiat on-ramp (card payments), use the invoice endpoint
+    if (is_fiat) {
+      const invoiceResponse = await fetch(`${NOWPAYMENTS_API_URL}/invoice`, {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          price_amount: amount_usd,
+          price_currency: 'usd',
+          order_id: paymentBody.order_id,
+          order_description: paymentBody.order_description,
+          is_fixed_rate: true,
+          is_fee_paid_by_user: true,
+          // Force outcome to LTC
+          outcome_currency: 'ltc',
+        }),
+      });
+
+      const invoiceData = await invoiceResponse.json();
+
+      if (!invoiceResponse.ok) {
+        console.error('NOWPayments invoice error:', invoiceData);
+        return new Response(JSON.stringify({ error: 'Invoice creation failed', details: invoiceData }), {
+          status: invoiceResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify({
+        invoice_id: invoiceData.id,
+        invoice_url: invoiceData.invoice_url,
+        order_id: invoiceData.order_id,
+        tokens_to_credit: tokens,
+        is_fiat: true,
+      }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Standard crypto payment
     const paymentResponse = await fetch(`${NOWPAYMENTS_API_URL}/payment`, {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        price_amount: amount_usd,
-        price_currency: 'usd',
-        pay_currency: pay_currency,
-        order_id: order_id || `dtt-${Date.now()}`,
-        order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
-        is_fixed_rate: true,
-        is_fee_paid_by_user: true,
-      }),
+      body: JSON.stringify(paymentBody),
     });
 
     const paymentData = await paymentResponse.json();

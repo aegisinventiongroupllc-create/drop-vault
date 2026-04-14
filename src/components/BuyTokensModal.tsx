@@ -52,16 +52,34 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     }
   };
 
-  const handleCardPay = () => {
-    // Simulated card flow (MoonPay/Transak integration placeholder)
+  const handleCardPay = async () => {
     setStep("processing");
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
+        body: { amount_usd: amountUsd, tokens, order_id: `dtt-${Date.now()}`, is_fiat: true },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.invoice_url) {
+        // Open NOWPayments hosted invoice page (supports card payments)
+        window.open(data.invoice_url, "_blank");
+      }
+
+      // Zero-confirmation: grant tokens instantly
       setStep("success");
       setTimeout(() => {
         onPurchase(tokens);
         onClose();
       }, 2500);
-    }, 1500);
+    } catch (err: any) {
+      console.error("Card payment error:", err);
+      setError(err.message || "Card payment failed. Please try again.");
+      setStep("payment");
+    }
   };
 
   return (
