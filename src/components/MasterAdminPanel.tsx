@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
-  canExecutePayout, formatPayoutCooldown,
+  canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
 } from "@/lib/paymentSplit";
 
@@ -48,7 +48,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts" | "health" | "demand";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts" | "health" | "demand" | "powerweek";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -169,12 +169,23 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     );
   }
 
+  // Mock power week data for creators (men's & women's side)
+  const POWER_WEEK_CREATORS = [
+    { name: "LunaCosplay", side: "Women", followers: 148200, milestone: 100000, active: true, endsIn: "3D:14H:22M" },
+    { name: "FitJessie", side: "Women", followers: 97400, milestone: 100000, active: false, endsIn: "" },
+    { name: "BlondieVibes", side: "Women", followers: 212000, milestone: 200000, active: true, endsIn: "6D:02H:10M" },
+    { name: "AlphaFlex", side: "Men", followers: 103800, milestone: 100000, active: true, endsIn: "1D:08H:45M" },
+    { name: "IronMike", side: "Men", followers: 85600, milestone: 100000, active: false, endsIn: "" },
+    { name: "TwinFlames", side: "Men", followers: 299100, milestone: 200000, active: false, endsIn: "" },
+  ];
+
   const sections: { id: Section; label: string }[] = [
     { id: "verification", label: "VERIFY" },
     { id: "analytics", label: "ANALYTICS" },
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
@@ -562,6 +573,99 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
             <DollarSign className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               The 90/10 split (Creator/Platform) is applied at transaction time. Each sale records the creator's share in the <strong>transactions</strong> ledger. This payout only releases the already-calculated creator share.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Power Week Monitor */}
+      {activeSection === "powerweek" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
+            <Zap className="w-8 h-8 text-primary mx-auto mb-2" />
+            <h3 className="text-lg font-bold text-foreground tracking-wider">POWER WEEK MONITOR</h3>
+            <p className="text-xs text-muted-foreground mt-1">Track creators with active 97/3 splits and milestone progress (Men's & Women's side)</p>
+          </div>
+
+          {/* Active Power Weeks */}
+          <div className="bg-card border border-primary/30 rounded-xl p-4">
+            <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              ACTIVE POWER WEEKS
+            </h4>
+            <div className="space-y-3">
+              {POWER_WEEK_CREATORS.filter(c => c.active).map((creator, i) => (
+                <div key={i} className="border border-primary/20 bg-primary/5 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground">{creator.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                        creator.side === "Women"
+                          ? "bg-pink-500/10 text-pink-400 border border-pink-400/20"
+                          : "bg-blue-500/10 text-blue-400 border border-blue-400/20"
+                      }`}>{creator.side}</span>
+                    </div>
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/30">97/3</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Milestone: {(creator.milestone / 1000).toFixed(0)}K</span>
+                    <span>Followers: {creator.followers.toLocaleString()}</span>
+                  </div>
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-2 text-center mt-2">
+                    <p className="text-[10px] text-muted-foreground">Time Remaining</p>
+                    <p className="text-sm font-bold text-primary font-mono">{creator.endsIn}</p>
+                  </div>
+                </div>
+              ))}
+              {POWER_WEEK_CREATORS.filter(c => c.active).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No active Power Weeks</p>
+              )}
+            </div>
+          </div>
+
+          {/* Milestone Progress (all creators) */}
+          <div className="bg-card border border-border rounded-xl p-4">
+            <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <Target className="w-4 h-4 text-gold" />
+              MILESTONE PROGRESS — ALL CREATORS
+            </h4>
+            <div className="space-y-3">
+              {POWER_WEEK_CREATORS.map((creator, i) => {
+                const progress = getMilestoneProgress(creator.followers);
+                const nextMilestone = (Math.floor(creator.followers / FOLLOWER_MILESTONE) + 1) * FOLLOWER_MILESTONE;
+                return (
+                  <div key={i} className="border border-border rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{creator.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          creator.side === "Women"
+                            ? "bg-pink-500/10 text-pink-400"
+                            : "bg-blue-500/10 text-blue-400"
+                        }`}>{creator.side}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{creator.followers.toLocaleString()} / {nextMilestone.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-gold to-primary rounded-full transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[10px] text-muted-foreground">{progress.toFixed(1)}% to next Power Week</span>
+                      {creator.active && <span className="text-[10px] font-bold text-primary">⚡ ACTIVE</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              Every 100,000 new followers triggers a 168-hour (7-day) Power Week where the platform fee drops from 10% to 3%. This is recurring — it triggers again at 200K, 300K, etc. The fee automatically reverts when the timer expires.
             </p>
           </div>
         </div>

@@ -10,7 +10,8 @@ import SuggestionBox from "@/components/SuggestionBox";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import {
-  getCreatorSplitState, formatCountdown, DEFAULT_SPLIT, INCENTIVE_SPLIT,
+  getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
+  DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
 
@@ -82,6 +83,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     getCreatorSplitState("creator-1", 48200)
   );
   const [countdown, setCountdown] = useState("");
+  const [giftUsername, setGiftUsername] = useState("");
+  const [giftSent, setGiftSent] = useState(false);
+  const [remainingLoyalty, setRemainingLoyalty] = useState(5);
+
+  const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
   useEffect(() => {
     if (!splitState.incentiveActive || !splitState.incentiveEndsAt) return;
@@ -218,18 +224,31 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         </div>
         {splitState.incentiveActive && countdown && (
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
-            <p className="text-xs font-bold text-primary tracking-wider">97/3 INCENTIVE ACTIVE: [{countdown}]</p>
-            <p className="text-[10px] text-muted-foreground">90/10 LOGIC RESUMES IN: [{countdown}]</p>
+            <p className="text-xs font-bold text-primary tracking-wider">⚡ 97/3 POWER WEEK ACTIVE</p>
+            <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
+            <p className="text-[10px] text-muted-foreground">Fee reverts to 10% when timer hits zero</p>
           </div>
         )}
-        {!splitState.milestoneReached && (
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Reach 100K followers to unlock the 97/3 incentive split for 7 days
-          </p>
+        {!splitState.incentiveActive && (
+          <div className="mt-3 space-y-2">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Progress to next 100K milestone</span>
+              <span>{splitState.followerCount.toLocaleString()} / {splitState.nextMilestone.toLocaleString()}</span>
+            </div>
+            <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
+                style={{ width: `${milestoneProgress}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">
+              Every 100K new followers unlocks a 7-day Power Week (97/3 split)
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Strategy Tip & Loyalty Tokens */}
+      {/* Strategy Tip & Loyalty Gift */}
       <div className="mx-4 mb-4 flex gap-3">
         <div className="flex-1 bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -238,11 +257,33 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           </div>
           <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser, lock your full content behind a paywall.</p>
         </div>
-        <div className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow">
+        <div className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow min-w-[120px]">
           <Crown className="w-4 h-4 text-gold mx-auto mb-1" />
-          <p className="text-xs font-bold text-gold">{loyaltyTokens}</p>
-          <p className="text-[10px] text-muted-foreground">Loyalty Tokens</p>
-          <p className="text-[8px] text-muted-foreground/60">Gift to fans</p>
+          <p className="text-xs font-bold text-gold">{remainingLoyalty}</p>
+          <p className="text-[10px] text-muted-foreground">Loyalty Bits</p>
+          <div className="mt-2 space-y-1">
+            <input
+              type="text"
+              value={giftUsername}
+              onChange={(e) => { setGiftUsername(e.target.value); setGiftSent(false); }}
+              placeholder="@fan"
+              className="w-full bg-secondary rounded-lg px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-gold/50"
+            />
+            <button
+              disabled={!giftUsername.trim() || remainingLoyalty <= 0}
+              onClick={() => {
+                if (remainingLoyalty > 0 && giftUsername.trim()) {
+                  setRemainingLoyalty(prev => prev - 1);
+                  setGiftSent(true);
+                  setGiftUsername("");
+                }
+              }}
+              className="w-full bg-gold/20 hover:bg-gold/30 text-gold text-[10px] font-bold rounded-lg py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              GIFT 1 BIT
+            </button>
+            {giftSent && <p className="text-[8px] text-green-400 font-bold">✓ Sent!</p>}
+          </div>
         </div>
       </div>
 
