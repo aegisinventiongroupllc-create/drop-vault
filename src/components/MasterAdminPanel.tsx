@@ -350,7 +350,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">User</span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Earned</span>
             </div>
-            <div className="divide-y divide-border">
+           <div className="divide-y divide-border">
               {filteredUsers.map((user) => (
                 <div key={user.id} className="px-4 py-3">
                   <div className="flex items-start justify-between">
@@ -367,16 +367,26 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                       </div>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
                       {user.wallet !== "—" && (
-                        <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">LTC: {user.wallet}</p>
+                        <p className="text-[10px] text-primary/80 font-mono mt-0.5">LTC: {user.wallet}</p>
                       )}
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-foreground">${user.earned.toLocaleString()}</p>
                       {user.pending > 0 && (
-                        <p className="text-[10px] text-gold">Pending: ${user.pending.toLocaleString()}</p>
+                        <p className="text-[10px] text-gold font-bold">Pending: ${user.pending.toLocaleString()}</p>
                       )}
                     </div>
                   </div>
+                  {/* Settlement info for creators with pending balances */}
+                  {user.role === "creator" && user.pending > 0 && user.wallet !== "—" && (
+                    <div className="mt-2 bg-gold/5 border border-gold/20 rounded-lg px-3 py-2 flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold text-gold tracking-wider">READY FOR SETTLEMENT</p>
+                        <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[180px]">{user.wallet}</p>
+                      </div>
+                      <p className="text-xs font-bold text-gold">${user.pending.toLocaleString()}</p>
+                    </div>
+                  )}
                 </div>
               ))}
               {filteredUsers.length === 0 && (
