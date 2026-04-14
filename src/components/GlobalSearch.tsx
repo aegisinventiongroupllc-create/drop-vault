@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchResult {
   name: string;
