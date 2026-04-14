@@ -144,6 +144,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return <CreatorSafetyModal onAgree={() => { setSafetyAgreed(true); setShowSafetyModal(false); }} />;
   }
 
+  // Hidden file input for media uploads
+  const mediaUploadInput = (
+    <input ref={mediaInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
+  );
+
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
