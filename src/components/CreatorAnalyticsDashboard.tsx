@@ -69,7 +69,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [safetyAgreed, setSafetyAgreed] = useState(false);
   const [requestActions, setRequestActions] = useState<Record<string, "accepted" | "declined">>({});
   const [loyaltyTokens] = useState(5);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadMsg, setUploadMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const mediaTargetRef = useRef<MediaBucket>("teasers");
 
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
     getCreatorSplitState("creator-1", 48200)
