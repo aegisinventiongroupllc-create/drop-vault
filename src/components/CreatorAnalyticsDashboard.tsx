@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
