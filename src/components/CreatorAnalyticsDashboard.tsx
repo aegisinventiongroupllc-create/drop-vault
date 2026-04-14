@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import SuggestionBox from "@/components/SuggestionBox";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
+import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import {
   getCreatorSplitState, formatCountdown, DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
@@ -68,7 +69,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [safetyAgreed, setSafetyAgreed] = useState(false);
   const [requestActions, setRequestActions] = useState<Record<string, "accepted" | "declined">>({});
   const [loyaltyTokens] = useState(5);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadMsg, setUploadMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const mediaTargetRef = useRef<MediaBucket>("teasers");
 
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
     getCreatorSplitState("creator-1", 48200)
@@ -111,13 +116,42 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setRequestActions(prev => ({ ...prev, [id]: action }));
   };
 
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const bucket = mediaTargetRef.current;
+    setUploading(bucket);
+    setUploadMsg("");
+    // Use a placeholder user ID until auth is wired
+    const userId = "creator-1";
+    const result = await uploadMedia(file, bucket, userId);
+    if ("error" in result) {
+      setUploadMsg(`Upload failed: ${result.error}`);
+    } else {
+      setUploadMsg(`Uploaded to ${bucket}: ${file.name}`);
+    }
+    setUploading(null);
+    e.target.value = "";
+  };
+
+  const triggerMediaUpload = (bucket: MediaBucket) => {
+    mediaTargetRef.current = bucket;
+    mediaInputRef.current?.click();
+  };
+
   // Show safety modal on first load
   if (showSafetyModal && !safetyAgreed) {
     return <CreatorSafetyModal onAgree={() => { setSafetyAgreed(true); setShowSafetyModal(false); }} />;
   }
 
+  // Hidden file input for media uploads
+  const mediaUploadInput = (
+    <input ref={mediaInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
+  );
+
   return (
     <div className="min-h-screen pb-24">
+      {mediaUploadInput}
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -420,14 +454,25 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Media Manager */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
+          {/* Upload status */}
+          {(uploading || uploadMsg) && (
+            <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
+              uploading ? "bg-primary/10 border border-primary/30 text-primary" : uploadMsg.startsWith("Upload failed") ? "bg-destructive/10 border border-destructive/30 text-destructive" : "bg-green-400/10 border border-green-400/30 text-green-400"
+            }`}>
+              {uploading ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Uploading to {uploading}...</span> : uploadMsg}
+            </div>
+          )}
+
           {/* Profile Trailer Upload */}
           <div className="bg-card border border-primary/30 rounded-xl p-4">
             <h3 className="text-sm font-bold text-foreground mb-2">PROFILE TRAILER (15s)</h3>
-            <p className="text-xs text-muted-foreground mb-3">This video loops at the top of your locked profile. Only media visible to non-paying users.</p>
+            <p className="text-xs text-muted-foreground mb-3">This video loops at the top of your locked profile. Stored in cloud storage for scalability.</p>
             <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/50 transition-colors">
               <Upload className="w-6 h-6 text-primary" />
-              <Button variant="neon" size="sm">UPLOAD PROFILE TRAILER</Button>
-              <p className="text-[10px] text-muted-foreground">MP4, max 15 seconds</p>
+              <Button variant="neon" size="sm" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
+                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD PROFILE TRAILER"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">MP4, max 15 seconds • Stored in cloud</p>
             </div>
           </div>
 
@@ -438,7 +483,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 <Globe className="w-4 h-4 text-primary" />
                 <h3 className="text-base font-semibold text-foreground">Public Teasers</h3>
               </div>
-              <Button variant="neon" size="sm" className="gap-1.5">
+              <Button variant="neon" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
                 <Upload className="w-3.5 h-3.5" />
                 Upload Teaser
               </Button>
@@ -466,7 +511,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 <Lock className="w-4 h-4 text-gold" />
                 <h3 className="text-base font-semibold text-foreground">Locked Vault Content</h3>
               </div>
-              <Button variant="gold" size="sm" className="gap-1.5">
+              <Button variant="gold" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("vault")} disabled={!!uploading}>
                 <Upload className="w-3.5 h-3.5" />
                 Upload to Vault
               </Button>

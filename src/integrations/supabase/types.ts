@@ -86,6 +86,30 @@ export type Database = {
         }
         Relationships: []
       }
+      market_demand: {
+        Row: {
+          created_at: string
+          id: string
+          keyword: string
+          search_count: number
+          user_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword: string
+          search_count?: number
+          user_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword?: string
+          search_count?: number
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       payout_batches: {
         Row: {
           admin_user_id: string | null

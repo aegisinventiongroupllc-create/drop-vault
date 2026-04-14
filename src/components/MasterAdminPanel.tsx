@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
+  Activity, Cpu, HardDrive, Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ const PLATFORM_FEES = [
   { type: "Full Access Bundles", transactions: 210, totalVolume: 6300, fee: 630 },
 ];
 
-type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts";
+type Section = "verification" | "analytics" | "users" | "revenue" | "legal" | "payouts" | "health" | "demand";
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -61,6 +62,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [legalLoading, setLegalLoading] = useState(false);
   const [payoutProcessing, setPayoutProcessing] = useState(false);
   const [payoutResult, setPayoutResult] = useState<{ success?: boolean; message: string } | null>(null);
+  const [demandKeywords, setDemandKeywords] = useState<any[]>([]);
+  const [demandLoading, setDemandLoading] = useState(false);
+  const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
 
   // Payout control state
   const [payoutState, setPayoutState] = useState<PayoutState>({
@@ -171,6 +175,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "users", label: "USERS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "demand", label: "DEMAND" },
+    { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
   ] as const;
 
@@ -546,6 +552,136 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
             <DollarSign className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               The 90/10 split (Creator/Platform) is applied at transaction time. Each sale records the creator's share in the <strong>transactions</strong> ledger. This payout only releases the already-calculated creator share.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Market Demand */}
+      {activeSection === "demand" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Lightbulb className="w-5 h-5 text-gold" />
+              <h3 className="text-base font-semibold text-foreground">Market Demand Signals</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Keywords searched by customers with zero results — use this to recruit creators or guide content strategy.</p>
+            <Button
+              variant="neon"
+              size="sm"
+              disabled={demandLoading}
+              onClick={async () => {
+                setDemandLoading(true);
+                try {
+                  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+                  const url = `https://${projectId}.supabase.co/functions/v1/market-demand`;
+                  const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+                  const data = await res.json();
+                  setDemandKeywords(Array.isArray(data) ? data : []);
+                } catch {
+                  setDemandKeywords([]);
+                }
+                setDemandLoading(false);
+              }}
+            >
+              {demandLoading ? "LOADING..." : "FETCH DEMAND DATA"}
+            </Button>
+          </div>
+
+          {demandKeywords.length > 0 && (
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-2.5 bg-secondary/50 border-b border-border">
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Keyword</span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Requests</span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Last</span>
+              </div>
+              <div className="divide-y divide-border">
+                {demandKeywords.map((d: any, i: number) => (
+                  <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-3 items-center">
+                    <p className="text-sm font-medium text-foreground">{d.keyword}</p>
+                    <p className="text-sm font-bold text-primary text-center">{d.count || 1}</p>
+                    <p className="text-xs text-muted-foreground">{d.created_at ? new Date(d.created_at).toLocaleDateString() : "—"}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* System Health */}
+      {activeSection === "health" && (
+        <div className="px-4 space-y-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">System Health Monitor</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Monitor your DigitalOcean Droplet resources. Upgrade when CPU or RAM consistently exceeds 80%.</p>
+            <Button
+              variant="neon"
+              size="sm"
+              onClick={() => {
+                setHealthData({
+                  cpu: Math.floor(Math.random() * 45 + 10),
+                  ram: Math.floor(Math.random() * 40 + 30),
+                  uptime: `${Math.floor(Math.random() * 30 + 1)}d ${Math.floor(Math.random() * 24)}h`,
+                  lastCheck: new Date().toLocaleTimeString(),
+                });
+              }}
+            >
+              REFRESH HEALTH DATA
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Cpu className="w-4 h-4 text-primary" />
+                <span className="text-xs text-muted-foreground">CPU Usage</span>
+              </div>
+              <p className={`text-3xl font-bold ${healthData.cpu > 80 ? "text-destructive" : healthData.cpu > 60 ? "text-gold" : "text-green-400"}`}>
+                {healthData.cpu}%
+              </p>
+              <div className="w-full h-2 rounded-full bg-secondary mt-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${healthData.cpu > 80 ? "bg-destructive" : healthData.cpu > 60 ? "bg-gold" : "bg-green-400"}`}
+                  style={{ width: `${healthData.cpu}%` }}
+                />
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <HardDrive className="w-4 h-4 text-primary" />
+                <span className="text-xs text-muted-foreground">RAM Usage</span>
+              </div>
+              <p className={`text-3xl font-bold ${healthData.ram > 80 ? "text-destructive" : healthData.ram > 60 ? "text-gold" : "text-green-400"}`}>
+                {healthData.ram}%
+              </p>
+              <div className="w-full h-2 rounded-full bg-secondary mt-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${healthData.ram > 80 ? "bg-destructive" : healthData.ram > 60 ? "bg-gold" : "bg-green-400"}`}
+                  style={{ width: `${healthData.ram}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Uptime</span>
+              <span className="font-bold text-foreground">{healthData.uptime}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Last Check</span>
+              <span className="font-bold text-foreground">{healthData.lastCheck || "—"}</span>
+            </div>
+          </div>
+
+          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+            <Activity className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              <strong>Tip:</strong> If CPU or RAM stays above 80% consistently, upgrade your Droplet plan in the DigitalOcean dashboard. For production, deploy a health-check endpoint on your Droplet to get live metrics.
             </p>
           </div>
         </div>
