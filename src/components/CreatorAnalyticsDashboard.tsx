@@ -10,7 +10,8 @@ import SuggestionBox from "@/components/SuggestionBox";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import {
-  getCreatorSplitState, formatCountdown, DEFAULT_SPLIT, INCENTIVE_SPLIT,
+  getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
+  DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
 
@@ -82,6 +83,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     getCreatorSplitState("creator-1", 48200)
   );
   const [countdown, setCountdown] = useState("");
+  const [giftUsername, setGiftUsername] = useState("");
+  const [giftSent, setGiftSent] = useState(false);
+  const [remainingLoyalty, setRemainingLoyalty] = useState(5);
+
+  const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
   useEffect(() => {
     if (!splitState.incentiveActive || !splitState.incentiveEndsAt) return;
