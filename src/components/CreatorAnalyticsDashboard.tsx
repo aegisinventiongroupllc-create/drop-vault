@@ -224,18 +224,31 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         </div>
         {splitState.incentiveActive && countdown && (
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
-            <p className="text-xs font-bold text-primary tracking-wider">97/3 INCENTIVE ACTIVE: [{countdown}]</p>
-            <p className="text-[10px] text-muted-foreground">90/10 LOGIC RESUMES IN: [{countdown}]</p>
+            <p className="text-xs font-bold text-primary tracking-wider">⚡ 97/3 POWER WEEK ACTIVE</p>
+            <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
+            <p className="text-[10px] text-muted-foreground">Fee reverts to 10% when timer hits zero</p>
           </div>
         )}
-        {!splitState.milestoneReached && (
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Reach 100K followers to unlock the 97/3 incentive split for 7 days
-          </p>
+        {!splitState.incentiveActive && (
+          <div className="mt-3 space-y-2">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Progress to next 100K milestone</span>
+              <span>{splitState.followerCount.toLocaleString()} / {splitState.nextMilestone.toLocaleString()}</span>
+            </div>
+            <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
+                style={{ width: `${milestoneProgress}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">
+              Every 100K new followers unlocks a 7-day Power Week (97/3 split)
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Strategy Tip & Loyalty Tokens */}
+      {/* Strategy Tip & Loyalty Gift */}
       <div className="mx-4 mb-4 flex gap-3">
         <div className="flex-1 bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
