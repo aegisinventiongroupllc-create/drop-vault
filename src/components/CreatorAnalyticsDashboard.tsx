@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import SuggestionBox from "@/components/SuggestionBox";
+import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import {
@@ -636,12 +637,13 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       )}
 
       {/* Support footer */}
-      <div className="px-4 mt-8 pb-4 text-center">
+      <div className="px-4 mt-8 pb-2 text-center">
         <a href="mailto:dropthatthingmedia@gmail.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
           <Mail className="w-3 h-3" />
           Official Support: dropthatthingmedia@gmail.com
         </a>
       </div>
+      <LegalFooter />
     </div>
   );
 };
