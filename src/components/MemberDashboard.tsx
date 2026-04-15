@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
+import LegalFooter from "@/components/LegalFooter";
 import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
   type CreatorUnlock, type CustomRequest,
@@ -11,6 +12,8 @@ const MOCK_UNLOCKS: CreatorUnlock[] = [
   { creatorId: "1", creatorName: "LunaCosplay", unlockedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 12 * 24 * 60 * 60 * 1000 },
   { creatorId: "2", creatorName: "FitJessie", unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 4 * 24 * 60 * 60 * 1000 },
   { creatorId: "3", creatorName: "BlondieVibes", unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, expiresAt: Date.now() - 1 * 24 * 60 * 60 * 1000 },
+  { creatorId: "4", creatorName: "AlphaKing", unlockedAt: Date.now() - 3 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 11 * 24 * 60 * 60 * 1000 },
+  { creatorId: "5", creatorName: "MaxFitness", unlockedAt: Date.now() - 5 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 9 * 24 * 60 * 60 * 1000 },
 ];
 
 const MOCK_REQUESTS: CustomRequest[] = [
@@ -19,33 +22,57 @@ const MOCK_REQUESTS: CustomRequest[] = [
   { id: "r3", creatorName: "BlondieVibes", description: "Behind the scenes content", amountUsd: 100, totalTokens: 6, status: "declined", createdAt: Date.now() - 172800000 },
 ];
 
+// Mock gender assignment for library sections
+const CREATOR_GENDER: Record<string, "women" | "men"> = {
+  "LunaCosplay": "women",
+  "FitJessie": "women",
+  "BlondieVibes": "women",
+  "AlphaKing": "men",
+  "MaxFitness": "men",
+};
+
 const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyTokens: (n: number) => void }) => {
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<"unlocks" | "requests">("unlocks");
+  const [activeTab, setActiveTab] = useState<"library" | "requests">("library");
   const [, setTick] = useState(0);
   const [notification, setNotification] = useState<string | null>(
     "LunaCosplay has gifted you a Bit-Token for your loyalty! Enjoy 14 days of exclusive access to the Vault."
   );
 
-  // Refresh countdowns
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
 
+  const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
+  const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
+  const myGuys = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "men");
+
   const tabs = [
-    { id: "unlocks" as const, label: "UNLOCKED" },
+    { id: "library" as const, label: "MY LIBRARY" },
     { id: "requests" as const, label: "REQUESTS" },
   ];
 
+  const renderCreatorCircle = (unlock: CreatorUnlock) => {
+    const remaining = getUnlockTimeRemaining(unlock);
+    return (
+      <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[72px]">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-primary/50 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg">
+          {unlock.creatorName.slice(0, 2).toUpperCase()}
+        </div>
+        <p className="text-[10px] font-semibold text-foreground truncate max-w-[72px] text-center">@{unlock.creatorName}</p>
+        <p className="text-[9px] text-primary">{formatUnlockCountdown(remaining)}</p>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 flex flex-col">
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-foreground tracking-wider font-display">MY VAULT</h1>
+        <h1 className="text-lg font-bold text-foreground tracking-wider font-display">MY LIBRARY</h1>
         <WalletIndicator balance={balance} />
       </div>
 
-      {/* Gift Notification */}
       {notification && (
         <div className="mx-4 mb-4 bg-primary/10 border border-primary/30 rounded-xl p-3 relative">
           <button onClick={() => setNotification(null)} className="absolute top-2 right-2 text-muted-foreground text-xs">✕</button>
@@ -83,43 +110,38 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
         ))}
       </div>
 
-      {/* Unlocked Creators */}
-      {activeTab === "unlocks" && (
-        <div className="px-4 space-y-3">
-          {MOCK_UNLOCKS.map((unlock) => {
-            const active = isUnlockActive(unlock);
-            const remaining = getUnlockTimeRemaining(unlock);
-            return (
-              <div key={unlock.creatorId} className={`bg-card border rounded-xl p-4 ${active ? "border-primary/30" : "border-border opacity-60"}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">
-                      {unlock.creatorName.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">@{unlock.creatorName}</p>
-                      {active ? (
-                        <p className="text-[10px] text-primary font-medium">{formatUnlockCountdown(remaining)} remaining</p>
-                      ) : (
-                        <p className="text-[10px] text-muted-foreground">Access expired</p>
-                      )}
-                    </div>
-                  </div>
-                  {!active && (
-                    <Button variant="neon" size="sm" className="text-xs">
-                      UNLOCK 1 BT
-                    </Button>
-                  )}
-                </div>
+      {/* Library View */}
+      {activeTab === "library" && (
+        <div className="px-4 space-y-6 flex-1">
+          {/* My Girls */}
+          <div>
+            <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
+            {myGirls.length > 0 ? (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {myGirls.map(renderCreatorCircle)}
               </div>
-            );
-          })}
+            ) : (
+              <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+            )}
+          </div>
+
+          {/* My Guys */}
+          <div>
+            <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
+            {myGuys.length > 0 ? (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {myGuys.map(renderCreatorCircle)}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Active Requests */}
+      {/* Requests */}
       {activeTab === "requests" && (
-        <div className="px-4 space-y-3">
+        <div className="px-4 space-y-3 flex-1">
           {MOCK_REQUESTS.map((req) => (
             <div key={req.id} className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-start justify-between mb-2">
@@ -141,6 +163,8 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
           ))}
         </div>
       )}
+
+      <LegalFooter />
 
       {showBuyModal && (
         <BuyTokensModal onClose={() => setShowBuyModal(false)} onPurchase={onBuyTokens} />

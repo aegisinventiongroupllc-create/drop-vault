@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
+import LegalFooter from "@/components/LegalFooter";
 import RoleSelection, { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
 import KnowYourCoinsModal from "@/components/KnowYourCoinsModal";
@@ -45,7 +46,7 @@ const Index = () => {
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
-  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [activeTab, setActiveTab] = useState<Tab>(savedPrefs ? "home" : "home");
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -199,6 +200,7 @@ const Index = () => {
           >
             Terms of Service & Privacy Policy
           </button>
+          <LegalFooter />
         </div>
       )}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />

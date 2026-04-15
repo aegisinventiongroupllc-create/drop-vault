@@ -4,7 +4,7 @@ const BottomNav = ({ active, onNavigate }: { active: Tab; onNavigate: (tab: Tab)
   const items: { id: Tab; label: string }[] = [
     { id: "home", label: "LIVE" },
     { id: "trending", label: "TRENDING" },
-    { id: "vaults", label: "VAULTS" },
+    { id: "vaults", label: "MY LIBRARY" },
     { id: "profile", label: "PROFILE" },
   ];
 
