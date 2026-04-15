@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
+import LegalFooter from "@/components/LegalFooter";
 import RoleSelection, { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
 import KnowYourCoinsModal from "@/components/KnowYourCoinsModal";
@@ -199,6 +200,7 @@ const Index = () => {
           >
             Terms of Service & Privacy Policy
           </button>
+          <LegalFooter />
         </div>
       )}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
