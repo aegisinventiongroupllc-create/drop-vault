@@ -45,7 +45,7 @@ const Index = () => {
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
-  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [activeTab, setActiveTab] = useState<Tab>(savedPrefs ? "home" : "home");
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
