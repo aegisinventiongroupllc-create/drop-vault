@@ -1,4 +1,5 @@
 import WalletIndicator from "@/components/WalletIndicator";
+import LegalFooter from "@/components/LegalFooter";
 import type { VaultType } from "@/lib/tokenEconomy";
 
 const TRENDING_WOMEN = [
@@ -55,6 +56,7 @@ const TrendingPage = ({ onCreatorClick, vault }: { onCreatorClick: (name: string
           </button>
         ))}
       </div>
+      <LegalFooter />
     </div>
   );
 };
