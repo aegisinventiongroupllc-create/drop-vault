@@ -88,16 +88,15 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <h2 className="text-xl font-bold text-foreground">{creatorName}</h2>
           <BadgeCheck className="w-5 h-5 text-primary" />
         </div>
-        <p className="text-sm text-muted-foreground mt-1">Content Creator • 48.2K followers</p>
+        <p className="text-sm text-muted-foreground mt-1">Content Creator • 0 followers</p>
 
-        {/* King of the Vault */}
+        {/* King of the Vault — empty until first top supporter */}
         <div className="mt-4 mx-auto max-w-xs bg-secondary/50 border border-gold/30 rounded-lg px-4 py-3 gold-glow">
           <div className="flex items-center justify-center gap-2">
             <Crown className="w-5 h-5 text-gold" />
             <span className="text-sm font-semibold text-gold">King of the Vault</span>
           </div>
-          <p className="text-sm text-foreground mt-1 font-medium">@DiamondHands_99</p>
-          <p className="text-xs text-muted-foreground">Top supporter this month</p>
+          <p className="text-xs text-muted-foreground mt-1">No top supporter yet</p>
         </div>
       </div>
 

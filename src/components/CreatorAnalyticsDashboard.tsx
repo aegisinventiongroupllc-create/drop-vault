@@ -17,54 +17,31 @@ import {
 } from "@/lib/paymentSplit";
 
 const STATS = [
-  { label: "Followers", value: "48.2K", change: "+2.3%", icon: Users },
-  { label: "Total Views", value: "1.8M", change: "+12.5%", icon: Eye },
-  { label: "Bit-Token Revenue", value: "2,450 BT", change: "+8.1%", icon: BarChart3 },
-  { label: "Growth Rate", value: "15.4%", change: "+3.2%", icon: TrendingUp },
+  { label: "Followers", value: "0", change: "+0%", icon: Users },
+  { label: "Total Views", value: "0", change: "+0%", icon: Eye },
+  { label: "Bit-Token Revenue", value: "0 BT", change: "+0%", icon: BarChart3 },
+  { label: "Growth Rate", value: "0%", change: "+0%", icon: TrendingUp },
 ];
 
 const REVENUE_DATA = [
-  { month: "Jan", earned: 320, withdrawn: 200 },
-  { month: "Feb", earned: 480, withdrawn: 350 },
-  { month: "Mar", earned: 620, withdrawn: 400 },
-  { month: "Apr", earned: 750, withdrawn: 500 },
-  { month: "May", earned: 890, withdrawn: 600 },
-  { month: "Jun", earned: 1100, withdrawn: 780 },
+  { month: "Jan", earned: 0, withdrawn: 0 },
+  { month: "Feb", earned: 0, withdrawn: 0 },
+  { month: "Mar", earned: 0, withdrawn: 0 },
+  { month: "Apr", earned: 0, withdrawn: 0 },
+  { month: "May", earned: 0, withdrawn: 0 },
+  { month: "Jun", earned: 0, withdrawn: 0 },
 ];
 
-const CUSTOM_REQUESTS = [
-  { id: "1", fan: "VaultKing99", description: "Custom cosplay photoshoot — Tifa Lockhart", amount: 500, status: "pending" as const, tokenPrice: 0, declineReason: "" },
-  { id: "2", fan: "NeonWhale", description: "Exclusive gym workout video — 10 min", amount: 250, status: "pending" as const, tokenPrice: 0, declineReason: "" },
-  { id: "3", fan: "DiamondFan", description: "Premium behind-the-scenes content", amount: 1000, status: "accepted" as const, tokenPrice: 50, declineReason: "" },
-  { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const, tokenPrice: 8, declineReason: "" },
-];
+const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
-const PUBLIC_TEASERS = [
-  { id: "t1", type: "video" as const, title: "Cosplay Reveal — 15s Teaser", views: 42300, date: "Apr 2", visibility: "public" as const },
-  { id: "t2", type: "video" as const, title: "Gym Motivation — Teaser", views: 18900, date: "Mar 30", visibility: "public" as const },
-];
+const PUBLIC_TEASERS: { id: string; type: "video"; title: string; views: number; date: string; visibility: "public" }[] = [];
 
-const VAULT_CONTENT = [
-  { id: "v1", type: "video" as const, title: "Cosplay Full Shoot — 18 min", views: 12400, date: "Apr 2", visibility: "locked" as const },
-  { id: "v2", type: "photo" as const, title: "Beach Shoot — Full Set (24 photos)", views: 8900, date: "Mar 28", visibility: "locked" as const },
-  { id: "v3", type: "video" as const, title: "Gym Session #12 — Full 22 min", views: 6200, date: "Mar 25", visibility: "locked" as const },
-  { id: "v4", type: "photo" as const, title: "BTS — Studio Lighting Set", views: 4300, date: "Mar 20", visibility: "locked" as const },
-  { id: "v5", type: "video" as const, title: "Q&A Uncut — 45 min", views: 15600, date: "Mar 18", visibility: "locked" as const },
-];
+const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views: number; date: string; visibility: "locked" }[] = [];
 
-const TOP_FANS = [
-  { rank: 1, name: "DiamondHands_99", spent: 2400 },
-  { rank: 2, name: "VaultKing99", spent: 1800 },
-  { rank: 3, name: "NeonWhale", spent: 1200 },
-  { rank: 4, name: "TopTierSub", spent: 900 },
-  { rank: 5, name: "CryptoFan42", spent: 600 },
-];
+const TOP_FANS: { rank: number; name: string; spent: number }[] = [];
 
-// Mock follower list for loyalty gifting
-const FOLLOWERS_LIST = [
-  "DiamondHands_99", "VaultKing99", "NeonWhale", "TopTierSub", "CryptoFan42",
-  "LoyalViewer01", "SilentSupporter", "MidnightFan", "GoldenBoy22", "StarGazer99",
-];
+// Real follower list — empty at launch
+const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media";
 
@@ -102,8 +79,15 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [responseTokenPrice, setResponseTokenPrice] = useState("");
   const [responseDeclineReason, setResponseDeclineReason] = useState("");
 
+  // Upload page state
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // LTC help guide modal
+  const [showLtcHelp, setShowLtcHelp] = useState(false);
+
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
-    getCreatorSplitState("creator-1", 48200)
+    getCreatorSplitState("creator-1", 0)
   );
   const [countdown, setCountdown] = useState("");
 
@@ -185,20 +169,36 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setResponseDeclineReason("");
   };
 
+  const runProgress = () => {
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress((p) => {
+        if (p >= 90) { clearInterval(interval); return p; }
+        return p + 10;
+      });
+    }, 150);
+    return interval;
+  };
+
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
     setUploading(bucket);
     setUploadMsg("");
+    const interval = runProgress();
     const userId = "creator-1";
+    const label = uploadTitle.trim() || file.name;
     const result = await uploadMedia(file, bucket, userId);
+    clearInterval(interval);
+    setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`Uploaded to ${bucket}: ${file.name}`);
+      setUploadMsg(`✓ "${label}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
+      setUploadTitle("");
     }
-    setUploading(null);
+    setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
   };
 
@@ -207,15 +207,20 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     if (!file) return;
     setUploading("teasers");
     setUploadMsg("");
+    const interval = runProgress();
     const userId = "creator-1";
+    const label = uploadTitle.trim() || file.name;
     // Upload new teaser — old one is auto-replaced in cloud storage (same path)
     const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
+    clearInterval(interval);
+    setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ Teaser uploaded with audio: ${file.name}. Old teaser moved to your library.`);
+      setUploadMsg(`✓ "${label}" teaser uploaded. Old teaser moved to your library.`);
+      setUploadTitle("");
     }
-    setUploading(null);
+    setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
   };
 
@@ -613,11 +618,20 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 rounded-xl p-4 mb-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
-              <p className="text-3xl font-bold text-primary">$2,340.00</p>
+              <p className="text-3xl font-bold text-primary">$0.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
+                <button
+                  type="button"
+                  onClick={() => setShowLtcHelp(true)}
+                  className="text-xs font-bold text-primary hover:underline tracking-wider"
+                >
+                  ? HELP
+                </button>
+              </div>
               <input
                 type="text"
                 value={ltcAddress}
@@ -776,88 +790,168 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         </div>
       )}
 
-      {/* Media Manager */}
+      {/* Media Manager — Simplified 3-step Upload */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
-          {/* Upload status */}
-          {(uploading || uploadMsg) && (
-            <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
-              uploading ? "bg-primary/10 border border-primary/30 text-primary" : uploadMsg.startsWith("Upload failed") ? "bg-destructive/10 border border-destructive/30 text-destructive" : "bg-green-400/10 border border-green-400/30 text-green-400"
-            }`}>
-              {uploading ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Uploading to {uploading}...</span> : uploadMsg}
+          {/* Step 1: Title */}
+          <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
+            <h3 className="text-base font-bold text-foreground tracking-wider">UPLOAD VIDEO</h3>
+            <p className="text-xs text-muted-foreground -mt-2">Three simple steps. Add a title, then upload your teaser and full video.</p>
+
+            <div className="space-y-2">
+              <label htmlFor="upload-title" className="text-xs font-bold text-muted-foreground tracking-wider">1. TITLE</label>
+              <input
+                id="upload-title"
+                type="text"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="e.g. Cosplay Reveal — Marin Kitagawa"
+                className="w-full bg-secondary rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            {/* Step 2: Teaser */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">2. UPLOAD TEASER (FREE PREVIEW)</label>
+              <Button
+                variant="neon"
+                size="lg"
+                className="w-full text-base font-bold h-14"
+                onClick={() => teaserInputRef.current?.click()}
+                disabled={!!uploading}
+              >
+                <Upload className="w-5 h-5 mr-1" />
+                {uploading === "teasers" ? "UPLOADING TEASER..." : "UPLOAD TEASER"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">15-second MP4/WebM with audio. Shows in the Discovery Feed.</p>
+            </div>
+
+            {/* Step 3: Full Video */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">3. UPLOAD FULL VIDEO (PAID CONTENT)</label>
+              <Button
+                variant="gold"
+                size="lg"
+                className="w-full text-base font-bold h-14"
+                onClick={() => triggerMediaUpload("vault")}
+                disabled={!!uploading}
+              >
+                <Lock className="w-5 h-5 mr-1" />
+                {uploading === "vault" ? "UPLOADING FULL VIDEO..." : "UPLOAD FULL VIDEO"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">Locked vault content — only paying customers can view.</p>
+            </div>
+
+            {/* Progress bar */}
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] text-muted-foreground tracking-wider">
+                  <span className="font-bold text-primary">UPLOADING — {uploading === "vault" ? "FULL VIDEO" : "TEASER"}</span>
+                  <span className="font-bold text-primary">{uploadProgress}%</span>
+                </div>
+                <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-150 neon-glow-sm"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Status message */}
+            {!uploading && uploadMsg && (
+              <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
+                uploadMsg.startsWith("Upload failed")
+                  ? "bg-destructive/10 border border-destructive/30 text-destructive"
+                  : "bg-green-400/10 border border-green-400/30 text-green-400"
+              }`}>
+                {uploadMsg}
+              </div>
+            )}
+          </div>
+
+          {/* Public Teasers list (empty until first upload) */}
+          {PUBLIC_TEASERS.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="w-4 h-4 text-primary" />
+                <h3 className="text-base font-semibold text-foreground">Your Teasers</h3>
+              </div>
+              <div className="space-y-3">
+                {PUBLIC_TEASERS.map((item) => (
+                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                      <Video className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
+                    </div>
+                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Profile Trailer Upload (15s with audio) */}
-          <div className="bg-card border border-primary/30 rounded-xl p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">15s TEASER TRAILER (WITH AUDIO)</h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              Upload your 15-second MP4 with audio baked in. This loops on the Discovery Feed.
-              <span className="text-primary font-bold"> New uploads auto-replace</span> the previous teaser (old one moves to your library).
-            </p>
-            <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/50 transition-colors">
-              <Upload className="w-6 h-6 text-primary" />
-              <Button variant="neon" size="sm" onClick={() => teaserInputRef.current?.click()} disabled={!!uploading}>
-                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD 15s TEASER WITH AUDIO"}
-              </Button>
-              <p className="text-[10px] text-muted-foreground">MP4/WebM with audio • Max 15 seconds • Cloud stored</p>
-            </div>
-          </div>
-
-          {/* Public Teasers */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-primary" />
-                <h3 className="text-base font-semibold text-foreground">Public Teasers</h3>
-              </div>
-              <Button variant="neon" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
-                <Upload className="w-3.5 h-3.5" />
-                Upload Teaser
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {PUBLIC_TEASERS.map((item) => (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                    <Video className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                  </div>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Creators Uploaded Videos (Vault — Men & Women sides) */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
+          {/* Vault Content list (empty until first upload) */}
+          {VAULT_CONTENT.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
                 <Lock className="w-4 h-4 text-gold" />
-                <h3 className="text-base font-semibold text-foreground">Creators Uploaded Videos</h3>
+                <h3 className="text-base font-semibold text-foreground">Your Full Videos</h3>
               </div>
-              <Button variant="gold" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("vault")} disabled={!!uploading}>
-                <Upload className="w-3.5 h-3.5" />
-                Upload to Vault
-              </Button>
+              <div className="space-y-3">
+                {VAULT_CONTENT.map((item) => (
+                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                      {item.type === "video" ? <Video className="w-6 h-6 text-gold" /> : <Image className="w-6 h-6 text-gold" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
+                    </div>
+                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">Private vault content — visible only to paying customers (Men's & Women's sides).</p>
-            <div className="space-y-3">
-              {VAULT_CONTENT.map((item) => (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                    {item.type === "video" ? <Video className="w-6 h-6 text-gold" /> : <Image className="w-6 h-6 text-gold" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                  </div>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
+          )}
+        </div>
+      )}
+
+      {/* LTC Help Guide Modal */}
+      {showLtcHelp && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setShowLtcHelp(false)}>
+          <div className="w-full max-w-md bg-card border border-primary/30 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="text-sm font-bold text-foreground tracking-wider">HOW TO GET YOUR LITECOIN (LTC) ADDRESS</h2>
+              <button onClick={() => setShowLtcHelp(false)} className="text-muted-foreground hover:text-foreground text-sm">✕</button>
+            </div>
+            <div className="p-5 space-y-4 text-sm">
+              <ol className="space-y-3 text-foreground/90">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">1</span>
+                  <span>Open your crypto wallet (like <span className="font-bold text-foreground">Exodus</span>, <span className="font-bold text-foreground">Coinbase</span>, or <span className="font-bold text-foreground">Trust Wallet</span>).</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">2</span>
+                  <span>Search for <span className="font-bold text-foreground">Litecoin (LTC)</span> and tap <span className="font-bold text-foreground">'Receive'</span>.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">3</span>
+                  <span>Copy the long string of letters and numbers (usually starts with <span className="font-mono font-bold text-primary">L</span> or <span className="font-mono font-bold text-primary">M</span>).</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">4</span>
+                  <span>Paste it into the wallet address box above.</span>
+                </li>
+              </ol>
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
+                <p className="text-xs font-bold text-destructive">⚠ Never type this by hand.</p>
+                <p className="text-xs text-muted-foreground mt-1">If you make a typo, your payment will be lost forever. Always copy and paste.</p>
+              </div>
+              <Button variant="neon" className="w-full" onClick={() => setShowLtcHelp(false)}>GOT IT</Button>
             </div>
           </div>
         </div>

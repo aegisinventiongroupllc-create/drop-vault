@@ -20,16 +20,8 @@ interface VideoItem {
   country: string;
 }
 
-const MOCK_VIDEOS: VideoItem[] = [
-  { id: "1", creator: "LunaCosplay", creatorAvatar: "LC", title: "Marin Kitagawa Cosplay Reveal", description: "✨ New cosplay reveal — Marin Kitagawa ✨ #cosplay #anime", likes: 12400, comments: 892, color: "from-pink-900/40 to-purple-900/40", vault: "women", country: "US" },
-  { id: "2", creator: "FitJessie", creatorAvatar: "FJ", title: "Morning Gym Routine", description: "Morning gym routine 💪 Full video in my vault!", likes: 8200, comments: 431, color: "from-blue-900/40 to-teal-900/40", vault: "women", country: "US" },
-  { id: "3", creator: "BlondieVibes", creatorAvatar: "BV", title: "Beach Day Vibes", description: "Beach day vibes 🌊 Link in bio for exclusive content", likes: 15600, comments: 1203, color: "from-amber-900/40 to-orange-900/40", vault: "women", country: "GB" },
-  { id: "4", creator: "TwinFlames", creatorAvatar: "TF", title: "Dance Challenge Duo", description: "Dance challenge with my bestie 💃🔥", likes: 22100, comments: 1870, color: "from-red-900/40 to-pink-900/40", vault: "women", country: "BR" },
-  { id: "5", creator: "PetiteSophie", creatorAvatar: "PS", title: "Night Out GRWM", description: "GRWM for a night out 💄✨ #grwm #nightout", likes: 9800, comments: 672, color: "from-violet-900/40 to-indigo-900/40", vault: "women", country: "FR" },
-  { id: "6", creator: "AlphaFlex", creatorAvatar: "AF", title: "Morning Routine Full Set", description: "Morning routine — full set in the vault 💪", likes: 7400, comments: 340, color: "from-blue-900/40 to-slate-900/40", vault: "men", country: "US" },
-  { id: "7", creator: "KingCole", creatorAvatar: "KC", title: "Behind The Scenes Shoot", description: "Behind the scenes shoot 📸🔥", likes: 11200, comments: 560, color: "from-slate-900/40 to-blue-900/40", vault: "men", country: "GB" },
-  { id: "8", creator: "RexFitness", creatorAvatar: "RF", title: "5AM Grind Session", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men", country: "AU" },
-];
+// Production launch — empty until real creators sign up
+const MOCK_VIDEOS: VideoItem[] = [];
 
 export { MOCK_VIDEOS };
 export type { VideoItem };
@@ -251,7 +243,10 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           countryFilter && countryFilter !== "GLOBAL" ? (
             <GhostCountryMessage countryCode={countryFilter} />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No creators found</div>
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 gap-3">
+              <p className="text-sm font-bold text-foreground tracking-wider">NO CREATORS YET</p>
+              <p className="text-xs text-muted-foreground max-w-xs">DTT Media just launched. Be one of the first creators to upload — your teasers will appear here.</p>
+            </div>
           )
         )}
       </div>
