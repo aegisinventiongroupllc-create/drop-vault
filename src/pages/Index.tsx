@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
 import GlobalPassport from "@/components/GlobalPassport";
-import LegalFooter from "@/components/LegalFooter";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import RoleSelection, { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
