@@ -240,7 +240,6 @@ const Index = () => {
           >
             {t.terms} & {t.privacy}
           </button>
-          <LegalFooter />
         </div>
       )}
       <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={setActiveTab} />
