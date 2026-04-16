@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX, X, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
