@@ -1,14 +1,19 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /052417
 
 User-agent: Bingbot
 Allow: /
+Disallow: /052417
 
 User-agent: Twitterbot
 Allow: /
+Disallow: /052417
 
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /052417
 
 User-agent: *
 Allow: /
+Disallow: /052417
