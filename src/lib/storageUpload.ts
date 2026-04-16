@@ -5,10 +5,12 @@ export type MediaBucket = "teasers" | "vault";
 export async function uploadMedia(
   file: File,
   bucket: MediaBucket,
-  userId: string
+  userId: string,
+  fixedName?: string
 ): Promise<{ url: string; path: string } | { error: string }> {
   const ext = file.name.split(".").pop() || "mp4";
-  const filePath = `${userId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const fileName = fixedName ? `${fixedName}.${ext}` : `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const filePath = `${userId}/${fileName}`;
 
   const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
     cacheControl: "3600",
