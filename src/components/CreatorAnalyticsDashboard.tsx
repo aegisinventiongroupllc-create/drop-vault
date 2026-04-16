@@ -146,7 +146,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return "Invalid LTC address. Must start with L, M, or ltc1.";
   };
 
-  const maxEarned = Math.max(...REVENUE_DATA.map((d) => d.earned));
+  const maxEarned = Math.max(1, ...REVENUE_DATA.map((d) => d.earned));
 
   const sections: { id: Section; label: string }[] = [
     { id: "overview", label: "ANALYTICS" },
