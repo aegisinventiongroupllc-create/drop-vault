@@ -169,20 +169,36 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setResponseDeclineReason("");
   };
 
+  const runProgress = () => {
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress((p) => {
+        if (p >= 90) { clearInterval(interval); return p; }
+        return p + 10;
+      });
+    }, 150);
+    return interval;
+  };
+
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
     setUploading(bucket);
     setUploadMsg("");
+    const interval = runProgress();
     const userId = "creator-1";
+    const label = uploadTitle.trim() || file.name;
     const result = await uploadMedia(file, bucket, userId);
+    clearInterval(interval);
+    setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`Uploaded to ${bucket}: ${file.name}`);
+      setUploadMsg(`✓ "${label}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
+      setUploadTitle("");
     }
-    setUploading(null);
+    setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
   };
 
@@ -191,15 +207,20 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     if (!file) return;
     setUploading("teasers");
     setUploadMsg("");
+    const interval = runProgress();
     const userId = "creator-1";
+    const label = uploadTitle.trim() || file.name;
     // Upload new teaser — old one is auto-replaced in cloud storage (same path)
     const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
+    clearInterval(interval);
+    setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ Teaser uploaded with audio: ${file.name}. Old teaser moved to your library.`);
+      setUploadMsg(`✓ "${label}" teaser uploaded. Old teaser moved to your library.`);
+      setUploadTitle("");
     }
-    setUploading(null);
+    setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
   };
 
