@@ -399,26 +399,41 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Revenue Monitor */}
       {activeSection === "revenue" && (
         <div className="px-4 space-y-4">
-          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
-            <p className="text-xs text-muted-foreground mb-1">Total Platform Revenue ($1 Admin Fee + 10%)</p>
-            <p className="text-4xl font-bold text-primary">${totalFees.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">Across all transaction types</p>
+          {/* Three big numbers */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-gradient-to-br from-green-900/20 to-green-700/10 border border-green-500/30 rounded-xl p-4 text-center">
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Creator Payouts</p>
+              <p className="text-2xl font-bold text-green-400">${(tabEarned + (creatorGenderTab === "women" ? menPending : womenPending)).toLocaleString()}</p>
+              <p className="text-[9px] text-muted-foreground mt-1">The $18s</p>
+            </div>
+            <div className="bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 rounded-xl p-4 text-center">
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Entry Tax</p>
+              <p className="text-2xl font-bold text-gold">$0</p>
+              <p className="text-[9px] text-muted-foreground mt-1">The $1s</p>
+            </div>
+            <div className="bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Commission</p>
+              <p className="text-2xl font-bold text-primary">$0</p>
+              <p className="text-[9px] text-muted-foreground mt-1">The 10%s</p>
+            </div>
           </div>
 
           <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-2.5 bg-secondary/50 border-b border-border">
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-2.5 bg-secondary/50 border-b border-border">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Type</span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Volume</span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Fee</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Tax</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Commission</span>
             </div>
             <div className="divide-y divide-border">
               {PLATFORM_FEES.map((fee) => (
-                <div key={fee.type} className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 py-3 items-center">
+                <div key={fee.type} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-3 items-center">
                   <div>
                     <p className="text-sm font-medium text-foreground">{fee.type}</p>
-                    <p className="text-xs text-muted-foreground">{fee.transactions.toLocaleString()} transactions</p>
+                    <p className="text-xs text-muted-foreground">{fee.transactions.toLocaleString()} txns</p>
                   </div>
                   <p className="text-sm text-muted-foreground text-right">${fee.totalVolume.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-gold text-right">$0</p>
                   <p className="text-sm font-bold text-primary text-right">${fee.fee.toLocaleString()}</p>
                 </div>
               ))}
@@ -448,7 +463,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
             <Percent className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              Dual-Bucket Revenue: $1 admin fee deducted first, then 10% platform / 90% creator split on the base amount. Creator payouts are processed after fee deduction.
+              Dual-Bucket Revenue: $1 entry tax to Admin_Profit_Vault, then 10% commission / 90% creator split on the base amount. Both columns tracked separately.
             </p>
           </div>
         </div>

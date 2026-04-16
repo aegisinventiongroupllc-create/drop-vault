@@ -19,6 +19,11 @@ async function verifySignature(body: string, signature: string, secret: string):
   return hex === signature;
 }
 
+// Dual-Bucket "Tax then Split" constants
+const ADMIN_FEE_USD = 1;
+const PLATFORM_SPLIT_PERCENT = 10;
+const CREATOR_SPLIT_PERCENT = 90;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -43,7 +48,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // NOWPayments signs sorted JSON keys
     const parsed = JSON.parse(rawBody);
     const sortedBody = JSON.stringify(Object.keys(parsed).sort().reduce((obj: Record<string, unknown>, key: string) => {
       obj[key] = parsed[key];
@@ -58,11 +62,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { payment_id, payment_status, order_id, price_amount, actually_paid, pay_currency, outcome_amount } = parsed;
+    const { payment_id, payment_status, order_id, price_amount } = parsed;
 
     console.log(`IPN received: payment_id=${payment_id}, status=${payment_status}, order_id=${order_id}`);
 
-    // ONLY process completed payments
     if (payment_status !== 'finished' && payment_status !== 'partially_paid') {
       console.log(`Ignoring IPN with status: ${payment_status}`);
       return new Response(JSON.stringify({ ok: true, status: 'ignored', reason: `Status ${payment_status} not actionable` }), {
@@ -70,29 +73,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Connect to Supabase with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Extract creator_id from order_id if present (format: dtt-{timestamp}-{creatorId})
     const orderParts = (order_id || '').split('-');
     const creatorId = orderParts.length >= 3 ? orderParts.slice(2).join('-') : null;
 
-    // Calculate platform split (10% platform, 90% creator)
-    const amountUsd = Number(price_amount) || 0;
-    const creatorSharePercent = 90;
-    const creatorShareUsd = amountUsd * (creatorSharePercent / 100);
-    const platformShareUsd = amountUsd - creatorShareUsd;
+    // Dual-Bucket calculation
+    const invoiceAmount = Number(price_amount) || 0;
+    const entryTax = ADMIN_FEE_USD; // $1 flat to Admin_Profit_Vault
+    const baseAmount = invoiceAmount - entryTax; // e.g. $20 from $21
+    const platformCommission = baseAmount * (PLATFORM_SPLIT_PERCENT / 100); // 10% of base
+    const creatorShareUsd = baseAmount * (CREATOR_SPLIT_PERCENT / 100); // 90% of base
+    const totalPlatformRevenue = entryTax + platformCommission;
 
-    // Record the transaction
+    console.log(`Dual-Bucket: invoice=$${invoiceAmount}, tax=$${entryTax}, base=$${baseAmount}, commission=$${platformCommission}, creator=$${creatorShareUsd}`);
+
+    // Record the transaction with separate entry_tax and platform_commission
     const { error: txError } = await supabase.from('transactions').insert({
       payment_id: String(payment_id),
-      amount_usd: amountUsd,
+      amount_usd: invoiceAmount,
       creator_id: creatorId || '00000000-0000-0000-0000-000000000000',
-      creator_share_percent: creatorSharePercent,
+      creator_share_percent: CREATOR_SPLIT_PERCENT,
       creator_share_usd: creatorShareUsd,
-      platform_share_usd: platformShareUsd,
+      platform_share_usd: totalPlatformRevenue,
+      entry_tax: entryTax,
+      platform_commission: platformCommission,
       status: payment_status,
     });
 
@@ -100,7 +107,7 @@ Deno.serve(async (req) => {
       console.error('Transaction insert error:', txError);
     }
 
-    // Update creator wallet pending balance if creator is identified
+    // Update creator wallet
     if (creatorId) {
       const { data: wallet } = await supabase
         .from('creator_wallets')
@@ -121,7 +128,9 @@ Deno.serve(async (req) => {
       ok: true,
       payment_id,
       status: payment_status,
-      amount_usd: amountUsd,
+      invoice_amount: invoiceAmount,
+      entry_tax: entryTax,
+      platform_commission: platformCommission,
       creator_share: creatorShareUsd,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },

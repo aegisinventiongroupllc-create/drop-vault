@@ -182,6 +182,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_usd: number
@@ -190,8 +226,10 @@ export type Database = {
           creator_id: string
           creator_share_percent: number
           creator_share_usd: number
+          entry_tax: number
           id: string
           payment_id: string | null
+          platform_commission: number
           platform_share_usd: number
           status: string
         }
@@ -202,8 +240,10 @@ export type Database = {
           creator_id: string
           creator_share_percent?: number
           creator_share_usd: number
+          entry_tax?: number
           id?: string
           payment_id?: string | null
+          platform_commission?: number
           platform_share_usd: number
           status?: string
         }
@@ -214,8 +254,10 @@ export type Database = {
           creator_id?: string
           creator_share_percent?: number
           creator_share_usd?: number
+          entry_tax?: number
           id?: string
           payment_id?: string | null
+          platform_commission?: number
           platform_share_usd?: number
           status?: string
         }
