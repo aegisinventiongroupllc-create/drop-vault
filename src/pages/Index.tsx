@@ -21,6 +21,7 @@ interface UserPrefs {
   email: string;
   role: UserRole;
   vault?: VaultType;
+  preference?: GenderPreference; // "women" | "men" | "both"
 }
 
 const loadPrefs = (): UserPrefs | null => {
@@ -43,6 +44,7 @@ const Index = () => {
   const [verified, setVerified] = useState(!!savedPrefs);
   const [role, setRole] = useState<UserRole | null>(savedPrefs?.role ?? null);
   const [email, setEmail] = useState(savedPrefs?.email ?? "");
+  const [preference, setPreference] = useState<GenderPreference | null>(savedPrefs?.preference ?? savedPrefs?.vault ?? null);
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
@@ -54,7 +56,6 @@ const Index = () => {
   const [showLegal, setShowLegal] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(6);
 
-  // If returning user has saved prefs, skip onboarding entirely
   const onboardingComplete = !!(role && vault);
 
   // --- Onboarding screens ---
@@ -70,9 +71,9 @@ const Index = () => {
           setRole(selectedRole);
           setEmail(selectedEmail);
           if (selectedRole === "creator") {
-            // Creators go to women vault by default (their own vault)
-            const prefs: UserPrefs = { email: selectedEmail, role: "creator", vault: "women" };
+            const prefs: UserPrefs = { email: selectedEmail, role: "creator", vault: "women", preference: "women" };
             setVault("women");
+            setPreference("women");
             savePrefs(prefs);
             if (!hasSeenCoins) setShowKnowYourCoins(true);
           }
@@ -81,12 +82,14 @@ const Index = () => {
     );
   }
 
-  if (role === "customer" && !vault) {
+  if (role === "customer" && !preference) {
     return (
       <CustomerPreference
         onSelect={(pref) => {
-          setVault(pref);
-          const prefs: UserPrefs = { email, role: "customer", vault: pref };
+          setPreference(pref);
+          const activeVault: VaultType = pref === "both" ? "women" : pref;
+          setVault(activeVault);
+          const prefs: UserPrefs = { email, role: "customer", vault: activeVault, preference: pref };
           savePrefs(prefs);
           if (!hasSeenCoins) setShowKnowYourCoins(true);
         }}
@@ -106,17 +109,15 @@ const Index = () => {
   // --- Main app (creator or customer) ---
 
   if (role === "creator") {
-    // Creator goes to dashboard
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
-
     return (
       <div className="h-screen overflow-hidden">
         <CreatorAnalyticsDashboard onBack={() => {
-          // "Back" from creator dashboard clears session
           localStorage.removeItem(STORAGE_KEY);
           setRole(null);
           setVault(null);
+          setPreference(null);
           setVerified(true);
         }} />
       </div>
@@ -140,7 +141,7 @@ const Index = () => {
     return (
       <>
         <CreatorAnalyticsDashboard onBack={() => setShowDashboard(false)} />
-        <BottomNav active={activeTab} onNavigate={(tab) => { setShowDashboard(false); setActiveTab(tab); }} />
+        <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={(tab) => { setShowDashboard(false); setActiveTab(tab); }} />
       </>
     );
   }
@@ -149,7 +150,7 @@ const Index = () => {
     return (
       <>
         <CreatorProfile creatorName={selectedCreator} onBack={() => setSelectedCreator(null)} />
-        <BottomNav active={activeTab} onNavigate={(tab) => { setSelectedCreator(null); setActiveTab(tab); }} />
+        <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={(tab) => { setSelectedCreator(null); setActiveTab(tab); }} />
       </>
     );
   }
@@ -157,12 +158,46 @@ const Index = () => {
   const handleCreatorClick = (name: string) => setSelectedCreator(name);
   const handleBuyTokens = (n: number) => setTokenBalance(prev => prev + n);
 
+  const toggleVault = () => {
+    const next: VaultType = vault === "women" ? "men" : "women";
+    setVault(next);
+  };
+
   return (
     <div className="h-screen overflow-hidden">
-      {activeTab === "home" && (
-        <DiscoveryFeed onCreatorClick={handleCreatorClick} vault={vault!} onSearch={() => setShowSearch(true)} />
+      {/* "Both" toggle header */}
+      {preference === "both" && (activeTab === "home" || activeTab === "trending") && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+          <div className="flex items-center justify-center gap-1 py-2 max-w-lg mx-auto">
+            <button
+              onClick={() => setVault("women")}
+              className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              WOMEN
+            </button>
+            <button
+              onClick={() => setVault("men")}
+              className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              MEN
+            </button>
+          </div>
+        </div>
       )}
-      {activeTab === "trending" && <TrendingPage onCreatorClick={handleCreatorClick} vault={vault!} />}
+
+      {activeTab === "home" && (
+        <DiscoveryFeed
+          onCreatorClick={handleCreatorClick}
+          vault={vault!}
+          onSearch={() => setShowSearch(true)}
+          hasVaultToggle={preference === "both"}
+        />
+      )}
+      {activeTab === "trending" && <TrendingPage onCreatorClick={handleCreatorClick} vault={vault!} hasVaultToggle={preference === "both"} />}
       {activeTab === "vaults" && (
         <MemberDashboard balance={tokenBalance} onBuyTokens={handleBuyTokens} />
       )}
@@ -187,6 +222,7 @@ const Index = () => {
               localStorage.removeItem(STORAGE_KEY);
               setRole(null);
               setVault(null);
+              setPreference(null);
               setEmail("");
               setVerified(true);
             }}
@@ -203,7 +239,7 @@ const Index = () => {
           <LegalFooter />
         </div>
       )}
-      <BottomNav active={activeTab} onNavigate={setActiveTab} />
+      <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={setActiveTab} />
     </div>
   );
 };

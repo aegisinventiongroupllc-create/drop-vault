@@ -1,10 +1,20 @@
+import type { VaultType } from "@/lib/tokenEconomy";
+
 type Tab = "home" | "trending" | "vaults" | "profile";
 
-const BottomNav = ({ active, onNavigate }: { active: Tab; onNavigate: (tab: Tab) => void }) => {
+interface BottomNavProps {
+  active: Tab;
+  onNavigate: (tab: Tab) => void;
+  vault?: VaultType;
+}
+
+const BottomNav = ({ active, onNavigate, vault }: BottomNavProps) => {
+  const libraryLabel = vault === "men" ? "MY GUYS" : vault === "women" ? "MY GIRLS" : "MY LIBRARY";
+
   const items: { id: Tab; label: string }[] = [
     { id: "home", label: "LIVE" },
     { id: "trending", label: "TRENDING" },
-    { id: "vaults", label: "MY LIBRARY" },
+    { id: "vaults", label: libraryLabel },
     { id: "profile", label: "PROFILE" },
   ];
 

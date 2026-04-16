@@ -5,10 +5,11 @@ import { calculateRequestTokens, TOKEN_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
 const TIERS = [
-  { label: "Standard", price: 100, delivery: "7 days", description: "Basic custom media piece" },
-  { label: "Premium", price: 250, delivery: "5 days", description: "High-quality custom content with revisions" },
-  { label: "Exclusive", price: 500, delivery: "3 days", description: "Priority production with unlimited revisions" },
-  { label: "Ultra VIP", price: 1000, delivery: "48 hours", description: "Top-tier bespoke commission with direct collaboration" },
+  { label: "Standard", price: 500, delivery: "7 days", description: "Basic custom media piece" },
+  { label: "Premium", price: 1000, delivery: "5 days", description: "High-quality custom content with revisions" },
+  { label: "Exclusive", price: 2500, delivery: "3 days", description: "Priority production with unlimited revisions" },
+  { label: "Ultra VIP", price: 5000, delivery: "48 hours", description: "Top-tier bespoke commission with direct collaboration" },
+  { label: "Legendary", price: 10001, delivery: "24 hours", description: "Ultimate bespoke experience with direct 1-on-1 session" },
 ];
 
 const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onClose: () => void }) => {

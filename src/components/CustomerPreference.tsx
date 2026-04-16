@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export type GenderPreference = "women" | "men";
+export type GenderPreference = "women" | "men" | "both";
 
 interface CustomerPreferenceProps {
   onSelect: (pref: GenderPreference) => void;
@@ -34,10 +34,18 @@ const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
           >
             MEN
           </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full text-base font-bold tracking-wider py-6 border-accent/30 hover:border-accent hover:text-accent"
+            onClick={() => onSelect("both")}
+          >
+            BOTH
+          </Button>
         </div>
 
         <p className="text-[10px] text-muted-foreground/50">
-          © {new Date().getFullYear()} DTT Media. All rights reserved.
+          © {new Date().getFullYear()} DTT Media LLC. All rights reserved.
         </p>
       </div>
     </div>

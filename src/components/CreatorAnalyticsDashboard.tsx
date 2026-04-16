@@ -332,8 +332,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <span className="text-xs font-bold tracking-wider text-foreground">PAYOUT STRUCTURE</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
-              Includes a flat <span className="font-semibold text-foreground">$1.00 Network Tax</span> per request.
+              <span className="font-semibold text-foreground">Dual-Bucket Revenue: Tax then Split.</span>{" "}
+              A flat <span className="font-semibold text-foreground">$1.00 Admin Fee</span> is deducted first, then the remaining base is split{" "}
+              <span className="font-semibold text-foreground">90% Creator / 10% Platform</span>.
+              Custom requests ($500–$10,001): same $1 fee + 10% of base.
             </p>
           </div>
 

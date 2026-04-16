@@ -21,15 +21,13 @@ const TRENDING_MEN = [
   { rank: 5, creator: "NovaKing", views: "490K", category: "Fashion" },
 ];
 
-const TrendingPage = ({ onCreatorClick, vault }: { onCreatorClick: (name: string) => void; vault: VaultType }) => {
+const TrendingPage = ({ onCreatorClick, vault, hasVaultToggle }: { onCreatorClick: (name: string) => void; vault: VaultType; hasVaultToggle?: boolean }) => {
   const trending = vault === "women" ? TRENDING_WOMEN : TRENDING_MEN;
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className={`min-h-screen pb-20 ${hasVaultToggle ? "pt-10" : ""}`}>
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground tracking-wider font-display">
-          TRENDING
-        </h1>
+        <h1 className="text-xl font-bold text-foreground tracking-wider font-display">TRENDING</h1>
         <WalletIndicator />
       </div>
 
