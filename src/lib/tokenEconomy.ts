@@ -1,12 +1,24 @@
 // Token Economy Engine for DROPTHATTHING
-// 1 Bit-Token = $20 USD = 14 days access to ONE Creator Profile
+// Dual-Bucket Revenue: "Tax then Split" model
+// 1 Bit-Token = $21 USD invoice ($1 Admin Fee + $20 base)
+// 5 Bit-Tokens = $101 USD invoice ($1 Admin Fee + $100 base)
 
-export const TOKEN_VALUE_USD = 20;
-export const BUNDLE_TOKENS = 6;
-export const BUNDLE_PRICE_USD = 100;
+export const ADMIN_FEE_USD = 1; // Flat $1 goes to Admin_Profit_Vault
+export const TOKEN_BASE_VALUE_USD = 20; // Base value per token (after admin fee)
+export const TOKEN_INVOICE_USD = 21; // What the customer pays for 1 token
+export const BUNDLE_TOKENS = 5;
+export const BUNDLE_BASE_USD = 100; // 5 × $20
+export const BUNDLE_INVOICE_USD = 101; // $100 + $1 admin fee
+export const PLATFORM_SPLIT_PERCENT = 10; // 10% of base goes to platform
+export const CREATOR_SPLIT_PERCENT = 90; // 90% of base goes to creator
 export const UNLOCK_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days (336 hours)
 export const PLATFORM_CONVENIENCE_FEE_TOKENS = 1; // +1 BT surcharge on custom requests
 export const LOYALTY_TOKENS_MONTHLY = 5;
+export const CUSTOM_REQUEST_ADMIN_FEE_USD = 1; // Flat $1 on custom requests too
+
+// Legacy exports for backward compat
+export const TOKEN_VALUE_USD = TOKEN_INVOICE_USD;
+export const BUNDLE_PRICE_USD = BUNDLE_INVOICE_USD;
 
 export interface TokenBalance {
   available: number;
@@ -16,8 +28,8 @@ export interface TokenBalance {
 export interface CreatorUnlock {
   creatorId: string;
   creatorName: string;
-  unlockedAt: number; // timestamp ms
-  expiresAt: number;  // timestamp ms
+  unlockedAt: number;
+  expiresAt: number;
 }
 
 export interface CustomRequest {
@@ -47,7 +59,47 @@ export function formatUnlockCountdown(ms: number): string {
 }
 
 export function dollarsToBitTokens(usd: number): number {
-  return usd / TOKEN_VALUE_USD;
+  return usd / TOKEN_BASE_VALUE_USD;
+}
+
+/**
+ * Dual-Bucket split for token purchases:
+ * Invoice = base + $1 admin fee
+ * Platform gets: $1 admin fee + 10% of base
+ * Creator gets: 90% of base
+ */
+export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: number) {
+  const adminFee = ADMIN_FEE_USD;
+  const base = invoiceAmount - adminFee;
+  const platformShare = base * (PLATFORM_SPLIT_PERCENT / 100);
+  const creatorShare = base * (CREATOR_SPLIT_PERCENT / 100);
+  return {
+    invoiceAmount,
+    adminFee,
+    base,
+    platformShare,
+    creatorShare,
+    totalPlatformRevenue: adminFee + platformShare,
+  };
+}
+
+/**
+ * Custom Request split ($500–$10,001):
+ * Flat $1 admin fee added to invoice, then 10% of base amount to platform
+ */
+export function calculateCustomRequestSplit(baseAmount: number) {
+  const adminFee = CUSTOM_REQUEST_ADMIN_FEE_USD;
+  const invoiceTotal = baseAmount + adminFee;
+  const platformShare = baseAmount * (PLATFORM_SPLIT_PERCENT / 100);
+  const creatorShare = baseAmount * (CREATOR_SPLIT_PERCENT / 100);
+  return {
+    invoiceTotal,
+    adminFee,
+    baseAmount,
+    platformShare,
+    creatorShare,
+    totalPlatformRevenue: adminFee + platformShare,
+  };
 }
 
 export function calculateRequestTokens(usd: number): { baseTokens: number; fee: number; total: number } {
@@ -64,5 +116,5 @@ export type VaultType = "women" | "men";
 export interface UserPreferences {
   primaryVault: VaultType;
   hasSeenKnowYourCoins: boolean;
-  hasAgreedToSafety: boolean; // for creators
+  hasAgreedToSafety: boolean;
 }
