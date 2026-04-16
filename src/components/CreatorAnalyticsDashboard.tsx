@@ -328,7 +328,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              Every 100K new followers unlocks a 7-day Power Week (97/3 split)
+              Next Power Week available at 500,000 followers — recurs every additional 500K (7-day 97/3 split)
             </p>
           </div>
         )}
