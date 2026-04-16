@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD, ADMIN_FEE_USD,
@@ -16,9 +16,10 @@ interface BuyTokensModalProps {
 
 const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
-  const [step, setStep] = useState<"select" | "payment" | "processing" | "success">("select");
+  const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting">("select");
   const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address: string; pay_amount: number; pay_currency: string; payment_id: string } | null>(null);
+  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
@@ -36,8 +37,8 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
       setPaymentInfo({ pay_address: data.pay_address, pay_amount: data.pay_amount, pay_currency: data.pay_currency, payment_id: data.payment_id });
-      setStep("success");
-      setTimeout(() => { onPurchase(tokens); onClose(); }, 2500);
+      setStep("awaiting");
+      // DO NOT credit tokens here — IPN webhook handles balance updates
     } catch (err: any) {
       setError(err.message || "Payment failed. Please try again.");
       setStep("payment");
@@ -53,9 +54,12 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      if (data?.invoice_url) window.open(data.invoice_url, "_blank");
-      setStep("success");
-      setTimeout(() => { onPurchase(tokens); onClose(); }, 2500);
+      if (data?.invoice_url) {
+        setInvoiceUrl(data.invoice_url);
+        window.open(data.invoice_url, "_blank");
+      }
+      setStep("awaiting");
+      // DO NOT credit tokens here — IPN webhook handles balance updates
     } catch (err: any) {
       setError(err.message || "Card payment failed. Please try again.");
       setStep("payment");
@@ -143,7 +147,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </div>
             )}
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO — INSTANT ACCESS (0-5 MINS)</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO</p>
               <div className="grid grid-cols-3 gap-2">
                 {["ltc", "btc", "eth"].map((coin) => (
                   <button key={coin} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all">
@@ -178,17 +182,40 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
           </div>
         )}
 
-        {step === "success" && (
-          <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto"><span className="text-3xl">✓</span></div>
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">TOKENS CREDITED</h3>
-            <p className="text-sm text-muted-foreground">{tokens} Bit-Token{tokens > 1 ? "s" : ""} added to your balance!</p>
+        {step === "awaiting" && (
+          <div className="p-6 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center mx-auto">
+              <Clock className="w-8 h-8 text-gold" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">AWAITING PAYMENT</h3>
+            <p className="text-sm text-muted-foreground">
+              Your tokens will be credited automatically once the payment is confirmed by the network.
+            </p>
+
             {paymentInfo && (
-              <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
-                <p className="text-[10px] text-muted-foreground">Send <span className="text-primary font-bold">{paymentInfo.pay_amount} {paymentInfo.pay_currency.toUpperCase()}</span> to:</p>
-                <p className="text-[10px] text-foreground font-mono break-all">{paymentInfo.pay_address}</p>
+              <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-2 text-left">
+                <p className="text-[10px] font-bold text-muted-foreground tracking-wider">SEND EXACTLY:</p>
+                <p className="text-sm font-bold text-primary text-center">{paymentInfo.pay_amount} {paymentInfo.pay_currency.toUpperCase()}</p>
+                <p className="text-[10px] font-bold text-muted-foreground tracking-wider">TO ADDRESS:</p>
+                <p className="text-[10px] text-foreground font-mono break-all bg-background/50 rounded p-2 border border-border">{paymentInfo.pay_address}</p>
               </div>
             )}
+
+            {invoiceUrl && (
+              <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="neon" size="sm" className="w-full">OPEN PAYMENT PAGE</Button>
+              </a>
+            )}
+
+            <div className="bg-gold/5 border border-gold/20 rounded-lg p-3">
+              <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ SECURE VERIFICATION</p>
+              <p className="text-[10px] text-muted-foreground">
+                Tokens are credited only after cryptographic signature verification via our IPN webhook.
+                Status: <span className="text-primary font-bold">finished</span> or <span className="text-primary font-bold">partially_paid</span>.
+              </p>
+            </div>
+
+            <Button variant="outline" className="w-full" onClick={onClose}>CLOSE — I'LL CHECK BACK</Button>
           </div>
         )}
       </div>
