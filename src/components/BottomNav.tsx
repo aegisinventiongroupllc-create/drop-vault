@@ -1,5 +1,6 @@
 import type { VaultType } from "@/lib/tokenEconomy";
 import { useI18n } from "@/i18n/I18nContext";
+import LegalFooter from "@/components/LegalFooter";
 
 type Tab = "home" | "trending" | "vaults" | "profile";
 
@@ -35,6 +36,11 @@ const BottomNav = ({ active, onNavigate, vault }: BottomNavProps) => {
             {label}
           </button>
         ))}
+      </div>
+      <div className="border-t border-border/50">
+        <div className="max-w-lg mx-auto">
+          <LegalFooter />
+        </div>
       </div>
     </nav>
   );
