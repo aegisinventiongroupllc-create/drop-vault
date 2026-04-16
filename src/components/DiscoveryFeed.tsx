@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
+import GlobalPassport from "@/components/GlobalPassport";
+import GhostCountryMessage from "@/components/GhostCountryMessage";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 
@@ -14,17 +16,18 @@ interface VideoItem {
   comments: number;
   color: string;
   vault: VaultType;
+  country: string;
 }
 
 const MOCK_VIDEOS: VideoItem[] = [
-  { id: "1", creator: "LunaCosplay", creatorAvatar: "LC", description: "✨ New cosplay reveal — Marin Kitagawa ✨ #cosplay #anime", likes: 12400, comments: 892, color: "from-pink-900/40 to-purple-900/40", vault: "women" },
-  { id: "2", creator: "FitJessie", creatorAvatar: "FJ", description: "Morning gym routine 💪 Full video in my vault!", likes: 8200, comments: 431, color: "from-blue-900/40 to-teal-900/40", vault: "women" },
-  { id: "3", creator: "BlondieVibes", creatorAvatar: "BV", description: "Beach day vibes 🌊 Link in bio for exclusive content", likes: 15600, comments: 1203, color: "from-amber-900/40 to-orange-900/40", vault: "women" },
-  { id: "4", creator: "TwinFlames", creatorAvatar: "TF", description: "Dance challenge with my bestie 💃🔥", likes: 22100, comments: 1870, color: "from-red-900/40 to-pink-900/40", vault: "women" },
-  { id: "5", creator: "PetiteSophie", creatorAvatar: "PS", description: "GRWM for a night out 💄✨ #grwm #nightout", likes: 9800, comments: 672, color: "from-violet-900/40 to-indigo-900/40", vault: "women" },
-  { id: "6", creator: "AlphaFlex", creatorAvatar: "AF", description: "Morning routine — full set in the vault 💪", likes: 7400, comments: 340, color: "from-blue-900/40 to-slate-900/40", vault: "men" },
-  { id: "7", creator: "KingCole", creatorAvatar: "KC", description: "Behind the scenes shoot 📸🔥", likes: 11200, comments: 560, color: "from-slate-900/40 to-blue-900/40", vault: "men" },
-  { id: "8", creator: "RexFitness", creatorAvatar: "RF", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men" },
+  { id: "1", creator: "LunaCosplay", creatorAvatar: "LC", description: "✨ New cosplay reveal — Marin Kitagawa ✨ #cosplay #anime", likes: 12400, comments: 892, color: "from-pink-900/40 to-purple-900/40", vault: "women", country: "US" },
+  { id: "2", creator: "FitJessie", creatorAvatar: "FJ", description: "Morning gym routine 💪 Full video in my vault!", likes: 8200, comments: 431, color: "from-blue-900/40 to-teal-900/40", vault: "women", country: "US" },
+  { id: "3", creator: "BlondieVibes", creatorAvatar: "BV", description: "Beach day vibes 🌊 Link in bio for exclusive content", likes: 15600, comments: 1203, color: "from-amber-900/40 to-orange-900/40", vault: "women", country: "GB" },
+  { id: "4", creator: "TwinFlames", creatorAvatar: "TF", description: "Dance challenge with my bestie 💃🔥", likes: 22100, comments: 1870, color: "from-red-900/40 to-pink-900/40", vault: "women", country: "BR" },
+  { id: "5", creator: "PetiteSophie", creatorAvatar: "PS", description: "GRWM for a night out 💄✨ #grwm #nightout", likes: 9800, comments: 672, color: "from-violet-900/40 to-indigo-900/40", vault: "women", country: "FR" },
+  { id: "6", creator: "AlphaFlex", creatorAvatar: "AF", description: "Morning routine — full set in the vault 💪", likes: 7400, comments: 340, color: "from-blue-900/40 to-slate-900/40", vault: "men", country: "US" },
+  { id: "7", creator: "KingCole", creatorAvatar: "KC", description: "Behind the scenes shoot 📸🔥", likes: 11200, comments: 560, color: "from-slate-900/40 to-blue-900/40", vault: "men", country: "GB" },
+  { id: "8", creator: "RexFitness", creatorAvatar: "RF", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men", country: "AU" },
 ];
 
 const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
@@ -110,8 +113,12 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   );
 });
 
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean }) => {
-  const filteredVideos = MOCK_VIDEOS.filter(v => v.vault === vault);
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string }) => {
+  const filteredVideos = MOCK_VIDEOS.filter(v => {
+    if (v.vault !== vault) return false;
+    if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -126,9 +133,17 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle }: { on
       </div>
 
       <div className={`flex-1 snap-y snap-mandatory overflow-y-auto pb-16 ${hasVaultToggle ? "pt-[9rem]" : "pt-[7rem]"}`}>
-        {filteredVideos.map((video) => (
-          <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} />
-        ))}
+        {filteredVideos.length > 0 ? (
+          filteredVideos.map((video) => (
+            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} />
+          ))
+        ) : (
+          countryFilter && countryFilter !== "GLOBAL" ? (
+            <GhostCountryMessage countryCode={countryFilter} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No creators found</div>
+          )
+        )}
       </div>
     </div>
   );
