@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
+import GlobalPassport from "@/components/GlobalPassport";
 import LegalFooter from "@/components/LegalFooter";
 import RoleSelection, { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
@@ -51,13 +52,13 @@ const Index = () => {
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
-  const [activeTab, setActiveTab] = useState<Tab>(savedPrefs ? "home" : "home");
+  const [activeTab, setActiveTab] = useState<Tab>("home");
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
-  const [showDashboard, setShowDashboard] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(6);
+  const [countryFilter, setCountryFilter] = useState("GLOBAL");
 
   const onboardingComplete = !!(role && vault);
 
@@ -84,6 +85,7 @@ const Index = () => {
     );
   }
 
+  // Customer preference screen — goes directly to feed after selection
   if (role === "customer" && !preference) {
     return (
       <CustomerPreference
@@ -125,7 +127,7 @@ const Index = () => {
     );
   }
 
-  // --- Customer flow ---
+  // --- Customer flow: goes DIRECTLY to discovery feed ---
   if (showSearch) {
     return (
       <GlobalSearch
@@ -136,9 +138,6 @@ const Index = () => {
   }
 
   if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
-
-  // Customers do NOT see admin panel — this is hidden
-  // if (showAdmin) return <MasterAdminPanel ... />;
 
   if (selectedCreator) {
     return (
@@ -154,29 +153,36 @@ const Index = () => {
 
   return (
     <div className="h-screen overflow-hidden">
-      {/* "Both" toggle header */}
-      {preference === "both" && (activeTab === "home" || activeTab === "trending") && (
+      {/* "Both" toggle header + Global Passport */}
+      {(activeTab === "home" || activeTab === "trending") && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
           <div className="flex items-center justify-between gap-1 py-2 max-w-lg mx-auto px-4">
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setVault("women")}
-                className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                  vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-                }`}
-              >
-                {t.women}
-              </button>
-              <button
-                onClick={() => setVault("men")}
-                className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                  vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-                }`}
-              >
-                {t.men}
-              </button>
+              {preference === "both" && (
+                <>
+                  <button
+                    onClick={() => setVault("women")}
+                    className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                      vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {t.women}
+                  </button>
+                  <button
+                    onClick={() => setVault("men")}
+                    className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                      vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {t.men}
+                  </button>
+                </>
+              )}
             </div>
-            <LanguageToggle />
+            <div className="flex items-center gap-2">
+              <GlobalPassport selected={countryFilter} onSelect={setCountryFilter} />
+              <LanguageToggle />
+            </div>
           </div>
         </div>
       )}
@@ -186,10 +192,18 @@ const Index = () => {
           onCreatorClick={handleCreatorClick}
           vault={vault!}
           onSearch={() => setShowSearch(true)}
-          hasVaultToggle={preference === "both"}
+          hasVaultToggle={true}
+          countryFilter={countryFilter}
         />
       )}
-      {activeTab === "trending" && <TrendingPage onCreatorClick={handleCreatorClick} vault={vault!} hasVaultToggle={preference === "both"} />}
+      {activeTab === "trending" && (
+        <TrendingPage
+          onCreatorClick={handleCreatorClick}
+          vault={vault!}
+          hasVaultToggle={true}
+          countryFilter={countryFilter}
+        />
+      )}
       {activeTab === "vaults" && (
         <MemberDashboard balance={tokenBalance} onBuyTokens={handleBuyTokens} />
       )}
