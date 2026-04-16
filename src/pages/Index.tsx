@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
+import LanguageToggle from "@/components/LanguageToggle";
 import LegalFooter from "@/components/LegalFooter";
 import RoleSelection, { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
@@ -13,6 +14,7 @@ import CreatorAnalyticsDashboard from "@/components/CreatorAnalyticsDashboard";
 import MasterAdminPanel from "@/components/MasterAdminPanel";
 import GlobalSearch from "@/components/GlobalSearch";
 import LegalPages from "@/components/LegalPages";
+import { useI18n } from "@/i18n/I18nContext";
 import type { VaultType } from "@/lib/tokenEconomy";
 
 const STORAGE_KEY = "dtt_user_prefs";
