@@ -1,0 +1,18 @@
+{
+  "name": "DTT Media — DropThatThing",
+  "short_name": "DTT Media",
+  "description": "The premium creator vault platform by DTT Media LLC.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
