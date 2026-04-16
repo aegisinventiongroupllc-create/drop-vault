@@ -15,30 +15,13 @@ import {
   DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
-
-const STATS = [
-  { label: "Followers", value: "0", change: "+0%", icon: Users },
-  { label: "Total Views", value: "0", change: "+0%", icon: Eye },
-  { label: "Bit-Token Revenue", value: "0 BT", change: "+0%", icon: BarChart3 },
-  { label: "Growth Rate", value: "0%", change: "+0%", icon: TrendingUp },
-];
-
-const REVENUE_DATA = [
-  { month: "Jan", earned: 0, withdrawn: 0 },
-  { month: "Feb", earned: 0, withdrawn: 0 },
-  { month: "Mar", earned: 0, withdrawn: 0 },
-  { month: "Apr", earned: 0, withdrawn: 0 },
-  { month: "May", earned: 0, withdrawn: 0 },
-  { month: "Jun", earned: 0, withdrawn: 0 },
-];
+import { useCreatorStats } from "@/hooks/useCreatorStats";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
 const PUBLIC_TEASERS: { id: string; type: "video"; title: string; views: number; date: string; visibility: "public" }[] = [];
 
 const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views: number; date: string; visibility: "locked" }[] = [];
-
-const TOP_FANS: { rank: number; name: string; spent: number }[] = [];
 
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
