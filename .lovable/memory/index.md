@@ -3,15 +3,14 @@
 ## Core
 - Visuals: Dark Luxury theme. Women's Vault (Pink/Black), Men's Vault (Blue/Silver/Black). Bold uppercase nav ONLY, zero icons.
 - Stack: Supabase (Auth, DB, Storage, Edge Functions), Docker, Nginx, NOWPayments (LTC).
-- Economy: Dual-Bucket "Tax then Split". 1 BT = $21 invoice ($1 admin fee + $20 base). 5 BT = $101 ($1 + $100). 90/10 split on base.
-- Revenue: 90/10 base split. $1 flat admin fee on all transactions. 97/3 Power Week on 100k milestones.
-- Compliance: 3-checkbox gate (18+, TOS, Independent Contractor). 2257 compliance footer. Support: dropthatthingmedia@gmail.com.
-- Nav: Dynamic bottom nav — "MY GIRLS" or "MY GUYS" based on vault. "BOTH" option adds header toggle.
+- Economy: 1 Bit-Token = $20 USD = 14-days access. Auto-locks at 14 days. Payouts are LTC-exclusive.
+- Revenue: 90/10 base split. 97/3 'Power Week' auto-triggers on 500K new Customer-role followers (recurring).
+- Compliance: Mandatory 18+ legal waiver splash screen. Support: dropthatthingmedia@gmail.com.
+- No Stripe: Platform uses NOWPayments exclusively. ID verification via iDenfy/Veriff (not Stripe Identity).
 
 ## Memories
 - [Revenue Model](mem://business/revenue-model) — Creator payout splits and 97% Power Week rules
-- [Dual-Bucket Revenue](mem://economy/dual-bucket-revenue) — Tax-then-split formula, admin fees, custom request pricing
-- [Age Verification](mem://constraints/age-verification) — 3-checkbox legal gate with IP/timestamp logging
+- [Age Verification](mem://constraints/age-verification) — Mandatory 18+ splash screen and legal waiver
 - [Creator Profiles](mem://features/creator-profiles) — Profile structure, trailers, and Vault Hub layout
 - [Master Admin Panel](mem://features/master-admin-panel) — Password-protected master admin interface and features
 - [Teaser Feed](mem://features/teaser-feed) — Vertical scrolling discovery feed for 15s trailers
