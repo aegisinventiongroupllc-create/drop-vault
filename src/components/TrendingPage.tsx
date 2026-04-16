@@ -31,7 +31,7 @@ const TrendingPage = ({ onCreatorClick, vault, hasVaultToggle, countryFilter }: 
     : allTrending;
 
   return (
-    <div className={`min-h-screen pb-20 ${hasVaultToggle ? "pt-10" : ""}`}>
+    <div className={`mobile-scroll-shell ${hasVaultToggle ? "pt-10" : ""}`}>
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <h1 className="text-xl font-bold text-foreground tracking-wider font-display">TRENDING</h1>
         <WalletIndicator />

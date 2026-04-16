@@ -42,7 +42,7 @@ const PWAInstallPrompt = () => {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-[90] max-w-md mx-auto">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8.5rem)] left-4 right-4 z-[90] max-w-md mx-auto">
       <div className="bg-card border border-primary/40 rounded-2xl p-4 shadow-lg neon-glow-sm flex items-center gap-3">
         <img
           src="/dtt-icon-192.png"
