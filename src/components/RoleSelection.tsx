@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, Star } from "lucide-react";
@@ -9,12 +10,21 @@ interface RoleSelectionProps {
   onSelect: (role: UserRole, email: string) => void;
 }
 
+const ADMIN_PASSCODE = "052417";
+
 const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSelect = (role: UserRole) => {
     const trimmed = email.trim();
+    if (trimmed === ADMIN_PASSCODE) {
+      sessionStorage.setItem("admin_authenticated", "true");
+      setError("");
+      navigate("/admin-portal");
+      return;
+    }
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setError("Please enter a valid email address.");
       return;
