@@ -17,54 +17,31 @@ import {
 } from "@/lib/paymentSplit";
 
 const STATS = [
-  { label: "Followers", value: "48.2K", change: "+2.3%", icon: Users },
-  { label: "Total Views", value: "1.8M", change: "+12.5%", icon: Eye },
-  { label: "Bit-Token Revenue", value: "2,450 BT", change: "+8.1%", icon: BarChart3 },
-  { label: "Growth Rate", value: "15.4%", change: "+3.2%", icon: TrendingUp },
+  { label: "Followers", value: "0", change: "+0%", icon: Users },
+  { label: "Total Views", value: "0", change: "+0%", icon: Eye },
+  { label: "Bit-Token Revenue", value: "0 BT", change: "+0%", icon: BarChart3 },
+  { label: "Growth Rate", value: "0%", change: "+0%", icon: TrendingUp },
 ];
 
 const REVENUE_DATA = [
-  { month: "Jan", earned: 320, withdrawn: 200 },
-  { month: "Feb", earned: 480, withdrawn: 350 },
-  { month: "Mar", earned: 620, withdrawn: 400 },
-  { month: "Apr", earned: 750, withdrawn: 500 },
-  { month: "May", earned: 890, withdrawn: 600 },
-  { month: "Jun", earned: 1100, withdrawn: 780 },
+  { month: "Jan", earned: 0, withdrawn: 0 },
+  { month: "Feb", earned: 0, withdrawn: 0 },
+  { month: "Mar", earned: 0, withdrawn: 0 },
+  { month: "Apr", earned: 0, withdrawn: 0 },
+  { month: "May", earned: 0, withdrawn: 0 },
+  { month: "Jun", earned: 0, withdrawn: 0 },
 ];
 
-const CUSTOM_REQUESTS = [
-  { id: "1", fan: "VaultKing99", description: "Custom cosplay photoshoot — Tifa Lockhart", amount: 500, status: "pending" as const, tokenPrice: 0, declineReason: "" },
-  { id: "2", fan: "NeonWhale", description: "Exclusive gym workout video — 10 min", amount: 250, status: "pending" as const, tokenPrice: 0, declineReason: "" },
-  { id: "3", fan: "DiamondFan", description: "Premium behind-the-scenes content", amount: 1000, status: "accepted" as const, tokenPrice: 50, declineReason: "" },
-  { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const, tokenPrice: 8, declineReason: "" },
-];
+const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
-const PUBLIC_TEASERS = [
-  { id: "t1", type: "video" as const, title: "Cosplay Reveal — 15s Teaser", views: 42300, date: "Apr 2", visibility: "public" as const },
-  { id: "t2", type: "video" as const, title: "Gym Motivation — Teaser", views: 18900, date: "Mar 30", visibility: "public" as const },
-];
+const PUBLIC_TEASERS: { id: string; type: "video"; title: string; views: number; date: string; visibility: "public" }[] = [];
 
-const VAULT_CONTENT = [
-  { id: "v1", type: "video" as const, title: "Cosplay Full Shoot — 18 min", views: 12400, date: "Apr 2", visibility: "locked" as const },
-  { id: "v2", type: "photo" as const, title: "Beach Shoot — Full Set (24 photos)", views: 8900, date: "Mar 28", visibility: "locked" as const },
-  { id: "v3", type: "video" as const, title: "Gym Session #12 — Full 22 min", views: 6200, date: "Mar 25", visibility: "locked" as const },
-  { id: "v4", type: "photo" as const, title: "BTS — Studio Lighting Set", views: 4300, date: "Mar 20", visibility: "locked" as const },
-  { id: "v5", type: "video" as const, title: "Q&A Uncut — 45 min", views: 15600, date: "Mar 18", visibility: "locked" as const },
-];
+const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views: number; date: string; visibility: "locked" }[] = [];
 
-const TOP_FANS = [
-  { rank: 1, name: "DiamondHands_99", spent: 2400 },
-  { rank: 2, name: "VaultKing99", spent: 1800 },
-  { rank: 3, name: "NeonWhale", spent: 1200 },
-  { rank: 4, name: "TopTierSub", spent: 900 },
-  { rank: 5, name: "CryptoFan42", spent: 600 },
-];
+const TOP_FANS: { rank: number; name: string; spent: number }[] = [];
 
-// Mock follower list for loyalty gifting
-const FOLLOWERS_LIST = [
-  "DiamondHands_99", "VaultKing99", "NeonWhale", "TopTierSub", "CryptoFan42",
-  "LoyalViewer01", "SilentSupporter", "MidnightFan", "GoldenBoy22", "StarGazer99",
-];
+// Real follower list — empty at launch
+const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media";
 
@@ -103,7 +80,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [responseDeclineReason, setResponseDeclineReason] = useState("");
 
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
-    getCreatorSplitState("creator-1", 48200)
+    getCreatorSplitState("creator-1", 0)
   );
   const [countdown, setCountdown] = useState("");
 
