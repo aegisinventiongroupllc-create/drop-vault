@@ -50,6 +50,13 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const teaserInputRef = useRef<HTMLInputElement>(null);
   const mediaTargetRef = useRef<MediaBucket>("teasers");
 
+  // Loyalty gift state
+  const [showLoyaltyModal, setShowLoyaltyModal] = useState(false);
+  const [loyaltySearch, setLoyaltySearch] = useState("");
+  const [loyaltyTarget, setLoyaltyTarget] = useState<string | null>(null);
+  const [loyaltySent, setLoyaltySent] = useState(false);
+  const [remainingLoyalty, setRemainingLoyalty] = useState(25);
+
   const liveStats = useCreatorStats();
 
   const STATS = [
