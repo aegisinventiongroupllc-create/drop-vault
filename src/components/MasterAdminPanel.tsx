@@ -173,7 +173,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   ];
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-44 overflow-y-auto">
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center gap-3">
         <button onClick={onBack} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground">
