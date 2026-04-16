@@ -157,23 +157,26 @@ const Index = () => {
       {/* "Both" toggle header */}
       {preference === "both" && (activeTab === "home" || activeTab === "trending") && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
-          <div className="flex items-center justify-center gap-1 py-2 max-w-lg mx-auto">
-            <button
-              onClick={() => setVault("women")}
-              className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-              }`}
-            >
-              WOMEN
-            </button>
-            <button
-              onClick={() => setVault("men")}
-              className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-              }`}
-            >
-              MEN
-            </button>
+          <div className="flex items-center justify-between gap-1 py-2 max-w-lg mx-auto px-4">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setVault("women")}
+                className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                  vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {t.women}
+              </button>
+              <button
+                onClick={() => setVault("men")}
+                className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
+                  vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {t.men}
+              </button>
+            </div>
+            <LanguageToggle />
           </div>
         </div>
       )}
@@ -192,9 +195,11 @@ const Index = () => {
       )}
       {activeTab === "profile" && (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
-          <h2 className="text-xl font-bold text-foreground tracking-wider font-display">PROFILE</h2>
+          <div className="absolute top-4 right-4">
+            <LanguageToggle />
+          </div>
+          <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
           <p className="text-sm text-muted-foreground">{email}</p>
-          {/* Customer sees ONLY logout and legal — no creator dashboard or admin */}
           <button
             onClick={() => {
               localStorage.removeItem(STORAGE_KEY);
@@ -206,13 +211,13 @@ const Index = () => {
             }}
             className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"
           >
-            LOG OUT
+            {t.log_out}
           </button>
           <button
             onClick={() => setShowLegal(true)}
             className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors mt-2"
           >
-            Terms of Service & Privacy Policy
+            {t.terms} & {t.privacy}
           </button>
           <LegalFooter />
         </div>
