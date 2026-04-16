@@ -27,6 +27,8 @@ const INCENTIVE_SPLIT = { creator: 97, platform: 3 };
 
 /**
  * Computes the current milestone bracket for a follower count.
+ * IMPORTANT: Only 'Customer' role accounts count toward milestones.
+ * Creator accounts do NOT count, even if they spend tokens.
  * E.g. 248,000 → lastMilestone=200000, nextMilestone=300000
  */
 function getMilestoneBracket(followers: number) {
