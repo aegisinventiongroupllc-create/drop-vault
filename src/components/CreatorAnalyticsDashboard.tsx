@@ -15,30 +15,13 @@ import {
   DEFAULT_SPLIT, INCENTIVE_SPLIT,
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
-
-const STATS = [
-  { label: "Followers", value: "0", change: "+0%", icon: Users },
-  { label: "Total Views", value: "0", change: "+0%", icon: Eye },
-  { label: "Bit-Token Revenue", value: "0 BT", change: "+0%", icon: BarChart3 },
-  { label: "Growth Rate", value: "0%", change: "+0%", icon: TrendingUp },
-];
-
-const REVENUE_DATA = [
-  { month: "Jan", earned: 0, withdrawn: 0 },
-  { month: "Feb", earned: 0, withdrawn: 0 },
-  { month: "Mar", earned: 0, withdrawn: 0 },
-  { month: "Apr", earned: 0, withdrawn: 0 },
-  { month: "May", earned: 0, withdrawn: 0 },
-  { month: "Jun", earned: 0, withdrawn: 0 },
-];
+import { useCreatorStats } from "@/hooks/useCreatorStats";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
 const PUBLIC_TEASERS: { id: string; type: "video"; title: string; views: number; date: string; visibility: "public" }[] = [];
 
 const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views: number; date: string; visibility: "locked" }[] = [];
-
-const TOP_FANS: { rank: number; name: string; spent: number }[] = [];
 
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
@@ -72,7 +55,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [loyaltySearch, setLoyaltySearch] = useState("");
   const [loyaltyTarget, setLoyaltyTarget] = useState<string | null>(null);
   const [loyaltySent, setLoyaltySent] = useState(false);
-  const [remainingLoyalty, setRemainingLoyalty] = useState(25); // 5 tokens × 5 bits each = 25 bits available
+  const [remainingLoyalty, setRemainingLoyalty] = useState(25);
+
+  const liveStats = useCreatorStats();
+
+  const STATS = [
+    { label: "Followers", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
+    { label: "Total Views", value: liveStats.totalViews.toLocaleString(), change: "+0%", icon: Eye },
+    { label: "Bit-Token Revenue", value: `${liveStats.bitTokenRevenue.toFixed(1)} BT`, change: `$${liveStats.totalEarnedUsd.toFixed(0)}`, icon: BarChart3 },
+    { label: "Growth Rate", value: `${liveStats.growthRate >= 0 ? "+" : ""}${liveStats.growthRate}%`, change: "vs last month", icon: TrendingUp },
+  ];
+
+  const REVENUE_DATA = liveStats.revenueByMonth;
+  const TOP_FANS = liveStats.topFans;
 
   // Request response state
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -90,6 +85,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     getCreatorSplitState("creator-1", 0)
   );
   const [countdown, setCountdown] = useState("");
+
+  // Recompute split state whenever live follower count changes
+  useEffect(() => {
+    const id = liveStats.creatorId || "creator-1";
+    setSplitState((prev) => getCreatorSplitState(id, liveStats.followerCount, prev));
+  }, [liveStats.followerCount, liveStats.creatorId]);
 
   const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
@@ -145,7 +146,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return "Invalid LTC address. Must start with L, M, or ltc1.";
   };
 
-  const maxEarned = Math.max(...REVENUE_DATA.map((d) => d.earned));
+  const maxEarned = Math.max(1, ...REVENUE_DATA.map((d) => d.earned));
 
   const sections: { id: Section; label: string }[] = [
     { id: "overview", label: "ANALYTICS" },
