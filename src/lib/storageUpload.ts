@@ -14,7 +14,7 @@ export async function uploadMedia(
 
   const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
     cacheControl: "3600",
-    upsert: false,
+    upsert: !!fixedName, // Auto-replace when using a fixed name
   });
 
   if (error) return { error: error.message };
