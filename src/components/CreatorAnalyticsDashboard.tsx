@@ -79,6 +79,13 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [responseTokenPrice, setResponseTokenPrice] = useState("");
   const [responseDeclineReason, setResponseDeclineReason] = useState("");
 
+  // Upload page state
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // LTC help guide modal
+  const [showLtcHelp, setShowLtcHelp] = useState(false);
+
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
     getCreatorSplitState("creator-1", 0)
   );
@@ -590,11 +597,20 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 rounded-xl p-4 mb-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
-              <p className="text-3xl font-bold text-primary">$2,340.00</p>
+              <p className="text-3xl font-bold text-primary">$0.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
+                <button
+                  type="button"
+                  onClick={() => setShowLtcHelp(true)}
+                  className="text-xs font-bold text-primary hover:underline tracking-wider"
+                >
+                  ? HELP
+                </button>
+              </div>
               <input
                 type="text"
                 value={ltcAddress}
