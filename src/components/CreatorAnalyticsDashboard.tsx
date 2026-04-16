@@ -538,48 +538,80 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Verification Center */}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
+          {/* ID Verification */}
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Verification Center</h3>
+              <h3 className="text-base font-semibold text-foreground">Identity Verification</h3>
             </div>
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Upload a valid government-issued ID to verify your identity and age.</p>
+              <p className="text-xs text-muted-foreground">Use your device camera to take a live photo of your government-issued ID for automatic age & identity verification.</p>
             </div>
-            <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/40 transition-colors">
-              <Upload className="w-8 h-8 text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">Identity & Age Documents</p>
-              <p className="text-xs text-muted-foreground text-center">Government-issued ID, Passport, or Driver's License</p>
-              <Button variant={idUploaded ? "outline" : "neon"} size="sm" onClick={() => { setIdUploaded(true); setVerificationStatus("pending"); }}>
-                {idUploaded ? "Re-upload" : "Upload Documents"}
-              </Button>
-            </div>
+
+            {/* Camera viewfinder */}
+            {showCamera && (
+              <div className="relative rounded-xl overflow-hidden mb-4 border-2 border-primary/40">
+                <video ref={cameraVideoRef} autoPlay playsInline muted className="w-full aspect-[4/3] bg-black object-cover" />
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+                  <Button variant="neon" size="sm" onClick={capturePhoto}>
+                    <Camera className="w-4 h-4 mr-1" /> CAPTURE
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={stopCamera}>CANCEL</Button>
+                </div>
+              </div>
+            )}
+
+            {/* Captured preview */}
+            {capturedImage && !showCamera && (
+              <div className="relative rounded-xl overflow-hidden mb-4 border border-border">
+                <img src={capturedImage} alt="Captured ID" className="w-full aspect-[4/3] object-cover" />
+                <div className="absolute top-2 right-2 bg-gold/90 text-black text-[10px] font-bold px-2 py-1 rounded">
+                  SUBMITTED
+                </div>
+              </div>
+            )}
+
+            {!showCamera && !capturedImage && (
+              <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/40 transition-colors">
+                <Camera className="w-8 h-8 text-muted-foreground" />
+                <p className="text-sm font-medium text-foreground">Live ID Photo Required</p>
+                <p className="text-xs text-muted-foreground text-center">Government-issued ID, Passport, or Driver's License</p>
+                <Button variant="neon" size="sm" onClick={startCamera}>
+                  <Camera className="w-4 h-4 mr-1" /> OPEN CAMERA
+                </Button>
+              </div>
+            )}
+
+            {/* Status */}
             <div className="mt-4 flex items-center gap-2 bg-secondary/50 rounded-lg p-3">
               {verificationStatus === "verified" ? (
-                <><CheckCircle className="w-4 h-4 text-green-400" /><p className="text-xs text-muted-foreground">Status: <span className="text-green-400 font-medium">Verified ✓</span></p></>
+                <><CheckCircle className="w-4 h-4 text-green-400" /><p className="text-xs text-muted-foreground">Status: <span className="text-green-400 font-medium">Verified ✓</span> — Automatically approved</p></>
+              ) : verificationStatus === "failed" ? (
+                <><AlertCircle className="w-4 h-4 text-destructive" /><p className="text-xs text-muted-foreground">Status: <span className="text-destructive font-medium">Failed — Flagged for Admin Review</span></p></>
               ) : verificationStatus === "pending" ? (
-                <><Clock className="w-4 h-4 text-gold" /><p className="text-xs text-muted-foreground">Status: <span className="text-gold font-medium">Pending Review</span></p></>
+                <><Clock className="w-4 h-4 text-gold" /><p className="text-xs text-muted-foreground">Status: <span className="text-gold font-medium">Processing — Automated Scan in Progress</span></p></>
               ) : (
                 <><AlertCircle className="w-4 h-4 text-muted-foreground" /><p className="text-xs text-muted-foreground">Status: <span className="text-muted-foreground font-medium">Not Submitted</span></p></>
               )}
             </div>
           </div>
 
-          {/* Payout Settings */}
+          {/* Payout Wallet Address (LTC) */}
           <div className="bg-card border border-border rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <CreditCard className="w-5 h-5 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Payout Settings</h3>
+              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Payout Wallet Address (LTC)</h3>
+            </div>
+            <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 mb-4">
+              <p className="text-sm font-bold text-gold text-center tracking-wide">WE PAYOUT VIA LTC ONLY.</p>
+              <p className="text-sm font-bold text-gold text-center tracking-wide">SUBMIT YOUR LITECOIN ADDRESS BELOW.</p>
+              <p className="text-[10px] text-muted-foreground text-center mt-2">All payouts are sent as Litecoin. Settlements take 4–5 business days.</p>
             </div>
             <div className="bg-secondary/50 rounded-xl p-4 mb-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
               <p className="text-3xl font-bold text-primary">$2,340.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
-            </div>
-            <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 mb-4">
-              <p className="text-xs font-bold text-gold text-center tracking-wider">⚠ LTC ONLY. YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.</p>
-              <p className="text-[10px] text-muted-foreground text-center mt-1">All payouts are sent as Litecoin. Settlements take 4–5 business days.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
@@ -590,22 +622,26 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                   const val = e.target.value.trim();
                   setLtcAddress(val);
                   setLtcSaved(false);
-                  if (val && !/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(val)) {
-                    setLtcError("Invalid LTC address. Must start with ltc1, L, M, or 3.");
-                  } else {
-                    setLtcError("");
-                  }
+                  setLtcError(validateLtcAddress(val));
                 }}
-                placeholder="Enter your Litecoin wallet address (e.g. ltc1q...)"
+                placeholder="e.g. ltc1q... or L... or M..."
                 className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-xs"
               />
               {ltcError && <p className="text-xs text-destructive">{ltcError}</p>}
-              {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved</p>}
-              <p className="text-xs text-muted-foreground">Payouts are sent exclusively via Litecoin (LTC)</p>
+              {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved and synced to Admin Panel</p>}
+              <p className="text-[10px] text-muted-foreground">⚠ LTC ONLY — YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.</p>
             </div>
             <Button variant="neon" className="w-full mt-4" disabled={!ltcAddress || !!ltcError} onClick={() => setLtcSaved(true)}>
-              SAVE WALLET & REQUEST PAYOUT
+              SAVE WALLET ADDRESS
             </Button>
+          </div>
+
+          {/* Revenue Split Info */}
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-xs text-muted-foreground text-center">
+              <span className="font-bold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
+              Includes a flat $1.00 Network Tax per request.
+            </p>
           </div>
         </div>
       )}
