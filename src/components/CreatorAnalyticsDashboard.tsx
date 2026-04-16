@@ -240,7 +240,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   );
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-44">
       {mediaUploadInput}
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
