@@ -790,88 +790,168 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         </div>
       )}
 
-      {/* Media Manager */}
+      {/* Media Manager — Simplified 3-step Upload */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
-          {/* Upload status */}
-          {(uploading || uploadMsg) && (
-            <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
-              uploading ? "bg-primary/10 border border-primary/30 text-primary" : uploadMsg.startsWith("Upload failed") ? "bg-destructive/10 border border-destructive/30 text-destructive" : "bg-green-400/10 border border-green-400/30 text-green-400"
-            }`}>
-              {uploading ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Uploading to {uploading}...</span> : uploadMsg}
+          {/* Step 1: Title */}
+          <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
+            <h3 className="text-base font-bold text-foreground tracking-wider">UPLOAD VIDEO</h3>
+            <p className="text-xs text-muted-foreground -mt-2">Three simple steps. Add a title, then upload your teaser and full video.</p>
+
+            <div className="space-y-2">
+              <label htmlFor="upload-title" className="text-xs font-bold text-muted-foreground tracking-wider">1. TITLE</label>
+              <input
+                id="upload-title"
+                type="text"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="e.g. Cosplay Reveal — Marin Kitagawa"
+                className="w-full bg-secondary rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            {/* Step 2: Teaser */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">2. UPLOAD TEASER (FREE PREVIEW)</label>
+              <Button
+                variant="neon"
+                size="lg"
+                className="w-full text-base font-bold h-14"
+                onClick={() => teaserInputRef.current?.click()}
+                disabled={!!uploading}
+              >
+                <Upload className="w-5 h-5 mr-1" />
+                {uploading === "teasers" ? "UPLOADING TEASER..." : "UPLOAD TEASER"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">15-second MP4/WebM with audio. Shows in the Discovery Feed.</p>
+            </div>
+
+            {/* Step 3: Full Video */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">3. UPLOAD FULL VIDEO (PAID CONTENT)</label>
+              <Button
+                variant="gold"
+                size="lg"
+                className="w-full text-base font-bold h-14"
+                onClick={() => triggerMediaUpload("vault")}
+                disabled={!!uploading}
+              >
+                <Lock className="w-5 h-5 mr-1" />
+                {uploading === "vault" ? "UPLOADING FULL VIDEO..." : "UPLOAD FULL VIDEO"}
+              </Button>
+              <p className="text-[10px] text-muted-foreground">Locked vault content — only paying customers can view.</p>
+            </div>
+
+            {/* Progress bar */}
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] text-muted-foreground tracking-wider">
+                  <span className="font-bold text-primary">UPLOADING — {uploading === "vault" ? "FULL VIDEO" : "TEASER"}</span>
+                  <span className="font-bold text-primary">{uploadProgress}%</span>
+                </div>
+                <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-150 neon-glow-sm"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Status message */}
+            {!uploading && uploadMsg && (
+              <div className={`rounded-xl p-3 text-center text-xs font-bold tracking-wider ${
+                uploadMsg.startsWith("Upload failed")
+                  ? "bg-destructive/10 border border-destructive/30 text-destructive"
+                  : "bg-green-400/10 border border-green-400/30 text-green-400"
+              }`}>
+                {uploadMsg}
+              </div>
+            )}
+          </div>
+
+          {/* Public Teasers list (empty until first upload) */}
+          {PUBLIC_TEASERS.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Globe className="w-4 h-4 text-primary" />
+                <h3 className="text-base font-semibold text-foreground">Your Teasers</h3>
+              </div>
+              <div className="space-y-3">
+                {PUBLIC_TEASERS.map((item) => (
+                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                      <Video className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
+                    </div>
+                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Profile Trailer Upload (15s with audio) */}
-          <div className="bg-card border border-primary/30 rounded-xl p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">15s TEASER TRAILER (WITH AUDIO)</h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              Upload your 15-second MP4 with audio baked in. This loops on the Discovery Feed.
-              <span className="text-primary font-bold"> New uploads auto-replace</span> the previous teaser (old one moves to your library).
-            </p>
-            <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/50 transition-colors">
-              <Upload className="w-6 h-6 text-primary" />
-              <Button variant="neon" size="sm" onClick={() => teaserInputRef.current?.click()} disabled={!!uploading}>
-                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD 15s TEASER WITH AUDIO"}
-              </Button>
-              <p className="text-[10px] text-muted-foreground">MP4/WebM with audio • Max 15 seconds • Cloud stored</p>
-            </div>
-          </div>
-
-          {/* Public Teasers */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-primary" />
-                <h3 className="text-base font-semibold text-foreground">Public Teasers</h3>
-              </div>
-              <Button variant="neon" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
-                <Upload className="w-3.5 h-3.5" />
-                Upload Teaser
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {PUBLIC_TEASERS.map((item) => (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                    <Video className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                  </div>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Creators Uploaded Videos (Vault — Men & Women sides) */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
+          {/* Vault Content list (empty until first upload) */}
+          {VAULT_CONTENT.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
                 <Lock className="w-4 h-4 text-gold" />
-                <h3 className="text-base font-semibold text-foreground">Creators Uploaded Videos</h3>
+                <h3 className="text-base font-semibold text-foreground">Your Full Videos</h3>
               </div>
-              <Button variant="gold" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("vault")} disabled={!!uploading}>
-                <Upload className="w-3.5 h-3.5" />
-                Upload to Vault
-              </Button>
+              <div className="space-y-3">
+                {VAULT_CONTENT.map((item) => (
+                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                      {item.type === "video" ? <Video className="w-6 h-6 text-gold" /> : <Image className="w-6 h-6 text-gold" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
+                    </div>
+                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">Private vault content — visible only to paying customers (Men's & Women's sides).</p>
-            <div className="space-y-3">
-              {VAULT_CONTENT.map((item) => (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                    {item.type === "video" ? <Video className="w-6 h-6 text-gold" /> : <Image className="w-6 h-6 text-gold" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                    <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                  </div>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
+          )}
+        </div>
+      )}
+
+      {/* LTC Help Guide Modal */}
+      {showLtcHelp && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setShowLtcHelp(false)}>
+          <div className="w-full max-w-md bg-card border border-primary/30 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="text-sm font-bold text-foreground tracking-wider">HOW TO GET YOUR LITECOIN (LTC) ADDRESS</h2>
+              <button onClick={() => setShowLtcHelp(false)} className="text-muted-foreground hover:text-foreground text-sm">✕</button>
+            </div>
+            <div className="p-5 space-y-4 text-sm">
+              <ol className="space-y-3 text-foreground/90">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">1</span>
+                  <span>Open your crypto wallet (like <span className="font-bold text-foreground">Exodus</span>, <span className="font-bold text-foreground">Coinbase</span>, or <span className="font-bold text-foreground">Trust Wallet</span>).</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">2</span>
+                  <span>Search for <span className="font-bold text-foreground">Litecoin (LTC)</span> and tap <span className="font-bold text-foreground">'Receive'</span>.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">3</span>
+                  <span>Copy the long string of letters and numbers (usually starts with <span className="font-mono font-bold text-primary">L</span> or <span className="font-mono font-bold text-primary">M</span>).</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">4</span>
+                  <span>Paste it into the wallet address box above.</span>
+                </li>
+              </ol>
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
+                <p className="text-xs font-bold text-destructive">⚠ Never type this by hand.</p>
+                <p className="text-xs text-muted-foreground mt-1">If you make a typo, your payment will be lost forever. Always copy and paste.</p>
+              </div>
+              <Button variant="neon" className="w-full" onClick={() => setShowLtcHelp(false)}>GOT IT</Button>
             </div>
           </div>
         </div>
