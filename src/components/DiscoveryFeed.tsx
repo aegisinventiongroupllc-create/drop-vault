@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX, X, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
@@ -34,12 +35,27 @@ export { MOCK_VIDEOS };
 export type { VideoItem };
 
 const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
+  const { toast } = useToast();
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const [following, setFollowing] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(video.likes);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<{ user: string; text: string }[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Check if already bookmarked
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("dtt_bookmarks") || "[]");
+      setBookmarked(saved.includes(video.creator));
+    } catch { /* ignore */ }
+  }, [video.creator]);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -61,6 +77,41 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   }, [isVisible, locked]);
 
   const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
+
+  const handleLike = () => {
+    setLiked(prev => !prev);
+    setLikeCount(prev => liked ? prev - 1 : prev + 1);
+  };
+
+  const handleBookmark = () => {
+    try {
+      const saved: string[] = JSON.parse(localStorage.getItem("dtt_bookmarks") || "[]");
+      let updated: string[];
+      if (bookmarked) {
+        updated = saved.filter(c => c !== video.creator);
+        toast({ title: "Removed from Library", description: `@${video.creator} removed` });
+      } else {
+        updated = [...new Set([...saved, video.creator])];
+        toast({ title: "Saved to Library", description: `@${video.creator} added to My Library` });
+      }
+      localStorage.setItem("dtt_bookmarks", JSON.stringify(updated));
+      setBookmarked(!bookmarked);
+    } catch { /* ignore */ }
+  };
+
+  const handleShare = async () => {
+    const shareData = { title: video.title, text: `Check out @${video.creator} on DropThatThing!`, url: window.location.href };
+    try {
+      if (navigator.share) { await navigator.share(shareData); }
+      else { await navigator.clipboard.writeText(shareData.url); toast({ title: "Link copied!" }); }
+    } catch { /* cancelled */ }
+  };
+
+  const handlePostComment = () => {
+    if (!commentText.trim()) return;
+    setComments(prev => [...prev, { user: "You", text: commentText.trim() }]);
+    setCommentText("");
+  };
 
   return (
     <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
@@ -96,17 +147,69 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
       )}
 
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
-        <button className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
+        <button className="flex flex-col items-center gap-1 active:scale-95 transition-transform" onClick={() => onCreatorClick(video.creator)}>
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">{video.creatorAvatar}</div>
         </button>
         <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
         </button>
-        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all"><Heart className="w-7 h-7" /><span className="text-xs">{formatCount(video.likes)}</span></button>
-        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all"><MessageCircle className="w-7 h-7" /><span className="text-xs">{formatCount(video.comments)}</span></button>
-        <button className="text-foreground hover:text-primary active:scale-90 transition-all"><Share2 className="w-6 h-6" /></button>
-        <button className="text-foreground hover:text-primary active:scale-90 transition-all"><Bookmark className="w-6 h-6" /></button>
+        <button onClick={handleLike} className={`flex flex-col items-center gap-1 active:scale-90 transition-all ${liked ? "text-red-500" : "text-foreground hover:text-primary"}`}>
+          <Heart className="w-7 h-7" fill={liked ? "currentColor" : "none"} />
+          <span className="text-xs">{formatCount(likeCount)}</span>
+        </button>
+        <button onClick={() => setShowComments(true)} className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all">
+          <MessageCircle className="w-7 h-7" />
+          <span className="text-xs">{formatCount(video.comments + comments.length)}</span>
+        </button>
+        <button onClick={handleShare} className="text-foreground hover:text-primary active:scale-90 transition-all">
+          <Share2 className="w-6 h-6" />
+        </button>
+        <button onClick={handleBookmark} className={`active:scale-90 transition-all ${bookmarked ? "text-primary" : "text-foreground hover:text-primary"}`}>
+          <Bookmark className="w-6 h-6" fill={bookmarked ? "currentColor" : "none"} />
+        </button>
       </div>
+
+      {/* Comments drawer */}
+      {showComments && (
+        <div className="absolute inset-0 z-30 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-background/40" onClick={() => setShowComments(false)} />
+          <div className="relative bg-card border-t border-border rounded-t-2xl max-h-[60vh] flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <h3 className="text-sm font-bold text-foreground tracking-wider">COMMENTS</h3>
+              <button onClick={() => setShowComments(false)} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[100px]">
+              {comments.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
+              )}
+              {comments.map((c, i) => (
+                <div key={i} className="flex gap-2">
+                  <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">{c.user[0]}</div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{c.user}</p>
+                    <p className="text-xs text-foreground/80">{c.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 px-4 py-3 border-t border-border">
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePostComment()}
+                placeholder="Add a comment..."
+                className="flex-1 bg-secondary rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <button onClick={handlePostComment} className="text-primary hover:text-primary/80 active:scale-95 transition-all disabled:opacity-40" disabled={!commentText.trim()}>
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="absolute bottom-4 left-4 right-16 z-20">
         <button className="text-base font-semibold text-foreground hover:text-primary active:text-primary/80 transition-colors" onClick={() => onCreatorClick(video.creator)}>@{video.creator}</button>
@@ -116,7 +219,6 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
     </div>
   );
 });
-
 const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string }) => {
   const filteredVideos = MOCK_VIDEOS.filter(v => {
     if (v.vault !== vault) return false;
