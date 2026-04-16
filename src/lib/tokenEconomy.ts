@@ -102,6 +102,15 @@ export function calculateCustomRequestSplit(baseAmount: number) {
   };
 }
 
+/**
+ * Tip split: flat $1 DTT Media fee, remainder to creator
+ */
+export function calculateTipSplit(tipAmount: number) {
+  const adminFee = ADMIN_FEE_USD;
+  const creatorShare = tipAmount - adminFee;
+  return { tipAmount, adminFee, creatorShare };
+}
+
 export function calculateRequestTokens(usd: number): { baseTokens: number; fee: number; total: number } {
   const baseTokens = dollarsToBitTokens(usd);
   return {
