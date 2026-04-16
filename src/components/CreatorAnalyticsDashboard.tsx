@@ -50,12 +50,17 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const teaserInputRef = useRef<HTMLInputElement>(null);
   const mediaTargetRef = useRef<MediaBucket>("teasers");
 
-  // Loyalty gift state
-  const [showLoyaltyModal, setShowLoyaltyModal] = useState(false);
-  const [loyaltySearch, setLoyaltySearch] = useState("");
-  const [loyaltyTarget, setLoyaltyTarget] = useState<string | null>(null);
-  const [loyaltySent, setLoyaltySent] = useState(false);
-  const [remainingLoyalty, setRemainingLoyalty] = useState(25); // 5 tokens × 5 bits each = 25 bits available
+  const liveStats = useCreatorStats();
+
+  const STATS = [
+    { label: "Followers", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
+    { label: "Total Views", value: liveStats.totalViews.toLocaleString(), change: "+0%", icon: Eye },
+    { label: "Bit-Token Revenue", value: `${liveStats.bitTokenRevenue.toFixed(1)} BT`, change: `$${liveStats.totalEarnedUsd.toFixed(0)}`, icon: BarChart3 },
+    { label: "Growth Rate", value: `${liveStats.growthRate >= 0 ? "+" : ""}${liveStats.growthRate}%`, change: "vs last month", icon: TrendingUp },
+  ];
+
+  const REVENUE_DATA = liveStats.revenueByMonth;
+  const TOP_FANS = liveStats.topFans;
 
   // Request response state
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
