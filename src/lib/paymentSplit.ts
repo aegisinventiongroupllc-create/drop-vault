@@ -1,5 +1,5 @@
 // Payment split engine for DROPTHATTHING platform
-// Handles 90/10 default split and recurring 97/3 Power Week every 100K followers
+// Handles 90/10 default split and recurring 97/3 Power Week every 500K followers
 
 export interface CreatorSplitState {
   creatorId: string;
@@ -29,7 +29,7 @@ const INCENTIVE_SPLIT = { creator: 97, platform: 3 };
  * Computes the current milestone bracket for a follower count.
  * IMPORTANT: Only 'Customer' role accounts count toward milestones.
  * Creator accounts do NOT count, even if they spend tokens.
- * E.g. 1,248,000 → lastMilestone=1000000, nextMilestone=1500000
+ * E.g. 1,248,000 → lastMilestone=1000000, nextMilestone=1500000 (every 500K)
  */
 function getMilestoneBracket(followers: number) {
   const lastMilestone = Math.floor(followers / FOLLOWER_MILESTONE) * FOLLOWER_MILESTONE;
