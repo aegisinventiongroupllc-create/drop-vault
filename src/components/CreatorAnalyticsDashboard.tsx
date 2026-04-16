@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -33,10 +33,10 @@ const REVENUE_DATA = [
 ];
 
 const CUSTOM_REQUESTS = [
-  { id: "1", fan: "VaultKing99", description: "Custom cosplay photoshoot — Tifa Lockhart", amount: 500, status: "pending" as const },
-  { id: "2", fan: "NeonWhale", description: "Exclusive gym workout video — 10 min", amount: 250, status: "pending" as const },
-  { id: "3", fan: "DiamondFan", description: "Premium behind-the-scenes content", amount: 1000, status: "accepted" as const },
-  { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const },
+  { id: "1", fan: "VaultKing99", description: "Custom cosplay photoshoot — Tifa Lockhart", amount: 500, status: "pending" as const, tokenPrice: 0, declineReason: "" },
+  { id: "2", fan: "NeonWhale", description: "Exclusive gym workout video — 10 min", amount: 250, status: "pending" as const, tokenPrice: 0, declineReason: "" },
+  { id: "3", fan: "DiamondFan", description: "Premium behind-the-scenes content", amount: 1000, status: "accepted" as const, tokenPrice: 50, declineReason: "" },
+  { id: "4", fan: "TopTierSub", description: "Custom GRWM video", amount: 150, status: "completed" as const, tokenPrice: 8, declineReason: "" },
 ];
 
 const PUBLIC_TEASERS = [
@@ -60,6 +60,12 @@ const TOP_FANS = [
   { rank: 5, name: "CryptoFan42", spent: 600 },
 ];
 
+// Mock follower list for loyalty gifting
+const FOLLOWERS_LIST = [
+  "DiamondHands_99", "VaultKing99", "NeonWhale", "TopTierSub", "CryptoFan42",
+  "LoyalViewer01", "SilentSupporter", "MidnightFan", "GoldenBoy22", "StarGazer99",
+];
+
 type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
@@ -72,21 +78,30 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
-  const [requestActions, setRequestActions] = useState<Record<string, "accepted" | "declined">>({});
-  const [loyaltyTokens] = useState(5);
+  const [requestActions, setRequestActions] = useState<Record<string, { action: "accepted" | "declined"; tokenPrice?: number; reason?: string }>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadMsg, setUploadMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaInputRef = useRef<HTMLInputElement>(null);
+  const teaserInputRef = useRef<HTMLInputElement>(null);
   const mediaTargetRef = useRef<MediaBucket>("teasers");
+
+  // Loyalty gift state
+  const [showLoyaltyModal, setShowLoyaltyModal] = useState(false);
+  const [loyaltySearch, setLoyaltySearch] = useState("");
+  const [loyaltyTarget, setLoyaltyTarget] = useState<string | null>(null);
+  const [loyaltySent, setLoyaltySent] = useState(false);
+  const [remainingLoyalty, setRemainingLoyalty] = useState(25); // 5 tokens × 5 bits each = 25 bits available
+
+  // Request response state
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [responseTokenPrice, setResponseTokenPrice] = useState("");
+  const [responseDeclineReason, setResponseDeclineReason] = useState("");
 
   const [splitState, setSplitState] = useState<CreatorSplitState>(() =>
     getCreatorSplitState("creator-1", 48200)
   );
   const [countdown, setCountdown] = useState("");
-  const [giftUsername, setGiftUsername] = useState("");
-  const [giftSent, setGiftSent] = useState(false);
-  const [remainingLoyalty, setRemainingLoyalty] = useState(5);
 
   const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
@@ -122,8 +137,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const handleRequestAction = (id: string, action: "accepted" | "declined") => {
-    setRequestActions(prev => ({ ...prev, [id]: action }));
+  const handleRequestAction = (id: string, action: "accepted" | "declined", tokenPrice?: number, reason?: string) => {
+    setRequestActions(prev => ({ ...prev, [id]: { action, tokenPrice, reason } }));
+    setRespondingTo(null);
+    setResponseTokenPrice("");
+    setResponseDeclineReason("");
   };
 
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +150,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     const bucket = mediaTargetRef.current;
     setUploading(bucket);
     setUploadMsg("");
-    // Use a placeholder user ID until auth is wired
     const userId = "creator-1";
     const result = await uploadMedia(file, bucket, userId);
     if ("error" in result) {
@@ -144,19 +161,41 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     e.target.value = "";
   };
 
+  const handleTeaserUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading("teasers");
+    setUploadMsg("");
+    const userId = "creator-1";
+    // Upload new teaser — old one is auto-replaced in cloud storage (same path)
+    const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
+    if ("error" in result) {
+      setUploadMsg(`Upload failed: ${result.error}`);
+    } else {
+      setUploadMsg(`✓ Teaser uploaded with audio: ${file.name}. Old teaser moved to your library.`);
+    }
+    setUploading(null);
+    e.target.value = "";
+  };
+
   const triggerMediaUpload = (bucket: MediaBucket) => {
     mediaTargetRef.current = bucket;
     mediaInputRef.current?.click();
   };
 
-  // Show safety modal on first load
+  const filteredFollowers = FOLLOWERS_LIST.filter(f =>
+    f.toLowerCase().includes(loyaltySearch.toLowerCase())
+  );
+
   if (showSafetyModal && !safetyAgreed) {
     return <CreatorSafetyModal onAgree={() => { setSafetyAgreed(true); setShowSafetyModal(false); }} />;
   }
 
-  // Hidden file input for media uploads
   const mediaUploadInput = (
-    <input ref={mediaInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
+    <>
+      <input ref={mediaInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
+      <input ref={teaserInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={handleTeaserUpload} />
+    </>
   );
 
   return (
@@ -249,44 +288,100 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         )}
       </div>
 
-      {/* Strategy Tip & Loyalty Gift */}
+      {/* Strategy Tip & Loyalty Gift (5 BIT TOKENS) */}
       <div className="mx-4 mb-4 flex gap-3">
         <div className="flex-1 bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <Lightbulb className="w-4 h-4 text-gold" />
             <h4 className="text-xs font-bold text-foreground">Strategy Tip</h4>
           </div>
-          <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser, lock your full content behind a paywall.</p>
+          <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser with audio, lock your full content behind a paywall.</p>
         </div>
-        <div className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow min-w-[120px]">
-          <Crown className="w-4 h-4 text-gold mx-auto mb-1" />
-          <p className="text-xs font-bold text-gold">{remainingLoyalty}</p>
-          <p className="text-[10px] text-muted-foreground">Loyalty Bits</p>
-          <div className="mt-2 space-y-1">
-            <input
-              type="text"
-              value={giftUsername}
-              onChange={(e) => { setGiftUsername(e.target.value); setGiftSent(false); }}
-              placeholder="@fan"
-              className="w-full bg-secondary rounded-lg px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-gold/50"
-            />
-            <button
-              disabled={!giftUsername.trim() || remainingLoyalty <= 0}
-              onClick={() => {
-                if (remainingLoyalty > 0 && giftUsername.trim()) {
-                  setRemainingLoyalty(prev => prev - 1);
-                  setGiftSent(true);
-                  setGiftUsername("");
-                }
-              }}
-              className="w-full bg-gold/20 hover:bg-gold/30 text-gold text-[10px] font-bold rounded-lg py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              GIFT 1 BIT
-            </button>
-            {giftSent && <p className="text-[8px] text-green-400 font-bold">✓ Sent!</p>}
+        <button
+          onClick={() => setShowLoyaltyModal(true)}
+          className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow min-w-[120px] hover:border-gold/50 transition-all"
+        >
+          <Gift className="w-5 h-5 text-gold mx-auto mb-1" />
+          <p className="text-xs font-bold text-gold">5 LOYALTY BITS</p>
+          <p className="text-[10px] text-muted-foreground">Gift to a follower</p>
+        </button>
+      </div>
+
+      {/* Loyalty Modal */}
+      {showLoyaltyModal && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-card border border-gold/30 rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="text-sm font-bold text-foreground tracking-wider">GIFT 5 LOYALTY BIT-TOKENS</h2>
+              <button onClick={() => { setShowLoyaltyModal(false); setLoyaltyTarget(null); setLoyaltySent(false); setLoyaltySearch(""); }} className="text-muted-foreground hover:text-foreground text-sm">✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <p className="text-xs text-muted-foreground">Search and select a follower to gift 5 Bit-Tokens from your balance.</p>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={loyaltySearch}
+                  onChange={(e) => { setLoyaltySearch(e.target.value); setLoyaltyTarget(null); setLoyaltySent(false); }}
+                  placeholder="Search follower..."
+                  className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                />
+              </div>
+
+              {/* Follower list */}
+              <div className="max-h-48 overflow-y-auto space-y-1">
+                {filteredFollowers.map(follower => (
+                  <button
+                    key={follower}
+                    onClick={() => setLoyaltyTarget(follower)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                      loyaltyTarget === follower
+                        ? "bg-gold/20 text-gold border border-gold/30"
+                        : "bg-secondary/50 text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    @{follower}
+                  </button>
+                ))}
+                {filteredFollowers.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">No followers found</p>
+                )}
+              </div>
+
+              {loyaltyTarget && !loyaltySent && (
+                <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
+                  <p className="text-xs text-foreground mb-2">
+                    Gift <span className="text-gold font-bold">5 Bit-Tokens</span> to <span className="text-foreground font-bold">@{loyaltyTarget}</span>?
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mb-3">5 tokens will be deducted from your balance and added to theirs.</p>
+                  <Button
+                    variant="gold"
+                    size="sm"
+                    className="w-full"
+                    disabled={remainingLoyalty < 5}
+                    onClick={() => {
+                      setRemainingLoyalty(prev => prev - 5);
+                      setLoyaltySent(true);
+                    }}
+                  >
+                    CONFIRM GIFT — 5 BIT-TOKENS
+                  </Button>
+                </div>
+              )}
+
+              {loyaltySent && (
+                <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-3 text-center">
+                  <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-1" />
+                  <p className="text-xs font-bold text-green-400">LOYALTY REWARD SENT!</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">@{loyaltyTarget} received 5 Bit-Tokens</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Analytics Overview */}
       {activeSection === "overview" && (
@@ -332,9 +427,8 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <span className="text-xs font-bold tracking-wider text-foreground">PAYOUT STRUCTURE</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Dual-Bucket Revenue: Tax then Split.</span>{" "}
-              A flat <span className="font-semibold text-foreground">$1.00 Admin Fee</span> is deducted first, then the remaining base is split{" "}
-              <span className="font-semibold text-foreground">90% Creator / 10% Platform</span>.
+              <span className="font-semibold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
+              Includes a flat <span className="font-semibold text-foreground">$1.00 Network Tax</span> per request.
               Custom requests ($500–$10,001): same $1 fee + 10% of base.
             </p>
           </div>
@@ -396,7 +490,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             ))}
           </div>
 
-          {/* Suggestion Box */}
           <SuggestionBox />
         </div>
       )}
@@ -443,17 +536,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <p className="text-3xl font-bold text-primary">$2,340.00</p>
               <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
             </div>
-
-            {/* LTC Warning */}
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 mb-4">
-              <p className="text-xs font-bold text-gold text-center tracking-wider">
-                ⚠ LTC ONLY. YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.
-              </p>
-              <p className="text-[10px] text-muted-foreground text-center mt-1">
-                All payouts are sent as Litecoin. Settlements take 4–5 business days.
-              </p>
+              <p className="text-xs font-bold text-gold text-center tracking-wider">⚠ LTC ONLY. YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.</p>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">All payouts are sent as Litecoin. Settlements take 4–5 business days.</p>
             </div>
-
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
               <input
@@ -463,7 +549,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                   const val = e.target.value.trim();
                   setLtcAddress(val);
                   setLtcSaved(false);
-                  // Validate LTC address format (ltc1, L, M, or 3 prefix)
                   if (val && !/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(val)) {
                     setLtcError("Invalid LTC address. Must start with ltc1, L, M, or 3.");
                   } else {
@@ -477,22 +562,14 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved</p>}
               <p className="text-xs text-muted-foreground">Payouts are sent exclusively via Litecoin (LTC)</p>
             </div>
-            <Button
-              variant="neon"
-              className="w-full mt-4"
-              disabled={!ltcAddress || !!ltcError}
-              onClick={() => {
-                setLtcSaved(true);
-                // TODO: Save to creator_wallets table when auth is wired
-              }}
-            >
+            <Button variant="neon" className="w-full mt-4" disabled={!ltcAddress || !!ltcError} onClick={() => setLtcSaved(true)}>
               SAVE WALLET & REQUEST PAYOUT
             </Button>
           </div>
         </div>
       )}
 
-      {/* Request Vault */}
+      {/* Request Vault — Creator Response */}
       {activeSection === "requests" && (
         <div className="px-4 space-y-4">
           <div className="bg-card border border-border rounded-xl p-4">
@@ -500,17 +577,17 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <FileText className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">The Request Vault</h3>
             </div>
-            <p className="text-xs text-muted-foreground mb-4">Custom Media Requests from fans</p>
+            <p className="text-xs text-muted-foreground mb-4">Custom Media Requests from fans — set your Bit-Token price or decline with a reason.</p>
             <div className="space-y-3">
               {CUSTOM_REQUESTS.map((req) => {
                 const action = requestActions[req.id];
-                const displayStatus = action ?? req.status;
+                const displayStatus = action?.action ?? req.status;
                 return (
                   <div key={req.id} className="border border-border rounded-xl p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-foreground">{req.description}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">From: {req.fan}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">From: @{req.fan}</p>
                       </div>
                       <div className="flex items-center gap-1 bg-primary/10 border border-primary/30 rounded-full px-2.5 py-1">
                         <DollarSign className="w-3 h-3 text-primary" />
@@ -526,17 +603,66 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                       }`}>
                         {displayStatus === "pending" ? "Awaiting Response" : displayStatus === "accepted" ? "In Progress" : displayStatus === "declined" ? "Declined" : "Completed"}
                       </span>
-                      {displayStatus === "pending" && (
+                      {displayStatus === "pending" && respondingTo !== req.id && (
                         <div className="flex gap-2">
-                          <Button variant="neon" size="sm" onClick={() => handleRequestAction(req.id, "accepted")}>
-                            ACCEPT & CREATE
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-destructive border-destructive/30" onClick={() => handleRequestAction(req.id, "declined")}>
-                            DECLINE
+                          <Button variant="neon" size="sm" onClick={() => setRespondingTo(req.id)}>
+                            RESPOND
                           </Button>
                         </div>
                       )}
                     </div>
+
+                    {/* Response form */}
+                    {respondingTo === req.id && (
+                      <div className="mt-3 bg-secondary/50 border border-border rounded-xl p-3 space-y-3">
+                        <div>
+                          <label className="text-[10px] font-bold text-muted-foreground tracking-wider">SET YOUR BIT-TOKEN PRICE</label>
+                          <input
+                            type="number"
+                            value={responseTokenPrice}
+                            onChange={(e) => setResponseTokenPrice(e.target.value)}
+                            placeholder="e.g. 25"
+                            className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="neon"
+                            size="sm"
+                            className="flex-1"
+                            disabled={!responseTokenPrice}
+                            onClick={() => handleRequestAction(req.id, "accepted", Number(responseTokenPrice))}
+                          >
+                            ACCEPT — {responseTokenPrice || "?"} BT
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-destructive border-destructive/30"
+                            onClick={() => {
+                              const reason = prompt("Reason for declining (optional):") || "Not available";
+                              handleRequestAction(req.id, "declined", undefined, reason);
+                            }}
+                          >
+                            DECLINE
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show token price if accepted */}
+                    {action?.action === "accepted" && action.tokenPrice && (
+                      <div className="mt-2 bg-primary/10 border border-primary/20 rounded-lg p-2 text-center">
+                        <p className="text-[10px] text-muted-foreground">Your price: <span className="text-primary font-bold">{action.tokenPrice} BT</span></p>
+                      </div>
+                    )}
+
+                    {/* Show decline reason */}
+                    {action?.action === "declined" && action.reason && (
+                      <div className="mt-2 bg-destructive/5 border border-destructive/20 rounded-lg p-2">
+                        <p className="text-[10px] text-muted-foreground">Reason: <span className="text-destructive">{action.reason}</span></p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -557,16 +683,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
           )}
 
-          {/* Profile Trailer Upload */}
+          {/* Profile Trailer Upload (15s with audio) */}
           <div className="bg-card border border-primary/30 rounded-xl p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">PROFILE TRAILER (15s)</h3>
-            <p className="text-xs text-muted-foreground mb-3">This video loops at the top of your locked profile. Stored in cloud storage for scalability.</p>
+            <h3 className="text-sm font-bold text-foreground mb-2">15s TEASER TRAILER (WITH AUDIO)</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Upload your 15-second MP4 with audio baked in. This loops on the Discovery Feed.
+              <span className="text-primary font-bold"> New uploads auto-replace</span> the previous teaser (old one moves to your library).
+            </p>
             <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/50 transition-colors">
               <Upload className="w-6 h-6 text-primary" />
-              <Button variant="neon" size="sm" onClick={() => triggerMediaUpload("teasers")} disabled={!!uploading}>
-                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD PROFILE TRAILER"}
+              <Button variant="neon" size="sm" onClick={() => teaserInputRef.current?.click()} disabled={!!uploading}>
+                {uploading === "teasers" ? "UPLOADING..." : "UPLOAD 15s TEASER WITH AUDIO"}
               </Button>
-              <p className="text-[10px] text-muted-foreground">MP4, max 15 seconds • Stored in cloud</p>
+              <p className="text-[10px] text-muted-foreground">MP4/WebM with audio • Max 15 seconds • Cloud stored</p>
             </div>
           </div>
 
@@ -598,18 +727,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
           </div>
 
-          {/* Locked Vault Content */}
+          {/* Creators Uploaded Videos (Vault — Men & Women sides) */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Lock className="w-4 h-4 text-gold" />
-                <h3 className="text-base font-semibold text-foreground">Locked Vault Content</h3>
+                <h3 className="text-base font-semibold text-foreground">Creators Uploaded Videos</h3>
               </div>
               <Button variant="gold" size="sm" className="gap-1.5" onClick={() => triggerMediaUpload("vault")} disabled={!!uploading}>
                 <Upload className="w-3.5 h-3.5" />
                 Upload to Vault
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mb-3">Private vault content — visible only to paying customers (Men's & Women's sides).</p>
             <div className="space-y-3">
               {VAULT_CONTENT.map((item) => (
                 <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
@@ -624,16 +754,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Music & Trailer Upload */}
-          <div className="bg-card border border-border rounded-xl p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">MUSIC & TRAILER</h3>
-            <p className="text-xs text-muted-foreground mb-3">Upload your 15-second MP4 with audio baked in for the Discovery Feed.</p>
-            <Button variant="neon" size="sm" className="gap-1.5">
-              <Upload className="w-3.5 h-3.5" />
-              UPLOAD TRAILER WITH AUDIO
-            </Button>
           </div>
         </div>
       )}
