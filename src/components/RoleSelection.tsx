@@ -20,7 +20,7 @@ const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
   const handleSelect = (role: UserRole) => {
     const trimmed = email.trim();
     if (trimmed === ADMIN_PASSCODE) {
-      sessionStorage.setItem("admin_authenticated", "true");
+      sessionStorage.setItem("dtt_secret_admin_ok", "1");
       setError("");
       navigate("/admin-portal");
       return;
