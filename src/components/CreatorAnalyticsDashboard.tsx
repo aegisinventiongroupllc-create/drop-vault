@@ -124,6 +124,43 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return () => clearInterval(interval);
   }, [splitState.incentiveActive, splitState.incentiveEndsAt]);
 
+  // Camera helpers for ID verification
+  const startCamera = async () => {
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      cameraStreamRef.current = stream;
+      if (cameraVideoRef.current) cameraVideoRef.current.srcObject = stream;
+    } catch {
+      setShowCamera(false);
+      alert("Camera access denied. Please allow camera access to verify your ID.");
+    }
+  };
+  const capturePhoto = () => {
+    if (!cameraVideoRef.current) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = cameraVideoRef.current.videoWidth;
+    canvas.height = cameraVideoRef.current.videoHeight;
+    canvas.getContext("2d")?.drawImage(cameraVideoRef.current, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    setCapturedImage(dataUrl);
+    stopCamera();
+    setIdUploaded(true);
+    setVerificationStatus("pending");
+  };
+  const stopCamera = () => {
+    cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+    cameraStreamRef.current = null;
+    setShowCamera(false);
+  };
+
+  // LTC address validation
+  const validateLtcAddress = (val: string) => {
+    if (!val) return "";
+    if (/^(ltc1|[LM3])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(val)) return "";
+    return "Invalid LTC address. Must start with L, M, or ltc1.";
+  };
+
   const maxEarned = Math.max(...REVENUE_DATA.map((d) => d.earned));
 
   const sections: { id: Section; label: string }[] = [
