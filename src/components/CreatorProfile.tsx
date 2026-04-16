@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera, Heart, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
 import CustomRequestModal from "@/components/CustomRequestModal";
+import { ADMIN_FEE_USD } from "@/lib/tokenEconomy";
 
 interface Vault {
   name: string;
@@ -25,6 +26,20 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [showRequest, setShowRequest] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [selectedTip, setSelectedTip] = useState<number | null>(null);
+  const [tipSent, setTipSent] = useState(false);
+  const [tipNotification, setTipNotification] = useState<string | null>(null);
+
+  const TIP_AMOUNTS = [5, 10, 20, 50, 100];
+
+  const handleSendTip = (amount: number) => {
+    const netAmount = amount - ADMIN_FEE_USD;
+    // In production, this triggers a NOWPayments invoice
+    setTipSent(true);
+    setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (after $${ADMIN_FEE_USD} platform fee).`);
+    setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
+  };
 
   const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
