@@ -41,6 +41,7 @@ const savePrefs = (prefs: UserPrefs) => {
 };
 
 const Index = () => {
+  const { t } = useI18n();
   const savedPrefs = loadPrefs();
 
   const [verified, setVerified] = useState(!!savedPrefs);
