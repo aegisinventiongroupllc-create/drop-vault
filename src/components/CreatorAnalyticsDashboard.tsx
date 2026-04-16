@@ -546,7 +546,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Use your device camera to take a live photo of your government-issued ID for automatic age & identity verification.</p>
+              <p className="text-xs text-muted-foreground">Use your device camera to take a live photo of your government-issued ID. Automated verification powered by <span className="font-bold text-foreground">iDenfy / Veriff</span> (coming soon).</p>
+            </div>
+            <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
+              <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
             </div>
 
             {/* Camera viewfinder */}
