@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/i18n/I18nContext";
 
 interface SearchResult {
   name: string;
@@ -21,6 +22,7 @@ const ALL_CREATORS: SearchResult[] = [
 ];
 
 const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: string) => void; onClose: () => void }) => {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [demandSent, setDemandSent] = useState(false);
 
@@ -57,7 +59,7 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
             type="text"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setDemandSent(false); }}
-            placeholder="Search creators by name or category..."
+            placeholder={t.search_placeholder}
             className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
@@ -83,7 +85,7 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
               <p className="text-xs text-muted-foreground">{creator.category}</p>
             </div>
             <Button variant="neon" size="sm" className="text-[10px]">
-              UNLOCK
+              {t.unlock}
             </Button>
           </button>
         ))}
@@ -92,23 +94,23 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
           <div className="text-center py-8 space-y-3">
             <Lightbulb className="w-8 h-8 text-gold mx-auto" />
             <p className="text-sm text-muted-foreground">
-              Niche not found — <span className="text-foreground font-semibold">Request this content?</span>
+              {t.niche_not_found} <span className="text-foreground font-semibold">{t.request_niche}?</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              We'll let creators know there's demand for "<span className="text-primary font-medium">{query}</span>"
+              "<span className="text-primary font-medium">{query}</span>"
             </p>
             {demandSent ? (
-              <p className="text-xs text-green-400 font-bold tracking-wider">✓ REQUEST LOGGED</p>
+              <p className="text-xs text-green-400 font-bold tracking-wider">{t.request_logged}</p>
             ) : (
               <Button variant="neon" size="sm" onClick={handleRequestDemand}>
-                REQUEST THIS NICHE
+                {t.request_niche}
               </Button>
             )}
           </div>
         )}
 
         {!query.trim() && (
-          <p className="text-center text-sm text-muted-foreground py-8">Start typing to discover creators</p>
+          <p className="text-center text-sm text-muted-foreground py-8">{t.start_typing}</p>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { VaultType } from "@/lib/tokenEconomy";
+import { useI18n } from "@/i18n/I18nContext";
 
 type Tab = "home" | "trending" | "vaults" | "profile";
 
@@ -9,13 +10,15 @@ interface BottomNavProps {
 }
 
 const BottomNav = ({ active, onNavigate, vault }: BottomNavProps) => {
-  const libraryLabel = vault === "men" ? "MY GUYS" : vault === "women" ? "MY GIRLS" : "MY LIBRARY";
+  const { t } = useI18n();
+
+  const libraryLabel = vault === "men" ? t.nav_my_guys : vault === "women" ? t.nav_my_girls : t.nav_my_library;
 
   const items: { id: Tab; label: string }[] = [
-    { id: "home", label: "LIVE" },
-    { id: "trending", label: "TRENDING" },
+    { id: "home", label: t.nav_live },
+    { id: "trending", label: t.nav_trending },
     { id: "vaults", label: libraryLabel },
-    { id: "profile", label: "PROFILE" },
+    { id: "profile", label: t.nav_profile },
   ];
 
   return (
