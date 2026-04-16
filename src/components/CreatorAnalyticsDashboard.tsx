@@ -318,7 +318,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         {!splitState.incentiveActive && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>Progress to next 100K milestone</span>
+              <span>Progress to next 500K milestone</span>
               <span>{splitState.followerCount.toLocaleString()} / {splitState.nextMilestone.toLocaleString()}</span>
             </div>
             <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
