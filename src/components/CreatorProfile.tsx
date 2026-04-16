@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera, Heart, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
 import CustomRequestModal from "@/components/CustomRequestModal";
+import { ADMIN_FEE_USD } from "@/lib/tokenEconomy";
 
 interface Vault {
   name: string;
@@ -25,6 +26,20 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [showRequest, setShowRequest] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [selectedTip, setSelectedTip] = useState<number | null>(null);
+  const [tipSent, setTipSent] = useState(false);
+  const [tipNotification, setTipNotification] = useState<string | null>(null);
+
+  const TIP_AMOUNTS = [5, 10, 20, 50, 100];
+
+  const handleSendTip = (amount: number) => {
+    const netAmount = amount - ADMIN_FEE_USD;
+    // In production, this triggers a NOWPayments invoice
+    setTipSent(true);
+    setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (after $${ADMIN_FEE_USD} platform fee).`);
+    setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
+  };
 
   const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,9 +113,78 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           Request Custom Media
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Premium commissions from $100 — $1,000 • Secure escrow
+          Premium commissions from $500 — $10,001 • Secure escrow via NOWPayments
         </p>
       </div>
+
+      {/* Send a Tip */}
+      <div className="px-4 mt-3">
+        <Button
+          variant="neon"
+          size="lg"
+          className="w-full text-base font-semibold gap-2"
+          onClick={() => setShowTipModal(true)}
+        >
+          <Heart className="w-5 h-5" />
+          SEND A TIP
+        </Button>
+        <p className="text-center text-xs text-muted-foreground mt-1.5">
+          Show your support — $1 platform fee per tip
+        </p>
+      </div>
+
+      {/* Tip Modal */}
+      {showTipModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => { if (!tipSent) { setShowTipModal(false); setSelectedTip(null); } }}>
+          <div className="bg-card border border-border rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-foreground text-center mb-1">
+              <Heart className="w-5 h-5 inline text-pink-400 mr-1" /> Send a Tip to {creatorName}
+            </h3>
+            <p className="text-xs text-muted-foreground text-center mb-4">
+              A flat ${ADMIN_FEE_USD} DTT Media fee is deducted. The rest goes to the creator.
+            </p>
+            {tipNotification ? (
+              <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
+                <p className="text-sm font-bold text-green-400">{tipNotification}</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {TIP_AMOUNTS.map((amt) => (
+                    <button
+                      key={amt}
+                      onClick={() => setSelectedTip(amt)}
+                      className={`py-3 rounded-xl text-sm font-bold transition-all border ${
+                        selectedTip === amt
+                          ? "bg-primary/20 border-primary text-primary"
+                          : "bg-secondary border-border text-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      ${amt}
+                    </button>
+                  ))}
+                </div>
+                {selectedTip && (
+                  <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
+                    <div className="flex justify-between"><span>Tip Amount:</span><span className="text-foreground font-bold">${selectedTip}</span></div>
+                    <div className="flex justify-between"><span>DTT Media Fee:</span><span className="text-destructive font-bold">-${ADMIN_FEE_USD}</span></div>
+                    <div className="flex justify-between border-t border-border pt-1"><span>Creator Receives:</span><span className="text-primary font-bold">${selectedTip - ADMIN_FEE_USD}</span></div>
+                  </div>
+                )}
+                <Button
+                  variant="neon"
+                  className="w-full"
+                  disabled={!selectedTip}
+                  onClick={() => selectedTip && handleSendTip(selectedTip)}
+                >
+                  <DollarSign className="w-4 h-4 mr-1" />
+                  {selectedTip ? `SEND $${selectedTip} TIP` : "SELECT AN AMOUNT"}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Media Grid */}
       <CreatorMediaGrid />
