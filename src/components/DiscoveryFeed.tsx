@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
-import GlobalPassport from "@/components/GlobalPassport";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
@@ -11,6 +10,7 @@ interface VideoItem {
   id: string;
   creator: string;
   creatorAvatar: string;
+  title: string;
   description: string;
   likes: number;
   comments: number;
@@ -20,15 +20,18 @@ interface VideoItem {
 }
 
 const MOCK_VIDEOS: VideoItem[] = [
-  { id: "1", creator: "LunaCosplay", creatorAvatar: "LC", description: "✨ New cosplay reveal — Marin Kitagawa ✨ #cosplay #anime", likes: 12400, comments: 892, color: "from-pink-900/40 to-purple-900/40", vault: "women", country: "US" },
-  { id: "2", creator: "FitJessie", creatorAvatar: "FJ", description: "Morning gym routine 💪 Full video in my vault!", likes: 8200, comments: 431, color: "from-blue-900/40 to-teal-900/40", vault: "women", country: "US" },
-  { id: "3", creator: "BlondieVibes", creatorAvatar: "BV", description: "Beach day vibes 🌊 Link in bio for exclusive content", likes: 15600, comments: 1203, color: "from-amber-900/40 to-orange-900/40", vault: "women", country: "GB" },
-  { id: "4", creator: "TwinFlames", creatorAvatar: "TF", description: "Dance challenge with my bestie 💃🔥", likes: 22100, comments: 1870, color: "from-red-900/40 to-pink-900/40", vault: "women", country: "BR" },
-  { id: "5", creator: "PetiteSophie", creatorAvatar: "PS", description: "GRWM for a night out 💄✨ #grwm #nightout", likes: 9800, comments: 672, color: "from-violet-900/40 to-indigo-900/40", vault: "women", country: "FR" },
-  { id: "6", creator: "AlphaFlex", creatorAvatar: "AF", description: "Morning routine — full set in the vault 💪", likes: 7400, comments: 340, color: "from-blue-900/40 to-slate-900/40", vault: "men", country: "US" },
-  { id: "7", creator: "KingCole", creatorAvatar: "KC", description: "Behind the scenes shoot 📸🔥", likes: 11200, comments: 560, color: "from-slate-900/40 to-blue-900/40", vault: "men", country: "GB" },
-  { id: "8", creator: "RexFitness", creatorAvatar: "RF", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men", country: "AU" },
+  { id: "1", creator: "LunaCosplay", creatorAvatar: "LC", title: "Marin Kitagawa Cosplay Reveal", description: "✨ New cosplay reveal — Marin Kitagawa ✨ #cosplay #anime", likes: 12400, comments: 892, color: "from-pink-900/40 to-purple-900/40", vault: "women", country: "US" },
+  { id: "2", creator: "FitJessie", creatorAvatar: "FJ", title: "Morning Gym Routine", description: "Morning gym routine 💪 Full video in my vault!", likes: 8200, comments: 431, color: "from-blue-900/40 to-teal-900/40", vault: "women", country: "US" },
+  { id: "3", creator: "BlondieVibes", creatorAvatar: "BV", title: "Beach Day Vibes", description: "Beach day vibes 🌊 Link in bio for exclusive content", likes: 15600, comments: 1203, color: "from-amber-900/40 to-orange-900/40", vault: "women", country: "GB" },
+  { id: "4", creator: "TwinFlames", creatorAvatar: "TF", title: "Dance Challenge Duo", description: "Dance challenge with my bestie 💃🔥", likes: 22100, comments: 1870, color: "from-red-900/40 to-pink-900/40", vault: "women", country: "BR" },
+  { id: "5", creator: "PetiteSophie", creatorAvatar: "PS", title: "Night Out GRWM", description: "GRWM for a night out 💄✨ #grwm #nightout", likes: 9800, comments: 672, color: "from-violet-900/40 to-indigo-900/40", vault: "women", country: "FR" },
+  { id: "6", creator: "AlphaFlex", creatorAvatar: "AF", title: "Morning Routine Full Set", description: "Morning routine — full set in the vault 💪", likes: 7400, comments: 340, color: "from-blue-900/40 to-slate-900/40", vault: "men", country: "US" },
+  { id: "7", creator: "KingCole", creatorAvatar: "KC", title: "Behind The Scenes Shoot", description: "Behind the scenes shoot 📸🔥", likes: 11200, comments: 560, color: "from-slate-900/40 to-blue-900/40", vault: "men", country: "GB" },
+  { id: "8", creator: "RexFitness", creatorAvatar: "RF", title: "5AM Grind Session", description: "5AM grind — unlock for the full 30min session", likes: 6800, comments: 290, color: "from-cyan-900/40 to-blue-900/40", vault: "men", country: "AU" },
 ];
+
+export { MOCK_VIDEOS };
+export type { VideoItem };
 
 const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
   const [seconds, setSeconds] = useState(0);
@@ -72,7 +75,7 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted">
         <div className="h-full bg-primary transition-all duration-1000 neon-glow-sm" style={{ width: `${(seconds / 15) * 100}%` }} />
       </div>
-      <button onClick={() => setMuted(!muted)} className="absolute bottom-24 left-3 z-20 w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-foreground">
+      <button onClick={() => setMuted(!muted)} className="absolute bottom-24 left-3 z-20 w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-foreground active:scale-95 transition-transform">
         {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
       </button>
 
@@ -93,30 +96,35 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
       )}
 
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
-        <button className="flex flex-col items-center gap-1">
+        <button className="flex flex-col items-center gap-1 active:scale-95 transition-transform">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">{video.creatorAvatar}</div>
         </button>
-        <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
+        <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
         </button>
-        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"><Heart className="w-7 h-7" /><span className="text-xs">{formatCount(video.likes)}</span></button>
-        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary transition-colors"><MessageCircle className="w-7 h-7" /><span className="text-xs">{formatCount(video.comments)}</span></button>
-        <button className="text-foreground hover:text-primary transition-colors"><Share2 className="w-6 h-6" /></button>
-        <button className="text-foreground hover:text-primary transition-colors"><Bookmark className="w-6 h-6" /></button>
+        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all"><Heart className="w-7 h-7" /><span className="text-xs">{formatCount(video.likes)}</span></button>
+        <button className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all"><MessageCircle className="w-7 h-7" /><span className="text-xs">{formatCount(video.comments)}</span></button>
+        <button className="text-foreground hover:text-primary active:scale-90 transition-all"><Share2 className="w-6 h-6" /></button>
+        <button className="text-foreground hover:text-primary active:scale-90 transition-all"><Bookmark className="w-6 h-6" /></button>
       </div>
 
       <div className="absolute bottom-4 left-4 right-16 z-20">
-        <button className="text-base font-semibold text-foreground hover:text-primary transition-colors" onClick={() => onCreatorClick(video.creator)}>@{video.creator}</button>
+        <button className="text-base font-semibold text-foreground hover:text-primary active:text-primary/80 transition-colors" onClick={() => onCreatorClick(video.creator)}>@{video.creator}</button>
+        <p className="text-xs font-bold text-primary/90 mt-0.5">{video.title}</p>
         <p className="text-sm text-foreground/80 mt-1 line-clamp-2">{video.description}</p>
       </div>
     </div>
   );
 });
 
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string }) => {
   const filteredVideos = MOCK_VIDEOS.filter(v => {
     if (v.vault !== vault) return false;
     if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      if (!v.title.toLowerCase().includes(q) && !v.creator.toLowerCase().includes(q) && !v.description.toLowerCase().includes(q)) return false;
+    }
     return true;
   });
 
@@ -127,7 +135,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           <h1 className="font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
           <WalletIndicator />
         </div>
-        <button onClick={onSearch} className="mx-4 w-[calc(100%-2rem)] bg-secondary rounded-xl px-4 py-2.5 text-left text-sm text-muted-foreground">
+        <button onClick={onSearch} className="mx-4 w-[calc(100%-2rem)] bg-secondary rounded-xl px-4 py-2.5 text-left text-sm text-muted-foreground hover:bg-secondary/80 active:bg-secondary/60 transition-colors">
           Search creators...
         </button>
       </div>
