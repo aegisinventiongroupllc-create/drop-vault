@@ -23,7 +23,7 @@ const BottomNav = ({ active, onNavigate, vault }: BottomNavProps) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-[90] border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
       <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
         {items.map(({ id, label }) => (
           <button

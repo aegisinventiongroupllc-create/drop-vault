@@ -50,7 +50,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   };
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="mobile-scroll-shell">
       {/* Header */}
       <div className="relative">
         <div className="h-40 bg-gradient-to-br from-primary/20 via-card to-card" />

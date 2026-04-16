@@ -115,15 +115,13 @@ const Index = () => {
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
     return (
-      <div className="h-screen overflow-hidden">
-        <CreatorAnalyticsDashboard onBack={() => {
-          localStorage.removeItem(STORAGE_KEY);
-          setRole(null);
-          setVault(null);
-          setPreference(null);
-          setVerified(true);
-        }} />
-      </div>
+      <CreatorAnalyticsDashboard onBack={() => {
+        localStorage.removeItem(STORAGE_KEY);
+        setRole(null);
+        setVault(null);
+        setPreference(null);
+        setVerified(true);
+      }} />
     );
   }
 
@@ -152,7 +150,7 @@ const Index = () => {
   const handleBuyTokens = (n: number) => setTokenBalance(prev => prev + n);
 
   return (
-    <div className="h-screen overflow-hidden">
+    <div className="min-h-[100dvh] overflow-x-hidden">
       {/* "Both" toggle header + Global Passport */}
       {(activeTab === "home" || activeTab === "trending") && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
@@ -214,7 +212,7 @@ const Index = () => {
         />
       )}
       {activeTab === "profile" && (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">
+        <div className="mobile-scroll-shell flex flex-col items-center justify-center gap-4">
           <div className="absolute top-4 right-4">
             <LanguageToggle />
           </div>
