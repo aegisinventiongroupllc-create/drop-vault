@@ -28,7 +28,7 @@ const BottomNav = ({ active, onNavigate, vault }: BottomNavProps) => {
           <button
             key={id}
             onClick={() => onNavigate(id)}
-            className={`text-xs font-bold tracking-widest transition-colors ${
+            className={`text-xs font-bold tracking-widest transition-all active:scale-95 ${
               active === id ? "text-primary" : "text-foreground/70 hover:text-foreground"
             }`}
           >
