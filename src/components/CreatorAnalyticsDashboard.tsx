@@ -86,6 +86,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   );
   const [countdown, setCountdown] = useState("");
 
+  // Recompute split state whenever live follower count changes
+  useEffect(() => {
+    const id = liveStats.creatorId || "creator-1";
+    setSplitState((prev) => getCreatorSplitState(id, liveStats.followerCount, prev));
+  }, [liveStats.followerCount, liveStats.creatorId]);
+
   const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
   useEffect(() => {
