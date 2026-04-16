@@ -4,12 +4,13 @@
 - Visuals: Dark Luxury theme. Women's Vault (Pink/Black), Men's Vault (Blue/Silver/Black). Bold uppercase nav ONLY, zero icons.
 - Stack: Supabase (Auth, DB, Storage, Edge Functions), Docker, Nginx, NOWPayments (LTC).
 - Economy: 1 Bit-Token = $20 USD = 14-days access. Auto-locks at 14 days. Payouts are LTC-exclusive.
-- Revenue: 90/10 base split. 97/3 'Power Week' auto-triggers on 500K new Customer-role followers (recurring).
+- Revenue: Dual-Bucket: $1 entry tax + 90/10 split on base. 97/3 'Power Week' at 500K follower milestones.
 - Compliance: Mandatory 18+ legal waiver splash screen. Support: dropthatthingmedia@gmail.com.
-- No Stripe: Platform uses NOWPayments exclusively. ID verification via iDenfy/Veriff (not Stripe Identity).
+- DB: transactions table has entry_tax and platform_commission columns — never lump them together.
 
 ## Memories
 - [Revenue Model](mem://business/revenue-model) — Creator payout splits and 97% Power Week rules
+- [Dual-Bucket Revenue](mem://economy/dual-bucket-revenue) — Tax-then-split formula with separate entry_tax and platform_commission
 - [Age Verification](mem://constraints/age-verification) — Mandatory 18+ splash screen and legal waiver
 - [Creator Profiles](mem://features/creator-profiles) — Profile structure, trailers, and Vault Hub layout
 - [Master Admin Panel](mem://features/master-admin-panel) — Password-protected master admin interface and features
@@ -28,3 +29,5 @@
 - [Creator Dashboard](mem://features/creator-dashboard) — Dashboard features for creators and progress tracking
 - [System Architecture](mem://infrastructure/system-architecture) — Supabase, Docker, Nginx, and environment variables
 - [Onboarding Flow](mem://features/onboarding-flow) — Sequential onboarding and user preferences in localStorage
+- [i18n](mem://features/i18n) — Multi-language support (EN/ES/PT/FR) with auto-detect
+- [Global Passport](mem://features/global-passport) — Country filter on galleries with Ghost Country demand logging
