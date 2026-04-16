@@ -20,7 +20,7 @@ export interface PayoutState {
 
 const INCENTIVE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 168 hours
 const PAYOUT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-const FOLLOWER_MILESTONE = 100_000;
+const FOLLOWER_MILESTONE = 500_000;
 
 const DEFAULT_SPLIT = { creator: 90, platform: 10 };
 const INCENTIVE_SPLIT = { creator: 97, platform: 3 };
@@ -29,7 +29,7 @@ const INCENTIVE_SPLIT = { creator: 97, platform: 3 };
  * Computes the current milestone bracket for a follower count.
  * IMPORTANT: Only 'Customer' role accounts count toward milestones.
  * Creator accounts do NOT count, even if they spend tokens.
- * E.g. 248,000 → lastMilestone=200000, nextMilestone=300000
+ * E.g. 1,248,000 → lastMilestone=1000000, nextMilestone=1500000
  */
 function getMilestoneBracket(followers: number) {
   const lastMilestone = Math.floor(followers / FOLLOWER_MILESTONE) * FOLLOWER_MILESTONE;
