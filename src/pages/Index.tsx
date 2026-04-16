@@ -205,7 +205,13 @@ const Index = () => {
         />
       )}
       {activeTab === "vaults" && (
-        <MemberDashboard balance={tokenBalance} onBuyTokens={handleBuyTokens} />
+        <MemberDashboard
+          balance={tokenBalance}
+          onBuyTokens={handleBuyTokens}
+          vault={vault ?? undefined}
+          onNavigateHome={() => setActiveTab("home")}
+          onCreatorClick={handleCreatorClick}
+        />
       )}
       {activeTab === "profile" && (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-20">

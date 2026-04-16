@@ -696,13 +696,29 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                     {respondingTo === req.id && (
                       <div className="mt-3 bg-secondary/50 border border-border rounded-xl p-3 space-y-3">
                         <div>
-                          <label className="text-[10px] font-bold text-muted-foreground tracking-wider">SET YOUR BIT-TOKEN PRICE</label>
+                          <label className="text-[10px] font-bold text-muted-foreground tracking-wider">SET YOUR BIT-TOKEN PRICE (max 500 BT)</label>
                           <input
                             type="number"
+                            min={1}
+                            max={500}
                             value={responseTokenPrice}
                             onChange={(e) => setResponseTokenPrice(e.target.value)}
                             placeholder="e.g. 25"
                             className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                          />
+                          {responseTokenPrice && (
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              = ${Number(responseTokenPrice) * 20} USD • DTT Flat Fee: $1.00
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-muted-foreground tracking-wider">COUNTER-OFFER MESSAGE (OPTIONAL)</label>
+                          <textarea
+                            value={responseDeclineReason}
+                            onChange={(e) => setResponseDeclineReason(e.target.value)}
+                            placeholder="Explain your pricing to the customer..."
+                            className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1 h-16 resize-none"
                           />
                         </div>
                         <div className="flex gap-2">
@@ -710,21 +726,30 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                             variant="neon"
                             size="sm"
                             className="flex-1"
-                            disabled={!responseTokenPrice}
+                            disabled={!responseTokenPrice || Number(responseTokenPrice) > 500}
                             onClick={() => handleRequestAction(req.id, "accepted", Number(responseTokenPrice))}
                           >
                             ACCEPT — {responseTokenPrice || "?"} BT
                           </Button>
                           <Button
+                            variant="gold"
+                            size="sm"
+                            className="flex-1"
+                            disabled={!responseTokenPrice}
+                            onClick={() => handleRequestAction(req.id, "accepted", Number(responseTokenPrice))}
+                          >
+                            COUNTER
+                          </Button>
+                          <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 text-destructive border-destructive/30"
+                            className="text-destructive border-destructive/30"
                             onClick={() => {
                               const reason = prompt("Reason for declining (optional):") || "Not available";
                               handleRequestAction(req.id, "declined", undefined, reason);
                             }}
                           >
-                            DECLINE
+                            ✕
                           </Button>
                         </div>
                       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, RefreshCw } from "lucide-react";
+import { Bell, RefreshCw, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
@@ -9,9 +9,8 @@ import {
   UNLOCK_DURATION_MS, TOKEN_INVOICE_USD,
   type CreatorUnlock, type CustomRequest,
 } from "@/lib/tokenEconomy";
-import { supabase } from "@/integrations/supabase/client";
+import type { VaultType } from "@/lib/tokenEconomy";
 
-// 24-hour warning threshold
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 
 const MOCK_UNLOCKS: CreatorUnlock[] = [
@@ -19,10 +18,9 @@ const MOCK_UNLOCKS: CreatorUnlock[] = [
   { creatorId: "2", creatorName: "FitJessie", unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 4 * 24 * 60 * 60 * 1000 },
   { creatorId: "3", creatorName: "BlondieVibes", unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, expiresAt: Date.now() - 1 * 24 * 60 * 60 * 1000 },
   { creatorId: "4", creatorName: "AlphaKing", unlockedAt: Date.now() - 3 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 11 * 24 * 60 * 60 * 1000 },
-  { creatorId: "5", creatorName: "MaxFitness", unlockedAt: Date.now() - 13 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 18 * 60 * 60 * 1000 }, // <24h left
+  { creatorId: "5", creatorName: "MaxFitness", unlockedAt: Date.now() - 13 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 18 * 60 * 60 * 1000 },
 ];
 
-// Only the current user's requests
 const MY_REQUESTS: CustomRequest[] = [
   { id: "r1", creatorName: "LunaCosplay", description: "Custom cosplay photoshoot", amountUsd: 500, totalTokens: 26, status: "accepted", createdAt: Date.now() - 86400000 },
   { id: "r2", creatorName: "FitJessie", description: "Exclusive workout video", amountUsd: 250, totalTokens: 13.5, status: "pending", createdAt: Date.now() - 43200000 },
@@ -37,32 +35,40 @@ const CREATOR_GENDER: Record<string, "women" | "men"> = {
   "MaxFitness": "men",
 };
 
-const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyTokens: (n: number) => void }) => {
+interface MemberDashboardProps {
+  balance: number;
+  onBuyTokens: (n: number) => void;
+  vault?: VaultType;
+  onNavigateHome?: () => void;
+  onCreatorClick?: (name: string) => void;
+}
+
+const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const [showRenewModal, setShowRenewModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "requests">("library");
   const [, setTick] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
 
-  // Tick every minute to update countdowns
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Filter only active (non-expired) unlocks — expired creators are auto-removed
   const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
   const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
   const myGuys = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "men");
 
-  // Check for creators expiring within 24 hours
+  const hasUnlocks = activeUnlocks.length > 0;
+
+  // Dynamic header based on vault preference
+  const libraryTitle = vault === "men" ? "MY GUYS" : vault === "women" ? "MY GIRLS" : "MY LIBRARY";
+
   const expiringCreators = activeUnlocks.filter(u => {
     const remaining = getUnlockTimeRemaining(u);
     return remaining > 0 && remaining <= RENEWAL_WARNING_MS;
   });
 
-  // Show renewal notification
   useEffect(() => {
     if (expiringCreators.length > 0 && !notification) {
       const names = expiringCreators.map(c => c.creatorName).join(", ");
@@ -71,7 +77,7 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
   }, [expiringCreators.length]);
 
   const tabs = [
-    { id: "library" as const, label: "MY LIBRARY" },
+    { id: "library" as const, label: libraryTitle },
     { id: "requests" as const, label: "MY REQUESTS" },
   ];
 
@@ -80,17 +86,24 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
     setShowBuyModal(true);
   };
 
+  const handleCreatorClick = (creatorName: string) => {
+    if (onCreatorClick) onCreatorClick(creatorName);
+  };
+
   const renderCreatorCircle = (unlock: CreatorUnlock) => {
     const remaining = getUnlockTimeRemaining(unlock);
     const isExpiringSoon = remaining > 0 && remaining <= RENEWAL_WARNING_MS;
 
     return (
       <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[80px]">
-        <div className={`w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent border-2 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg ${
-          isExpiringSoon ? "border-gold animate-pulse" : "border-primary/50"
-        }`}>
+        <button
+          onClick={() => handleCreatorClick(unlock.creatorName)}
+          className={`w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent border-2 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg transition-transform hover:scale-105 ${
+            isExpiringSoon ? "border-gold animate-pulse" : "border-primary/50"
+          }`}
+        >
           {unlock.creatorName.slice(0, 2).toUpperCase()}
-        </div>
+        </button>
         <p className="text-[10px] font-semibold text-foreground truncate max-w-[80px] text-center">@{unlock.creatorName}</p>
         <p className={`text-[9px] ${isExpiringSoon ? "text-gold font-bold" : "text-primary"}`}>
           {formatUnlockCountdown(remaining)}
@@ -111,7 +124,7 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
   return (
     <div className="min-h-screen pb-20 flex flex-col">
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-foreground tracking-wider font-display">MY LIBRARY</h1>
+        <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
         <WalletIndicator balance={balance} />
       </div>
 
@@ -156,45 +169,92 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
         ))}
       </div>
 
-      {/* Library View — Gallery of unlocked creators */}
+      {/* Library View */}
       {activeTab === "library" && (
         <div className="px-4 space-y-6 flex-1">
-          {/* My Girls */}
-          <div>
-            <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
-            {myGirls.length > 0 ? (
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {myGirls.map(renderCreatorCircle)}
+          {!hasUnlocks ? (
+            /* Empty state for new customers */
+            <div className="flex flex-col items-center justify-center gap-5 py-12">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+                <Compass className="w-10 h-10 text-primary" />
               </div>
-            ) : (
-              <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-            )}
-          </div>
+              <h3 className="text-lg font-bold text-foreground text-center">No creators unlocked yet</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                Browse the feed to find creators you love, then unlock their vault with Bit-Tokens.
+              </p>
+              <Button variant="neon" size="lg" className="gap-2" onClick={onNavigateHome}>
+                <Compass className="w-5 h-5" />
+                DISCOVER CREATORS
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* My Girls */}
+              {(vault !== "men") && (
+                <div>
+                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
+                  {myGirls.length > 0 ? (
+                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                      {myGirls.map(renderCreatorCircle)}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+                  )}
+                </div>
+              )}
 
-          {/* My Guys */}
-          <div>
-            <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
-            {myGuys.length > 0 ? (
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {myGuys.map(renderCreatorCircle)}
+              {/* My Guys */}
+              {(vault !== "women") && (
+                <div>
+                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
+                  {myGuys.length > 0 ? (
+                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                      {myGuys.map(renderCreatorCircle)}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+                  )}
+                </div>
+              )}
+
+              {/* Show both if "both" preference */}
+              {vault === undefined && (
+                <>
+                  <div>
+                    <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
+                    {myGirls.length > 0 ? (
+                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {myGirls.map(renderCreatorCircle)}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
+                    {myGuys.length > 0 ? (
+                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {myGuys.map(renderCreatorCircle)}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className="bg-secondary/50 border border-border rounded-xl p-3">
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Each unlock grants <span className="text-primary font-bold">14 days (336 hours)</span> of access.
+                  Expired creators are automatically removed. Tap a profile to open their Private Vault.
+                </p>
               </div>
-            ) : (
-              <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-            )}
-          </div>
-
-          {/* 14-day access info */}
-          <div className="bg-secondary/50 border border-border rounded-xl p-3">
-            <p className="text-[10px] text-muted-foreground text-center">
-              Each unlock grants <span className="text-primary font-bold">14 days (336 hours)</span> of access.
-              Expired creators are automatically removed from your library.
-              You'll receive a reminder <span className="text-gold font-bold">24 hours</span> before expiration.
-            </p>
-          </div>
+            </>
+          )}
         </div>
       )}
 
-      {/* My Requests — Privacy: users only see their own */}
+      {/* My Requests */}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">
           <p className="text-xs text-muted-foreground mb-2">Only you can see your requests.</p>
@@ -216,14 +276,10 @@ const MemberDashboard = ({ balance, onBuyTokens }: { balance: number; onBuyToken
                 }`}>
                   {req.status === "pending" ? "Pending" : req.status === "accepted" ? "Accepted" : req.status === "declined" ? "Declined" : "Completed"}
                 </span>
-
-                {/* If declined, show reason placeholder */}
                 {req.status === "declined" && (
                   <span className="text-[10px] text-muted-foreground italic">Creator passed on this request</span>
                 )}
               </div>
-
-              {/* One-click buy if balance too low */}
               {req.status === "accepted" && balance < req.totalTokens && (
                 <div className="mt-3 bg-gold/10 border border-gold/30 rounded-lg p-3">
                   <p className="text-[10px] text-muted-foreground mb-2">
