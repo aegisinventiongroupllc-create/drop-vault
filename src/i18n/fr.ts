@@ -54,7 +54,7 @@ const fr: Translations = {
   tos_section8_title: "8. Résiliation de Compte",
   tos_section8_text: "La Plateforme se réserve le droit de suspendre ou de résilier les comptes qui violent ces Conditions à tout moment sans préavis.",
   tos_section9_title: "9. Contact",
-  tos_section9_text: "Pour toute question concernant ces Conditions, contactez : dropthatthingmedia@gmail.com",
+  tos_section9_text: "Pour toute question concernant ces Conditions, contactez : admin@dttmediallc.com",
 
   privacy_section1_title: "1. Informations que Nous Collectons",
   privacy_section1_text: "Nous collectons les informations que vous fournissez directement : adresse e-mail, nom d'utilisateur, informations de paiement (traitées par des fournisseurs tiers) et documents d'identité téléchargés pour la vérification des Créateurs.",
@@ -67,7 +67,7 @@ const fr: Translations = {
   privacy_section5_title: "5. Conservation des Données",
   privacy_section5_text: "Les données du compte sont conservées pendant la durée d'existence de votre compte. Lors de la suppression du compte, les données personnelles sont supprimées dans les 30 jours, sauf lorsque la conservation est requise par la loi.",
   privacy_section6_title: "6. Contact",
-  privacy_section6_text: "Pour les questions de confidentialité, contactez : dropthatthingmedia@gmail.com",
+  privacy_section6_text: "Pour les questions de confidentialité, contactez : admin@dttmediallc.com",
 
   token_single: "1 Bit-Token — 21 $",
   token_bundle: "6 Bit-Tokens — 101 $",
