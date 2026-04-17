@@ -49,19 +49,23 @@ const LegalFooter = () => {
           onClick={close}
         >
           <div
-            className="bg-card border border-border rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto"
+            className="bg-card border border-border rounded-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {view === "2257" && <Statement2257 />}
-            {view === "tos" && <TermsOfService />}
-            {view === "privacy" && <PrivacyPolicy />}
-            {view === "contact" && <ContactInfo />}
-            <button
-              onClick={close}
-              className="mt-5 w-full py-2.5 text-xs font-bold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors tracking-widest"
-            >
-              CLOSE
-            </button>
+            <div className="flex-1 overflow-y-auto overscroll-contain p-6" style={{ WebkitOverflowScrolling: "touch" }}>
+              {view === "2257" && <Statement2257 />}
+              {view === "tos" && <TermsOfService />}
+              {view === "privacy" && <PrivacyPolicy />}
+              {view === "contact" && <ContactInfo />}
+            </div>
+            <div className="border-t border-border p-3 bg-card">
+              <button
+                onClick={close}
+                className="w-full py-2.5 text-xs font-bold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors tracking-widest"
+              >
+                CLOSE
+              </button>
+            </div>
           </div>
         </div>
       )}
