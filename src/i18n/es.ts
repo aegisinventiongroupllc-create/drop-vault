@@ -54,7 +54,7 @@ const es: Translations = {
   tos_section8_title: "8. Terminación de Cuenta",
   tos_section8_text: "La Plataforma se reserva el derecho de suspender o terminar cuentas que violen estos Términos en cualquier momento sin previo aviso.",
   tos_section9_title: "9. Contacto",
-  tos_section9_text: "Para preguntas sobre estos Términos, contacte: dropthatthingmedia@gmail.com",
+  tos_section9_text: "Para preguntas sobre estos Términos, contacte: admin@dttmediallc.com",
 
   privacy_section1_title: "1. Información que Recopilamos",
   privacy_section1_text: "Recopilamos la información que usted proporciona directamente: dirección de correo electrónico, nombre de usuario, información de pago (procesada por proveedores externos) y documentos de identidad cargados para verificación de Creadores.",
@@ -67,7 +67,7 @@ const es: Translations = {
   privacy_section5_title: "5. Retención de Datos",
   privacy_section5_text: "Los datos de la cuenta se retienen durante la existencia de su cuenta. Al eliminar la cuenta, los datos personales se eliminan dentro de 30 días, excepto cuando la retención es requerida por ley.",
   privacy_section6_title: "6. Contacto",
-  privacy_section6_text: "Para consultas de privacidad, contacte: dropthatthingmedia@gmail.com",
+  privacy_section6_text: "Para consultas de privacidad, contacte: admin@dttmediallc.com",
 
   token_single: "1 Bit-Token — $21",
   token_bundle: "6 Bit-Tokens — $101",
