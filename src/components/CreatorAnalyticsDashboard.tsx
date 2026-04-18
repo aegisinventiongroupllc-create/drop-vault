@@ -602,6 +602,16 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
             </div>
 
+            {/* Persona International KYC */}
+            <div className="mb-4">
+              <Button variant="gold" size="lg" className="w-full" onClick={launchPersona}>
+                <Globe className="w-4 h-4 mr-2" /> VERIFY INTERNATIONAL IDENTITY
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center mt-2">
+                Powered by Persona — Passport, ID & Driver's License accepted worldwide. Sandbox mode.
+              </p>
+            </div>
+
             {/* Camera viewfinder */}
             {showCamera && (
               <div className="relative rounded-xl overflow-hidden mb-4 border-2 border-primary/40">
