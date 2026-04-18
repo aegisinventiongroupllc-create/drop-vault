@@ -1,6 +1,7 @@
 import { useState } from "react";
+import RestrictedCountries from "@/components/RestrictedCountries";
 
-type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints";
+type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints" | "restricted";
 
 const LegalFooter = () => {
   const [view, setView] = useState<LegalView>(null);
@@ -12,6 +13,7 @@ const LegalFooter = () => {
     { id: "refund", label: "Refund Policy" },
     { id: "aml", label: "AML / KYC" },
     { id: "risk", label: "Risk Disclosure" },
+    { id: "restricted", label: "Restricted Countries" },
     { id: "complaints", label: "Complaints" },
     { id: "2257", label: "18 U.S.C. § 2257" },
     { id: "contact", label: "Contact" },
@@ -61,6 +63,7 @@ const LegalFooter = () => {
               {view === "refund" && <RefundPolicy />}
               {view === "aml" && <AmlPolicy />}
               {view === "risk" && <RiskDisclosure />}
+              {view === "restricted" && <RestrictedCountries />}
               {view === "complaints" && <Complaints />}
             </div>
             <div className="border-t border-border p-3 bg-card">
