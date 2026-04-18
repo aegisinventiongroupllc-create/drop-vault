@@ -25,6 +25,7 @@ import {
 } from "@/lib/paymentSplit";
 import { useCreatorStats } from "@/hooks/useCreatorStats";
 import { useCreatorMedia } from "@/hooks/useCreatorMedia";
+import { QRCodeCanvas } from "qrcode.react";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
@@ -629,46 +630,58 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           {/* QR Code Section */}
-          <div className="bg-card border border-border rounded-xl p-4 text-center">
-            <h3 className="text-sm font-bold text-foreground mb-2">SHARE MY VAULT</h3>
-            <div className="w-32 h-32 mx-auto bg-foreground rounded-lg p-2 mb-3" style={{ border: "3px solid hsl(var(--primary))" }}>
-              <div className="w-full h-full bg-background rounded flex items-center justify-center">
-                <div className="grid grid-cols-5 gap-0.5">
-                  {Array.from({ length: 25 }).map((_, i) => (
-                    <div key={i} className={`w-4 h-4 ${[0,1,3,4,5,9,10,14,15,19,20,21,23,24].includes(i) ? "bg-foreground" : "bg-background"}`} />
-                  ))}
+          {(() => {
+            const handle = (profileUsername || "").trim().replace(/^@/, "").toLowerCase();
+            const vaultUrl = handle
+              ? `https://dttmediallc.com/creator/${encodeURIComponent(handle)}`
+              : "https://dttmediallc.com";
+            return (
+              <div className="bg-card border border-border rounded-xl p-4 text-center">
+                <h3 className="text-sm font-bold text-foreground mb-2">SHARE MY VAULT</h3>
+                <div
+                  className="w-36 h-36 mx-auto bg-white rounded-lg p-2 mb-3 flex items-center justify-center"
+                  style={{ border: "3px solid hsl(var(--primary))" }}
+                >
+                  <QRCodeCanvas
+                    id="creator-vault-qr"
+                    value={vaultUrl}
+                    size={128}
+                    level="M"
+                    includeMargin={false}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                  />
                 </div>
+                <p className="text-[10px] text-muted-foreground mb-2 break-all">
+                  {handle ? `dttmediallc.com/creator/${handle}` : "Set your username to personalize this link"}
+                </p>
+                <Button
+                  variant="neon"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    try {
+                      const canvas = document.getElementById("creator-vault-qr") as HTMLCanvasElement | null;
+                      if (!canvas) throw new Error("QR not ready");
+                      const dataUrl = canvas.toDataURL("image/png");
+                      const a = document.createElement("a");
+                      a.href = dataUrl;
+                      a.download = `dtt-vault-${handle || "qr"}.png`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      toast.success("QR code downloaded", { description: "Share your vault link anywhere." });
+                    } catch {
+                      toast.error("Download failed. Please try again.");
+                    }
+                  }}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  DOWNLOAD QR CODE
+                </Button>
               </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground mb-2">dropthatthing.com/creator/username</p>
-            <Button
-              variant="neon"
-              size="sm"
-              className="gap-1.5"
-              onClick={async () => {
-                const url = "https://dttmediallc.com/creator/username";
-                try {
-                  const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(url)}`;
-                  const res = await fetch(apiUrl);
-                  const blob = await res.blob();
-                  const objectUrl = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = objectUrl;
-                  a.download = "dtt-vault-qr.png";
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(objectUrl);
-                  toast.success("QR code downloaded", { description: "Share your vault link anywhere." });
-                } catch {
-                  toast.error("Download failed. Please try again.");
-                }
-              }}
-            >
-              <Download className="w-3.5 h-3.5" />
-              DOWNLOAD QR CODE
-            </Button>
-          </div>
+            );
+          })()}
 
           {/* Recent Activity */}
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">
