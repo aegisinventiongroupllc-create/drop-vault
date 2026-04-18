@@ -10,6 +10,14 @@ import SuggestionBox from "@/components/SuggestionBox";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Persona?: any;
+  }
+}
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
   DEFAULT_SPLIT, INCENTIVE_SPLIT,
