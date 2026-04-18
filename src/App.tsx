@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/i18n/I18nContext";
 import { HelmetProvider } from "react-helmet-async";
+import GeoGate from "@/components/GeoGate";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SecretAdmin from "./pages/SecretAdmin.tsx";
@@ -13,8 +14,8 @@ import AdminPortal from "./pages/AdminPortal.tsx";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,       // 5 min SWR window
-      gcTime: 30 * 60 * 1000,          // 30 min garbage collection
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 2,
     },
@@ -29,13 +30,15 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/052417" element={<SecretAdmin />} />
-              <Route path="/admin-portal" element={<AdminPortal />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <GeoGate>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/052417" element={<SecretAdmin />} />
+                <Route path="/admin-portal" element={<AdminPortal />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </GeoGate>
           </BrowserRouter>
         </TooltipProvider>
       </I18nProvider>
