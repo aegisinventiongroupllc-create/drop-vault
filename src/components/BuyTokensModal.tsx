@@ -157,15 +157,21 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE PROCESSING</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
               <button onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all">
                 <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
-                <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay</p>
+                <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay · KYC may be required</p>
               </button>
             </div>
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center">
+            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
               <p className="text-[10px] text-muted-foreground">
-                All payments settle in <span className="text-primary font-bold">LTC (Litecoin)</span>. Payout destination: Platform Master Wallet.
+                All payments settle in <span className="text-primary font-bold">LTC (Litecoin)</span>. Network & processor fees apply and are shown at checkout.
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Crypto values are volatile and transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final — see Refund Policy.
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                By continuing you agree to our Terms, Privacy, Refund, AML/KYC and Risk Disclosure policies.
               </p>
             </div>
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
