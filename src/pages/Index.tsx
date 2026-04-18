@@ -64,7 +64,10 @@ const Index = () => {
 
   // --- Onboarding screens ---
   if (!verified) {
-    return <AgeVerification onVerified={() => setVerified(true)} />;
+    return <AgeVerification onVerified={() => {
+      sessionStorage.setItem("dtt_verified", "1");
+      setVerified(true);
+    }} />;
   }
 
   if (!role) {
