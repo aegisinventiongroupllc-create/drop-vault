@@ -121,6 +121,49 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return () => clearInterval(interval);
   }, [splitState.incentiveActive, splitState.incentiveEndsAt]);
 
+  // Load existing creator profile so the Verify form is pre-filled
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, email")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setProfileDisplayName(data.display_name ?? "");
+        if (data.email) setProfileUsername(data.email.split("@")[0]);
+      }
+    })();
+  }, []);
+
+  const saveProfileInfo = async () => {
+    if (!profileUsername.trim() || !profileDisplayName.trim()) {
+      toast.error("Username and display name are required.");
+      return;
+    }
+    setSavingProfile(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in first.");
+        return;
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: profileDisplayName.trim() } as any)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setProfileSaved(true);
+      toast.success("Profile info saved.");
+    } catch (e: any) {
+      toast.error(e?.message || "Could not save profile.");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   // Camera helpers for ID verification
   const startCamera = async () => {
     setShowCamera(true);
