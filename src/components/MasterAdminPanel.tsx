@@ -200,6 +200,10 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "legal", label: "LEGAL LOGS" },
   ];
 
+  if (selectedCreator) {
+    return <AdminCreatorDetail creator={selectedCreator} onBack={() => setSelectedCreator(null)} />;
+  }
+
   return (
     <div className="mobile-scroll-shell">
       {/* Header */}
