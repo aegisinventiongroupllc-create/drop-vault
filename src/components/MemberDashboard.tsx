@@ -69,14 +69,30 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     return () => clearInterval(interval);
   }, []);
 
-  const toggleAutorenew = (creatorId: string, creatorName: string) => {
-    const next = { ...autorenew, [creatorId]: !autorenew[creatorId] };
+  const toggleAutorenew = async (creatorId: string, creatorName: string) => {
+    const nextValue = !autorenew[creatorId];
+    const next = { ...autorenew, [creatorId]: nextValue };
     setAutorenew(next);
     saveAutorenew(next);
+
+    // Persist to backend so the hourly renewal cron honors it.
+    // Falls back silently if the user has no real subscription row yet (mock data).
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user?.id) {
+        await supabase
+          .from("subscriptions")
+          .update({ autorenew: nextValue })
+          .eq("customer_id", u.user.id)
+          .eq("creator_id", creatorId);
+      }
+    } catch { /* ignore — local toggle still applies */ }
+
     toast({
-      title: next[creatorId] ? "Autopay ON" : "Autopay OFF",
-      description: next[creatorId]
-        ? `@${creatorName} will auto-renew every 14 days using 1 Bit-Token.`
+      title: nextValue ? "Autopay ON" : "Autopay OFF",
+      description: nextValue
+        ? `@${creatorName} will auto-renew every 14 days using 1 Bit-Token. We'll warn you 24h before renewal.`
         : `@${creatorName} will no longer auto-renew.`,
     });
   };
