@@ -629,7 +629,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <p className="text-xs text-muted-foreground">Launch Persona to authenticate your Human-Verified status.</p>
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
-...
+              <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
+            </div>
+
+            {/* Persona International KYC */}
             <div className="mb-4">
               <Button variant="gold" size="lg" className="w-full" onClick={launchPersona}>
                 <Globe className="w-4 h-4 mr-2" /> AUTHENTICATE HUMAN-VERIFIED STATUS
