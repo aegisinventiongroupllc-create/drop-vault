@@ -21,12 +21,32 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address: string; pay_amount: number; pay_currency: string; payment_id: string } | null>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  const logConsent = async (method: "card" | "crypto", currency?: string) => {
+    try {
+      let ip = "unknown";
+      try {
+        const r = await fetch("https://api.ipify.org?format=json");
+        ip = (await r.json()).ip;
+      } catch {}
+      await supabase.from("legal_consents").insert({
+        ip_address: ip,
+        user_agent: navigator.userAgent,
+        terms_version: "2.0",
+        consent_text: `[CHECKOUT] Buy Tokens via ${method}${currency ? ` (${currency.toUpperCase()})` : ""} — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.`,
+        consent_type: "checkout_consent",
+      });
+    } catch {}
+  };
 
   const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
   const invoiceAmount = selectedOption === "bundle" ? BUNDLE_INVOICE_USD : TOKEN_INVOICE_USD;
   const split = calculateTokenPurchaseSplit(invoiceAmount, tokens);
 
   const handleCryptoPay = async (currency: string) => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("crypto", currency);
     setSelectedCrypto(currency);
     setStep("processing");
     setError(null);
@@ -46,6 +66,8 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   };
 
   const handleCardPay = async () => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("card");
     setStep("processing");
     setError(null);
     try {
@@ -150,7 +172,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO</p>
               <div className="grid grid-cols-3 gap-2">
                 {["ltc", "btc", "eth"].map((coin) => (
-                  <button key={coin} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all">
+                  <button key={coin} disabled={!consentChecked} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
                   </button>
                 ))}
@@ -158,7 +180,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
             <div className="space-y-2">
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
-              <button onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all">
+              <button disabled={!consentChecked} onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                 <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
                 <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay · KYC may be required</p>
               </button>
@@ -174,6 +196,19 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
                 By continuing you agree to our Terms, Privacy, Refund, AML/KYC and Risk Disclosure policies.
               </p>
             </div>
+            <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-primary shrink-0"
+              />
+              <span className="text-[10px] text-muted-foreground leading-relaxed">
+                I confirm I am 18+, the funds are mine and lawful, and I have read and accept the
+                <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
+                I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span> and all sales are final.
+              </span>
+            </label>
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>
         )}

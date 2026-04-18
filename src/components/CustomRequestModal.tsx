@@ -23,6 +23,24 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success" | "counter" | "counter-accept">("select");
   const [error, setError] = useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address?: string; pay_amount?: number; pay_currency?: string; payment_id?: string; invoice_url?: string } | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  const logConsent = async (method: "card" | "crypto", currency?: string) => {
+    try {
+      let ip = "unknown";
+      try {
+        const r = await fetch("https://api.ipify.org?format=json");
+        ip = (await r.json()).ip;
+      } catch {}
+      await supabase.from("legal_consents").insert({
+        ip_address: ip,
+        user_agent: navigator.userAgent,
+        terms_version: "2.0",
+        consent_text: `[CUSTOM-REQUEST] @${creatorName} via ${method}${currency ? ` (${currency.toUpperCase()})` : ""} — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.`,
+        consent_type: "checkout_consent",
+      });
+    } catch {}
+  };
 
   // Counter-offer state
   const [counterOffer, setCounterOffer] = useState<{ tokens: number; message: string } | null>(null);
@@ -37,6 +55,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const tokenCalc = calculateRequestTokens(activePrice);
 
   const handleCryptoPay = async (currency: string) => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("crypto", currency);
     setStep("processing");
     setError(null);
     try {
@@ -59,6 +79,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   };
 
   const handleCardPay = async () => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("card");
     setStep("processing");
     setError(null);
     try {
@@ -317,17 +339,18 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             )}
 
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">PAY WITH CARD (BANXA)</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
               <button
                 onClick={handleCardPay}
-                className="w-full bg-secondary border-2 border-primary/40 rounded-xl p-4 text-center hover:border-primary transition-all neon-glow-sm"
+                disabled={!consentChecked}
+                className="w-full bg-secondary border-2 border-primary/40 rounded-xl p-4 text-center hover:border-primary transition-all neon-glow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <CreditCard className="w-5 h-5 text-primary" />
                   <p className="text-sm font-bold text-foreground">CREDIT / DEBIT CARD</p>
                 </div>
                 <p className="text-xs text-primary font-semibold">Pay ${activePrice + ADMIN_FEE_USD}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Visa / MC / Apple Pay — Card → LTC → Tokens</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Visa / MC / Apple Pay · KYC may be required</p>
               </button>
             </div>
 
@@ -338,7 +361,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                   <button
                     key={coin}
                     onClick={() => handleCryptoPay(coin)}
-                    className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all"
+                    disabled={!consentChecked}
+                    className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Coins className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
                     <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
@@ -347,12 +371,28 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
             </div>
 
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center">
+            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
               <p className="text-[10px] text-muted-foreground">
                 All payments settle in <span className="text-primary font-bold">LTC (Litecoin)</span>.
-                DTT Flat Fee: <span className="text-gold font-bold">$1.00</span>
+                DTT Flat Fee: <span className="text-gold font-bold">$1.00</span>. Network & processor fees apply.
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Crypto values are volatile and transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final — see Refund Policy.
               </p>
             </div>
+
+            <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-primary shrink-0"
+              />
+              <span className="text-[10px] text-muted-foreground leading-relaxed">
+                I confirm I am 18+, the funds are mine and lawful, and I have read and accept the
+                <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
+              </span>
+            </label>
 
             <Button variant="outline" className="w-full" onClick={() => { setStep("confirm"); setError(null); }}>
               BACK
