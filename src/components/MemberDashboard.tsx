@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
-import { Bell, RefreshCw, Compass } from "lucide-react";
+import { Bell, RefreshCw, Compass, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import LegalFooter from "@/components/LegalFooter";
 import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
   UNLOCK_DURATION_MS, TOKEN_INVOICE_USD,
+  SUPPORT_TIP_TOKENS, SUPPORT_TIP_USD, calculateSupportTipSplit,
   type CreatorUnlock, type CustomRequest,
 } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
+const AUTORENEW_KEY = "dtt_autorenew";
+
+function loadAutorenew(): Record<string, boolean> {
+  try { return JSON.parse(localStorage.getItem(AUTORENEW_KEY) || "{}"); } catch { return {}; }
+}
+function saveAutorenew(map: Record<string, boolean>) {
+  localStorage.setItem(AUTORENEW_KEY, JSON.stringify(map));
+}
 
 const MOCK_UNLOCKS: CreatorUnlock[] = [
   { creatorId: "1", creatorName: "LunaCosplay", unlockedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 12 * 24 * 60 * 60 * 1000 },
@@ -50,10 +61,43 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const [, setTick] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
 
+  const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
+  const { toast } = useToast();
+
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const toggleAutorenew = (creatorId: string, creatorName: string) => {
+    const next = { ...autorenew, [creatorId]: !autorenew[creatorId] };
+    setAutorenew(next);
+    saveAutorenew(next);
+    toast({
+      title: next[creatorId] ? "Autopay ON" : "Autopay OFF",
+      description: next[creatorId]
+        ? `@${creatorName} will auto-renew every 14 days using 1 Bit-Token.`
+        : `@${creatorName} will no longer auto-renew.`,
+    });
+  };
+
+  const handleSupport = (creatorName: string) => {
+    if (balance < SUPPORT_TIP_TOKENS) {
+      toast({
+        title: "Not enough Bit-Tokens",
+        description: `Support sends 1 Bit-Token ($${SUPPORT_TIP_USD}) to @${creatorName}. Buy more to continue.`,
+        variant: "destructive",
+      });
+      setShowBuyModal(true);
+      return;
+    }
+    const split = calculateSupportTipSplit();
+    onBuyTokens(-SUPPORT_TIP_TOKENS); // deduct 1 token from balance
+    toast({
+      title: `💖 Support sent to @${creatorName}`,
+      description: `1 Bit-Token ($${split.totalUsd}) — Creator gets $${split.creatorShare}, Platform $${split.platformShare}.`,
+    });
+  };
 
   const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
   const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
@@ -93,9 +137,10 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const renderCreatorCircle = (unlock: CreatorUnlock) => {
     const remaining = getUnlockTimeRemaining(unlock);
     const isExpiringSoon = remaining > 0 && remaining <= RENEWAL_WARNING_MS;
+    const isAutoOn = !!autorenew[unlock.creatorId];
 
     return (
-      <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[80px]">
+      <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[96px]">
         <button
           onClick={() => handleCreatorClick(unlock.creatorName)}
           className={`w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent border-2 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg transition-transform hover:scale-105 ${
@@ -104,10 +149,31 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         >
           {unlock.creatorName.slice(0, 2).toUpperCase()}
         </button>
-        <p className="text-[10px] font-semibold text-foreground truncate max-w-[80px] text-center">@{unlock.creatorName}</p>
+        <p className="text-[10px] font-semibold text-foreground truncate max-w-[96px] text-center">@{unlock.creatorName}</p>
         <p className={`text-[9px] ${isExpiringSoon ? "text-gold font-bold" : "text-primary"}`}>
           {formatUnlockCountdown(remaining)}
         </p>
+
+        {/* Autopay toggle */}
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className={`text-[8px] font-bold tracking-wider ${isAutoOn ? "text-primary" : "text-muted-foreground"}`}>AUTOPAY</span>
+          <Switch
+            checked={isAutoOn}
+            onCheckedChange={() => toggleAutorenew(unlock.creatorId, unlock.creatorName)}
+            className="scale-50 -my-2"
+          />
+        </div>
+
+        {/* Support button */}
+        <button
+          onClick={() => handleSupport(unlock.creatorName)}
+          className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary text-[9px] font-bold rounded-full px-2 py-0.5 transition-colors"
+          title={`Send 1 Bit-Token ($${SUPPORT_TIP_USD}) — Creator gets $19, Platform $1`}
+        >
+          <Heart className="w-2.5 h-2.5" />
+          SUPPORT 1BT
+        </button>
+
         {isExpiringSoon && (
           <button
             onClick={() => handleRenew(unlock.creatorName)}
