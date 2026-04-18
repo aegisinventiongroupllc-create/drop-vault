@@ -147,6 +147,42 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setShowCamera(false);
   };
 
+  // Persona KYC launcher
+  const launchPersona = () => {
+    if (!window.Persona) {
+      toast.error("Verification SDK not loaded. Please refresh and try again.");
+      return;
+    }
+    const client = new window.Persona.Client({
+      templateId: "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
+      environmentId: "sandbox",
+      onReady: () => client.open(),
+      onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
+        setVerificationStatus("verified");
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase
+              .from("profiles")
+              .update({ role: "creator" } as any)
+              .eq("user_id", user.id);
+          }
+        } catch (e) {
+          console.error("Profile update failed", e);
+        }
+        toast.success("Identity Confirmed — You can now post drops!", {
+          description: `Inquiry ${inquiryId} (${status})`,
+        });
+      },
+      onCancel: () => toast("Verification cancelled."),
+      onError: (error: any) => {
+        console.error("Persona error", error);
+        toast.error("Verification error. Please try again.");
+      },
+    });
+  };
+
+
   // LTC address validation
   const validateLtcAddress = (val: string) => {
     if (!val) return "";
