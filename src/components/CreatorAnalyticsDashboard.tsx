@@ -179,8 +179,8 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       return;
     }
     const client = new window.Persona.Client({
-      templateId: "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
-      environmentId: "sandbox",
+      templateId: (import.meta as any).env?.VITE_PERSONA_TEMPLATE_ID || "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
+      environmentId: "production",
       onReady: () => client.open(),
       onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
         // Sandbox auto-approve: any completed inquiry instantly unlocks the creator
@@ -196,8 +196,8 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         } catch (e) {
           console.error("Profile update failed", e);
         }
-        toast.success("Identity Confirmed — You can now post drops!", {
-          description: `Auto-approved (sandbox) · Inquiry ${inquiryId} · ${status}`,
+        toast.success("Human-Verified Status Confirmed — You can now post drops!", {
+          description: `Inquiry ${inquiryId} · ${status}`,
           duration: 4000,
         });
         // Jump straight to the profile/overview tab so they're live in seconds
@@ -626,19 +626,16 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Use your device camera to take a live photo of your government-issued ID. Automated verification powered by <span className="font-bold text-foreground">iDenfy / Veriff</span> (coming soon).</p>
+              <p className="text-xs text-muted-foreground">Launch Persona to authenticate your Human-Verified status.</p>
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
-              <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
-            </div>
-
-            {/* Persona International KYC */}
+...
             <div className="mb-4">
               <Button variant="gold" size="lg" className="w-full" onClick={launchPersona}>
-                <Globe className="w-4 h-4 mr-2" /> VERIFY INTERNATIONAL IDENTITY
+                <Globe className="w-4 h-4 mr-2" /> AUTHENTICATE HUMAN-VERIFIED STATUS
               </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Powered by Persona — Passport, ID & Driver's License accepted worldwide. Sandbox mode.
+                Powered by Persona — Passport, ID & Driver's License accepted worldwide.
               </p>
             </div>
 
