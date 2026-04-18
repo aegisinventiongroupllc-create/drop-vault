@@ -690,6 +690,51 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Verification Center */}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
+          {/* Profile Info — required before going live */}
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">Profile Info</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Set your public username and display name. This is what fans will see on your vault.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground tracking-wider">USERNAME</label>
+                <input
+                  type="text"
+                  value={profileUsername}
+                  onChange={(e) => { setProfileUsername(e.target.value.replace(/\s+/g, "").toLowerCase()); setProfileSaved(false); }}
+                  placeholder="e.g. neonqueen"
+                  className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">dttmediallc.com/creator/{profileUsername || "username"}</p>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground tracking-wider">DISPLAY NAME</label>
+                <input
+                  type="text"
+                  value={profileDisplayName}
+                  onChange={(e) => { setProfileDisplayName(e.target.value); setProfileSaved(false); }}
+                  placeholder="e.g. Neon Queen"
+                  className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                />
+              </div>
+              <Button
+                variant="neon"
+                className="w-full"
+                disabled={savingProfile || !profileUsername.trim() || !profileDisplayName.trim()}
+                onClick={saveProfileInfo}
+              >
+                {savingProfile ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> SAVING…</> : "SAVE PROFILE INFO"}
+              </Button>
+              {profileSaved && (
+                <p className="text-xs text-green-400 font-bold text-center">✓ Profile saved</p>
+              )}
+            </div>
+          </div>
+
           {/* ID Verification */}
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
@@ -698,7 +743,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Launch Persona to authenticate your Human-Verified status.</p>
+              <p className="text-xs text-muted-foreground">Launch Persona to authenticate your Human-Verified status. Approval is instant.</p>
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
               <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
@@ -710,43 +755,9 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                 <Globe className="w-4 h-4 mr-2" /> AUTHENTICATE HUMAN-VERIFIED STATUS
               </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Powered by Persona — Passport, ID & Driver's License accepted worldwide.
+                Powered by Persona — Passport, ID & Driver's License accepted worldwide. Instant approval.
               </p>
             </div>
-
-            {/* Camera viewfinder */}
-            {showCamera && (
-              <div className="relative rounded-xl overflow-hidden mb-4 border-2 border-primary/40">
-                <video ref={cameraVideoRef} autoPlay playsInline muted className="w-full aspect-[4/3] bg-black object-cover" />
-                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
-                  <Button variant="neon" size="sm" onClick={capturePhoto}>
-                    <Camera className="w-4 h-4 mr-1" /> CAPTURE
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={stopCamera}>CANCEL</Button>
-                </div>
-              </div>
-            )}
-
-            {/* Captured preview */}
-            {capturedImage && !showCamera && (
-              <div className="relative rounded-xl overflow-hidden mb-4 border border-border">
-                <img src={capturedImage} alt="Captured ID" className="w-full aspect-[4/3] object-cover" />
-                <div className="absolute top-2 right-2 bg-gold/90 text-black text-[10px] font-bold px-2 py-1 rounded">
-                  SUBMITTED
-                </div>
-              </div>
-            )}
-
-            {!showCamera && !capturedImage && (
-              <div className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 hover:border-primary/40 transition-colors">
-                <Camera className="w-8 h-8 text-muted-foreground" />
-                <p className="text-sm font-medium text-foreground">Live ID Photo Required</p>
-                <p className="text-xs text-muted-foreground text-center">Government-issued ID, Passport, or Driver's License</p>
-                <Button variant="neon" size="sm" onClick={startCamera}>
-                  <Camera className="w-4 h-4 mr-1" /> OPEN CAMERA
-                </Button>
-              </div>
-            )}
 
             {/* Status */}
             <div className="mt-4 flex items-center gap-2 bg-secondary/50 rounded-lg p-3">
