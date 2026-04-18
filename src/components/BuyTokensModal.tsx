@@ -172,7 +172,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO</p>
               <div className="grid grid-cols-3 gap-2">
                 {["ltc", "btc", "eth"].map((coin) => (
-                  <button key={coin} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all">
+                  <button key={coin} disabled={!consentChecked} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
                   </button>
                 ))}
@@ -180,7 +180,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
             <div className="space-y-2">
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
-              <button onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all">
+              <button disabled={!consentChecked} onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                 <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
                 <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay · KYC may be required</p>
               </button>

@@ -23,6 +23,24 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success" | "counter" | "counter-accept">("select");
   const [error, setError] = useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address?: string; pay_amount?: number; pay_currency?: string; payment_id?: string; invoice_url?: string } | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  const logConsent = async (method: "card" | "crypto", currency?: string) => {
+    try {
+      let ip = "unknown";
+      try {
+        const r = await fetch("https://api.ipify.org?format=json");
+        ip = (await r.json()).ip;
+      } catch {}
+      await supabase.from("legal_consents").insert({
+        ip_address: ip,
+        user_agent: navigator.userAgent,
+        terms_version: "2.0",
+        consent_text: `[CUSTOM-REQUEST] @${creatorName} via ${method}${currency ? ` (${currency.toUpperCase()})` : ""} — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.`,
+        consent_type: "checkout_consent",
+      });
+    } catch {}
+  };
 
   // Counter-offer state
   const [counterOffer, setCounterOffer] = useState<{ tokens: number; message: string } | null>(null);
@@ -37,6 +55,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const tokenCalc = calculateRequestTokens(activePrice);
 
   const handleCryptoPay = async (currency: string) => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("crypto", currency);
     setStep("processing");
     setError(null);
     try {
@@ -59,6 +79,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   };
 
   const handleCardPay = async () => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent("card");
     setStep("processing");
     setError(null);
     try {
