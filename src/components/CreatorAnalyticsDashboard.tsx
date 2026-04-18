@@ -605,9 +605,9 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(objectUrl);
-                  toast({ title: "QR code downloaded", description: "Share your vault link anywhere." });
+                  toast.success("QR code downloaded", { description: "Share your vault link anywhere." });
                 } catch {
-                  toast({ title: "Download failed", description: "Please try again.", variant: "destructive" });
+                  toast.error("Download failed. Please try again.");
                 }
               }}
             >
