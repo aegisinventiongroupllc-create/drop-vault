@@ -24,6 +24,7 @@ import {
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
 import { useCreatorStats } from "@/hooks/useCreatorStats";
+import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
