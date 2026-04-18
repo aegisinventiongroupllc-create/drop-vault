@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react";
-import { Bell, RefreshCw, Compass } from "lucide-react";
+import { Bell, RefreshCw, Compass, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import LegalFooter from "@/components/LegalFooter";
 import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
   UNLOCK_DURATION_MS, TOKEN_INVOICE_USD,
+  SUPPORT_TIP_TOKENS, SUPPORT_TIP_USD, calculateSupportTipSplit,
   type CreatorUnlock, type CustomRequest,
 } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
+const AUTORENEW_KEY = "dtt_autorenew";
+
+function loadAutorenew(): Record<string, boolean> {
+  try { return JSON.parse(localStorage.getItem(AUTORENEW_KEY) || "{}"); } catch { return {}; }
+}
+function saveAutorenew(map: Record<string, boolean>) {
+  localStorage.setItem(AUTORENEW_KEY, JSON.stringify(map));
+}
 
 const MOCK_UNLOCKS: CreatorUnlock[] = [
   { creatorId: "1", creatorName: "LunaCosplay", unlockedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 12 * 24 * 60 * 60 * 1000 },
