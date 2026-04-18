@@ -183,6 +183,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       environmentId: "sandbox",
       onReady: () => client.open(),
       onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
+        // Sandbox auto-approve: any completed inquiry instantly unlocks the creator
         setVerificationStatus("verified");
         try {
           const { data: { user } } = await supabase.auth.getUser();
@@ -196,8 +197,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           console.error("Profile update failed", e);
         }
         toast.success("Identity Confirmed — You can now post drops!", {
-          description: `Inquiry ${inquiryId} (${status})`,
+          description: `Auto-approved (sandbox) · Inquiry ${inquiryId} · ${status}`,
+          duration: 4000,
         });
+        // Jump straight to the profile/overview tab so they're live in seconds
+        setActiveSection("overview");
       },
       onCancel: () => toast("Verification cancelled."),
       onError: (error: any) => {
