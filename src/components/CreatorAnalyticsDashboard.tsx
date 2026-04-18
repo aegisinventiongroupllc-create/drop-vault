@@ -317,35 +317,52 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return interval;
   };
 
-  const getAuthUserId = async (): Promise<string | null> => {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.id ?? null;
+  const requireTitle = (): string | null => {
+    const t = uploadTitle.trim();
+    if (!t) {
+      const msg = "Please add a title before uploading.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
+      return null;
+    }
+    return t;
   };
 
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
-    setUploading(bucket);
-    setUploadMsg("");
-    const userId = await getAuthUserId();
-    if (!userId) {
-      setUploadMsg("Upload failed: You must be signed in to upload.");
-      setUploading(null);
+    const title = requireTitle();
+    if (!title) { e.target.value = ""; return; }
+    if (!authUserId) {
+      const msg = "You must be signed in to upload.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
       e.target.value = "";
       return;
     }
+    setUploading(bucket);
+    setUploadMsg("");
     const interval = runProgress();
-    const label = uploadTitle.trim() || file.name;
-    const result = await uploadMedia(file, bucket, userId);
+    // Each video gets its own unique storage path so creators can have hundreds without collisions
+    const result = await uploadMedia(file, bucket, authUserId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
       toast.error(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ "${label}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
-      toast.success(`"${label}" uploaded successfully`);
+      const dbResult = await insertMedia({
+        bucket,
+        storage_path: result.path,
+        title,
+        media_type: file.type.startsWith("image/") ? "photo" : "video",
+      });
+      if ("error" in dbResult) {
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`);
+      }
+      setUploadMsg(`✓ "${title}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
+      toast.success(`"${title}" uploaded`);
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
@@ -355,31 +372,61 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const handleTeaserUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading("teasers");
-    setUploadMsg("");
-    const userId = await getAuthUserId();
-    if (!userId) {
-      setUploadMsg("Upload failed: You must be signed in to upload.");
-      setUploading(null);
+    const title = requireTitle();
+    if (!title) { e.target.value = ""; return; }
+    if (!authUserId) {
+      const msg = "You must be signed in to upload.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
       e.target.value = "";
       return;
     }
+    setUploading("teasers");
+    setUploadMsg("");
     const interval = runProgress();
-    const label = uploadTitle.trim() || file.name;
-    // Upload new teaser — old one is auto-replaced in cloud storage (same path)
-    const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
+    // Each teaser is its own video — no fixed name so creators can keep many
+    const result = await uploadMedia(file, "teasers", authUserId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
       toast.error(`Teaser upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ "${label}" teaser uploaded. Old teaser moved to your library.`);
+      const dbResult = await insertMedia({
+        bucket: "teasers",
+        storage_path: result.path,
+        title,
+        media_type: "video",
+      });
+      if ("error" in dbResult) {
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`);
+      }
+      setUploadMsg(`✓ "${title}" teaser uploaded.`);
       toast.success("Teaser uploaded");
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
+  };
+
+  const startRename = (id: string, current: string) => {
+    setEditingMediaId(id);
+    setEditingTitle(current);
+  };
+
+  const saveRename = async () => {
+    if (!editingMediaId) return;
+    const r = await renameMedia(editingMediaId, editingTitle.trim());
+    if ("error" in r) toast.error(r.error);
+    else toast.success("Title updated");
+    setEditingMediaId(null);
+    setEditingTitle("");
+  };
+
+  const removeMediaItem = async (id: string, bucket: "teasers" | "vault", path: string) => {
+    const r = await deleteMedia(id, bucket, path);
+    if ("error" in r) toast.error(r.error);
+    else toast.success("Video removed");
   };
 
   const triggerMediaUpload = (bucket: MediaBucket) => {
