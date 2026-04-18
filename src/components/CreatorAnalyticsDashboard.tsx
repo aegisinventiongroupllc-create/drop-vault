@@ -304,22 +304,35 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return interval;
   };
 
+  const getAuthUserId = async (): Promise<string | null> => {
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? null;
+  };
+
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
     setUploading(bucket);
     setUploadMsg("");
+    const userId = await getAuthUserId();
+    if (!userId) {
+      setUploadMsg("Upload failed: You must be signed in to upload.");
+      setUploading(null);
+      e.target.value = "";
+      return;
+    }
     const interval = runProgress();
-    const userId = "creator-1";
     const label = uploadTitle.trim() || file.name;
     const result = await uploadMedia(file, bucket, userId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
+      toast.error(`Upload failed: ${result.error}`);
     } else {
       setUploadMsg(`✓ "${label}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
+      toast.success(`"${label}" uploaded successfully`);
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
@@ -331,8 +344,14 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     if (!file) return;
     setUploading("teasers");
     setUploadMsg("");
+    const userId = await getAuthUserId();
+    if (!userId) {
+      setUploadMsg("Upload failed: You must be signed in to upload.");
+      setUploading(null);
+      e.target.value = "";
+      return;
+    }
     const interval = runProgress();
-    const userId = "creator-1";
     const label = uploadTitle.trim() || file.name;
     // Upload new teaser — old one is auto-replaced in cloud storage (same path)
     const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
@@ -340,8 +359,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
+      toast.error(`Teaser upload failed: ${result.error}`);
     } else {
       setUploadMsg(`✓ "${label}" teaser uploaded. Old teaser moved to your library.`);
+      toast.success("Teaser uploaded");
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
@@ -458,100 +479,16 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         )}
       </div>
 
-      {/* Strategy Tip & Loyalty Gift (5 BIT TOKENS) */}
-      <div className="mx-4 mb-4 flex gap-3">
-        <div className="flex-1 bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
+      {/* Strategy Tip */}
+      <div className="mx-4 mb-4">
+        <div className="bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <Lightbulb className="w-4 h-4 text-gold" />
             <h4 className="text-xs font-bold text-foreground">Strategy Tip</h4>
           </div>
           <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser with audio, lock your full content behind a paywall.</p>
         </div>
-        <button
-          onClick={() => setShowLoyaltyModal(true)}
-          className="bg-card border border-gold/30 rounded-xl p-3 text-center gold-glow min-w-[120px] hover:border-gold/50 transition-all"
-        >
-          <Gift className="w-5 h-5 text-gold mx-auto mb-1" />
-          <p className="text-xs font-bold text-gold">5 LOYALTY BITS</p>
-          <p className="text-[10px] text-muted-foreground">Gift to a follower</p>
-        </button>
       </div>
-
-      {/* Loyalty Modal */}
-      {showLoyaltyModal && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-card border border-gold/30 rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-sm font-bold text-foreground tracking-wider">GIFT 5 LOYALTY BIT-TOKENS</h2>
-              <button onClick={() => { setShowLoyaltyModal(false); setLoyaltyTarget(null); setLoyaltySent(false); setLoyaltySearch(""); }} className="text-muted-foreground hover:text-foreground text-sm">✕</button>
-            </div>
-            <div className="p-4 space-y-3">
-              <p className="text-xs text-muted-foreground">Search and select a follower to gift 5 Bit-Tokens from your balance.</p>
-
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={loyaltySearch}
-                  onChange={(e) => { setLoyaltySearch(e.target.value); setLoyaltyTarget(null); setLoyaltySent(false); }}
-                  placeholder="Search follower..."
-                  className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
-                />
-              </div>
-
-              {/* Follower list */}
-              <div className="max-h-48 overflow-y-auto space-y-1">
-                {filteredFollowers.map(follower => (
-                  <button
-                    key={follower}
-                    onClick={() => setLoyaltyTarget(follower)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                      loyaltyTarget === follower
-                        ? "bg-gold/20 text-gold border border-gold/30"
-                        : "bg-secondary/50 text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    @{follower}
-                  </button>
-                ))}
-                {filteredFollowers.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-4">No followers found</p>
-                )}
-              </div>
-
-              {loyaltyTarget && !loyaltySent && (
-                <div className="bg-gold/10 border border-gold/30 rounded-xl p-3 text-center">
-                  <p className="text-xs text-foreground mb-2">
-                    Gift <span className="text-gold font-bold">5 Bit-Tokens</span> to <span className="text-foreground font-bold">@{loyaltyTarget}</span>?
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mb-3">5 tokens will be deducted from your balance and added to theirs.</p>
-                  <Button
-                    variant="gold"
-                    size="sm"
-                    className="w-full"
-                    disabled={remainingLoyalty < 5}
-                    onClick={() => {
-                      setRemainingLoyalty(prev => prev - 5);
-                      setLoyaltySent(true);
-                    }}
-                  >
-                    CONFIRM GIFT — 5 BIT-TOKENS
-                  </Button>
-                </div>
-              )}
-
-              {loyaltySent && (
-                <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-3 text-center">
-                  <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-1" />
-                  <p className="text-xs font-bold text-green-400">LOYALTY REWARD SENT!</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">@{loyaltyTarget} received 5 Bit-Tokens</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Analytics Overview */}
       {activeSection === "overview" && (

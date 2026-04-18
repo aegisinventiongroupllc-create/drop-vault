@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { TOKEN_VALUE_USD, BUNDLE_TOKENS, BUNDLE_PRICE_USD } from "@/lib/tokenEconomy";
+import { TOKEN_VALUE_USD } from "@/lib/tokenEconomy";
 
 const KnowYourCoinsModal = ({ onClose }: { onClose: () => void }) => {
   return (
@@ -14,34 +14,19 @@ const KnowYourCoinsModal = ({ onClose }: { onClose: () => void }) => {
 
         <div className="p-6 space-y-5">
           <div className="space-y-3">
-            <div className="flex items-center justify-between bg-secondary rounded-xl p-4">
+            <div className="flex items-center justify-between bg-secondary rounded-xl p-4 border border-primary/30 neon-glow-sm">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
                 <span className="text-sm font-semibold text-foreground">1 Bit-Token</span>
               </div>
               <span className="text-lg font-bold text-primary">${TOKEN_VALUE_USD}</span>
             </div>
-
-            <div className="flex items-center justify-between bg-secondary rounded-xl p-4 border border-primary/30 neon-glow-sm">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
-                <div>
-                  <span className="text-sm font-semibold text-foreground">{BUNDLE_TOKENS} Bit-Tokens</span>
-                  <p className="text-[10px] text-primary font-bold">BEST VALUE</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-lg font-bold text-primary">${BUNDLE_PRICE_USD}</span>
-                <p className="text-[10px] text-muted-foreground line-through">${TOKEN_VALUE_USD * BUNDLE_TOKENS}</p>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-2 text-xs text-muted-foreground">
             <p>• <span className="text-foreground font-medium">1 Bit-Token</span> = 14 days of full access to ONE Creator Profile</p>
             <p>• Access auto-locks after 14 days — no stacking</p>
-            <p>• Buy 5, Get 1 Free with the 6-Token bundle</p>
-            <p>• Custom Requests incur a +1 Token platform fee</p>
+            <p>• Custom Requests are flat $1 per request</p>
           </div>
 
           <Button variant="neon" className="w-full" onClick={onClose}>
