@@ -254,6 +254,72 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          autorenew: boolean
+          created_at: string
+          creator_id: string
+          creator_name: string | null
+          customer_id: string
+          expires_at: string
+          id: string
+          last_renewed_at: string | null
+          renewal_count: number
+          started_at: string
+          status: string
+          updated_at: string
+          warned_24h: boolean
+        }
+        Insert: {
+          autorenew?: boolean
+          created_at?: string
+          creator_id: string
+          creator_name?: string | null
+          customer_id: string
+          expires_at: string
+          id?: string
+          last_renewed_at?: string | null
+          renewal_count?: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+          warned_24h?: boolean
+        }
+        Update: {
+          autorenew?: boolean
+          created_at?: string
+          creator_id?: string
+          creator_name?: string | null
+          customer_id?: string
+          expires_at?: string
+          id?: string
+          last_renewed_at?: string | null
+          renewal_count?: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+          warned_24h?: boolean
+        }
+        Relationships: []
+      }
+      token_balances: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_usd: number

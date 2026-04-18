@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/i18n/I18nContext";
 import { HelmetProvider } from "react-helmet-async";
 import GeoGate from "@/components/GeoGate";
+import AppUpdateWatcher from "@/components/AppUpdateWatcher";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SecretAdmin from "./pages/SecretAdmin.tsx";
@@ -30,6 +31,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AppUpdateWatcher />
             <GeoGate>
               <Routes>
                 <Route path="/" element={<Index />} />
