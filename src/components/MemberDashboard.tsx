@@ -61,10 +61,43 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const [, setTick] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
 
+  const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
+  const { toast } = useToast();
+
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const toggleAutorenew = (creatorId: string, creatorName: string) => {
+    const next = { ...autorenew, [creatorId]: !autorenew[creatorId] };
+    setAutorenew(next);
+    saveAutorenew(next);
+    toast({
+      title: next[creatorId] ? "Autopay ON" : "Autopay OFF",
+      description: next[creatorId]
+        ? `@${creatorName} will auto-renew every 14 days using 1 Bit-Token.`
+        : `@${creatorName} will no longer auto-renew.`,
+    });
+  };
+
+  const handleSupport = (creatorName: string) => {
+    if (balance < SUPPORT_TIP_TOKENS) {
+      toast({
+        title: "Not enough Bit-Tokens",
+        description: `Support sends 1 Bit-Token ($${SUPPORT_TIP_USD}) to @${creatorName}. Buy more to continue.`,
+        variant: "destructive",
+      });
+      setShowBuyModal(true);
+      return;
+    }
+    const split = calculateSupportTipSplit();
+    onBuyTokens(-SUPPORT_TIP_TOKENS); // deduct 1 token from balance
+    toast({
+      title: `💖 Support sent to @${creatorName}`,
+      description: `1 Bit-Token ($${split.totalUsd}) — Creator gets $${split.creatorShare}, Platform $${split.platformShare}.`,
+    });
+  };
 
   const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
   const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
