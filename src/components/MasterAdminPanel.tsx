@@ -2,16 +2,26 @@ import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb, Zap, Target,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 import {
   canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
 } from "@/lib/paymentSplit";
 
 const ADMIN_PASSWORD = "052417";
+export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
+
+interface CreatorRow {
+  user_id: string;
+  display_name: string | null;
+  email: string | null;
+  role: string;
+  created_at: string;
+}
 
 // Clean-slate mock data — all stats start at 0 for production launch
 const VERIFICATION_QUEUE: { id: string; creator: string; submitted: string; docType: string; status: "pending" | "approved" | "rejected"; side: "Women" | "Men" }[] = [];
