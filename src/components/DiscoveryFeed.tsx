@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
+import LegalFooter from "@/components/LegalFooter";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 
@@ -135,6 +136,9 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
             <span className="text-xs text-muted-foreground">• $1 Platform Fee</span>
           </div>
           <p className="text-[9px] text-muted-foreground/60">14-day access • 336 hours</p>
+          <p className="text-[9px] text-muted-foreground/60 max-w-[80%] text-center px-4">
+            Card via <span className="font-semibold text-foreground">Banxa</span> · Crypto via NOWPayments · All sales final · Crypto irreversible
+          </p>
         </div>
       )}
 
@@ -249,6 +253,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
             </div>
           )
         )}
+        <LegalFooter />
       </div>
     </div>
   );
