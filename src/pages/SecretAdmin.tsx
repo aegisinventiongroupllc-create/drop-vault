@@ -19,7 +19,7 @@ const SecretAdmin = () => {
       setErr("");
       navigate("/admin-portal", { replace: true });
     } else {
-      setErr("Invalid code. Please contact support: admin@dttmediallc.com");
+      setErr("Invalid code. Please contact support: office@dttmediallc.com");
     }
   };
 

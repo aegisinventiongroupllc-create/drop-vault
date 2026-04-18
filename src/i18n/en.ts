@@ -54,7 +54,7 @@ const en: Translations = {
   tos_section8_title: "8. Account Termination",
   tos_section8_text: "The Platform reserves the right to suspend or terminate accounts that violate these Terms at any time without prior notice.",
   tos_section9_title: "9. Contact",
-  tos_section9_text: "For questions about these Terms, contact: admin@dttmediallc.com",
+  tos_section9_text: "For questions about these Terms, contact: office@dttmediallc.com",
 
   privacy_section1_title: "1. Data Collection",
   privacy_section1_text: "DTT Media LLC collects account information, transaction history, and IP addresses. For Creators, we collect government-issued ID and \"liveness\" selfies to ensure platform safety and 18+ compliance.",
@@ -67,7 +67,7 @@ const en: Translations = {
   privacy_section5_title: "5. Data Retention",
   privacy_section5_text: "Account data is retained for the duration of your account's existence. Upon account deletion, personal data is removed within 30 days, except where retention is required by law.",
   privacy_section6_title: "6. Contact",
-  privacy_section6_text: "For privacy inquiries, contact: admin@dttmediallc.com",
+  privacy_section6_text: "For privacy inquiries, contact: office@dttmediallc.com",
 
   token_single: "1 Bit-Token — $21",
   token_bundle: "6 Bit-Tokens — $101",

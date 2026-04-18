@@ -54,7 +54,7 @@ const pt: Translations = {
   tos_section8_title: "8. Encerramento de Conta",
   tos_section8_text: "A Plataforma se reserva o direito de suspender ou encerrar contas que violem estes Termos a qualquer momento sem aviso prévio.",
   tos_section9_title: "9. Contato",
-  tos_section9_text: "Para dúvidas sobre estes Termos, contate: admin@dttmediallc.com",
+  tos_section9_text: "Para dúvidas sobre estes Termos, contate: office@dttmediallc.com",
 
   privacy_section1_title: "1. Informações que Coletamos",
   privacy_section1_text: "Coletamos informações que você fornece diretamente: endereço de e-mail, nome de usuário, informações de pagamento (processadas por provedores terceirizados) e documentos de identidade enviados para verificação de Criadores.",
@@ -67,7 +67,7 @@ const pt: Translations = {
   privacy_section5_title: "5. Retenção de Dados",
   privacy_section5_text: "Os dados da conta são retidos durante a existência da sua conta. Após a exclusão da conta, os dados pessoais são removidos em 30 dias, exceto quando a retenção é exigida por lei.",
   privacy_section6_title: "6. Contato",
-  privacy_section6_text: "Para consultas de privacidade, contate: admin@dttmediallc.com",
+  privacy_section6_text: "Para consultas de privacidade, contate: office@dttmediallc.com",
 
   token_single: "1 Bit-Token — $21",
   token_bundle: "6 Bit-Tokens — $101",

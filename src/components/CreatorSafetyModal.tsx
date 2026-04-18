@@ -37,7 +37,7 @@ const CreatorSafetyModal = ({ onAgree }: { onAgree: () => void }) => {
               and will never be shared without consent.
             </p>
             <p>
-              For questions or concerns, contact: <a href="mailto:admin@dttmediallc.com" className="text-primary underline">admin@dttmediallc.com</a>
+              For questions or concerns, contact: <a href="mailto:office@dttmediallc.com" className="text-primary underline">office@dttmediallc.com</a>
             </p>
           </div>
 

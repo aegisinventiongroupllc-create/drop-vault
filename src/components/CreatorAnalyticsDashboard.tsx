@@ -1040,9 +1040,9 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
 
       {/* Support footer */}
       <div className="px-4 mt-8 pb-2 text-center">
-        <a href="mailto:admin@dttmediallc.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+        <a href="mailto:office@dttmediallc.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
           <Mail className="w-3 h-3" />
-          Official Support: admin@dttmediallc.com
+          Official Support: office@dttmediallc.com
         </a>
       </div>
       <LegalFooter />

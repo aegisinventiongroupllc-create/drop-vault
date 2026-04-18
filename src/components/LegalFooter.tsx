@@ -92,7 +92,7 @@ const Statement2257 = () => (
       All records required by law are maintained by the primary producer (the Creator) at the location specified in their individual records. DTT Media LLC maintains secondary records of identity and age for all Creators through our automated verification systems.
     </p>
     <p className="text-muted-foreground/60 text-[10px]">
-      For compliance inquiries, contact: admin@dttmediallc.com
+      For compliance inquiries, contact: office@dttmediallc.com
     </p>
   </SectionShell>
 );
@@ -142,10 +142,10 @@ const ContactInfo = () => (
     <p>
       <strong className="text-foreground">Support email:</strong>{" "}
       <a
-        href="mailto:admin@dttmediallc.com"
+        href="mailto:office@dttmediallc.com"
         className="text-primary hover:underline"
       >
-        admin@dttmediallc.com
+        office@dttmediallc.com
       </a>
     </p>
   </SectionShell>
