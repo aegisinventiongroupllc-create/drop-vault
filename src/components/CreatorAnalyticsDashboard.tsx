@@ -147,10 +147,35 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setShowCamera(false);
   };
 
-  // Persona KYC launcher
-  const launchPersona = () => {
+  // Persona KYC launcher (dynamic SDK load with retry)
+  const loadPersonaScript = (): Promise<void> =>
+    new Promise((resolve, reject) => {
+      if (window.Persona) return resolve();
+      const existing = document.querySelector<HTMLScriptElement>('script[data-persona-sdk]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve());
+        existing.addEventListener("error", () => reject(new Error("Persona SDK failed to load")));
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = "https://cdn.withpersona.com/dist/persona-v5.latest.js";
+      s.async = true;
+      s.dataset.personaSdk = "true";
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("Persona SDK failed to load"));
+      document.head.appendChild(s);
+    });
+
+  const launchPersona = async () => {
+    try {
+      await loadPersonaScript();
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not load verification SDK. Check your network/ad-blocker and try again.");
+      return;
+    }
     if (!window.Persona) {
-      toast.error("Verification SDK not loaded. Please refresh and try again.");
+      toast.error("Verification SDK unavailable.");
       return;
     }
     const client = new window.Persona.Client({
@@ -181,6 +206,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       },
     });
   };
+
 
 
   // LTC address validation
