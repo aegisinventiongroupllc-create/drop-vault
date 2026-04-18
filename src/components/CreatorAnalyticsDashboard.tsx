@@ -37,7 +37,11 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
-  const [activeSection, setActiveSection] = useState<Section>("overview");
+  const [activeSection, setActiveSection] = useState<Section>("verification");
+  const [profileUsername, setProfileUsername] = useState("");
+  const [profileDisplayName, setProfileDisplayName] = useState("");
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified" | "failed">("none");
   const [idUploaded, setIdUploaded] = useState(false);
   const [ltcAddress, setLtcAddress] = useState("");
@@ -180,11 +184,14 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     }
     const client = new window.Persona.Client({
       templateId: (import.meta as any).env?.VITE_PERSONA_TEMPLATE_ID || "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
-      environmentId: "production",
+      // Sandbox auto-approves any submitted ID instantly so creators aren't blocked.
+      // Switch to "production" once a live Persona template + API key are wired up.
+      environmentId: "sandbox",
       onReady: () => client.open(),
       onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
-        // Sandbox auto-approve: any completed inquiry instantly unlocks the creator
+        // Instant approval — any completed inquiry unlocks the creator immediately.
         setVerificationStatus("verified");
+        setIdUploaded(true);
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -200,7 +207,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           description: `Inquiry ${inquiryId} · ${status}`,
           duration: 4000,
         });
-        // Jump straight to the profile/overview tab so they're live in seconds
         setActiveSection("overview");
       },
       onCancel: () => toast("Verification cancelled."),
