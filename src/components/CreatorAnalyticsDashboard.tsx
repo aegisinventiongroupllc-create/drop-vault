@@ -388,13 +388,16 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setUploading("teasers");
     setUploadMsg("");
     const interval = runProgress();
-    // Each teaser is its own video — no fixed name so creators can keep many
+    const uploadToastId = toast.loading(`Uploading teaser "${title}"…`, {
+      description: "Please wait — don't close this tab.",
+      duration: Infinity,
+    });
     const result = await uploadMedia(file, "teasers", authUserId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
-      toast.error(`Teaser upload failed: ${result.error}`);
+      toast.error(`Teaser upload failed: ${result.error}`, { id: uploadToastId });
     } else {
       const dbResult = await insertMedia({
         bucket: "teasers",
@@ -403,10 +406,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         media_type: "video",
       });
       if ("error" in dbResult) {
-        toast.error(`Saved file but couldn't record title: ${dbResult.error}`);
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId });
+      } else {
+        setUploadMsg(`✓ "${title}" teaser uploaded.`);
+        toast.success("Teaser uploaded", { id: uploadToastId });
       }
-      setUploadMsg(`✓ "${title}" teaser uploaded.`);
-      toast.success("Teaser uploaded");
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
