@@ -45,7 +45,7 @@ const Index = () => {
   const { t } = useI18n();
   const savedPrefs = loadPrefs();
 
-  const [verified, setVerified] = useState(!!savedPrefs);
+  const [verified, setVerified] = useState(() => sessionStorage.getItem("dtt_verified") === "1");
   const [role, setRole] = useState<UserRole | null>(savedPrefs?.role ?? null);
   const [email, setEmail] = useState(savedPrefs?.email ?? "");
   const [preference, setPreference] = useState<GenderPreference | null>(savedPrefs?.preference ?? savedPrefs?.vault ?? null);
