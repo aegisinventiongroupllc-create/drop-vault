@@ -71,6 +71,10 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     await logConsent("card");
     setStep("processing");
     setError(null);
+    const toastId = toast.loading("Opening secure card checkout…", {
+      description: "Don't close this tab — it will redirect when ready.",
+      duration: Infinity,
+    });
     try {
       const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
         body: { amount_usd: invoiceAmount, tokens, order_id: `dtt-${Date.now()}`, is_fiat: true },
@@ -82,8 +86,9 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         window.open(data.invoice_url, "_blank");
       }
       setStep("awaiting");
-      // DO NOT credit tokens here — IPN webhook handles balance updates
+      toast.success("Checkout opened in new tab", { id: toastId });
     } catch (err: any) {
+      toast.error("Card payment failed", { id: toastId, description: err.message });
       setError(err.message || "Card payment failed. Please try again.");
       setStep("payment");
     }
