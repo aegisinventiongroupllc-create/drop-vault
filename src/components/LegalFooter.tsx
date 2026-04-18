@@ -41,6 +41,9 @@ const LegalFooter = () => {
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
           © {new Date().getFullYear()} DTT Media LLC. All Rights Reserved. Must be 18+ to enter.
         </p>
+        <p className="text-[10px] text-muted-foreground/70 leading-relaxed mt-1 font-semibold">
+          Refund Policy: All sales are final. No refunds.
+        </p>
       </footer>
 
       {view && (
