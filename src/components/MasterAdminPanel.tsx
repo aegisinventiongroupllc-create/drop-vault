@@ -2,16 +2,26 @@ import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb, Zap, Target,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 import {
   canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
 } from "@/lib/paymentSplit";
 
 const ADMIN_PASSWORD = "052417";
+export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
+
+interface CreatorRow {
+  user_id: string;
+  display_name: string | null;
+  email: string | null;
+  role: string;
+  created_at: string;
+}
 
 // Clean-slate mock data — all stats start at 0 for production launch
 const VERIFICATION_QUEUE: { id: string; creator: string; submitted: string; docType: string; status: "pending" | "approved" | "rejected"; side: "Women" | "Men" }[] = [];
@@ -55,6 +65,21 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
   const [creatorGenderTab, setCreatorGenderTab] = useState<"women" | "men">("women");
 
+  // Live creator log
+  const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
+  const [creatorsLoading, setCreatorsLoading] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<CreatorRow | null>(null);
+
+  const fetchLiveCreators = async () => {
+    setCreatorsLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, email, role, created_at")
+      .order("created_at", { ascending: false });
+    if (!error && data) setLiveCreators(data as CreatorRow[]);
+    setCreatorsLoading(false);
+  };
+
   const [payoutState, setPayoutState] = useState<PayoutState>({
     lastPayoutAt: null,
     cooldownMs: 24 * 60 * 60 * 1000,
@@ -96,6 +121,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true);
       setError(false);
+      // Grant admin override across the app — free vault access, bypass age/safety gates
+      try { localStorage.setItem(ADMIN_OVERRIDE_KEY, "1"); } catch {}
+      fetchLiveCreators();
     } else {
       setError(true);
     }
@@ -171,6 +199,10 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
   ];
+
+  if (selectedCreator) {
+    return <AdminCreatorDetail creator={selectedCreator} onBack={() => setSelectedCreator(null)} />;
+  }
 
   return (
     <div className="mobile-scroll-shell">
@@ -309,40 +341,15 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* CREATORS — Gender Tabs (Men / Women) */}
       {activeSection === "creators" && (
         <div className="px-4 space-y-4">
-          {/* Gender toggle */}
-          <div className="flex rounded-xl overflow-hidden border border-border">
-            <button
-              onClick={() => { setCreatorGenderTab("women"); setSearchQuery(""); }}
-              className={`flex-1 py-3 text-xs font-bold tracking-widest transition-all ${
-                creatorGenderTab === "women"
-                  ? "bg-pink-500/20 text-pink-400 border-r border-pink-400/30"
-                  : "bg-secondary text-muted-foreground border-r border-border"
-              }`}
-            >
-              WOMEN CREATORS
-            </button>
-            <button
-              onClick={() => { setCreatorGenderTab("men"); setSearchQuery(""); }}
-              className={`flex-1 py-3 text-xs font-bold tracking-widest transition-all ${
-                creatorGenderTab === "men"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-secondary text-muted-foreground"
-              }`}
-            >
-              MEN CREATORS
-            </button>
-          </div>
-
-          {/* Tab totals */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-card border border-border rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground tracking-wider mb-1">TOTAL EARNED</p>
-              <p className="text-2xl font-bold text-foreground">${tabEarned.toLocaleString()}</p>
+          {/* LIVE Creator Log — every signed-up creator, click to inspect */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-foreground">CREATOR LOG</h2>
+              <p className="text-[10px] text-muted-foreground">{liveCreators.length} total signups • Tap any creator to inspect their files & waivers</p>
             </div>
-            <div className="bg-card border border-border rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground tracking-wider mb-1">PENDING PAYOUT</p>
-              <p className="text-2xl font-bold text-gold">${tabPending.toLocaleString()}</p>
-            </div>
+            <button onClick={fetchLiveCreators} className="text-[10px] font-bold text-primary px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
+              {creatorsLoading ? "..." : "REFRESH"}
+            </button>
           </div>
 
           {/* Search */}
@@ -352,43 +359,43 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name or email..."
+              placeholder="Search by username or email..."
               className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
 
-          {/* Creator payout list */}
+          {/* Live creator list */}
           <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-2.5 bg-secondary/50 border-b border-border">
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Creator</span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Earned</span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">LTC Wallet</span>
-            </div>
             <div className="divide-y divide-border">
-              {filteredCreators.map((creator) => (
-                <div key={creator.id} className="px-4 py-3">
-                  <div className="flex items-start justify-between">
+              {liveCreators
+                .filter((c) =>
+                  (c.display_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (c.email || "").toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((c) => (
+                  <button
+                    key={c.user_id}
+                    onClick={() => setSelectedCreator(c)}
+                    className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-secondary/30 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary">
+                      {(c.display_name || c.email || "?").slice(0, 2).toUpperCase()}
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{creator.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{creator.email}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{c.display_name || "Unnamed"}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{c.email || "—"}</p>
                     </div>
-                    <div className="text-right ml-3">
-                      <p className="text-sm font-bold text-foreground">${creator.earned.toLocaleString()}</p>
-                      {creator.pending > 0 && (
-                        <p className="text-[10px] text-gold font-bold">Pending: ${creator.pending.toLocaleString()}</p>
-                      )}
-                    </div>
-                  </div>
-                  {creator.wallet && creator.wallet !== "—" && (
-                    <div className="mt-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
-                      <p className="text-[10px] text-muted-foreground font-mono truncate">{creator.wallet}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {filteredCreators.length === 0 && (
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                      c.role === "creator" ? "bg-primary/10 text-primary border border-primary/30"
+                      : c.role === "admin" ? "bg-gold/10 text-gold border border-gold/30"
+                      : "bg-secondary text-muted-foreground border border-border"
+                    }`}>{c.role.toUpperCase()}</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                ))}
+              {liveCreators.length === 0 && !creatorsLoading && (
                 <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No {creatorGenderTab === "women" ? "women" : "men"} creators yet — clean slate for launch.
+                  No creators yet. Once people sign up, they'll appear here.
                 </div>
               )}
             </div>

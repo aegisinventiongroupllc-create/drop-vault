@@ -24,6 +24,7 @@ import {
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
 import { useCreatorStats } from "@/hooks/useCreatorStats";
+import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
@@ -69,7 +70,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [loyaltySent, setLoyaltySent] = useState(false);
   const [remainingLoyalty, setRemainingLoyalty] = useState(25);
 
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setAuthUserId(data.user?.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthUserId(session?.user?.id ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   const liveStats = useCreatorStats();
+  const { items: mediaItems, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const STATS = [
     { label: "Followers", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
@@ -304,35 +317,52 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     return interval;
   };
 
-  const getAuthUserId = async (): Promise<string | null> => {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.id ?? null;
+  const requireTitle = (): string | null => {
+    const t = uploadTitle.trim();
+    if (!t) {
+      const msg = "Please add a title before uploading.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
+      return null;
+    }
+    return t;
   };
 
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
-    setUploading(bucket);
-    setUploadMsg("");
-    const userId = await getAuthUserId();
-    if (!userId) {
-      setUploadMsg("Upload failed: You must be signed in to upload.");
-      setUploading(null);
+    const title = requireTitle();
+    if (!title) { e.target.value = ""; return; }
+    if (!authUserId) {
+      const msg = "You must be signed in to upload.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
       e.target.value = "";
       return;
     }
+    setUploading(bucket);
+    setUploadMsg("");
     const interval = runProgress();
-    const label = uploadTitle.trim() || file.name;
-    const result = await uploadMedia(file, bucket, userId);
+    // Each video gets its own unique storage path so creators can have hundreds without collisions
+    const result = await uploadMedia(file, bucket, authUserId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
       toast.error(`Upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ "${label}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
-      toast.success(`"${label}" uploaded successfully`);
+      const dbResult = await insertMedia({
+        bucket,
+        storage_path: result.path,
+        title,
+        media_type: file.type.startsWith("image/") ? "photo" : "video",
+      });
+      if ("error" in dbResult) {
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`);
+      }
+      setUploadMsg(`✓ "${title}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
+      toast.success(`"${title}" uploaded`);
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
@@ -342,31 +372,61 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const handleTeaserUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading("teasers");
-    setUploadMsg("");
-    const userId = await getAuthUserId();
-    if (!userId) {
-      setUploadMsg("Upload failed: You must be signed in to upload.");
-      setUploading(null);
+    const title = requireTitle();
+    if (!title) { e.target.value = ""; return; }
+    if (!authUserId) {
+      const msg = "You must be signed in to upload.";
+      setUploadMsg(`Upload failed: ${msg}`);
+      toast.error(msg);
       e.target.value = "";
       return;
     }
+    setUploading("teasers");
+    setUploadMsg("");
     const interval = runProgress();
-    const label = uploadTitle.trim() || file.name;
-    // Upload new teaser — old one is auto-replaced in cloud storage (same path)
-    const result = await uploadMedia(file, "teasers", userId, "profile-trailer");
+    // Each teaser is its own video — no fixed name so creators can keep many
+    const result = await uploadMedia(file, "teasers", authUserId);
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
       toast.error(`Teaser upload failed: ${result.error}`);
     } else {
-      setUploadMsg(`✓ "${label}" teaser uploaded. Old teaser moved to your library.`);
+      const dbResult = await insertMedia({
+        bucket: "teasers",
+        storage_path: result.path,
+        title,
+        media_type: "video",
+      });
+      if ("error" in dbResult) {
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`);
+      }
+      setUploadMsg(`✓ "${title}" teaser uploaded.`);
       toast.success("Teaser uploaded");
       setUploadTitle("");
     }
     setTimeout(() => { setUploading(null); setUploadProgress(0); }, 800);
     e.target.value = "";
+  };
+
+  const startRename = (id: string, current: string) => {
+    setEditingMediaId(id);
+    setEditingTitle(current);
+  };
+
+  const saveRename = async () => {
+    if (!editingMediaId) return;
+    const r = await renameMedia(editingMediaId, editingTitle.trim());
+    if ("error" in r) toast.error(r.error);
+    else toast.success("Title updated");
+    setEditingMediaId(null);
+    setEditingTitle("");
+  };
+
+  const removeMediaItem = async (id: string, bucket: "teasers" | "vault", path: string) => {
+    const r = await deleteMedia(id, bucket, path);
+    if ("error" in r) toast.error(r.error);
+    else toast.success("Video removed");
   };
 
   const triggerMediaUpload = (bucket: MediaBucket) => {
@@ -975,53 +1035,81 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             )}
           </div>
 
-          {/* Public Teasers list (empty until first upload) */}
-          {PUBLIC_TEASERS.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Globe className="w-4 h-4 text-primary" />
-                <h3 className="text-base font-semibold text-foreground">Your Teasers</h3>
-              </div>
-              <div className="space-y-3">
-                {PUBLIC_TEASERS.map((item) => (
-                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                      <Video className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                    </div>
-                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Live media library — per-video editable titles */}
+          {(() => {
+            const teasers = mediaItems.filter((m) => m.bucket === "teasers");
+            const vaults = mediaItems.filter((m) => m.bucket === "vault");
 
-          {/* Vault Content list (empty until first upload) */}
-          {VAULT_CONTENT.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Lock className="w-4 h-4 text-gold" />
-                <h3 className="text-base font-semibold text-foreground">Your Full Videos</h3>
-              </div>
-              <div className="space-y-3">
-                {VAULT_CONTENT.map((item) => (
-                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                      {item.type === "video" ? <Video className="w-6 h-6 text-gold" /> : <Image className="w-6 h-6 text-gold" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                      <span className="text-xs text-muted-foreground">{item.views.toLocaleString()} views • {item.date}</span>
-                    </div>
-                    <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
+            const renderRow = (item: typeof mediaItems[number], accent: string) => {
+              const isEditing = editingMediaId === item.id;
+              return (
+                <div key={item.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 ${accent}`}>
+                    {item.media_type === "video" ? <Video className="w-5 h-5" /> : <Image className="w-5 h-5" />}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  <div className="flex-1 min-w-0">
+                    {isEditing ? (
+                      <div className="flex gap-1.5">
+                        <input
+                          autoFocus
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") saveRename(); if (e.key === "Escape") { setEditingMediaId(null); setEditingTitle(""); } }}
+                          className="flex-1 bg-secondary rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        <button onClick={saveRename} className="text-[10px] font-bold text-primary px-2">SAVE</button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                        <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()} • {item.views} views</span>
+                      </>
+                    )}
+                  </div>
+                  {!isEditing && (
+                    <>
+                      <button
+                        onClick={() => startRename(item.id, item.title)}
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 px-2"
+                      >EDIT</button>
+                      <button
+                        onClick={() => removeMediaItem(item.id, item.bucket, item.storage_path)}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                      ><Trash2 className="w-4 h-4" /></button>
+                    </>
+                  )}
+                </div>
+              );
+            };
+
+            return (
+              <>
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Globe className="w-4 h-4 text-primary" />
+                    <h3 className="text-base font-semibold text-foreground">Your Teasers ({teasers.length})</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {teasers.length === 0
+                      ? <p className="text-xs text-muted-foreground text-center py-4">No teasers yet. Add a title and upload your first 15-sec teaser above.</p>
+                      : teasers.map((m) => renderRow(m, "text-primary"))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lock className="w-4 h-4 text-gold" />
+                    <h3 className="text-base font-semibold text-foreground">Your Full Videos ({vaults.length})</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {vaults.length === 0
+                      ? <p className="text-xs text-muted-foreground text-center py-4">No vault videos yet. Upload locked content above — fans pay Bit-Tokens to unlock.</p>
+                      : vaults.map((m) => renderRow(m, "text-gold"))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
 
