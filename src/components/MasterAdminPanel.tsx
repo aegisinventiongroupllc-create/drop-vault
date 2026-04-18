@@ -65,6 +65,21 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
   const [creatorGenderTab, setCreatorGenderTab] = useState<"women" | "men">("women");
 
+  // Live creator log
+  const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
+  const [creatorsLoading, setCreatorsLoading] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<CreatorRow | null>(null);
+
+  const fetchLiveCreators = async () => {
+    setCreatorsLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, email, role, created_at")
+      .order("created_at", { ascending: false });
+    if (!error && data) setLiveCreators(data as CreatorRow[]);
+    setCreatorsLoading(false);
+  };
+
   const [payoutState, setPayoutState] = useState<PayoutState>({
     lastPayoutAt: null,
     cooldownMs: 24 * 60 * 60 * 1000,
@@ -106,6 +121,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true);
       setError(false);
+      // Grant admin override across the app — free vault access, bypass age/safety gates
+      try { localStorage.setItem(ADMIN_OVERRIDE_KEY, "1"); } catch {}
+      fetchLiveCreators();
     } else {
       setError(true);
     }
