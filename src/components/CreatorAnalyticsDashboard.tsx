@@ -10,6 +10,14 @@ import SuggestionBox from "@/components/SuggestionBox";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Persona?: any;
+  }
+}
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
   DEFAULT_SPLIT, INCENTIVE_SPLIT,
@@ -138,6 +146,42 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     cameraStreamRef.current = null;
     setShowCamera(false);
   };
+
+  // Persona KYC launcher
+  const launchPersona = () => {
+    if (!window.Persona) {
+      toast.error("Verification SDK not loaded. Please refresh and try again.");
+      return;
+    }
+    const client = new window.Persona.Client({
+      templateId: "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
+      environmentId: "sandbox",
+      onReady: () => client.open(),
+      onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
+        setVerificationStatus("verified");
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase
+              .from("profiles")
+              .update({ role: "creator" } as any)
+              .eq("user_id", user.id);
+          }
+        } catch (e) {
+          console.error("Profile update failed", e);
+        }
+        toast.success("Identity Confirmed — You can now post drops!", {
+          description: `Inquiry ${inquiryId} (${status})`,
+        });
+      },
+      onCancel: () => toast("Verification cancelled."),
+      onError: (error: any) => {
+        console.error("Persona error", error);
+        toast.error("Verification error. Please try again.");
+      },
+    });
+  };
+
 
   // LTC address validation
   const validateLtcAddress = (val: string) => {
@@ -556,6 +600,16 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
               <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
+            </div>
+
+            {/* Persona International KYC */}
+            <div className="mb-4">
+              <Button variant="gold" size="lg" className="w-full" onClick={launchPersona}>
+                <Globe className="w-4 h-4 mr-2" /> VERIFY INTERNATIONAL IDENTITY
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center mt-2">
+                Powered by Persona — Passport, ID & Driver's License accepted worldwide. Sandbox mode.
+              </p>
             </div>
 
             {/* Camera viewfinder */}
