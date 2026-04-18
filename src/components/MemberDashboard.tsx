@@ -137,9 +137,10 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const renderCreatorCircle = (unlock: CreatorUnlock) => {
     const remaining = getUnlockTimeRemaining(unlock);
     const isExpiringSoon = remaining > 0 && remaining <= RENEWAL_WARNING_MS;
+    const isAutoOn = !!autorenew[unlock.creatorId];
 
     return (
-      <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[80px]">
+      <div key={unlock.creatorId} className="flex flex-col items-center gap-1.5 min-w-[96px]">
         <button
           onClick={() => handleCreatorClick(unlock.creatorName)}
           className={`w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent border-2 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg transition-transform hover:scale-105 ${
@@ -148,10 +149,31 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         >
           {unlock.creatorName.slice(0, 2).toUpperCase()}
         </button>
-        <p className="text-[10px] font-semibold text-foreground truncate max-w-[80px] text-center">@{unlock.creatorName}</p>
+        <p className="text-[10px] font-semibold text-foreground truncate max-w-[96px] text-center">@{unlock.creatorName}</p>
         <p className={`text-[9px] ${isExpiringSoon ? "text-gold font-bold" : "text-primary"}`}>
           {formatUnlockCountdown(remaining)}
         </p>
+
+        {/* Autopay toggle */}
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className={`text-[8px] font-bold tracking-wider ${isAutoOn ? "text-primary" : "text-muted-foreground"}`}>AUTOPAY</span>
+          <Switch
+            checked={isAutoOn}
+            onCheckedChange={() => toggleAutorenew(unlock.creatorId, unlock.creatorName)}
+            className="scale-50 -my-2"
+          />
+        </div>
+
+        {/* Support button */}
+        <button
+          onClick={() => handleSupport(unlock.creatorName)}
+          className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary text-[9px] font-bold rounded-full px-2 py-0.5 transition-colors"
+          title={`Send 1 Bit-Token ($${SUPPORT_TIP_USD}) — Creator gets $19, Platform $1`}
+        >
+          <Heart className="w-2.5 h-2.5" />
+          SUPPORT 1BT
+        </button>
+
         {isExpiringSoon && (
           <button
             onClick={() => handleRenew(unlock.creatorName)}
