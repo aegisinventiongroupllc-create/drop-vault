@@ -70,7 +70,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [loyaltySent, setLoyaltySent] = useState(false);
   const [remainingLoyalty, setRemainingLoyalty] = useState(25);
 
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setAuthUserId(data.user?.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthUserId(session?.user?.id ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   const liveStats = useCreatorStats();
+  const { items: mediaItems, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const STATS = [
     { label: "Followers", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
