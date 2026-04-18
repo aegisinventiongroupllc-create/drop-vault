@@ -550,7 +550,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             <p className="text-xs text-muted-foreground leading-relaxed">
               <span className="font-semibold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
               Includes a flat <span className="font-semibold text-foreground">$1.00 Network Tax</span> per request.
-              Custom requests ($500–$10,001): same $1 fee + 10% of base.
+              Custom requests ($500–$10,001): same flat $1 fee, no matter the request size.
             </p>
           </div>
 
@@ -587,7 +587,30 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               </div>
             </div>
             <p className="text-[10px] text-muted-foreground mb-2">dropthatthing.com/creator/username</p>
-            <Button variant="neon" size="sm" className="gap-1.5">
+            <Button
+              variant="neon"
+              size="sm"
+              className="gap-1.5"
+              onClick={async () => {
+                const url = "https://dttmediallc.com/creator/username";
+                try {
+                  const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(url)}`;
+                  const res = await fetch(apiUrl);
+                  const blob = await res.blob();
+                  const objectUrl = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = objectUrl;
+                  a.download = "dtt-vault-qr.png";
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(objectUrl);
+                  toast.success("QR code downloaded", { description: "Share your vault link anywhere." });
+                } catch {
+                  toast.error("Download failed. Please try again.");
+                }
+              }}
+            >
               <Download className="w-3.5 h-3.5" />
               DOWNLOAD QR CODE
             </Button>
