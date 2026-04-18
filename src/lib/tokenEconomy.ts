@@ -111,6 +111,26 @@ export function calculateTipSplit(tipAmount: number) {
   return { tipAmount, adminFee, creatorShare };
 }
 
+/**
+ * Support Tip via 1 Bit-Token ($20 fixed value):
+ * Platform Fee: 5% ($1) — Creator Revenue: 95% ($19)
+ */
+export const SUPPORT_TIP_TOKENS = 1;
+export const SUPPORT_TIP_USD = 20;
+export const SUPPORT_PLATFORM_PERCENT = 5;
+export const SUPPORT_CREATOR_PERCENT = 95;
+
+export function calculateSupportTipSplit() {
+  const platformShare = SUPPORT_TIP_USD * (SUPPORT_PLATFORM_PERCENT / 100);
+  const creatorShare = SUPPORT_TIP_USD * (SUPPORT_CREATOR_PERCENT / 100);
+  return {
+    tokens: SUPPORT_TIP_TOKENS,
+    totalUsd: SUPPORT_TIP_USD,
+    platformShare,
+    creatorShare,
+  };
+}
+
 export function calculateRequestTokens(usd: number): { baseTokens: number; fee: number; total: number } {
   const baseTokens = dollarsToBitTokens(usd);
   return {
