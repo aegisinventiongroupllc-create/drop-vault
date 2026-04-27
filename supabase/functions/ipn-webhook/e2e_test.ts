@@ -32,12 +32,18 @@ async function hmacSha512Hex(body: string, secret: string): Promise<string> {
     .join("");
 }
 
-Deno.test("E2E: IPN 'finished' webhook credits buyer's token balance", async () => {
+Deno.test({
+  name: "E2E: IPN 'finished' webhook credits buyer's token balance",
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: async () => {
   assert(SUPABASE_URL, "SUPABASE_URL must be set");
   assert(SERVICE_ROLE_KEY, "SUPABASE_SERVICE_ROLE_KEY must be set");
   assert(IPN_SECRET, "NOWPAYMENTS_IPN_SECRET must be set");
 
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   // 1. Create an ephemeral test user
   const testEmail = `e2e-ipn-${Date.now()}@test.dropthatthing.local`;
@@ -149,4 +155,5 @@ Deno.test("E2E: IPN 'finished' webhook credits buyer's token balance", async () 
     await admin.from("transactions").delete().eq("buyer_id", userId);
     await admin.auth.admin.deleteUser(userId);
   }
+  },
 });
