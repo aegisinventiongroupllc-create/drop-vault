@@ -224,7 +224,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE FIAT ON-RAMP · SETTLES IN LTC</p>
               <button disabled={!consentChecked} onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                 <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
                 <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay · KYC may be required</p>
