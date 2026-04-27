@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -18,7 +20,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { amount_usd, tokens, order_id, pay_currency, is_fiat } = await req.json();
+    const { amount_usd, tokens, pay_currency, is_fiat } = await req.json();
 
     if (!amount_usd || !tokens) {
       return new Response(JSON.stringify({ error: 'Missing required fields: amount_usd, tokens' }), {
@@ -26,12 +28,31 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Identify the buyer from JWT (so the webhook can credit the right account)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authHeader = req.headers.get('Authorization') || '';
+    const supabaseAuth = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData } = await supabaseAuth.auth.getUser();
+    const buyerId = userData?.user?.id;
+    if (!buyerId) {
+      return new Response(JSON.stringify({ error: 'Authentication required to purchase tokens' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Embed buyer + token count in order_id so the IPN webhook can credit reliably.
+    // Format: dtt-{timestamp}-{tokens}-{userId}
+    const orderIdResolved = `dtt-${Date.now()}-${tokens}-${buyerId}`;
+
     // Build payment request body
     const paymentBody: Record<string, unknown> = {
       price_amount: amount_usd,
       price_currency: 'usd',
       pay_currency: pay_currency || 'ltc',
-      order_id: order_id || `dtt-${Date.now()}`,
+      order_id: orderIdResolved,
       order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
       is_fixed_rate: true,
       is_fee_paid_by_user: true,
