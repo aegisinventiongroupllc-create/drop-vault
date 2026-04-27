@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
+import TokenPurchaseHistory from "@/components/TokenPurchaseHistory";
 import LegalFooter from "@/components/LegalFooter";
 import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
@@ -233,6 +234,9 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
           BUY TOKENS
         </Button>
       </div>
+
+      {/* Top-up history */}
+      <TokenPurchaseHistory />
 
       {/* Tabs */}
       <div className="flex gap-2 px-4 mb-4">
