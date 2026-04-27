@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.credit_tokens(UUID, TEXT, INTEGER, NUMERIC) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.credit_tokens(UUID, TEXT, INTEGER, NUMERIC) TO service_role;

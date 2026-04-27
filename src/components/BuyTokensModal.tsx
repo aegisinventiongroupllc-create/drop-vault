@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { X, Loader2, Clock } from "lucide-react";
+import { X, Loader2, Clock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD, ADMIN_FEE_USD,
@@ -17,12 +17,51 @@ interface BuyTokensModalProps {
 
 const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
-  const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting">("select");
+  const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
   const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address: string; pay_amount: number; pay_currency: string; payment_id: string } | null>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [creditedTokens, setCreditedTokens] = useState<number>(0);
+
+  // Listen for the IPN to credit this user's wallet while we're awaiting
+  useEffect(() => {
+    if (step !== "awaiting") return;
+    let cancelled = false;
+
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData?.user?.id;
+      if (!uid || cancelled) return;
+
+      const channel = supabase
+        .channel(`token-purchase-${uid}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "token_purchases", filter: `user_id=eq.${uid}` },
+          (payload: any) => {
+            const credited = payload?.new?.tokens_credited ?? tokens;
+            setCreditedTokens(credited);
+            setStep("success");
+            onPurchase(credited);
+            toast.success("Payment Received!", {
+              description: "Your Bitokens have been added to your vault.",
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const logConsent = async (method: "card" | "crypto", currency?: string) => {
     try {
@@ -53,7 +92,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     setError(null);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, pay_currency: currency, order_id: `dtt-${Date.now()}` },
+        body: { amount_usd: invoiceAmount, tokens, pay_currency: currency },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
@@ -77,7 +116,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     });
     try {
       const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, order_id: `dtt-${Date.now()}`, is_fiat: true },
+        body: { amount_usd: invoiceAmount, tokens, is_fiat: true },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
@@ -263,6 +302,19 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
 
             <Button variant="outline" className="w-full" onClick={onClose}>CLOSE — I'LL CHECK BACK</Button>
+          </div>
+        )}
+
+        {step === "success" && (
+          <div className="p-6 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-9 h-9 text-primary" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">PAYMENT RECEIVED!</h3>
+            <p className="text-sm text-muted-foreground">
+              Your <span className="text-primary font-bold">{creditedTokens} Bit-Token{creditedTokens !== 1 ? "s" : ""}</span> have been added to your vault.
+            </p>
+            <Button variant="neon" className="w-full" onClick={onClose}>BACK TO VAULT</Button>
           </div>
         )}
       </div>

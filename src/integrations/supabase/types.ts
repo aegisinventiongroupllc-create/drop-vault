@@ -320,6 +320,36 @@ export type Database = {
         }
         Relationships: []
       }
+      token_purchases: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          id: string
+          payment_id: string
+          status: string
+          tokens_credited: number
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          id?: string
+          payment_id: string
+          status?: string
+          tokens_credited: number
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          payment_id?: string
+          status?: string
+          tokens_credited?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount_usd: number
@@ -391,6 +421,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      credit_tokens: {
+        Args: {
+          _amount_usd: number
+          _payment_id: string
+          _tokens: number
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
