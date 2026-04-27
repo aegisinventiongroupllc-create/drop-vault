@@ -77,8 +77,30 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Parse order_id formats:
+    //   Token purchase: dtt-{timestamp}-{tokens}-{userId}
+    //   Legacy/creator: dtt-{timestamp}-{creatorId}
     const orderParts = (order_id || '').split('-');
-    const creatorId = orderParts.length >= 3 ? orderParts.slice(2).join('-') : null;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    let buyerUserId: string | null = null;
+    let tokensToCredit = 0;
+    let creatorId: string | null = null;
+
+    if (orderParts.length >= 7) {
+      // Token purchase: prefix(1) + timestamp(1) + tokens(1) + uuid(5) = 8 parts after split('-')
+      // Actually: ["dtt", "{ts}", "{tokens}", uuid1, uuid2, uuid3, uuid4, uuid5]
+      const maybeTokens = parseInt(orderParts[2], 10);
+      const maybeUuid = orderParts.slice(3).join('-');
+      if (!isNaN(maybeTokens) && uuidRegex.test(maybeUuid)) {
+        buyerUserId = maybeUuid;
+        tokensToCredit = maybeTokens;
+      }
+    }
+    if (!buyerUserId && orderParts.length >= 3) {
+      // Legacy creator-payment format
+      const maybeUuid = orderParts.slice(2).join('-');
+      if (uuidRegex.test(maybeUuid)) creatorId = maybeUuid;
+    }
 
     // Dual-Bucket calculation
     const invoiceAmount = Number(price_amount) || 0;
@@ -90,11 +112,29 @@ Deno.serve(async (req) => {
 
     console.log(`Dual-Bucket: invoice=$${invoiceAmount}, tax=$${entryTax}, base=$${baseAmount}, commission=$${platformCommission}, creator=$${creatorShareUsd}`);
 
+    // === TOKEN PURCHASE: credit buyer's wallet atomically ===
+    let tokensCredited = false;
+    if (buyerUserId && tokensToCredit > 0) {
+      const { data: creditResult, error: creditError } = await supabase.rpc('credit_tokens', {
+        _user_id: buyerUserId,
+        _payment_id: String(payment_id),
+        _tokens: tokensToCredit,
+        _amount_usd: invoiceAmount,
+      });
+      if (creditError) {
+        console.error('credit_tokens RPC error:', creditError);
+      } else {
+        tokensCredited = creditResult === true;
+        console.log(`Tokens credited to ${buyerUserId}: ${tokensCredited} (${tokensToCredit} tokens)`);
+      }
+    }
+
     // Record the transaction with separate entry_tax and platform_commission
     const { error: txError } = await supabase.from('transactions').insert({
       payment_id: String(payment_id),
       amount_usd: invoiceAmount,
       creator_id: creatorId || '00000000-0000-0000-0000-000000000000',
+      buyer_id: buyerUserId,
       creator_share_percent: CREATOR_SPLIT_PERCENT,
       creator_share_usd: creatorShareUsd,
       platform_share_usd: totalPlatformRevenue,
@@ -107,8 +147,8 @@ Deno.serve(async (req) => {
       console.error('Transaction insert error:', txError);
     }
 
-    // Update creator wallet
-    if (creatorId) {
+    // Update creator wallet (only for legacy creator-payment flow, not token purchases)
+    if (creatorId && !buyerUserId) {
       const { data: wallet } = await supabase
         .from('creator_wallets')
         .select('pending_balance, total_earned')
@@ -132,6 +172,8 @@ Deno.serve(async (req) => {
       entry_tax: entryTax,
       platform_commission: platformCommission,
       creator_share: creatorShareUsd,
+      tokens_credited: tokensCredited,
+      buyer_id: buyerUserId,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
