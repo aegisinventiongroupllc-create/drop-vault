@@ -53,7 +53,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     setError(null);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, pay_currency: currency, order_id: `dtt-${Date.now()}` },
+        body: { amount_usd: invoiceAmount, tokens, pay_currency: currency },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
@@ -77,7 +77,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     });
     try {
       const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, order_id: `dtt-${Date.now()}`, is_fiat: true },
+        body: { amount_usd: invoiceAmount, tokens, is_fiat: true },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
