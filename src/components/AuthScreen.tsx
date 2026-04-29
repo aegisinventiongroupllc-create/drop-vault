@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
+import { logActivity } from "@/lib/activityLog";
 
 const ADMIN_PASSCODE = "052417";
 
@@ -13,7 +14,7 @@ interface AuthScreenProps {
   onAdmin: () => void;
 }
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "forgot";
 
 const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
@@ -37,6 +38,32 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
       onAdmin();
       return;
     }
+
+    // Forgot password — only email needed
+    if (mode === "forgot") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        toast({ title: "Hold on", description: "Please enter a valid email address.", variant: "destructive" });
+        return;
+      }
+      setLoading(true);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast({
+          title: "Check your email",
+          description: "If an account exists for that email, we sent a reset link.",
+        });
+        setMode("login");
+      } catch (e: any) {
+        toast({ title: "Couldn't send reset link", description: e?.message ?? "Try again.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     const err = validate();
     if (err) { toast({ title: "Hold on", description: err, variant: "destructive" }); return; }
 
@@ -52,6 +79,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           },
         });
         if (error) throw error;
+        await logActivity("signup", `New ${role} signup`, { role });
         toast({
           title: "Check your inbox",
           description: "We sent you a confirmation link. Click it to activate your account, then log in.",
@@ -64,6 +92,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           password,
         });
         if (error) throw error;
+        await logActivity("login", "Email + password");
         // Session listener in Index.tsx handles redirect.
       }
     } catch (e: any) {
@@ -82,6 +111,8 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
       });
       if (result.error) {
         toast({ title: "Google sign-in failed", description: String(result.error.message ?? result.error), variant: "destructive" });
+      } else if (!result.redirected) {
+        await logActivity("login", "Google");
       }
     } finally {
       setLoading(false);
@@ -96,7 +127,9 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
             DROPTHAT<span className="text-primary">THING</span>
           </h1>
           <p className="text-muted-foreground text-sm">
-            {mode === "login" ? "Welcome back. Log in to continue." : "Create your account to get started."}
+            {mode === "login" && "Welcome back. Log in to continue."}
+            {mode === "signup" && "Create your account to get started."}
+            {mode === "forgot" && "Enter your email and we'll send you a reset link."}
           </p>
         </div>
 
@@ -135,18 +168,20 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
               autoComplete="email"
             />
           </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-9"
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-9"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+              />
+            </div>
+          )}
         </div>
 
         <Button
@@ -156,32 +191,73 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? "PLEASE WAIT…" : mode === "login" ? "LOG IN" : "CREATE ACCOUNT"}
+          {loading
+            ? "PLEASE WAIT…"
+            : mode === "login"
+              ? "LOG IN"
+              : mode === "signup"
+                ? "CREATE ACCOUNT"
+                : "SEND RESET LINK"}
         </Button>
 
-        <div className="flex items-center gap-2 w-full">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-[10px] text-muted-foreground tracking-widest">OR</span>
-          <div className="flex-1 h-px bg-border" />
+        {mode !== "forgot" && (
+          <>
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[10px] text-muted-foreground tracking-widest">OR</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full text-sm font-semibold border-primary/30 hover:border-primary"
+              onClick={handleGoogle}
+              disabled={loading}
+            >
+              CONTINUE WITH GOOGLE
+            </Button>
+          </>
+        )}
+
+        <div className="flex flex-col items-center gap-1.5 mt-1">
+          {mode === "login" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                Forgot password?
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                New here? Create an account
+              </button>
+            </>
+          )}
+          {mode === "signup" && (
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Already have an account? Log in
+            </button>
+          )}
+          {mode === "forgot" && (
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Back to log in
+            </button>
+          )}
         </div>
-
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full text-sm font-semibold border-primary/30 hover:border-primary"
-          onClick={handleGoogle}
-          disabled={loading}
-        >
-          CONTINUE WITH GOOGLE
-        </Button>
-
-        <button
-          type="button"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
-        >
-          {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
-        </button>
 
         <p className="text-[10px] text-muted-foreground/50">
           © {new Date().getFullYear()} DTT Media. All rights reserved.

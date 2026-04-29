@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_detail: string | null
+          action_type: string
+          activity_date: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+          user_role: string
+        }
+        Insert: {
+          action_detail?: string | null
+          action_type: string
+          activity_date?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+          user_role?: string
+        }
+        Update: {
+          action_detail?: string | null
+          action_type?: string
+          activity_date?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+          user_role?: string
+        }
+        Relationships: []
+      }
       creator_media: {
         Row: {
           bucket: string

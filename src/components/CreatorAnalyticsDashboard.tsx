@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -12,6 +12,7 @@ import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLog";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -34,6 +35,11 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
+  const handleLogout = async () => {
+    await logActivity("logout", "Creator dashboard");
+    onBack();
+  };
+
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [profileUsername, setProfileUsername] = useState("");
   const [profileDisplayName, setProfileDisplayName] = useState("");
@@ -402,7 +408,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground">
+          <button onClick={handleLogout} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground" aria-label="Log out">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button
@@ -418,7 +424,17 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleProfileUpload} />
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
-        <WalletIndicator />
+        <div className="flex items-center gap-2">
+          <WalletIndicator />
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 border border-destructive/30 text-destructive text-[10px] font-bold tracking-widest hover:bg-destructive/25 transition-colors"
+            aria-label="Log out of creator dashboard"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            LOG OUT
+          </button>
+        </div>
       </div>
 
       {/* Section tabs */}
