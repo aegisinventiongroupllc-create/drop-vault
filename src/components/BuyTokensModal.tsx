@@ -45,6 +45,14 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             setCreditedTokens(credited);
             setStep("success");
             onPurchase(credited);
+            // Activity log: token purchase confirmed
+            import("@/lib/activityLog").then(({ logActivity }) =>
+              logActivity("tokens_purchased", `Received ${credited} tokens`, {
+                tokens: credited,
+                amount_usd: payload?.new?.amount_usd ?? null,
+                payment_id: payload?.new?.payment_id ?? null,
+              })
+            );
             toast.success("Payment Received!", {
               description: "Your Bitokens have been added to your vault.",
             });
