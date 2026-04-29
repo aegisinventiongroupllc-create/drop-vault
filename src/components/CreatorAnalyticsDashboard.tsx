@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -12,6 +12,7 @@ import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activityLog";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -34,6 +35,11 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
+  const handleLogout = async () => {
+    await logActivity("logout", "Creator dashboard");
+    onBack();
+  };
+
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [profileUsername, setProfileUsername] = useState("");
   const [profileDisplayName, setProfileDisplayName] = useState("");
