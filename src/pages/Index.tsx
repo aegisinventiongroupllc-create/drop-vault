@@ -222,6 +222,7 @@ const Index = () => {
         setPreference(null);
         setEmail("");
         setAuthedUserId(null);
+        setRoleChosen(false);
         setVerified(true);
       }} />
     );
@@ -331,6 +332,7 @@ const Index = () => {
               setPreference(null);
               setEmail("");
               setAuthedUserId(null);
+              setRoleChosen(false);
               setVerified(true);
             }}
             className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"
