@@ -36,13 +36,13 @@ const LegalFooter = () => {
           ))}
         </div>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-          © {new Date().getFullYear()} DTT Media LLC. All Rights Reserved. Must be 18+ to enter.
+          © {new Date().getFullYear()} DTT. All Rights Reserved. Must be 18+ to enter.
         </p>
         <p className="text-[10px] text-muted-foreground/70 leading-relaxed mt-1">
           Card & crypto payments processed by <span className="font-semibold text-foreground">NOWPayments</span> (licensed third-party processor). All settlement in LTC.
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
-          DTT Media LLC · Registered in the United States · Support: <a href="mailto:office@dttmediallc.com" className="text-primary hover:underline">office@dttmediallc.com</a>
+          DTT · Registered in the United States · Support: <a href="mailto:office@dttmediallc.com" className="text-primary hover:underline">office@dttmediallc.com</a>
         </p>
       </footer>
 
@@ -91,23 +91,23 @@ const SectionShell = ({ title, children }: { title: string; children: React.Reac
 const Statement2257 = () => (
   <SectionShell title="18 U.S.C. § 2257 Record Keeping Compliance Statement">
     <p>All models, actors, and other persons appearing in visual depictions of actual or simulated sexually explicit conduct on this website were at least 18 years of age at the time the visual depictions were created.</p>
-    <p><strong className="text-foreground">DTT Media LLC</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
-    <p>DTT Media LLC maintains secondary records of identity and age for all Creators through our automated verification systems (Ondato).</p>
+    <p><strong className="text-foreground">DTT</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
+    <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Ondato).</p>
     <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: office@dttmediallc.com</p>
   </SectionShell>
 );
 
 const TermsOfService = () => (
   <SectionShell title="Terms of Service">
-    <p><strong className="text-foreground">1. The Platform.</strong> DropThatThing (operated by DTT Media LLC) is a technology platform facilitating social interaction and marketplace transactions between Customers and Independent Creators.</p>
+    <p><strong className="text-foreground">1. The Platform.</strong> DropThatThing (operated by DTT) is a technology platform facilitating social interaction and marketplace transactions between Customers and Independent Creators.</p>
     <p><strong className="text-foreground">2. Age Requirement.</strong> You must be at least 18 years of age (or the legal age of majority in your jurisdiction). Access by minors is strictly prohibited and will result in account termination and reporting to authorities.</p>
-    <p><strong className="text-foreground">3. Independent Contractors.</strong> Creators are independent contractors and not employees, partners, or agents of DTT Media LLC. Creators are solely responsible for their content, taxes, and legal compliance in their jurisdiction.</p>
+    <p><strong className="text-foreground">3. Independent Contractors.</strong> Creators are independent contractors and not employees, partners, or agents of DTT. Creators are solely responsible for their content, taxes, and legal compliance in their jurisdiction.</p>
     <p><strong className="text-foreground">4. Prohibited Use.</strong> You may not use the platform for: illegal content, content involving minors, non-consensual material, fraud, money laundering, terrorism financing, sanctions evasion, or any activity violating applicable law. Violations result in immediate account termination, fund seizure, and reporting to law enforcement.</p>
     <p><strong className="text-foreground">5. Geographic Restrictions.</strong> The platform is not available to residents of jurisdictions where adult content or crypto-related services are prohibited, including but not limited to: OFAC-sanctioned countries (Iran, North Korea, Syria, Cuba, Crimea), and any region listed in our Ghost Country list. It is your responsibility to ensure local legality.</p>
     <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens are digital access credits (1 token = $20 USD value, 14-day access). A $1 platform fee applies per transaction. Card and crypto payments are processed by <strong className="text-foreground">NOWPayments</strong>, a licensed payment processor. All settlement is in LTC. Exchange rates and processor fees are disclosed at checkout.</p>
     <p><strong className="text-foreground">7. No Refunds.</strong> All sales are final (see Refund Policy).</p>
     <p><strong className="text-foreground">8. Account Security.</strong> You are responsible for safeguarding your credentials. Notify us immediately of unauthorized access.</p>
-    <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT Media LLC's total liability is limited to fees paid in the 30 days preceding a claim.</p>
+    <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT's total liability is limited to fees paid in the 30 days preceding a claim.</p>
     <p><strong className="text-foreground">10. Governing Law.</strong> These terms are governed by the laws of the State of Delaware, USA. Disputes are resolved by binding arbitration.</p>
     <p><strong className="text-foreground">11. Changes.</strong> We may amend these terms; continued use constitutes acceptance.</p>
   </SectionShell>
@@ -140,7 +140,7 @@ const RefundPolicy = () => (
 
 const AmlPolicy = () => (
   <SectionShell title="AML / KYC Policy">
-    <p>DTT Media LLC and its payment partner (NOWPayments) maintain a strict Anti-Money Laundering (AML) and Counter-Terrorism Financing (CTF) program in line with FinCEN, FATF, and EU 5AMLD/6AMLD guidance.</p>
+    <p>DTT and its payment partner (NOWPayments) maintain a strict Anti-Money Laundering (AML) and Counter-Terrorism Financing (CTF) program in line with FinCEN, FATF, and EU 5AMLD/6AMLD guidance.</p>
     <p><strong className="text-foreground">Customer Due Diligence (CDD).</strong> Card purchases above processor thresholds require ID verification through NOWPayments. Creators must complete full KYC (government ID + liveness selfie) via Ondato before payouts.</p>
     <p><strong className="text-foreground">Sanctions Screening.</strong> All users are screened against OFAC, UN, EU, and UK sanctions lists. Hits result in account freeze and report filing.</p>
     <p><strong className="text-foreground">Transaction Monitoring.</strong> Automated systems flag structuring, velocity anomalies, and high-risk geographies. Suspicious Activity Reports (SARs) are filed where required by law.</p>
@@ -153,7 +153,7 @@ const AmlPolicy = () => (
 const RiskDisclosure = () => (
   <SectionShell title="Risk Disclosure">
     <p><strong className="text-foreground">Crypto Volatility.</strong> Cryptocurrencies (LTC, BTC, ETH) are highly volatile. The fiat value of crypto sent or received may change before, during, or after the transaction.</p>
-    <p><strong className="text-foreground">Irreversibility.</strong> Crypto transactions are irreversible once broadcast. Always verify the address before sending. DTT Media LLC and its processors cannot recover funds sent to incorrect addresses.</p>
+    <p><strong className="text-foreground">Irreversibility.</strong> Crypto transactions are irreversible once broadcast. Always verify the address before sending. DTT and its processors cannot recover funds sent to incorrect addresses.</p>
     <p><strong className="text-foreground">Network Fees.</strong> Blockchain network fees fluctuate and are paid by the buyer.</p>
     <p><strong className="text-foreground">No Investment.</strong> Bit-Tokens are utility access credits, not investments, securities, or stored-value instruments. They have no resale value, no interest, and expire 14 days after activation.</p>
     <p><strong className="text-foreground">Regulatory Risk.</strong> Crypto and adult-content regulations vary by jurisdiction and may change. You are responsible for compliance with your local laws.</p>
@@ -173,7 +173,7 @@ const Complaints = () => (
 
 const ContactInfo = () => (
   <SectionShell title="Contact Us">
-    <p><strong className="text-foreground">DTT Media LLC</strong></p>
+    <p><strong className="text-foreground">DTT</strong></p>
     <p>Operator of DropThatThing. For all inquiries — support, compliance, partnerships, refunds, complaints, and legal — please contact our team at the email below.</p>
     <p><strong className="text-foreground">Support email:</strong> <a href="mailto:office@dttmediallc.com" className="text-primary hover:underline">office@dttmediallc.com</a></p>
     <p><strong className="text-foreground">Response time:</strong> within 2 business days.</p>

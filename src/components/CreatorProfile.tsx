@@ -140,7 +140,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <Heart className="w-5 h-5 inline text-pink-400 mr-1" /> Send a Tip to {creatorName}
             </h3>
             <p className="text-xs text-muted-foreground text-center mb-4">
-              A flat ${ADMIN_FEE_USD} DTT Media fee is deducted. The rest goes to the creator.
+              A flat ${ADMIN_FEE_USD} DTT fee is deducted. The rest goes to the creator.
             </p>
             {tipNotification ? (
               <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
@@ -166,7 +166,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {selectedTip && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
                     <div className="flex justify-between"><span>Tip Amount:</span><span className="text-foreground font-bold">${selectedTip}</span></div>
-                    <div className="flex justify-between"><span>DTT Media Fee:</span><span className="text-destructive font-bold">-${ADMIN_FEE_USD}</span></div>
+                    <div className="flex justify-between"><span>DTT Fee:</span><span className="text-destructive font-bold">-${ADMIN_FEE_USD}</span></div>
                     <div className="flex justify-between border-t border-border pt-1"><span>Creator Receives:</span><span className="text-primary font-bold">${selectedTip - ADMIN_FEE_USD}</span></div>
                   </div>
                 )}

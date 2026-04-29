@@ -4,8 +4,8 @@ const pt: Translations = {
   age_title: "DROPTHAT",
   age_subtitle: "Esta plataforma contém conteúdo com restrição de idade. Você deve concordar com todos os termos abaixo para entrar.",
   age_consent: "Certifico que tenho pelo menos 18 anos de idade e estou legalmente autorizado/a a visualizar conteúdo adulto em minha jurisdição.",
-  tos_consent: "Li, entendo e concordo com os Termos de Serviço e Política de Privacidade da DTT Media LLC. Entendo que todas as transações com cartão são finais e processadas por um processador terceirizado seguro.",
-  contractor_consent: "Reconheço que todos os criadores nesta plataforma são contratados independentes, não funcionários da DTT Media LLC. Concordo em isentar a DTT Media LLC e suas afiliadas de qualquer responsabilidade e renuncio a todos os direitos de ação legal.",
+  tos_consent: "Li, entendo e concordo com os Termos de Serviço e Política de Privacidade da DTT. Entendo que todas as transações com cartão são finais e processadas por um processador terceirizado seguro.",
+  contractor_consent: "Reconheço que todos os criadores nesta plataforma são contratados independentes, não funcionários da DTT. Concordo em isentar a DTT e suas afiliadas de qualquer responsabilidade e renuncio a todos os direitos de ação legal.",
   age_enter: "CONCORDO — ENTRAR",
   age_leave: "TENHO MENOS DE 18 — SAIR",
 
@@ -75,13 +75,13 @@ const pt: Translations = {
   pay_with_crypto: "PAGAR COM CRIPTO",
 
   tip_amounts: "Escolher valor da gorjeta",
-  tip_fee_note: "$1.00 taxa DTT Media por gorjeta",
+  tip_fee_note: "$1.00 taxa DTT por gorjeta",
 
   payout_ltc_only: "Pagamos apenas via LTC. Envie seu endereço Litecoin abaixo.",
   payout_instruction: "Todos os pagamentos são processados em Litecoin (LTC) — a moeda de pagamento universal independentemente do seu país ou moeda local.",
 
   language: "Idioma",
-  copyright: `© ${new Date().getFullYear()} DTT Media LLC. Todos os direitos reservados.`,
+  copyright: `© ${new Date().getFullYear()} DTT. Todos os direitos reservados.`,
   compliance_2257: "18 U.S.C. § 2257 Conformidade",
 };
 

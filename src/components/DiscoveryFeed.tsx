@@ -249,7 +249,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           ) : (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 gap-3">
               <p className="text-sm font-bold text-foreground tracking-wider">NO CREATORS YET</p>
-              <p className="text-xs text-muted-foreground max-w-xs">DTT Media just launched. Be one of the first creators to upload — your teasers will appear here.</p>
+              <p className="text-xs text-muted-foreground max-w-xs">DTT just launched. Be one of the first creators to upload — your teasers will appear here.</p>
             </div>
           )
         )}

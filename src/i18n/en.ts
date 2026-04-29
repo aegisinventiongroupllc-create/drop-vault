@@ -4,8 +4,8 @@ const en: Translations = {
   age_title: "DROPTHAT",
   age_subtitle: "This platform contains age-restricted content. You must agree to all terms below to enter.",
   age_consent: "I certify that I am at least 18 years of age and legally permitted to view adult content in my jurisdiction.",
-  tos_consent: "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT Media LLC. I understand that all card transactions are final and handled via a secure third-party processor.",
-  contractor_consent: "I acknowledge that all creators on this platform are independent contractors, not employees of DTT Media LLC. I agree to hold DTT Media LLC and its affiliates harmless and waive all rights to legal action.",
+  tos_consent: "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that all card transactions are final and handled via a secure third-party processor.",
+  contractor_consent: "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to hold DTT and its affiliates harmless and waive all rights to legal action.",
   age_enter: "I AGREE — ENTER",
   age_leave: "I AM UNDER 18 — LEAVE",
 
@@ -38,13 +38,13 @@ const en: Translations = {
   privacy_title: "Privacy Policy",
   tos_last_updated: "Last Updated: April 16, 2026",
   tos_section1_title: "1. The Platform",
-  tos_section1_text: "DropThatThing (operated by DTT Media LLC) is a technology platform that facilitates social interaction and marketplace transactions between Customers and Independent Creators.",
+  tos_section1_text: "DropThatThing (operated by DTT) is a technology platform that facilitates social interaction and marketplace transactions between Customers and Independent Creators.",
   tos_section2_title: "2. Age Requirement",
   tos_section2_text: "You must be at least 18 years of age or the legal age of majority in your jurisdiction to access this site. Access by minors is strictly prohibited.",
   tos_section3_title: "3. Relationship of Parties",
-  tos_section3_text: "Creators are independent contractors and are not employees, partners, or agents of DTT Media LLC. Creators are solely responsible for the content they upload and for their own local tax reporting.",
+  tos_section3_text: "Creators are independent contractors and are not employees, partners, or agents of DTT. Creators are solely responsible for the content they upload and for their own local tax reporting.",
   tos_section4_title: "4. Payments",
-  tos_section4_text: "All token purchases and custom requests are final. Payments are processed via third-party crypto/fiat gateways. DTT Media LLC charges a platform fee and an entry tax on transactions to maintain the infrastructure and security of the marketplace.",
+  tos_section4_text: "All token purchases and custom requests are final. Payments are processed via third-party crypto/fiat gateways. DTT charges a platform fee and an entry tax on transactions to maintain the infrastructure and security of the marketplace.",
   tos_section5_title: "5. Content Policy",
   tos_section5_text: "Users agree to log their IP address and timestamp upon entry as part of our legal compliance protocol.",
   tos_section6_title: "6. Bit-Token Economy",
@@ -57,7 +57,7 @@ const en: Translations = {
   tos_section9_text: "For questions about these Terms, contact: office@dttmediallc.com",
 
   privacy_section1_title: "1. Data Collection",
-  privacy_section1_text: "DTT Media LLC collects account information, transaction history, and IP addresses. For Creators, we collect government-issued ID and \"liveness\" selfies to ensure platform safety and 18+ compliance.",
+  privacy_section1_text: "DTT collects account information, transaction history, and IP addresses. For Creators, we collect government-issued ID and \"liveness\" selfies to ensure platform safety and 18+ compliance.",
   privacy_section2_title: "2. Purpose of Processing",
   privacy_section2_text: "Verification data is used solely to confirm age and identity. Transaction data is used to facilitate payouts via the LTC network.",
   privacy_section3_title: "3. Third Parties",
@@ -75,13 +75,13 @@ const en: Translations = {
   pay_with_crypto: "PAY WITH CRYPTO",
 
   tip_amounts: "Choose tip amount",
-  tip_fee_note: "$1.00 DTT Media fee per tip",
+  tip_fee_note: "$1.00 DTT fee per tip",
 
   payout_ltc_only: "We payout via LTC only. Submit your Litecoin address below.",
   payout_instruction: "All payouts are processed in Litecoin (LTC) — the universal payout currency regardless of your country or local currency.",
 
   language: "Language",
-  copyright: `© ${new Date().getFullYear()} DTT Media LLC. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} DTT. All rights reserved.`,
   compliance_2257: "18 U.S.C. § 2257 Compliance",
 };
 

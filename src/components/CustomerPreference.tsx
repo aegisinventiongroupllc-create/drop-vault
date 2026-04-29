@@ -45,7 +45,7 @@ const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
         </div>
 
         <p className="text-[10px] text-muted-foreground/50">
-          © {new Date().getFullYear()} DTT Media LLC. All rights reserved.
+          © {new Date().getFullYear()} DTT. All rights reserved.
         </p>
       </div>
     </div>
