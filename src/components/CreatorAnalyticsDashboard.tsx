@@ -13,11 +13,6 @@ import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-declare global {
-  interface Window {
-    Persona?: any;
-  }
-}
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
   DEFAULT_SPLIT, INCENTIVE_SPLIT,
@@ -208,69 +203,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     setShowCamera(false);
   };
 
-  // Persona KYC launcher (dynamic SDK load with retry)
-  const loadPersonaScript = (): Promise<void> =>
-    new Promise((resolve, reject) => {
-      if (window.Persona) return resolve();
-      const existing = document.querySelector<HTMLScriptElement>('script[data-persona-sdk]');
-      if (existing) {
-        existing.addEventListener("load", () => resolve());
-        existing.addEventListener("error", () => reject(new Error("Persona SDK failed to load")));
-        return;
-      }
-      const s = document.createElement("script");
-      s.src = "https://cdn.withpersona.com/dist/persona-v5.latest.js";
-      s.async = true;
-      s.dataset.personaSdk = "true";
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error("Persona SDK failed to load"));
-      document.head.appendChild(s);
-    });
-
-  const launchPersona = async () => {
-    try {
-      await loadPersonaScript();
-    } catch (e) {
-      console.error(e);
-      toast.error("Could not load verification SDK. Check your network/ad-blocker and try again.");
-      return;
-    }
-    if (!window.Persona) {
-      toast.error("Verification SDK unavailable.");
-      return;
-    }
-    const client = new window.Persona.Client({
-      templateId: (import.meta as any).env?.VITE_PERSONA_TEMPLATE_ID || "itmpl_aQqMczMu8TeJFbiCFw7NHj9QFHph",
-      // Sandbox auto-approves any submitted ID instantly so creators aren't blocked.
-      // Switch to "production" once a live Persona template + API key are wired up.
-      environmentId: "sandbox",
-      onReady: () => client.open(),
-      onComplete: async ({ inquiryId, status }: { inquiryId: string; status: string }) => {
-        // Instant approval — any completed inquiry unlocks the creator immediately.
-        setVerificationStatus("verified");
-        setIdUploaded(true);
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            await supabase
-              .from("profiles")
-              .update({ role: "creator" } as any)
-              .eq("user_id", user.id);
-          }
-        } catch (e) {
-          console.error("Profile update failed", e);
-        }
-        toast.success("Human-Verified Status Confirmed — You can now post drops!", {
-          description: `Inquiry ${inquiryId} · ${status}`,
-          duration: 4000,
-        });
-        setActiveSection("overview");
-      },
-      onCancel: () => toast("Verification cancelled."),
-      onError: (error: any) => {
-        console.error("Persona error", error);
-        toast.error("Verification error. Please try again.");
-      },
+  // Ondato KYC launcher — placeholder until sandbox/production keys are wired up.
+  const launchOndato = () => {
+    setVerificationStatus("pending");
+    toast("Verification in progress", {
+      description: "Ondato identity verification will launch here once sandbox keys are configured.",
+      duration: 4000,
     });
   };
 
@@ -761,19 +699,19 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Launch Persona to authenticate your Human-Verified status. Approval is instant.</p>
+              <p className="text-xs text-muted-foreground">Launch Ondato to authenticate your Human-Verified status. Approval is instant once verified.</p>
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
               <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
             </div>
 
-            {/* Persona International KYC */}
+            {/* Ondato International KYC */}
             <div className="mb-4">
-              <Button variant="gold" size="lg" className="w-full" onClick={launchPersona}>
-                <Globe className="w-4 h-4 mr-2" /> AUTHENTICATE HUMAN-VERIFIED STATUS
+              <Button variant="gold" size="lg" className="w-full" onClick={launchOndato}>
+                <Globe className="w-4 h-4 mr-2" /> VERIFY AGE
               </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Powered by Persona — Passport, ID & Driver's License accepted worldwide. Instant approval.
+                Powered by Ondato — Passport, ID & Driver's License accepted worldwide.
               </p>
             </div>
 
