@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import WalletIndicator from "@/components/WalletIndicator";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import TokenPurchaseHistory from "@/components/TokenPurchaseHistory";
-import LegalFooter from "@/components/LegalFooter";
 import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
   UNLOCK_DURATION_MS, TOKEN_INVOICE_USD,
@@ -380,8 +379,6 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
           ))}
         </div>
       )}
-
-      <LegalFooter />
 
       {showBuyModal && (
         <BuyTokensModal onClose={() => { setShowBuyModal(false); setRenewCreator(null); }} onPurchase={onBuyTokens} />
