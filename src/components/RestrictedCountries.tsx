@@ -1,6 +1,6 @@
 // Public Restricted Countries / Geo-Block List
 // Used by LegalFooter modal. Visible to both customers and creators.
-// Banxa reviewers reference this list to confirm our geo-block scope.
+// NOWPayments compliance reviewers reference this list to confirm our geo-block scope.
 
 const OFAC_SANCTIONED = [
   "Cuba",
@@ -77,8 +77,8 @@ const RestrictedCountries = () => (
     </h3>
     <div className="text-xs text-muted-foreground space-y-4 leading-relaxed">
       <p>
-        DTT Media LLC and its payment partners (<span className="text-foreground font-semibold">Banxa</span>,
-        NOWPayments) prohibit access from the jurisdictions listed below. Customers
+        DTT Media LLC and its payment partner (<span className="text-foreground font-semibold">NOWPayments</span>)
+        prohibit access from the jurisdictions listed below. Customers
         and Creators residing in or accessing the platform from these regions are
         blocked from registration, content access, payments, and payouts. Lists are
         reviewed continuously against OFAC, UN, EU, UK HMT, and applicable national
@@ -122,7 +122,7 @@ const RestrictedCountries = () => (
         <p className="text-foreground font-bold text-[11px]">Enforcement Mechanism</p>
         <p className="text-[11px]">
           • IP geolocation check at app load and at every checkout.<br />
-          • Card payments additionally screened by Banxa's licensed KYC/AML stack.<br />
+          • Card payments additionally screened by NOWPayments' licensed KYC/AML stack.<br />
           • Creator payouts blocked at the wallet layer for restricted residency.<br />
           • VPN circumvention is a Terms violation and triggers account termination
           and fund forfeiture.

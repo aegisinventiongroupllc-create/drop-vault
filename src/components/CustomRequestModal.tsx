@@ -339,7 +339,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             )}
 
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — POWERED BY BANXA (LICENSED PROCESSOR)</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE FIAT ON-RAMP · SETTLES IN LTC</p>
               <button
                 onClick={handleCardPay}
                 disabled={!consentChecked}

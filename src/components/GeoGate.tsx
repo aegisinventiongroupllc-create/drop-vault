@@ -66,7 +66,7 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
       const code = await fetchCountry();
       if (cancelled) return;
       if (!code) {
-        // Fail-open: don't block on detection failure (Banxa doesn't expect false positives)
+        // Fail-open: don't block on detection failure
         setState({ status: "unknown" });
         return;
       }
@@ -107,7 +107,7 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
           <GhostCountryMessage countryCode={state.country} />
           <p className="mt-4 px-6 text-center text-[10px] text-muted-foreground/70 max-w-sm">
             Access from your detected region ({state.country}) is restricted by our
-            payment processor (<span className="font-semibold text-foreground">Banxa</span>),
+            payment processor (<span className="font-semibold text-foreground">NOWPayments</span>),
             applicable sanctions law, or local adult-content regulations. See our
             Restricted Countries policy below.
           </p>

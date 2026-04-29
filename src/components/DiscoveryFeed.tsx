@@ -137,7 +137,7 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
           </div>
           <p className="text-[9px] text-muted-foreground/60">14-day access • 336 hours</p>
           <p className="text-[9px] text-muted-foreground/60 max-w-[80%] text-center px-4">
-            Card via <span className="font-semibold text-foreground">Banxa</span> · Crypto via NOWPayments · All sales final · Crypto irreversible
+            Card & Crypto via <span className="font-semibold text-foreground">NOWPayments</span> · Settles in LTC · All sales final · Crypto irreversible
           </p>
         </div>
       )}
