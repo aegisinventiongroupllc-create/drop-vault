@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -39,6 +39,19 @@ interface LegalConsent {
   created_at: string;
 }
 
+interface ActivityRow {
+  id: string;
+  user_id: string;
+  user_role: string;
+  action_type: string;
+  action_detail: string | null;
+  metadata: any;
+  activity_date: string;
+  created_at: string;
+  email?: string | null;
+  display_name?: string | null;
+}
+
 interface Stats {
   totalCreators: number;
   totalRevenue: number;
@@ -55,6 +68,10 @@ const AdminPortal = () => {
   const [consents, setConsents] = useState<LegalConsent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
   const [consentSearch, setConsentSearch] = useState("");
+  const [activity, setActivity] = useState<ActivityRow[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityRoleFilter, setActivityRoleFilter] = useState<"all" | "creator" | "customer">("all");
+  const [activityDateFilter, setActivityDateFilter] = useState<string>(""); // YYYY-MM-DD
 
   useEffect(() => {
     if (!authed) {
@@ -125,18 +142,80 @@ const AdminPortal = () => {
     if (!authed) return;
     loadStats();
     loadConsents("");
+    loadActivity();
     const channel = supabase
       .channel("admin-portal-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "legal_consents" }, () => loadConsents(consentSearch))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_logs" }, () => loadActivity())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
+
+  const loadActivity = async () => {
+    setActivityLoading(true);
+    try {
+      let q = (supabase.from("activity_logs") as any)
+        .select("id, user_id, user_role, action_type, action_detail, metadata, activity_date, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (activityRoleFilter !== "all") q = q.eq("user_role", activityRoleFilter);
+      if (activityDateFilter) q = q.eq("activity_date", activityDateFilter);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const list = (rows ?? []) as ActivityRow[];
+
+      const ids = Array.from(new Set(list.map((r) => r.user_id)));
+      let pmap: Record<string, { email: string | null; display_name: string | null }> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, email, display_name")
+          .in("user_id", ids);
+        pmap = Object.fromEntries((profs ?? []).map((p) => [p.user_id, { email: p.email, display_name: p.display_name }]));
+      }
+      setActivity(list.map((r) => ({ ...r, email: pmap[r.user_id]?.email ?? null, display_name: pmap[r.user_id]?.display_name ?? null })));
+    } catch (err) {
+      toast({ title: "Failed to load activity", description: String(err), variant: "destructive" });
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  // Reload when filters change
+  useEffect(() => {
+    if (authed) loadActivity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityRoleFilter, activityDateFilter, authed]);
+
+  const exportActivityCsv = () => {
+    const header = ["date", "time", "role", "user", "email", "action", "detail"];
+    const rows = activity.map((r) => {
+      const dt = new Date(r.created_at);
+      return [
+        r.activity_date,
+        dt.toLocaleTimeString(),
+        r.user_role,
+        r.display_name ?? "",
+        r.email ?? "",
+        r.action_type,
+        (r.action_detail ?? "").replace(/"/g, '""'),
+      ];
+    });
+    const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dtt-activity-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const loadConsents = async (search: string) => {
     setConsentsLoading(true);
@@ -393,6 +472,83 @@ const AdminPortal = () => {
                         <div><span className="font-semibold">IP:</span> <span className="font-mono">{c.ip_address || "unknown"}</span></div>
                         <div className="truncate"><span className="font-semibold">Device:</span> <span className="font-mono">{c.user_agent || "unknown"}</span></div>
                         <div><span className="font-semibold">Type:</span> {c.consent_type}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+
+          {/* Daily Activity Log */}
+          <Card className="p-4">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
+                <Activity className="w-4 h-4" /> Daily Activity Log
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={exportActivityCsv} disabled={activity.length === 0}>
+                  Export CSV
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 px-2" onClick={loadActivity} disabled={activityLoading}>
+                  {activityLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                </Button>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+              Append-only record of every creator and customer action — logins, uploads, token purchases, custom requests, password changes, payouts, and more. Filter by role or date.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <select
+                value={activityRoleFilter}
+                onChange={(e) => setActivityRoleFilter(e.target.value as any)}
+                className="h-8 text-xs bg-secondary text-foreground border border-border rounded-md px-2"
+              >
+                <option value="all">All roles</option>
+                <option value="creator">Creators only</option>
+                <option value="customer">Customers only</option>
+              </select>
+              <Input
+                type="date"
+                value={activityDateFilter}
+                onChange={(e) => setActivityDateFilter(e.target.value)}
+                className="h-8 text-xs"
+              />
+            </div>
+
+            {activityLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+            ) : activity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No activity recorded for this filter.</p>
+            ) : (
+              <div className="space-y-2 max-h-[480px] overflow-y-auto">
+                {activity.map((r) => {
+                  const dt = new Date(r.created_at);
+                  return (
+                    <div key={r.id} className="border border-border rounded-md p-2.5 text-xs space-y-1">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold truncate">
+                            {r.display_name || r.email || r.user_id.slice(0, 8)}
+                          </div>
+                          <div className="text-muted-foreground text-[10px]">
+                            {r.activity_date} · {dt.toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${
+                          r.user_role === "creator" ? "bg-primary/20 text-primary" : "bg-secondary text-secondary-foreground"
+                        }`}>
+                          {r.user_role}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-foreground/10 text-foreground">
+                          {r.action_type.replace(/_/g, " ")}
+                        </span>
+                        {r.action_detail && (
+                          <span className="text-muted-foreground text-[10px] truncate">{r.action_detail}</span>
+                        )}
                       </div>
                     </div>
                   );

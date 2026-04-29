@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/lib/activityLog";
 
 export type MediaBucket = "teasers" | "vault";
 
@@ -20,10 +21,20 @@ export async function uploadMedia(
   if (error) return { error: error.message };
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+  // Fire-and-forget activity log
+  logActivity("media_upload", `Uploaded to ${bucket}`, {
+    bucket,
+    path: filePath,
+    size_bytes: file.size,
+    mime: file.type,
+  });
   return { url: data.publicUrl, path: filePath };
 }
 
 export async function deleteMedia(bucket: MediaBucket, path: string) {
   const { error } = await supabase.storage.from(bucket).remove([path]);
+  if (!error) {
+    logActivity("media_delete", `Removed from ${bucket}`, { bucket, path });
+  }
   return error ? { error: error.message } : { success: true };
 }
