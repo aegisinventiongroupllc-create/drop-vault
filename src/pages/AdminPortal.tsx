@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
 const SESSION_KEY = "dtt_secret_admin_ok";
@@ -25,6 +26,19 @@ interface MediaItem {
   publicUrl?: string;
 }
 
+interface LegalConsent {
+  id: string;
+  email: string | null;
+  username: string | null;
+  user_id: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  consent_type: string;
+  consent_text: string;
+  terms_version: string;
+  created_at: string;
+}
+
 interface Stats {
   totalCreators: number;
   totalRevenue: number;
@@ -38,6 +52,9 @@ const AdminPortal = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [consents, setConsents] = useState<LegalConsent[]>([]);
+  const [consentsLoading, setConsentsLoading] = useState(false);
+  const [consentSearch, setConsentSearch] = useState("");
 
   useEffect(() => {
     if (!authed) {
@@ -107,17 +124,37 @@ const AdminPortal = () => {
   useEffect(() => {
     if (!authed) return;
     loadStats();
+    loadConsents("");
     const channel = supabase
       .channel("admin-portal-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "legal_consents" }, () => loadConsents(consentSearch))
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
+
+  const loadConsents = async (search: string) => {
+    setConsentsLoading(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/legal-logs${search ? `?search=${encodeURIComponent(search)}` : ""}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setConsents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      toast({ title: "Failed to load consents", description: String(err), variant: "destructive" });
+    } finally {
+      setConsentsLoading(false);
+    }
+  };
 
   const copyToClipboard = async (text: string, key: string) => {
     try {
@@ -277,6 +314,86 @@ const AdminPortal = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Legal Consent Audit Trail */}
+          <Card className="p-4">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4" /> Legal Consent Log
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 px-2"
+                onClick={() => loadConsents(consentSearch)}
+                disabled={consentsLoading}
+              >
+                {consentsLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+              Immutable audit trail. Every record proves the user checked all required boxes (18+, ToS, Contractor) at the listed timestamp, with their IP &amp; device. Use this for legal defense.
+            </p>
+
+            <div className="relative mb-3">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+              <Input
+                placeholder="Search by email or username..."
+                value={consentSearch}
+                onChange={(e) => setConsentSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && loadConsents(consentSearch)}
+                className="h-8 pl-7 text-xs"
+              />
+            </div>
+
+            {consentsLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+            ) : consents.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No consent records yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {consents.map((c) => {
+                  const dt = new Date(c.created_at);
+                  const checkedAge = c.consent_text.includes("[AGE]");
+                  const checkedTos = c.consent_text.includes("[TOS]");
+                  const checkedContractor = c.consent_text.includes("[CONTRACTOR]");
+                  return (
+                    <div key={c.id} className="border border-border rounded-md p-3 text-xs space-y-2">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold truncate">
+                            {c.email || c.username || (c.user_id ? c.user_id.slice(0, 8) : "Anonymous visitor")}
+                          </div>
+                          <div className="text-muted-foreground text-[10px] mt-0.5">
+                            {dt.toLocaleDateString()} · {dt.toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary/20 text-primary shrink-0">
+                          v{c.terms_version}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${checkedAge ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"}`}>
+                          {checkedAge ? "✓" : "✗"} 18+
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${checkedTos ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"}`}>
+                          {checkedTos ? "✓" : "✗"} ToS
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${checkedContractor ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"}`}>
+                          {checkedContractor ? "✓" : "✗"} Contractor
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground space-y-1 pt-1 border-t border-border/50">
+                        <div><span className="font-semibold">IP:</span> <span className="font-mono">{c.ip_address || "unknown"}</span></div>
+                        <div className="truncate"><span className="font-semibold">Device:</span> <span className="font-mono">{c.user_agent || "unknown"}</span></div>
+                        <div><span className="font-semibold">Type:</span> {c.consent_type}</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </Card>
