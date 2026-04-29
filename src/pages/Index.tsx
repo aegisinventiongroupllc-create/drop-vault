@@ -3,7 +3,8 @@ import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
 import GlobalPassport from "@/components/GlobalPassport";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import RoleSelection, { type UserRole } from "@/components/RoleSelection";
+import AuthScreen from "@/components/AuthScreen";
+import { type UserRole } from "@/components/RoleSelection";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
 import KnowYourCoinsModal from "@/components/KnowYourCoinsModal";
 import BottomNav, { type Tab } from "@/components/BottomNav";
@@ -17,6 +18,8 @@ import GlobalSearch from "@/components/GlobalSearch";
 import LegalPages from "@/components/LegalPages";
 import { useI18n } from "@/i18n/I18nContext";
 import type { VaultType } from "@/lib/tokenEconomy";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const STORAGE_KEY = "dtt_user_prefs";
 
@@ -43,6 +46,7 @@ const savePrefs = (prefs: UserPrefs) => {
 
 const Index = () => {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const savedPrefs = loadPrefs();
 
   const isAdminOverride = typeof window !== "undefined" && localStorage.getItem("dtt_admin_override") === "1";
@@ -60,6 +64,49 @@ const Index = () => {
   const [showLegal, setShowLegal] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(6);
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
+  const [authReady, setAuthReady] = useState(false);
+  const [authedUserId, setAuthedUserId] = useState<string | null>(null);
+
+  // Listen for auth changes + hydrate role from profiles
+  useEffect(() => {
+    const hydrateRole = async (userId: string, userEmail: string | null) => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const dbRole = (data?.role === "creator" ? "creator" : "customer") as UserRole;
+      setRole(dbRole);
+      if (userEmail) setEmail(userEmail);
+      if (dbRole === "creator") {
+        setVault("women");
+        setPreference("women");
+        const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: "women", preference: "women" };
+        savePrefs(prefs);
+      }
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setAuthedUserId(session.user.id);
+        // Defer Supabase calls to avoid deadlocks inside the callback
+        setTimeout(() => hydrateRole(session.user.id, session.user.email ?? null), 0);
+      } else {
+        setAuthedUserId(null);
+      }
+      setAuthReady(true);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setAuthedUserId(session.user.id);
+        hydrateRole(session.user.id, session.user.email ?? null);
+      }
+      setAuthReady(true);
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const onboardingComplete = !!(role && vault);
 
@@ -71,21 +118,26 @@ const Index = () => {
     }} />;
   }
 
+  // Wait for session check before deciding what to render
+  if (!authReady) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="text-xs tracking-widest text-muted-foreground">LOADING…</div>
+      </div>
+    );
+  }
+
+  // Not signed in → show auth (unless admin passcode used)
+  if (!authedUserId) {
+    return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
+  }
+
+  // Signed in but role not yet hydrated
   if (!role) {
     return (
-      <RoleSelection
-        onSelect={(selectedRole, selectedEmail) => {
-          setRole(selectedRole);
-          setEmail(selectedEmail);
-          if (selectedRole === "creator") {
-            const prefs: UserPrefs = { email: selectedEmail, role: "creator", vault: "women", preference: "women" };
-            setVault("women");
-            setPreference("women");
-            savePrefs(prefs);
-            if (!hasSeenCoins) setShowKnowYourCoins(true);
-          }
-        }}
-      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="text-xs tracking-widest text-muted-foreground">PREPARING YOUR DASHBOARD…</div>
+      </div>
     );
   }
 
@@ -119,11 +171,14 @@ const Index = () => {
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
     return (
-      <CreatorAnalyticsDashboard onBack={() => {
+      <CreatorAnalyticsDashboard onBack={async () => {
+        await supabase.auth.signOut();
         localStorage.removeItem(STORAGE_KEY);
         setRole(null);
         setVault(null);
         setPreference(null);
+        setEmail("");
+        setAuthedUserId(null);
         setVerified(true);
       }} />
     );
@@ -224,11 +279,13 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">{email}</p>
           <button
             onClick={() => {
+              supabase.auth.signOut();
               localStorage.removeItem(STORAGE_KEY);
               setRole(null);
               setVault(null);
               setPreference(null);
               setEmail("");
+              setAuthedUserId(null);
               setVerified(true);
             }}
             className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"
