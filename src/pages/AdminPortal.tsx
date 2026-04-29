@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -197,6 +197,9 @@ const AdminPortal = () => {
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-xl sm:text-2xl font-bold tracking-wider">ADMIN PORTAL</h1>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate("/")}>
+                <Home className="w-4 h-4" />
+              </Button>
               <Button size="sm" variant="outline" onClick={loadStats} disabled={loading}>
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               </Button>
