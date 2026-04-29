@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -39,6 +39,19 @@ interface LegalConsent {
   created_at: string;
 }
 
+interface ActivityRow {
+  id: string;
+  user_id: string;
+  user_role: string;
+  action_type: string;
+  action_detail: string | null;
+  metadata: any;
+  activity_date: string;
+  created_at: string;
+  email?: string | null;
+  display_name?: string | null;
+}
+
 interface Stats {
   totalCreators: number;
   totalRevenue: number;
@@ -55,6 +68,10 @@ const AdminPortal = () => {
   const [consents, setConsents] = useState<LegalConsent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
   const [consentSearch, setConsentSearch] = useState("");
+  const [activity, setActivity] = useState<ActivityRow[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityRoleFilter, setActivityRoleFilter] = useState<"all" | "creator" | "customer">("all");
+  const [activityDateFilter, setActivityDateFilter] = useState<string>(""); // YYYY-MM-DD
 
   useEffect(() => {
     if (!authed) {
@@ -125,18 +142,80 @@ const AdminPortal = () => {
     if (!authed) return;
     loadStats();
     loadConsents("");
+    loadActivity();
     const channel = supabase
       .channel("admin-portal-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "legal_consents" }, () => loadConsents(consentSearch))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_logs" }, () => loadActivity())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
+
+  const loadActivity = async () => {
+    setActivityLoading(true);
+    try {
+      let q = (supabase.from("activity_logs") as any)
+        .select("id, user_id, user_role, action_type, action_detail, metadata, activity_date, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (activityRoleFilter !== "all") q = q.eq("user_role", activityRoleFilter);
+      if (activityDateFilter) q = q.eq("activity_date", activityDateFilter);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const list = (rows ?? []) as ActivityRow[];
+
+      const ids = Array.from(new Set(list.map((r) => r.user_id)));
+      let pmap: Record<string, { email: string | null; display_name: string | null }> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, email, display_name")
+          .in("user_id", ids);
+        pmap = Object.fromEntries((profs ?? []).map((p) => [p.user_id, { email: p.email, display_name: p.display_name }]));
+      }
+      setActivity(list.map((r) => ({ ...r, email: pmap[r.user_id]?.email ?? null, display_name: pmap[r.user_id]?.display_name ?? null })));
+    } catch (err) {
+      toast({ title: "Failed to load activity", description: String(err), variant: "destructive" });
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  // Reload when filters change
+  useEffect(() => {
+    if (authed) loadActivity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityRoleFilter, activityDateFilter, authed]);
+
+  const exportActivityCsv = () => {
+    const header = ["date", "time", "role", "user", "email", "action", "detail"];
+    const rows = activity.map((r) => {
+      const dt = new Date(r.created_at);
+      return [
+        r.activity_date,
+        dt.toLocaleTimeString(),
+        r.user_role,
+        r.display_name ?? "",
+        r.email ?? "",
+        r.action_type,
+        (r.action_detail ?? "").replace(/"/g, '""'),
+      ];
+    });
+    const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dtt-activity-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const loadConsents = async (search: string) => {
     setConsentsLoading(true);
