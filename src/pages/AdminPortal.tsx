@@ -480,6 +480,83 @@ const AdminPortal = () => {
             )}
           </Card>
 
+          {/* Daily Activity Log */}
+          <Card className="p-4">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
+                <Activity className="w-4 h-4" /> Daily Activity Log
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={exportActivityCsv} disabled={activity.length === 0}>
+                  Export CSV
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 px-2" onClick={loadActivity} disabled={activityLoading}>
+                  {activityLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                </Button>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+              Append-only record of every creator and customer action — logins, uploads, token purchases, custom requests, password changes, payouts, and more. Filter by role or date.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <select
+                value={activityRoleFilter}
+                onChange={(e) => setActivityRoleFilter(e.target.value as any)}
+                className="h-8 text-xs bg-secondary text-foreground border border-border rounded-md px-2"
+              >
+                <option value="all">All roles</option>
+                <option value="creator">Creators only</option>
+                <option value="customer">Customers only</option>
+              </select>
+              <Input
+                type="date"
+                value={activityDateFilter}
+                onChange={(e) => setActivityDateFilter(e.target.value)}
+                className="h-8 text-xs"
+              />
+            </div>
+
+            {activityLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+            ) : activity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No activity recorded for this filter.</p>
+            ) : (
+              <div className="space-y-2 max-h-[480px] overflow-y-auto">
+                {activity.map((r) => {
+                  const dt = new Date(r.created_at);
+                  return (
+                    <div key={r.id} className="border border-border rounded-md p-2.5 text-xs space-y-1">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold truncate">
+                            {r.display_name || r.email || r.user_id.slice(0, 8)}
+                          </div>
+                          <div className="text-muted-foreground text-[10px]">
+                            {r.activity_date} · {dt.toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${
+                          r.user_role === "creator" ? "bg-primary/20 text-primary" : "bg-secondary text-secondary-foreground"
+                        }`}>
+                          {r.user_role}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-foreground/10 text-foreground">
+                          {r.action_type.replace(/_/g, " ")}
+                        </span>
+                        {r.action_detail && (
+                          <span className="text-muted-foreground text-[10px] truncate">{r.action_detail}</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+
           <p className="text-[10px] text-muted-foreground/50 text-center">
             Real-time. Auto-refreshes on database changes.
           </p>
