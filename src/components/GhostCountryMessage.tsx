@@ -49,7 +49,7 @@ const GhostCountryMessage = ({ countryCode }: GhostCountryMessageProps) => {
     <div className="flex flex-col items-center justify-center gap-5 py-16 px-6 text-center">
       <div className="text-5xl">{country?.flag ?? "🌍"}</div>
       <h3 className="text-lg font-bold text-foreground">
-        DTT Media is currently recruiting in {countryName}!
+        DTT is currently recruiting in {countryName}!
       </h3>
       <p className="text-sm text-muted-foreground max-w-xs">
         Want to see someone here? Type their name or niche below.

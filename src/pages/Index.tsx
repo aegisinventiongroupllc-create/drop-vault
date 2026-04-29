@@ -5,6 +5,7 @@ import GlobalPassport from "@/components/GlobalPassport";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthScreen from "@/components/AuthScreen";
 import { type UserRole } from "@/components/RoleSelection";
+import PostAuthRolePicker from "@/components/PostAuthRolePicker";
 import CustomerPreference, { type GenderPreference } from "@/components/CustomerPreference";
 import KnowYourCoinsModal from "@/components/KnowYourCoinsModal";
 import BottomNav, { type Tab } from "@/components/BottomNav";
@@ -67,23 +68,31 @@ const Index = () => {
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
+  const [roleChosen, setRoleChosen] = useState<boolean>(false);
 
   // Listen for auth changes + hydrate role from profiles
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
       const { data } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, role_chosen")
         .eq("user_id", userId)
         .maybeSingle();
-      const dbRole = (data?.role === "creator" ? "creator" : "customer") as UserRole;
-      setRole(dbRole);
+      const chosen = !!(data as any)?.role_chosen;
+      setRoleChosen(chosen);
       if (userEmail) setEmail(userEmail);
-      if (dbRole === "creator") {
-        setVault("women");
-        setPreference("women");
-        const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: "women", preference: "women" };
-        savePrefs(prefs);
+      if (chosen) {
+        const dbRole = (data?.role === "creator" ? "creator" : "customer") as UserRole;
+        setRole(dbRole);
+        if (dbRole === "creator") {
+          setVault("women");
+          setPreference("women");
+          const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: "women", preference: "women" };
+          savePrefs(prefs);
+        }
+      } else {
+        // User hasn't picked yet — clear any stale role so the picker shows.
+        setRole(null);
       }
     };
 
@@ -94,6 +103,7 @@ const Index = () => {
         setTimeout(() => hydrateRole(session.user.id, session.user.email ?? null), 0);
       } else {
         setAuthedUserId(null);
+        setRoleChosen(false);
       }
       setAuthReady(true);
     });
@@ -133,7 +143,39 @@ const Index = () => {
     return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
   }
 
-  // Signed in but role not yet hydrated
+  // Signed in but profile not yet hydrated
+  if (!authedUserId) return null;
+  // Signed in but user hasn't picked a role yet → ask creator vs customer
+  if (!roleChosen) {
+    return (
+      <PostAuthRolePicker
+        email={email}
+        onSelect={async (chosenRole) => {
+          // Persist choice
+          const { error } = await supabase
+            .from("profiles")
+            .update({ role: chosenRole, role_chosen: true } as any)
+            .eq("user_id", authedUserId);
+          if (error) {
+            console.error("Failed to save role", error);
+            return;
+          }
+          setRole(chosenRole);
+          setRoleChosen(true);
+          if (chosenRole === "creator") {
+            setVault("women");
+            setPreference("women");
+            savePrefs({ email, role: "creator", vault: "women", preference: "women" });
+          } else {
+            // Reset any stale customer preference so the "what are you looking for" screen shows
+            setPreference(null);
+            setVault(null);
+          }
+        }}
+      />
+    );
+  }
+
   if (!role) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
@@ -180,6 +222,7 @@ const Index = () => {
         setPreference(null);
         setEmail("");
         setAuthedUserId(null);
+        setRoleChosen(false);
         setVerified(true);
       }} />
     );
@@ -289,6 +332,7 @@ const Index = () => {
               setPreference(null);
               setEmail("");
               setAuthedUserId(null);
+              setRoleChosen(false);
               setVerified(true);
             }}
             className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"

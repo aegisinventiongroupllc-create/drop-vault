@@ -76,7 +76,7 @@ const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
         </div>
 
         <p className="text-[10px] text-muted-foreground/50">
-          © {new Date().getFullYear()} DTT Media. All rights reserved.
+          © {new Date().getFullYear()} DTT. All rights reserved.
         </p>
       </div>
     </div>

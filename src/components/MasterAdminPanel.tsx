@@ -213,7 +213,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
         </button>
         <div>
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DTT ADMIN</h1>
-          <p className="text-xs text-muted-foreground">DTT Media LLC — Platform Management</p>
+          <p className="text-xs text-muted-foreground">DTT — Platform Management</p>
         </div>
       </div>
 

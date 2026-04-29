@@ -46,7 +46,7 @@ const PWAInstallPrompt = () => {
       <div className="bg-card border border-primary/40 rounded-2xl p-4 shadow-lg neon-glow-sm flex items-center gap-3">
         <img
           src="/dtt-icon-192.png"
-          alt="DTT Media"
+          alt="DTT"
           className="w-12 h-12 rounded-xl shrink-0"
         />
         <div className="flex-1 min-w-0">

@@ -4,8 +4,8 @@ const fr: Translations = {
   age_title: "DROPTHAT",
   age_subtitle: "Cette plateforme contient du contenu soumis à une restriction d'âge. Vous devez accepter toutes les conditions ci-dessous pour entrer.",
   age_consent: "Je certifie avoir au moins 18 ans et être légalement autorisé(e) à consulter du contenu pour adultes dans ma juridiction.",
-  tos_consent: "J'ai lu, compris et j'accepte les Conditions d'Utilisation et la Politique de Confidentialité de DTT Media LLC. Je comprends que toutes les transactions par carte sont définitives et traitées par un processeur tiers sécurisé.",
-  contractor_consent: "Je reconnais que tous les créateurs sur cette plateforme sont des prestataires indépendants, et non des employés de DTT Media LLC. J'accepte de dégager DTT Media LLC et ses affiliés de toute responsabilité et je renonce à tout droit d'action en justice.",
+  tos_consent: "J'ai lu, compris et j'accepte les Conditions d'Utilisation et la Politique de Confidentialité de DTT. Je comprends que toutes les transactions par carte sont définitives et traitées par un processeur tiers sécurisé.",
+  contractor_consent: "Je reconnais que tous les créateurs sur cette plateforme sont des prestataires indépendants, et non des employés de DTT. J'accepte de dégager DTT et ses affiliés de toute responsabilité et je renonce à tout droit d'action en justice.",
   age_enter: "J'ACCEPTE — ENTRER",
   age_leave: "J'AI MOINS DE 18 ANS — QUITTER",
 
@@ -75,13 +75,13 @@ const fr: Translations = {
   pay_with_crypto: "PAYER EN CRYPTO",
 
   tip_amounts: "Choisir le montant du pourboire",
-  tip_fee_note: "1,00 $ frais DTT Media par pourboire",
+  tip_fee_note: "1,00 $ frais DTT par pourboire",
 
   payout_ltc_only: "Nous payons uniquement via LTC. Soumettez votre adresse Litecoin ci-dessous.",
   payout_instruction: "Tous les paiements sont traités en Litecoin (LTC) — la devise de paiement universelle quel que soit votre pays ou votre devise locale.",
 
   language: "Langue",
-  copyright: `© ${new Date().getFullYear()} DTT Media LLC. Tous droits réservés.`,
+  copyright: `© ${new Date().getFullYear()} DTT. Tous droits réservés.`,
   compliance_2257: "18 U.S.C. § 2257 Conformité",
 };
 

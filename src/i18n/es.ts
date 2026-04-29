@@ -4,8 +4,8 @@ const es: Translations = {
   age_title: "DROPTHAT",
   age_subtitle: "Esta plataforma contiene contenido restringido por edad. Debe aceptar todos los términos a continuación para ingresar.",
   age_consent: "Certifico que tengo al menos 18 años de edad y estoy legalmente autorizado/a para ver contenido para adultos en mi jurisdicción.",
-  tos_consent: "He leído, entiendo y acepto los Términos de Servicio y la Política de Privacidad de DTT Media LLC. Entiendo que todas las transacciones con tarjeta son finales y se procesan a través de un procesador externo seguro.",
-  contractor_consent: "Reconozco que todos los creadores en esta plataforma son contratistas independientes, no empleados de DTT Media LLC. Acepto eximir a DTT Media LLC y sus afiliados de toda responsabilidad y renuncio a todos los derechos de acción legal.",
+  tos_consent: "He leído, entiendo y acepto los Términos de Servicio y la Política de Privacidad de DTT. Entiendo que todas las transacciones con tarjeta son finales y se procesan a través de un procesador externo seguro.",
+  contractor_consent: "Reconozco que todos los creadores en esta plataforma son contratistas independientes, no empleados de DTT. Acepto eximir a DTT y sus afiliados de toda responsabilidad y renuncio a todos los derechos de acción legal.",
   age_enter: "ACEPTO — ENTRAR",
   age_leave: "SOY MENOR DE 18 — SALIR",
 
@@ -75,13 +75,13 @@ const es: Translations = {
   pay_with_crypto: "PAGAR CON CRIPTO",
 
   tip_amounts: "Elegir monto de propina",
-  tip_fee_note: "$1.00 tarifa de DTT Media por propina",
+  tip_fee_note: "$1.00 tarifa de DTT por propina",
 
   payout_ltc_only: "Pagamos solo via LTC. Envíe su dirección Litecoin a continuación.",
   payout_instruction: "Todos los pagos se procesan en Litecoin (LTC) — la moneda de pago universal independientemente de su país o moneda local.",
 
   language: "Idioma",
-  copyright: `© ${new Date().getFullYear()} DTT Media LLC. Todos los derechos reservados.`,
+  copyright: `© ${new Date().getFullYear()} DTT. Todos los derechos reservados.`,
   compliance_2257: "18 U.S.C. § 2257 Cumplimiento",
 };
 

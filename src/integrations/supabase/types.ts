@@ -260,6 +260,7 @@ export type Database = {
           email: string | null
           id: string
           role: string
+          role_chosen: boolean
           updated_at: string
           user_id: string
         }
@@ -271,6 +272,7 @@ export type Database = {
           email?: string | null
           id?: string
           role?: string
+          role_chosen?: boolean
           updated_at?: string
           user_id: string
         }
@@ -282,6 +284,7 @@ export type Database = {
           email?: string | null
           id?: string
           role?: string
+          role_chosen?: boolean
           updated_at?: string
           user_id?: string
         }

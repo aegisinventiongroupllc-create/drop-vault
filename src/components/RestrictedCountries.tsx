@@ -77,7 +77,7 @@ const RestrictedCountries = () => (
     </h3>
     <div className="text-xs text-muted-foreground space-y-4 leading-relaxed">
       <p>
-        DTT Media LLC and its payment partner (<span className="text-foreground font-semibold">NOWPayments</span>)
+        DTT and its payment partner (<span className="text-foreground font-semibold">NOWPayments</span>)
         prohibit access from the jurisdictions listed below. Customers
         and Creators residing in or accessing the platform from these regions are
         blocked from registration, content access, payments, and payouts. Lists are
