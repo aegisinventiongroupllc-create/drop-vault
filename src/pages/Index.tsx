@@ -20,6 +20,7 @@ import { useI18n } from "@/i18n/I18nContext";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { logActivity } from "@/lib/activityLog";
 
 const STORAGE_KEY = "dtt_user_prefs";
 
@@ -279,7 +280,9 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">{email}</p>
           <button
             onClick={() => {
-              supabase.auth.signOut();
+              logActivity("logout", "Customer profile tab").finally(() => {
+                supabase.auth.signOut();
+              });
               localStorage.removeItem(STORAGE_KEY);
               setRole(null);
               setVault(null);
