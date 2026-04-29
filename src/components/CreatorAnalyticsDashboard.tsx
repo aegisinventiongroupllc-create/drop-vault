@@ -788,7 +788,10 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved and synced to Admin Panel</p>}
               <p className="text-[10px] text-muted-foreground">⚠ LTC ONLY — YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.</p>
             </div>
-            <Button variant="neon" className="w-full mt-4" disabled={!ltcAddress || !!ltcError} onClick={() => setLtcSaved(true)}>
+            <Button variant="neon" className="w-full mt-4" disabled={!ltcAddress || !!ltcError} onClick={() => {
+              setLtcSaved(true);
+              logActivity("ltc_address_saved", "LTC payout address saved", { last4: ltcAddress.slice(-4) });
+            }}>
               SAVE WALLET ADDRESS
             </Button>
           </div>
