@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
 const SESSION_KEY = "dtt_secret_admin_ok";
@@ -25,6 +26,19 @@ interface MediaItem {
   publicUrl?: string;
 }
 
+interface LegalConsent {
+  id: string;
+  email: string | null;
+  username: string | null;
+  user_id: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  consent_type: string;
+  consent_text: string;
+  terms_version: string;
+  created_at: string;
+}
+
 interface Stats {
   totalCreators: number;
   totalRevenue: number;
@@ -38,6 +52,9 @@ const AdminPortal = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [consents, setConsents] = useState<LegalConsent[]>([]);
+  const [consentsLoading, setConsentsLoading] = useState(false);
+  const [consentSearch, setConsentSearch] = useState("");
 
   useEffect(() => {
     if (!authed) {
@@ -107,17 +124,37 @@ const AdminPortal = () => {
   useEffect(() => {
     if (!authed) return;
     loadStats();
+    loadConsents("");
     const channel = supabase
       .channel("admin-portal-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, loadStats)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "legal_consents" }, () => loadConsents(consentSearch))
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
+
+  const loadConsents = async (search: string) => {
+    setConsentsLoading(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/legal-logs${search ? `?search=${encodeURIComponent(search)}` : ""}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setConsents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      toast({ title: "Failed to load consents", description: String(err), variant: "destructive" });
+    } finally {
+      setConsentsLoading(false);
+    }
+  };
 
   const copyToClipboard = async (text: string, key: string) => {
     try {
