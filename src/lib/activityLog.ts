@@ -54,13 +54,13 @@ export async function logActivity(
       }
     } catch { /* non-fatal */ }
 
-    await supabase.from("activity_logs").insert({
+    await supabase.from("activity_logs").insert([{
       user_id: user.id,
       user_role: role,
       action_type: action,
       action_detail: detail ?? null,
-      metadata: metadata ?? {},
-    });
+      metadata: (metadata ?? {}) as any,
+    }]);
   } catch (err) {
     // Never let logging crash the UI
     if (typeof window !== "undefined" && (window as any).DTT_DEBUG) {
