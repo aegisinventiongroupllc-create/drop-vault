@@ -939,6 +939,23 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Media Manager — Simplified 3-step Upload */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
+          {kycStatus !== "approved" && (
+            <div className="bg-card border-2 border-destructive/40 rounded-2xl p-5 text-center space-y-3">
+              <Lock className="w-10 h-10 text-destructive mx-auto" />
+              <h3 className="text-base font-bold text-foreground tracking-wider">UPLOADS LOCKED</h3>
+              <p className="text-xs text-muted-foreground">
+                {kycStatus === "pending"
+                  ? "Your ID submission is under review. Uploads unlock once an admin approves you."
+                  : kycStatus === "rejected"
+                  ? "Your last submission was rejected. Re-submit your ID to unlock uploads."
+                  : "You must verify your identity before uploading content."}
+              </p>
+              <Button variant="neon" onClick={() => setActiveSection("verification")}>
+                GO TO VERIFICATION
+              </Button>
+            </div>
+          )}
+          {kycStatus === "approved" && <>
           {/* Step 1: Title */}
           <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
             <h3 className="text-base font-bold text-foreground tracking-wider">UPLOAD VIDEO</h3>
