@@ -13,6 +13,7 @@ import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
+import CreatorIdVerification from "@/components/CreatorIdVerification";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -80,6 +81,32 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Live KYC status (controls upload gate)
+  const [kycStatus, setKycStatus] = useState<"unsubmitted" | "pending" | "approved" | "rejected">("unsubmitted");
+  useEffect(() => {
+    if (!authUserId) return;
+    let cancelled = false;
+    const load = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("verification_status")
+        .eq("user_id", authUserId)
+        .maybeSingle();
+      if (!cancelled && data?.verification_status) {
+        setKycStatus(data.verification_status as any);
+      }
+    };
+    load();
+    const channel = supabase
+      .channel(`profile_kyc_${authUserId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${authUserId}` },
+        (payload: any) => {
+          if (payload.new?.verification_status) setKycStatus(payload.new.verification_status);
+        })
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [authUserId]);
 
   const liveStats = useCreatorStats();
   const { items: mediaItems, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
@@ -707,42 +734,18 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             </div>
           </div>
 
-          {/* ID Verification */}
+          {/* ID Verification — manual KYC */}
           <div className="bg-card border border-border rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <Shield className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Identity Verification</h3>
             </div>
-            <div className="bg-secondary/50 border border-primary/20 rounded-lg p-3 mb-4 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground">Launch Ondato to authenticate your Human-Verified status. Approval is instant once verified.</p>
-            </div>
-            <div className="bg-gold/10 border border-gold/30 rounded-lg p-2.5 mb-4">
-              <p className="text-[10px] text-gold text-center font-bold tracking-wider">🔒 HIGH-RISK COMPLIANT PROVIDER — NO STRIPE USED</p>
-            </div>
-
-            {/* Ondato International KYC */}
-            <div className="mb-4">
-              <Button variant="gold" size="lg" className="w-full" onClick={launchOndato}>
-                <Globe className="w-4 h-4 mr-2" /> VERIFY AGE
-              </Button>
-              <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Powered by Ondato — Passport, ID & Driver's License accepted worldwide.
-              </p>
-            </div>
-
-            {/* Status */}
-            <div className="mt-4 flex items-center gap-2 bg-secondary/50 rounded-lg p-3">
-              {verificationStatus === "verified" ? (
-                <><CheckCircle className="w-4 h-4 text-green-400" /><p className="text-xs text-muted-foreground">Status: <span className="text-green-400 font-medium">Verified ✓</span> — Automatically approved</p></>
-              ) : verificationStatus === "failed" ? (
-                <><AlertCircle className="w-4 h-4 text-destructive" /><p className="text-xs text-muted-foreground">Status: <span className="text-destructive font-medium">Failed — Flagged for Admin Review</span></p></>
-              ) : verificationStatus === "pending" ? (
-                <><Clock className="w-4 h-4 text-gold" /><p className="text-xs text-muted-foreground">Status: <span className="text-gold font-medium">Processing — Automated Scan in Progress</span></p></>
-              ) : (
-                <><AlertCircle className="w-4 h-4 text-muted-foreground" /><p className="text-xs text-muted-foreground">Status: <span className="text-muted-foreground font-medium">Not Submitted</span></p></>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground mb-4">
+              We manually review every creator before they can upload. Submit a Government ID + a verification selfie.
+            </p>
+            {authUserId && (
+              <CreatorIdVerification userId={authUserId} onApproved={() => setKycStatus("approved")} />
+            )}
           </div>
 
           {/* Payout Wallet Address (LTC) */}
