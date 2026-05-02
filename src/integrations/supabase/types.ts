@@ -83,6 +83,60 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_verifications: {
+        Row: {
+          created_at: string
+          date_of_birth: string
+          id: string
+          id_back_path: string
+          id_front_path: string
+          legal_first_name: string
+          legal_last_name: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          selfie_path: string
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth: string
+          id?: string
+          id_back_path: string
+          id_front_path: string
+          legal_first_name: string
+          legal_last_name: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path: string
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string
+          id?: string
+          id_back_path?: string
+          id_front_path?: string
+          legal_first_name?: string
+          legal_last_name?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path?: string
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       creator_wallets: {
         Row: {
           created_at: string
@@ -256,37 +310,58 @@ export type Database = {
           avatar_url: string | null
           country: string | null
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
           email: string | null
           id: string
+          legal_first_name: string | null
+          legal_last_name: string | null
           role: string
           role_chosen: boolean
           updated_at: string
           user_id: string
+          verification_reviewed_at: string | null
+          verification_reviewer_notes: string | null
+          verification_status: string
+          verification_submitted_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           email?: string | null
           id?: string
+          legal_first_name?: string | null
+          legal_last_name?: string | null
           role?: string
           role_chosen?: boolean
           updated_at?: string
           user_id: string
+          verification_reviewed_at?: string | null
+          verification_reviewer_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           email?: string | null
           id?: string
+          legal_first_name?: string | null
+          legal_last_name?: string | null
           role?: string
           role_chosen?: boolean
           updated_at?: string
           user_id?: string
+          verification_reviewed_at?: string | null
+          verification_reviewer_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
         }
         Relationships: []
       }

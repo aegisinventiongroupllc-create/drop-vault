@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import AdminVerifications from "@/components/AdminVerifications";
 
 const SESSION_KEY = "dtt_secret_admin_ok";
 
@@ -305,6 +306,11 @@ const AdminPortal = () => {
               </div>
             </Card>
           </div>
+
+          {/* Creator ID Verifications */}
+          <Card className="p-4">
+            <AdminVerifications />
+          </Card>
 
           {/* Payout Management */}
           <Card className="p-4">

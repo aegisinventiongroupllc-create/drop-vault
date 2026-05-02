@@ -20,6 +20,9 @@ export type ActivityAction =
   | "custom_request_declined"
   | "ltc_address_saved"
   | "profile_updated"
+  | "id_verification_submitted"
+  | "id_verification_approved"
+  | "id_verification_rejected"
   | "page_view";
 
 /**
