@@ -1108,6 +1108,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               </>
             );
           })()}
+          </>}
         </div>
       )}
 
