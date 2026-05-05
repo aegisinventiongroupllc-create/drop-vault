@@ -120,8 +120,8 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center">
-      <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center overscroll-contain">
+      <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground font-display tracking-wider">BUY TOKENS</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
