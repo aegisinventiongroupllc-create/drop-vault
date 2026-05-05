@@ -222,21 +222,33 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </div>
             )}
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CRYPTO</p>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">PAY WITH CRYPTO — SETTLES IN LTC</p>
               <div className="grid grid-cols-3 gap-2">
                 {["ltc", "btc", "eth"].map((coin) => (
-                  <button key={coin} disabled={!consentChecked} onClick={() => handleCryptoPay(coin)} className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  <button
+                    key={coin}
+                    disabled={!consentChecked}
+                    onClick={() => handleCryptoPay(coin)}
+                    className={`rounded-xl p-3 text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      coin === "ltc"
+                        ? "bg-primary/10 border-2 border-primary hover:bg-primary/20 neon-glow-sm"
+                        : "bg-secondary border border-border hover:border-primary/50"
+                    }`}
+                  >
                     <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
+                    {coin === "ltc" && (
+                      <p className="text-[9px] text-primary font-bold mt-0.5">RECOMMENDED</p>
+                    )}
                   </button>
                 ))}
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE FIAT ON-RAMP · SETTLES IN LTC</p>
-              <button disabled={!consentChecked} onClick={handleCardPay} className="w-full bg-secondary border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                <p className="text-sm font-bold text-foreground mb-1">CREDIT / DEBIT CARD</p>
-                <p className="text-[10px] text-muted-foreground">Visa / MC / Apple Pay · KYC may be required</p>
-              </button>
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD PAYMENTS</p>
+              <div className="w-full bg-secondary/30 border border-dashed border-border rounded-xl p-4 text-center opacity-70">
+                <p className="text-sm font-bold text-muted-foreground mb-1">CREDIT / DEBIT CARD</p>
+                <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
+              </div>
             </div>
             <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
               <p className="text-[10px] text-muted-foreground">
