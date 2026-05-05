@@ -170,6 +170,72 @@ export type Database = {
         }
         Relationships: []
       }
+      dmca_requests: {
+        Row: {
+          accuracy_statement: boolean
+          admin_notes: string | null
+          complainant_address: string | null
+          complainant_email: string
+          complainant_name: string
+          complainant_phone: string | null
+          copyright_owner: string
+          created_at: string
+          good_faith_statement: boolean
+          id: string
+          infringing_urls: string
+          ip_address: string | null
+          original_work_description: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          signature: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          accuracy_statement?: boolean
+          admin_notes?: string | null
+          complainant_address?: string | null
+          complainant_email: string
+          complainant_name: string
+          complainant_phone?: string | null
+          copyright_owner: string
+          created_at?: string
+          good_faith_statement?: boolean
+          id?: string
+          infringing_urls: string
+          ip_address?: string | null
+          original_work_description: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          signature: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          accuracy_statement?: boolean
+          admin_notes?: string | null
+          complainant_address?: string | null
+          complainant_email?: string
+          complainant_name?: string
+          complainant_phone?: string | null
+          copyright_owner?: string
+          created_at?: string
+          good_faith_statement?: boolean
+          id?: string
+          infringing_urls?: string
+          ip_address?: string | null
+          original_work_description?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          signature?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           consent_text: string
