@@ -64,7 +64,7 @@ const Index = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
-  const [tokenBalance, setTokenBalance] = useState(6);
+  const [tokenBalance, setTokenBalance] = useState(0);
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
