@@ -207,7 +207,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     <div className="mobile-scroll-shell flex flex-col">
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
-        <WalletIndicator balance={balance} />
+        <WalletIndicator />
       </div>
 
       {/* Expiration notification */}
