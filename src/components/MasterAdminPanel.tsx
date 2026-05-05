@@ -480,9 +480,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {activeSection === "payouts" && (
         <div className="px-4 space-y-4">
           <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
-            <p className="text-xs text-muted-foreground mb-1">PROCESS MASS PAYOUT</p>
+            <p className="text-xs text-muted-foreground mb-1">CREATOR PAYOUTS (MANUAL LTC)</p>
             <p className="text-sm text-muted-foreground mt-2">
-              This will fetch all creators with a pending balance &gt; $0 and send LTC to their saved wallet addresses via NOWPayments Mass Payout API.
+              All payouts are sent manually from your LTC wallet. Use the list below to view each creator's pending balance and saved LTC address, send the payout from your wallet, then mark it paid here.
             </p>
           </div>
 
@@ -493,57 +493,22 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               <p className="text-xs text-muted-foreground">Pending from all creators</p>
             </div>
 
-            <Button
-              variant="neon" size="lg" className="w-full text-sm font-bold tracking-widest"
-              disabled={payoutProcessing || !canExecutePayout(payoutState).allowed}
-              onClick={async () => {
-                const result = canExecutePayout(payoutState);
-                if (!result.allowed) {
-                  setPayoutResult({ success: false, message: `LOCKED — Next in [${formatPayoutCooldown(result.remainingMs)}]` });
-                  return;
-                }
-                setPayoutProcessing(true);
-                setPayoutResult(null);
-                try {
-                  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/mass-payout`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ admin_password: ADMIN_PASSWORD }),
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    setPayoutState({ ...payoutState, lastPayoutAt: Date.now() });
-                    setPayoutResult({ success: true, message: `PAYOUTS SENT — ${data.creators_paid} creators, $${data.total_amount} total` });
-                  } else if (data.message) {
-                    setPayoutResult({ success: true, message: data.message });
-                  } else {
-                    setPayoutResult({ success: false, message: data.error || 'Payout failed' });
-                  }
-                } catch {
-                  setPayoutResult({ success: false, message: 'Network error — check edge function logs' });
-                }
-                setPayoutProcessing(false);
-              }}
-            >
-              {payoutProcessing ? "PROCESSING..." : canExecutePayout(payoutState).allowed ? "PROCESS MASS PAYOUT" : `LOCKED — NEXT IN [${cooldownDisplay || "..."}]`}
-            </Button>
-
-            {payoutResult && (
-              <div className={`text-center p-3 rounded-lg border ${payoutResult.success ? "bg-green-400/10 border-green-400/30" : "bg-destructive/10 border-destructive/30"}`}>
-                <p className={`text-xs font-bold tracking-wider ${payoutResult.success ? "text-green-400" : "text-destructive"}`}>{payoutResult.message}</p>
-              </div>
-            )}
+            <div className="bg-gold/5 border border-gold/30 rounded-lg p-3 text-center">
+              <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ MANUAL PAYOUT MODE</p>
+              <p className="text-[10px] text-muted-foreground">
+                Send LTC manually from your wallet to each creator's saved LTC address. Automated mass-payout is disabled.
+              </p>
+            </div>
 
             <p className="text-[10px] text-muted-foreground text-center">
-              This button triggers the NOWPayments Mass Payout API. All pending creator balances are sent as LTC to their saved wallet addresses. 24-hour cooldown applies.
+              All pending creator balances above are computed from confirmed transactions. Send from your LTC wallet, then update the creator's balance accordingly.
             </p>
           </div>
 
           <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
             <DollarSign className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              The 90/10 split (Creator/Platform) is applied at transaction time via the IPN webhook. This payout only releases the already-calculated creator share.
+              The 90/10 split (Creator/Platform) is applied at transaction time. This view only shows the already-calculated creator share.
             </p>
           </div>
         </div>
