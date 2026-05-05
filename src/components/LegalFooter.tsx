@@ -186,4 +186,137 @@ const ContactInfo = () => (
   </SectionShell>
 );
 
+const dmcaSchema = z.object({
+  complainant_name: z.string().trim().min(1, "Required").max(120),
+  complainant_email: z.string().trim().email("Invalid email").max(255),
+  complainant_address: z.string().trim().max(500).optional().or(z.literal("")),
+  complainant_phone: z.string().trim().max(40).optional().or(z.literal("")),
+  copyright_owner: z.string().trim().min(1, "Required").max(200),
+  original_work_description: z.string().trim().min(10, "Describe your work").max(2000),
+  infringing_urls: z.string().trim().min(5, "Provide at least one URL on the platform").max(4000),
+  signature: z.string().trim().min(2, "Type your full legal name").max(120),
+  good_faith_statement: z.literal(true, { errorMap: () => ({ message: "Required" }) }),
+  accuracy_statement: z.literal(true, { errorMap: () => ({ message: "Required" }) }),
+});
+
+const DmcaTakedown = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    complainant_name: "",
+    complainant_email: "",
+    complainant_address: "",
+    complainant_phone: "",
+    copyright_owner: "",
+    original_work_description: "",
+    infringing_urls: "",
+    signature: "",
+    good_faith_statement: false,
+    accuracy_statement: false,
+  });
+
+  const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = dmcaSchema.safeParse(form);
+    if (!parsed.success) {
+      const first = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0];
+      toast({ title: "Form incomplete", description: first || "Please review the form." });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("dmca_requests").insert({
+      ...parsed.data,
+      complainant_address: parsed.data.complainant_address || null,
+      complainant_phone: parsed.data.complainant_phone || null,
+      user_agent: navigator.userAgent.slice(0, 500),
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: "Submission failed", description: error.message });
+      return;
+    }
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <SectionShell title="DMCA Notice Received">
+        <p>Thank you. Your takedown notice has been logged and routed to our Designated DMCA Agent.</p>
+        <p>We aim to act on valid notices within <strong className="text-foreground">2 business days</strong>. You will receive a follow-up at the email address you provided.</p>
+        <p className="text-muted-foreground/60 text-[10px]">Reference: filed {new Date().toLocaleString()}</p>
+      </SectionShell>
+    );
+  }
+
+  const inputCls = "w-full bg-secondary rounded-lg p-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50";
+  const labelCls = "text-[10px] font-bold tracking-wider text-muted-foreground block mb-1";
+
+  return (
+    <SectionShell title="DMCA Copyright Takedown">
+      <div className="space-y-2">
+        <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
+        <p><strong className="text-foreground">Designated DMCA Agent</strong></p>
+        <p>DTT — DMCA Agent<br/>Email: <a href="mailto:dmca@dttmediallc.com" className="text-primary hover:underline">dmca@dttmediallc.com</a><br/>Backup: <a href="mailto:office@dttmediallc.com" className="text-primary hover:underline">office@dttmediallc.com</a></p>
+        <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
+      </div>
+
+      <form onSubmit={submit} className="space-y-3 mt-4">
+        <div>
+          <label className={labelCls}>YOUR FULL NAME *</label>
+          <input className={inputCls} value={form.complainant_name} onChange={update("complainant_name")} maxLength={120} required />
+        </div>
+        <div>
+          <label className={labelCls}>EMAIL *</label>
+          <input type="email" className={inputCls} value={form.complainant_email} onChange={update("complainant_email")} maxLength={255} required />
+        </div>
+        <div>
+          <label className={labelCls}>MAILING ADDRESS</label>
+          <input className={inputCls} value={form.complainant_address} onChange={update("complainant_address")} maxLength={500} />
+        </div>
+        <div>
+          <label className={labelCls}>PHONE</label>
+          <input className={inputCls} value={form.complainant_phone} onChange={update("complainant_phone")} maxLength={40} />
+        </div>
+        <div>
+          <label className={labelCls}>COPYRIGHT OWNER (you, or whom you represent) *</label>
+          <input className={inputCls} value={form.copyright_owner} onChange={update("copyright_owner")} maxLength={200} required />
+        </div>
+        <div>
+          <label className={labelCls}>DESCRIBE THE COPYRIGHTED WORK *</label>
+          <textarea rows={3} className={inputCls} value={form.original_work_description} onChange={update("original_work_description")} maxLength={2000} required />
+        </div>
+        <div>
+          <label className={labelCls}>URL(S) ON DROPTHATTHING WHERE THE INFRINGING MATERIAL APPEARS *</label>
+          <textarea rows={3} className={inputCls} placeholder="One URL per line" value={form.infringing_urls} onChange={update("infringing_urls")} maxLength={4000} required />
+        </div>
+
+        <label className="flex items-start gap-2 text-[11px] text-muted-foreground cursor-pointer">
+          <input type="checkbox" checked={form.good_faith_statement} onChange={update("good_faith_statement")} className="mt-0.5" />
+          <span>I have a good-faith belief that the use of the material is not authorized by the copyright owner, its agent, or the law.</span>
+        </label>
+        <label className="flex items-start gap-2 text-[11px] text-muted-foreground cursor-pointer">
+          <input type="checkbox" checked={form.accuracy_statement} onChange={update("accuracy_statement")} className="mt-0.5" />
+          <span>The information in this notice is accurate, and under penalty of perjury I am the copyright owner or authorized to act on the owner's behalf.</span>
+        </label>
+
+        <div>
+          <label className={labelCls}>ELECTRONIC SIGNATURE (type your full legal name) *</label>
+          <input className={inputCls} value={form.signature} onChange={update("signature")} maxLength={120} required />
+        </div>
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full py-2.5 text-xs font-bold tracking-widest bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50"
+        >
+          {submitting ? "SUBMITTING…" : "SUBMIT DMCA NOTICE"}
+        </button>
+      </form>
+    </SectionShell>
+  );
+};
+
 export default LegalFooter;
