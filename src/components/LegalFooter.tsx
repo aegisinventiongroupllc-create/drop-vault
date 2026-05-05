@@ -1,7 +1,10 @@
 import { useState } from "react";
 import RestrictedCountries from "@/components/RestrictedCountries";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { z } from "zod";
 
-type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints" | "restricted";
+type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints" | "restricted" | "dmca";
 
 const LegalFooter = () => {
   const [view, setView] = useState<LegalView>(null);
@@ -16,6 +19,7 @@ const LegalFooter = () => {
     { id: "restricted", label: "Restricted Countries" },
     { id: "complaints", label: "Complaints" },
     { id: "2257", label: "18 U.S.C. § 2257" },
+    { id: "dmca", label: "DMCA" },
     { id: "contact", label: "Contact" },
   ];
 
@@ -65,6 +69,7 @@ const LegalFooter = () => {
               {view === "risk" && <RiskDisclosure />}
               {view === "restricted" && <RestrictedCountries />}
               {view === "complaints" && <Complaints />}
+              {view === "dmca" && <DmcaTakedown />}
             </div>
             <div className="border-t border-border p-3 bg-card">
               <button
