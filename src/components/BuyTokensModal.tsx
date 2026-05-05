@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { X, Loader2, Clock, CheckCircle2, Copy } from "lucide-react";
+import { X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD,
@@ -16,11 +16,9 @@ interface BuyTokensModalProps {
 }
 
 interface Checkout {
-  payment_id: string;
-  ltc_address: string;
-  ltc_amount: number;
-  ltc_price_usd: number;
-  expires_at: string;
+  invoice_id: string;
+  invoice_url: string;
+  order_id: string;
 }
 
 const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
@@ -48,7 +46,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
       if (!uid || cancelled) return;
 
       channel = supabase
-        .channel(`ltc-credit-${uid}`)
+        .channel(`cc-credit-${uid}`)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "token_purchases", filter: `user_id=eq.${uid}` },
@@ -62,15 +60,6 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         )
         .subscribe();
     })();
-
-    // Poll the verifier every 25s
-    const tick = () => {
-      supabase.functions.invoke("ltc-verify-payment", {
-        body: { payment_id: checkout.payment_id },
-      }).catch(() => {});
-    };
-    tick();
-    pollRef.current = window.setInterval(tick, 25000);
 
     return () => {
       cancelled = true;
@@ -102,21 +91,19 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     setStep("processing");
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("ltc-create-checkout", {
+      const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: { amount_usd: invoiceAmount, tokens },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
       setCheckout(data as Checkout);
       setStep("awaiting");
+      // Open the hosted CryptoCloud checkout in a new tab
+      window.open((data as Checkout).invoice_url, "_blank", "noopener,noreferrer");
     } catch (err: any) {
       setError(err.message || "Checkout failed. Please try again.");
       setStep("payment");
     }
-  };
-
-  const copy = async (text: string) => {
-    try { await navigator.clipboard.writeText(text); toast.success("Copied"); } catch {}
   };
 
   return (
@@ -172,7 +159,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
 
         {step === "payment" && (
           <div className="p-4 space-y-4">
-            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">PAY WITH LITECOIN (LTC)</h3>
+            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">PAY WITH CRYPTO</h3>
             {error && (
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-destructive">{error}</p>
@@ -181,8 +168,8 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
 
             <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYMENT METHOD</p>
-              <p className="text-2xl font-bold text-primary">LTC</p>
-              <p className="text-[10px] text-muted-foreground mt-1">Litecoin — fast & low fees</p>
+              <p className="text-2xl font-bold text-primary">LTC · BTC · ETH · USDT</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
             </div>
 
             <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center opacity-70">
@@ -191,7 +178,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
 
             <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-              <p className="text-[10px] text-muted-foreground">All payments settle directly to our LTC wallet. Network fees apply.</p>
+              <p className="text-[10px] text-muted-foreground">You'll be redirected to CryptoCloud's secure checkout to complete payment.</p>
               <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final.</p>
             </div>
 
@@ -218,51 +205,28 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
           <div className="p-8 text-center space-y-4">
             <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">GENERATING CHECKOUT</h3>
-            <p className="text-sm text-muted-foreground">Fetching live LTC rate…</p>
+            <p className="text-sm text-muted-foreground">Creating your secure invoice…</p>
           </div>
         )}
 
         {step === "awaiting" && checkout && (
           <div className="p-5 text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center mx-auto">
-              <Clock className="w-8 h-8 text-gold" />
+              <ExternalLink className="w-8 h-8 text-gold" />
             </div>
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">SEND LITECOIN</h3>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">COMPLETE YOUR PAYMENT</h3>
             <p className="text-xs text-muted-foreground">
-              Send the <span className="text-foreground font-bold">exact</span> amount below. Tokens credit automatically once the transaction appears on the Litecoin network.
+              Your secure CryptoCloud checkout opened in a new tab. Pay there and your tokens will credit automatically. You can keep this window open.
             </p>
 
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-3 text-left">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground tracking-wider mb-1">SEND EXACTLY</p>
-                <div className="flex items-center justify-between bg-background/50 rounded p-2 border border-border">
-                  <p className="text-base font-bold text-primary font-mono">{checkout.ltc_amount.toFixed(8)} LTC</p>
-                  <button onClick={() => copy(checkout.ltc_amount.toFixed(8))} className="text-muted-foreground hover:text-foreground"><Copy className="w-4 h-4" /></button>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-1">≈ ${invoiceAmount} USD @ ${checkout.ltc_price_usd.toFixed(2)}/LTC</p>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground tracking-wider mb-1">TO ADDRESS</p>
-                <div className="flex items-start justify-between gap-2 bg-background/50 rounded p-2 border border-border">
-                  <p className="text-[10px] text-foreground font-mono break-all">{checkout.ltc_address}</p>
-                  <button onClick={() => copy(checkout.ltc_address)} className="text-muted-foreground hover:text-foreground shrink-0"><Copy className="w-4 h-4" /></button>
-                </div>
-              </div>
-
-              <div className="flex justify-center pt-1">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`litecoin:${checkout.ltc_address}?amount=${checkout.ltc_amount.toFixed(8)}`)}`}
-                  alt="LTC QR Code"
-                  className="rounded border border-border bg-background p-1"
-                />
-              </div>
-            </div>
+            <a href={checkout.invoice_url} target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="neon" className="w-full">OPEN CHECKOUT AGAIN</Button>
+            </a>
 
             <div className="bg-gold/5 border border-gold/20 rounded-lg p-3">
               <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ AUTO-VERIFICATION</p>
               <p className="text-[10px] text-muted-foreground">
-                We monitor the LTC blockchain every 25 seconds. Tokens credit automatically when your exact-amount payment is detected. Checkout expires in 2 hours.
+                Tokens credit automatically as soon as CryptoCloud confirms your payment. Invoice expires in 2 hours.
               </p>
             </div>
 
