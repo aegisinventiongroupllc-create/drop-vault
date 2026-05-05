@@ -84,10 +84,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const handleCardPay = async () => {
     setError("Card payments are coming soon. Please use LTC for now.");
   };
-      setError(err.message || "Card payment failed.");
-      setStep("buy");
-    }
-  };
 
   // Simulate receiving a counter-offer from creator
   const simulateCounterOffer = () => {
