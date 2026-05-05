@@ -61,7 +61,7 @@ const en: Translations = {
   privacy_section2_title: "2. Purpose of Processing",
   privacy_section2_text: "Verification data is used solely to confirm age and identity. Transaction data is used to facilitate payouts via the LTC network.",
   privacy_section3_title: "3. Third Parties",
-  privacy_section3_text: "We may share data with payment processors (such as NOWPayments) and verification services to complete transactions and satisfy legal audits. We do not sell user data to third-party advertisers.",
+  privacy_section3_text: "We may share data with verification services to complete transactions and satisfy legal audits. We do not sell user data to third-party advertisers.",
   privacy_section4_title: "4. Data Security",
   privacy_section4_text: "We implement industry-standard security measures to protect your personal information. Identity verification documents are encrypted and stored securely.",
   privacy_section5_title: "5. Data Retention",

@@ -335,6 +335,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_ltc_payments: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          expires_at: string
+          id: string
+          ltc_address: string
+          ltc_amount: number
+          status: string
+          tokens: number
+          tx_hash: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ltc_address: string
+          ltc_amount: number
+          status?: string
+          tokens: number
+          tx_hash?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ltc_address?: string
+          ltc_amount?: number
+          status?: string
+          tokens?: number
+          tx_hash?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       power_weeks: {
         Row: {
           active: boolean

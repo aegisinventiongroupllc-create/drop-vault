@@ -60,17 +60,15 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     setStep("processing");
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
+      const { data, error: fnError } = await supabase.functions.invoke("ltc-create-checkout", {
         body: {
           amount_usd: activePrice + ADMIN_FEE_USD,
           tokens: tokenCalc.total,
-          pay_currency: currency,
-          order_id: `dtt-req-${creatorName}-${Date.now()}`,
         },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      setPaymentInfo({ pay_address: data.pay_address, pay_amount: data.pay_amount, pay_currency: data.pay_currency, payment_id: data.payment_id });
+      setPaymentInfo({ pay_address: data.ltc_address, pay_amount: data.ltc_amount, pay_currency: "LTC", payment_id: data.payment_id });
       setStep("success");
       import("@/lib/activityLog").then(({ logActivity }) =>
         logActivity("custom_request_sent", `Crypto request to ${creatorName}`, {
@@ -84,33 +82,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   };
 
   const handleCardPay = async () => {
-    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
-    await logConsent("card");
-    setStep("processing");
-    setError(null);
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: {
-          amount_usd: activePrice + ADMIN_FEE_USD,
-          tokens: tokenCalc.total,
-          order_id: `dtt-req-${creatorName}-${Date.now()}`,
-          is_fiat: true,
-        },
-      });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-      if (data?.invoice_url) window.open(data.invoice_url, "_blank");
-      setPaymentInfo({ invoice_url: data?.invoice_url });
-      setStep("success");
-      import("@/lib/activityLog").then(({ logActivity }) =>
-        logActivity("custom_request_sent", `Card request to ${creatorName}`, {
-          creator: creatorName, amount_usd: activePrice + ADMIN_FEE_USD, tokens: tokenCalc.total, method: "card",
-        })
-      );
-    } catch (err: any) {
-      setError(err.message || "Card payment failed.");
-      setStep("buy");
-    }
+    setError("Card payments are coming soon. Please use LTC for now.");
   };
 
   // Simulate receiving a counter-offer from creator
