@@ -35,7 +35,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
   const handleSendTip = (amount: number) => {
     const netAmount = amount - ADMIN_FEE_USD;
-    // In production, this triggers a NOWPayments invoice
+    // In production, this generates an LTC checkout invoice
     setTipSent(true);
     setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (after $${ADMIN_FEE_USD} platform fee).`);
     setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
@@ -112,7 +112,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           Request Custom Media
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Premium commissions from $500 — $10,001 • Secure escrow via NOWPayments
+          Premium commissions from $500 — $10,001 • Direct LTC payment
         </p>
       </div>
 
