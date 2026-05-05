@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { X, Loader2, Clock, CheckCircle2 } from "lucide-react";
+import { X, Loader2, Clock, CheckCircle2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD, ADMIN_FEE_USD,
+  TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD,
   BUNDLE_TOKENS, BUNDLE_INVOICE_USD, BUNDLE_BASE_USD,
   PLATFORM_SPLIT_PERCENT, CREATOR_SPLIT_PERCENT,
   calculateTokenPurchaseSplit,
@@ -15,28 +15,40 @@ interface BuyTokensModalProps {
   onPurchase: (tokens: number) => void;
 }
 
+interface Checkout {
+  payment_id: string;
+  ltc_address: string;
+  ltc_amount: number;
+  ltc_price_usd: number;
+  expires_at: string;
+}
+
 const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
   const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
-  const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
-  const [paymentInfo, setPaymentInfo] = useState<{ pay_address: string; pay_amount: number; pay_currency: string; payment_id: string } | null>(null);
-  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+  const [checkout, setCheckout] = useState<Checkout | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
   const [creditedTokens, setCreditedTokens] = useState<number>(0);
+  const pollRef = useRef<number | null>(null);
 
-  // Listen for the IPN to credit this user's wallet while we're awaiting
+  const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
+  const invoiceAmount = selectedOption === "bundle" ? BUNDLE_INVOICE_USD : TOKEN_INVOICE_USD;
+  const split = calculateTokenPurchaseSplit(invoiceAmount, tokens);
+
+  // Poll the verifier + listen for token_purchases insert as soon as we're awaiting
   useEffect(() => {
-    if (step !== "awaiting") return;
+    if (step !== "awaiting" || !checkout) return;
     let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData?.user?.id;
       if (!uid || cancelled) return;
 
-      const channel = supabase
-        .channel(`token-purchase-${uid}`)
+      channel = supabase
+        .channel(`ltc-credit-${uid}`)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "token_purchases", filter: `user_id=eq.${uid}` },
@@ -45,33 +57,29 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             setCreditedTokens(credited);
             setStep("success");
             onPurchase(credited);
-            // Activity log: token purchase confirmed
-            import("@/lib/activityLog").then(({ logActivity }) =>
-              logActivity("tokens_purchased", `Received ${credited} tokens`, {
-                tokens: credited,
-                amount_usd: payload?.new?.amount_usd ?? null,
-                payment_id: payload?.new?.payment_id ?? null,
-              })
-            );
-            toast.success("Payment Received!", {
-              description: "Your Bitokens have been added to your vault.",
-            });
+            toast.success("Payment confirmed!", { description: `${credited} Bit-Tokens added.` });
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     })();
+
+    // Poll the verifier every 25s
+    const tick = () => {
+      supabase.functions.invoke("ltc-verify-payment", {
+        body: { payment_id: checkout.payment_id },
+      }).catch(() => {});
+    };
+    tick();
+    pollRef.current = window.setInterval(tick, 25000);
 
     return () => {
       cancelled = true;
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      if (channel) supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, checkout, tokens, onPurchase]);
 
-  const logConsent = async (method: "card" | "crypto", currency?: string) => {
+  const logConsent = async () => {
     try {
       let ip = "unknown";
       try {
@@ -82,63 +90,33 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         ip_address: ip,
         user_agent: navigator.userAgent,
         terms_version: "2.0",
-        consent_text: `[CHECKOUT] Buy Tokens via ${method}${currency ? ` (${currency.toUpperCase()})` : ""} — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.`,
+        consent_text: "[CHECKOUT] Buy Tokens via LTC — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.",
         consent_type: "checkout_consent",
       });
     } catch {}
   };
 
-  const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
-  const invoiceAmount = selectedOption === "bundle" ? BUNDLE_INVOICE_USD : TOKEN_INVOICE_USD;
-  const split = calculateTokenPurchaseSplit(invoiceAmount, tokens);
-
-  const handleCryptoPay = async (currency: string) => {
+  const handleStartCheckout = async () => {
     if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
-    await logConsent("crypto", currency);
-    setSelectedCrypto(currency);
+    await logConsent();
     setStep("processing");
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, pay_currency: currency },
+      const { data, error: fnError } = await supabase.functions.invoke("ltc-create-checkout", {
+        body: { amount_usd: invoiceAmount, tokens },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      setPaymentInfo({ pay_address: data.pay_address, pay_amount: data.pay_amount, pay_currency: data.pay_currency, payment_id: data.payment_id });
+      setCheckout(data as Checkout);
       setStep("awaiting");
-      // DO NOT credit tokens here — IPN webhook handles balance updates
     } catch (err: any) {
-      setError(err.message || "Payment failed. Please try again.");
+      setError(err.message || "Checkout failed. Please try again.");
       setStep("payment");
     }
   };
 
-  const handleCardPay = async () => {
-    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
-    await logConsent("card");
-    setStep("processing");
-    setError(null);
-    const toastId = toast.loading("Opening secure card checkout…", {
-      description: "Don't close this tab — it will redirect when ready.",
-      duration: Infinity,
-    });
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("create-payment", {
-        body: { amount_usd: invoiceAmount, tokens, is_fiat: true },
-      });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-      if (data?.invoice_url) {
-        setInvoiceUrl(data.invoice_url);
-        window.open(data.invoice_url, "_blank");
-      }
-      setStep("awaiting");
-      toast.success("Checkout opened in new tab", { id: toastId });
-    } catch (err: any) {
-      toast.error("Card payment failed", { id: toastId, description: err.message });
-      setError(err.message || "Card payment failed. Please try again.");
-      setStep("payment");
-    }
+  const copy = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); toast.success("Copied"); } catch {}
   };
 
   return (
@@ -151,7 +129,6 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
 
         {step === "select" && (
           <div className="p-4 space-y-3">
-            {/* Single Token */}
             <button
               onClick={() => setSelectedOption("single")}
               className={`w-full text-left rounded-xl p-4 border-2 transition-all ${selectedOption === "single" ? "border-primary bg-primary/5" : "border-border bg-secondary/50"}`}
@@ -163,12 +140,9 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
                 </div>
                 <span className="text-lg font-bold text-primary">${TOKEN_INVOICE_USD}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-11">
-                $1 platform fee + ${TOKEN_BASE_VALUE_USD} base
-              </p>
+              <p className="text-[10px] text-muted-foreground mt-1 ml-11">$1 platform fee + ${TOKEN_BASE_VALUE_USD} base</p>
             </button>
 
-            {/* Bundle */}
             <button
               onClick={() => setSelectedOption("bundle")}
               className={`w-full text-left rounded-xl p-4 border-2 transition-all relative overflow-hidden ${selectedOption === "bundle" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
@@ -177,36 +151,19 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
-                  <div>
-                    <span className="font-semibold text-foreground">{BUNDLE_TOKENS} Bit-Tokens</span>
-                  </div>
+                  <span className="font-semibold text-foreground">{BUNDLE_TOKENS} Bit-Tokens</span>
                 </div>
                 <span className="text-lg font-bold text-primary">${BUNDLE_INVOICE_USD}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-11">
-                $1 platform fee + ${BUNDLE_BASE_USD} base
-              </p>
+              <p className="text-[10px] text-muted-foreground mt-1 ml-11">$1 platform fee + ${BUNDLE_BASE_USD} base</p>
             </button>
 
-            {/* Revenue breakdown */}
             <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
               <p className="text-[10px] font-bold text-muted-foreground tracking-wider">REVENUE BREAKDOWN</p>
-              <div className="flex justify-between text-[10px]">
-                <span className="text-muted-foreground">Admin Fee</span>
-                <span className="text-primary font-bold">${split.adminFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[10px]">
-                <span className="text-muted-foreground">Platform ({PLATFORM_SPLIT_PERCENT}%)</span>
-                <span className="text-foreground">${split.platformShare.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[10px]">
-                <span className="text-muted-foreground">Creator ({CREATOR_SPLIT_PERCENT}%)</span>
-                <span className="text-foreground">${split.creatorShare.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[10px] border-t border-border pt-1 font-bold">
-                <span className="text-muted-foreground">Your Total Revenue</span>
-                <span className="text-primary">${split.totalPlatformRevenue.toFixed(2)}</span>
-              </div>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Admin Fee</span><span className="text-primary font-bold">${split.adminFee.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Platform ({PLATFORM_SPLIT_PERCENT}%)</span><span className="text-foreground">${split.platformShare.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Creator ({CREATOR_SPLIT_PERCENT}%)</span><span className="text-foreground">${split.creatorShare.toFixed(2)}</span></div>
+              <div className="flex justify-between text-[10px] border-t border-border pt-1 font-bold"><span className="text-muted-foreground">Your Total Revenue</span><span className="text-primary">${split.totalPlatformRevenue.toFixed(2)}</span></div>
             </div>
 
             <Button variant="neon" className="w-full mt-4" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT</Button>
@@ -215,52 +172,29 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
 
         {step === "payment" && (
           <div className="p-4 space-y-4">
-            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">SELECT PAYMENT METHOD</h3>
+            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">PAY WITH LITECOIN (LTC)</h3>
             {error && (
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-destructive">{error}</p>
               </div>
             )}
-            <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">PAY WITH CRYPTO — SETTLES IN LTC</p>
-              <div className="grid grid-cols-3 gap-2">
-                {["ltc", "btc", "eth"].map((coin) => (
-                  <button
-                    key={coin}
-                    disabled={!consentChecked}
-                    onClick={() => handleCryptoPay(coin)}
-                    className={`rounded-xl p-3 text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                      coin === "ltc"
-                        ? "bg-primary/10 border-2 border-primary hover:bg-primary/20 neon-glow-sm"
-                        : "bg-secondary border border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
-                    {coin === "ltc" && (
-                      <p className="text-[9px] text-primary font-bold mt-0.5">RECOMMENDED</p>
-                    )}
-                  </button>
-                ))}
-              </div>
+
+            <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
+              <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYMENT METHOD</p>
+              <p className="text-2xl font-bold text-primary">LTC</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Litecoin — fast & low fees</p>
             </div>
-            <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD PAYMENTS</p>
-              <div className="w-full bg-secondary/30 border border-dashed border-border rounded-xl p-4 text-center opacity-70">
-                <p className="text-sm font-bold text-muted-foreground mb-1">CREDIT / DEBIT CARD</p>
-                <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
-              </div>
+
+            <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center opacity-70">
+              <p className="text-sm font-bold text-muted-foreground">CREDIT / DEBIT CARD</p>
+              <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
             </div>
+
             <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-              <p className="text-[10px] text-muted-foreground">
-                All payments settle in <span className="text-primary font-bold">LTC (Litecoin)</span>. Network & processor fees apply and are shown at checkout.
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                Crypto values are volatile and transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final — see Refund Policy.
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                By continuing you agree to our Terms, Privacy, Refund, AML/KYC and Risk Disclosure policies.
-              </p>
+              <p className="text-[10px] text-muted-foreground">All payments settle directly to our LTC wallet. Network fees apply.</p>
+              <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final.</p>
             </div>
+
             <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -269,11 +203,13 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
                 className="mt-0.5 w-4 h-4 accent-primary shrink-0"
               />
               <span className="text-[10px] text-muted-foreground leading-relaxed">
-                I confirm I am 18+, the funds are mine and lawful, and I have read and accept the
+                I confirm I am 18+, the funds are mine and lawful, and I accept the
                 <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
-                I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span> and all sales are final.
+                I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span>.
               </span>
             </label>
+
+            <Button variant="neon" className="w-full" disabled={!consentChecked} onClick={handleStartCheckout}>GENERATE PAYMENT</Button>
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>
         )}
@@ -281,43 +217,52 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         {step === "processing" && (
           <div className="p-8 text-center space-y-4">
             <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">PROCESSING</h3>
-            <p className="text-sm text-muted-foreground">
-              {selectedCrypto ? `Creating ${selectedCrypto.toUpperCase()} payment...` : "Connecting to payment gateway..."}
-            </p>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">GENERATING CHECKOUT</h3>
+            <p className="text-sm text-muted-foreground">Fetching live LTC rate…</p>
           </div>
         )}
 
-        {step === "awaiting" && (
-          <div className="p-6 text-center space-y-4">
+        {step === "awaiting" && checkout && (
+          <div className="p-5 text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center mx-auto">
               <Clock className="w-8 h-8 text-gold" />
             </div>
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">AWAITING PAYMENT</h3>
-            <p className="text-sm text-muted-foreground">
-              Your tokens will be credited automatically once the payment is confirmed by the network.
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">SEND LITECOIN</h3>
+            <p className="text-xs text-muted-foreground">
+              Send the <span className="text-foreground font-bold">exact</span> amount below. Tokens credit automatically once the transaction appears on the Litecoin network.
             </p>
 
-            {paymentInfo && (
-              <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-2 text-left">
-                <p className="text-[10px] font-bold text-muted-foreground tracking-wider">SEND EXACTLY:</p>
-                <p className="text-sm font-bold text-primary text-center">{paymentInfo.pay_amount} {paymentInfo.pay_currency.toUpperCase()}</p>
-                <p className="text-[10px] font-bold text-muted-foreground tracking-wider">TO ADDRESS:</p>
-                <p className="text-[10px] text-foreground font-mono break-all bg-background/50 rounded p-2 border border-border">{paymentInfo.pay_address}</p>
+            <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-3 text-left">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground tracking-wider mb-1">SEND EXACTLY</p>
+                <div className="flex items-center justify-between bg-background/50 rounded p-2 border border-border">
+                  <p className="text-base font-bold text-primary font-mono">{checkout.ltc_amount.toFixed(8)} LTC</p>
+                  <button onClick={() => copy(checkout.ltc_amount.toFixed(8))} className="text-muted-foreground hover:text-foreground"><Copy className="w-4 h-4" /></button>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">≈ ${invoiceAmount} USD @ ${checkout.ltc_price_usd.toFixed(2)}/LTC</p>
               </div>
-            )}
 
-            {invoiceUrl && (
-              <a href={invoiceUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="neon" size="sm" className="w-full">OPEN PAYMENT PAGE</Button>
-              </a>
-            )}
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground tracking-wider mb-1">TO ADDRESS</p>
+                <div className="flex items-start justify-between gap-2 bg-background/50 rounded p-2 border border-border">
+                  <p className="text-[10px] text-foreground font-mono break-all">{checkout.ltc_address}</p>
+                  <button onClick={() => copy(checkout.ltc_address)} className="text-muted-foreground hover:text-foreground shrink-0"><Copy className="w-4 h-4" /></button>
+                </div>
+              </div>
+
+              <div className="flex justify-center pt-1">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`litecoin:${checkout.ltc_address}?amount=${checkout.ltc_amount.toFixed(8)}`)}`}
+                  alt="LTC QR Code"
+                  className="rounded border border-border bg-background p-1"
+                />
+              </div>
+            </div>
 
             <div className="bg-gold/5 border border-gold/20 rounded-lg p-3">
-              <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ SECURE VERIFICATION</p>
+              <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ AUTO-VERIFICATION</p>
               <p className="text-[10px] text-muted-foreground">
-                Tokens are credited only after cryptographic signature verification via our IPN webhook.
-                Status: <span className="text-primary font-bold">finished</span> or <span className="text-primary font-bold">partially_paid</span>.
+                We monitor the LTC blockchain every 25 seconds. Tokens credit automatically when your exact-amount payment is detected. Checkout expires in 2 hours.
               </p>
             </div>
 
