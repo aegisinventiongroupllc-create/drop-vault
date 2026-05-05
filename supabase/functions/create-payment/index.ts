@@ -56,8 +56,6 @@ Deno.serve(async (req) => {
       order_description: `${tokens} Bit-Token${tokens > 1 ? 's' : ''} - DropThatThing`,
       is_fixed_rate: true,
       is_fee_paid_by_user: true,
-      // Force all settlements to LTC regardless of input currency
-      outcome_currency: 'ltc',
     };
 
     // For fiat on-ramp (card payments), use the invoice endpoint
@@ -75,8 +73,6 @@ Deno.serve(async (req) => {
           order_description: paymentBody.order_description,
           is_fixed_rate: true,
           is_fee_paid_by_user: true,
-          // Force outcome to LTC
-          outcome_currency: 'ltc',
         }),
       });
 
