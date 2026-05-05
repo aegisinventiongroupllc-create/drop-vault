@@ -228,9 +228,16 @@ const DmcaTakedown = () => {
     }
     setSubmitting(true);
     const { error } = await supabase.from("dmca_requests").insert({
-      ...parsed.data,
+      complainant_name: parsed.data.complainant_name,
+      complainant_email: parsed.data.complainant_email,
       complainant_address: parsed.data.complainant_address || null,
       complainant_phone: parsed.data.complainant_phone || null,
+      copyright_owner: parsed.data.copyright_owner,
+      original_work_description: parsed.data.original_work_description,
+      infringing_urls: parsed.data.infringing_urls,
+      signature: parsed.data.signature,
+      good_faith_statement: parsed.data.good_faith_statement,
+      accuracy_statement: parsed.data.accuracy_statement,
       user_agent: navigator.userAgent.slice(0, 500),
     });
     setSubmitting(false);
