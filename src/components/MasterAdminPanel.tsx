@@ -7,6 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
+import AdminVerifications from "@/components/AdminVerifications";
 import {
   canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
@@ -243,49 +244,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Creator Verification Queue */}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Shield className="w-5 h-5 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Creator Verification Queue</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">Review uploaded identity & age documents</p>
-            {queue.length === 0 && (
-              <div className="py-8 text-center text-sm text-muted-foreground">No pending verifications — clean slate for launch.</div>
-            )}
-            <div className="space-y-3">
-              {queue.map((item) => (
-                <div key={item.id} className="border border-border rounded-xl p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{item.creator}</p>
-                      <p className="text-xs text-muted-foreground">{item.docType} • {item.submitted}</p>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
-                        item.side === "Women" ? "bg-pink-500/10 text-pink-400 border border-pink-400/20" : "bg-blue-500/10 text-blue-400 border border-blue-400/20"
-                      }`}>{item.side}</span>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      item.status === "pending" ? "bg-gold/10 text-gold border border-gold/30"
-                      : item.status === "approved" ? "bg-green-400/10 text-green-400 border border-green-400/30"
-                      : "bg-destructive/10 text-destructive border border-destructive/30"
-                    }`}>{item.status === "pending" ? "Pending" : item.status === "approved" ? "Approved" : "Rejected"}</span>
-                  </div>
-                  <div className="w-full h-20 rounded-lg bg-secondary/50 border border-border flex items-center justify-center mb-3">
-                    <p className="text-xs text-muted-foreground">Document Preview — {item.docType}</p>
-                  </div>
-                  {item.status === "pending" && (
-                    <div className="flex gap-2">
-                      <Button variant="neon" size="sm" className="flex-1 gap-1.5" onClick={() => handleVerification(item.id, "approved")}>
-                        <CheckCircle className="w-3.5 h-3.5" /> Approve
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => handleVerification(item.id, "rejected")}>
-                        <XCircle className="w-3.5 h-3.5" /> Reject
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <AdminVerifications />
         </div>
       )}
 
