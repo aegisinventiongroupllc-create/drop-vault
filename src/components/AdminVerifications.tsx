@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock, Lock, Mail } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface VerificationRow {
@@ -24,6 +25,7 @@ interface VerificationRow {
 
 const StatusFilter = ["pending", "approved", "rejected", "all"] as const;
 type Filter = typeof StatusFilter[number];
+const ADMIN_EMAIL = "dropthatthingmedia@gmail.com";
 
 const AdminVerifications = () => {
   const [rows, setRows] = useState<VerificationRow[]>([]);
@@ -35,13 +37,16 @@ const AdminVerifications = () => {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [adminEmail, setAdminEmail] = useState(ADMIN_EMAIL);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [authSubmitting, setAuthSubmitting] = useState(false);
 
   const ensureAdminAccess = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       setRows([]);
       setAccessStatus("signed-out");
-      setAccessMessage("Sign in with your DropThatThing admin account first, then reopen the admin panel.");
+      setAccessMessage("Cory Quel is saved as pending. Sign in below with the admin email account to view, approve, or reject ID submissions.");
       return false;
     }
 
@@ -62,6 +67,33 @@ const AdminVerifications = () => {
     setAccessStatus("allowed");
     setAccessMessage("");
     return true;
+  };
+
+  const signInAdmin = async () => {
+    const email = adminEmail.trim();
+    if (!email || !adminPassword) {
+      toast({ title: "Admin sign-in required", description: "Enter the admin email and password." });
+      return;
+    }
+
+    setAuthSubmitting(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password: adminPassword });
+    if (error) {
+      setAuthSubmitting(false);
+      toast({ title: "Admin sign-in failed", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    setAdminPassword("");
+    await load();
+    setAuthSubmitting(false);
+  };
+
+  const signOutAdmin = async () => {
+    await supabase.auth.signOut();
+    setRows([]);
+    setAccessStatus("signed-out");
+    setAccessMessage("Signed out. Sign in with the admin email account to review ID submissions.");
   };
 
   const load = async () => {
@@ -170,9 +202,47 @@ const AdminVerifications = () => {
             <p className="font-bold text-foreground tracking-wider">ADMIN SIGN-IN REQUIRED</p>
             <p className="text-sm text-muted-foreground mt-1">{accessMessage}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={load}>
-            <RefreshCw className="w-3.5 h-3.5 mr-2" /> RECHECK ACCESS
-          </Button>
+          {accessStatus === "signed-out" && (
+            <div className="space-y-2 max-w-sm mx-auto text-left">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  placeholder="Admin email"
+                  className="pl-9"
+                  autoComplete="email"
+                />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && signInAdmin()}
+                  placeholder="Admin password"
+                  className="pl-9"
+                  autoComplete="current-password"
+                />
+              </div>
+              <Button variant="neon" className="w-full" onClick={signInAdmin} disabled={authSubmitting}>
+                {authSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
+                SIGN IN & LOAD IDS
+              </Button>
+            </div>
+          )}
+          <div className="flex justify-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={load}>
+              <RefreshCw className="w-3.5 h-3.5 mr-2" /> RECHECK ACCESS
+            </Button>
+            {accessStatus === "not-admin" && (
+              <Button variant="outline" size="sm" onClick={signOutAdmin}>
+                SIGN OUT
+              </Button>
+            )}
+          </div>
         </Card>
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">No {filter === "all" ? "" : filter + " "}submissions.</Card>
