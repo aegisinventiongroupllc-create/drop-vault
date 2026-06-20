@@ -262,50 +262,77 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         </div>
       )}
 
-      {/* Media Grid */}
-      <CreatorMediaGrid />
-
-      {/* Vault Grid */}
+      {/* Full Library — unlock or watch */}
       <div className="px-4 mt-8">
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
-          Vault Collection
+          Full Library
+          <span className="text-xs text-muted-foreground font-normal">({vaultCount} {vaultCount === 1 ? "video" : "videos"})</span>
         </h3>
 
-        <div className="grid grid-cols-2 gap-3">
-          {VAULTS.map((vault) => (
-            <button
-              key={vault.name}
-              className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 transition-all group"
-            >
-              <div className="text-3xl mb-2">{vault.emoji}</div>
-              <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                {vault.name}
-              </h4>
-              <p className="text-xs text-muted-foreground mt-1">{vault.videoCount} videos</p>
-              <div className="mt-3 flex items-center gap-1.5">
-                <Lock className="w-3 h-3 text-primary" />
-                <span className="text-sm font-bold text-primary">{vault.price} Bit-Tokens</span>
+        {isUnlocked ? (
+          <>
+            <div className="bg-primary/10 border border-primary/40 rounded-xl px-4 py-3 mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold text-primary tracking-wider">UNLOCKED</span>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
+              <span className="text-[11px] text-muted-foreground">
+                {activeSub ? formatUnlockCountdown(new Date(activeSub.expires_at).getTime() - Date.now()) : ""} left
+              </span>
+            </div>
 
-      {/* Full Access Bundle */}
-      <div className="px-4 mt-6">
-        <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2">
-          <Sparkles className="w-5 h-5" />
-          6 Bit-Token Mega Pack
-        </Button>
-        <p className="text-center text-xs text-muted-foreground mt-2">
-          Unlock all {VAULTS.reduce((a, v) => a + v.videoCount, 0)} videos across {VAULTS.length} vaults
-        </p>
+            {vaultCount === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-6">This creator hasn't added any long-form videos yet.</p>
+            ) : vaultItems.length === 0 ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {vaultItems.map((v) => (
+                  <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
+                    {v.url ? (
+                      <video src={v.url} className="w-full aspect-video object-cover bg-black" controls playsInline preload="metadata" />
+                    ) : (
+                      <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
+                    )}
+                    <p className="text-xs font-semibold text-foreground p-2 truncate">{v.title}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking}>
+              {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              EXTEND +14 DAYS — 1 BIT-TOKEN
+            </Button>
+          </>
+        ) : (
+          <>
+            <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">
+              <Lock className="w-8 h-8 text-primary mx-auto mb-2" />
+              <p className="text-sm font-bold text-foreground">Pay 1 Bit-Token to unlock</p>
+              <p className="text-xs text-muted-foreground mt-1">14 days of full access to every long-form video from @{creatorName}.</p>
+            </div>
+            <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={handleUnlock} disabled={unlocking || !creatorId}>
+              {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+              UNLOCK FULL LIBRARY — 1 BIT-TOKEN
+            </Button>
+            <p className="text-center text-xs text-muted-foreground mt-2">
+              Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"} • 1 = 14 days
+            </p>
+          </>
+        )}
       </div>
 
       {/* Custom Request Modal */}
       {showRequest && (
         <CustomRequestModal creatorName={creatorName} onClose={() => setShowRequest(false)} />
+      )}
+      {showBuyModal && (
+        <BuyTokensModal
+          onClose={() => setShowBuyModal(false)}
+          onPurchaseComplete={() => { setShowBuyModal(false); refreshBalance(); }}
+        />
       )}
     </div>
   );
