@@ -13,6 +13,8 @@ import {
   type CreatorUnlock, type CustomRequest,
 } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
+import { supabase } from "@/integrations/supabase/client";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
