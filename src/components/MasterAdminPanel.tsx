@@ -15,6 +15,7 @@ import {
 
 const ADMIN_PASSWORD = "052417";
 export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
+export const ADMIN_PASSCODE_KEY = "dtt_admin_passcode";
 
 interface CreatorRow {
   user_id: string;
@@ -124,6 +125,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       setError(false);
       // Grant admin override across the app — free vault access, bypass age/safety gates
       try { localStorage.setItem(ADMIN_OVERRIDE_KEY, "1"); } catch {}
+      try { sessionStorage.setItem(ADMIN_PASSCODE_KEY, password); } catch {}
       fetchLiveCreators();
     } else {
       setError(true);
