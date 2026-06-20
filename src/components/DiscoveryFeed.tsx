@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
 import LegalFooter from "@/components/LegalFooter";
+import { supabase } from "@/integrations/supabase/client";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 
@@ -19,6 +20,7 @@ interface VideoItem {
   color: string;
   vault: VaultType;
   country: string;
+  videoUrl?: string;
 }
 
 // Production launch — empty until real creators sign up
@@ -41,6 +43,8 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   const [comments, setComments] = useState<{ user: string; text: string }[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isRealTeaser = !!video.videoUrl;
 
   // Check if already bookmarked
   useEffect(() => {
@@ -59,6 +63,8 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   }, []);
 
   useEffect(() => {
+    // Real teasers from creators are free in full — no paywall countdown
+    if (isRealTeaser) return;
     if (!isVisible || locked) return;
     const interval = setInterval(() => {
       setSeconds((s) => {
@@ -67,7 +73,18 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isVisible, locked]);
+  }, [isVisible, locked, isRealTeaser]);
+
+  // Play/pause the real teaser video based on viewport visibility
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isVisible) { v.play().catch(() => {}); } else { v.pause(); }
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted]);
 
   const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
 
@@ -109,21 +126,34 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   return (
     <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
-      {isVisible && (
+      {isRealTeaser && (
+        <video
+          ref={videoRef}
+          src={video.videoUrl}
+          className="absolute inset-0 w-full h-full object-cover"
+          loop
+          playsInline
+          muted={muted}
+          preload="metadata"
+        />
+      )}
+      {isVisible && !isRealTeaser && (
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-6xl font-display text-foreground/5 tracking-widest select-none">▶</div>
           </div>
         </div>
       )}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted">
-        <div className="h-full bg-primary transition-all duration-1000 neon-glow-sm" style={{ width: `${(seconds / 15) * 100}%` }} />
-      </div>
+      {!isRealTeaser && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted">
+          <div className="h-full bg-primary transition-all duration-1000 neon-glow-sm" style={{ width: `${(seconds / 15) * 100}%` }} />
+        </div>
+      )}
       <button onClick={() => setMuted(!muted)} className="absolute bottom-24 left-3 z-20 w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-foreground active:scale-95 transition-transform">
         {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
       </button>
 
-      {locked && (
+      {locked && !isRealTeaser && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/60 backdrop-blur-xl">
           <Lock className="w-12 h-12 text-primary animate-pulse-glow" />
           <h3 className="text-xl font-semibold text-foreground">Preview ended</h3>
@@ -216,7 +246,55 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
   );
 });
 const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string }) => {
-  const filteredVideos = MOCK_VIDEOS.filter(v => {
+  const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: media } = await supabase
+        .from("creator_media")
+        .select("id, creator_id, storage_path, title")
+        .eq("bucket", "teasers")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (!media || cancelled) return;
+      const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, country")
+        .in("user_id", creatorIds);
+      const profMap: Record<string, { name: string; country: string }> = {};
+      profs?.forEach((p) => {
+        profMap[p.user_id] = {
+          name: p.display_name || "creator",
+          country: p.country || "GLOBAL",
+        };
+      });
+      const items: VideoItem[] = media.map((m) => {
+        const { data: pub } = supabase.storage.from("teasers").getPublicUrl(m.storage_path);
+        const prof = profMap[m.creator_id];
+        const name = prof?.name || "creator";
+        return {
+          id: m.id,
+          creator: name,
+          creatorAvatar: name.charAt(0).toUpperCase(),
+          title: m.title || "Teaser",
+          description: "",
+          likes: 0,
+          comments: 0,
+          color: "from-primary/20 to-background",
+          vault,
+          country: prof?.country || "GLOBAL",
+          videoUrl: pub.publicUrl,
+        };
+      });
+      if (!cancelled) setLiveVideos(items);
+    })();
+    return () => { cancelled = true; };
+  }, [vault]);
+
+  const allVideos = [...liveVideos, ...MOCK_VIDEOS];
+  const filteredVideos = allVideos.filter(v => {
     if (v.vault !== vault) return false;
     if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
     if (searchQuery && searchQuery.trim()) {
