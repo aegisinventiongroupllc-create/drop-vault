@@ -26,27 +26,11 @@ function saveAutorenew(map: Record<string, boolean>) {
   localStorage.setItem(AUTORENEW_KEY, JSON.stringify(map));
 }
 
-const MOCK_UNLOCKS: CreatorUnlock[] = [
-  { creatorId: "1", creatorName: "LunaCosplay", unlockedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 12 * 24 * 60 * 60 * 1000 },
-  { creatorId: "2", creatorName: "FitJessie", unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 4 * 24 * 60 * 60 * 1000 },
-  { creatorId: "3", creatorName: "BlondieVibes", unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, expiresAt: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-  { creatorId: "4", creatorName: "AlphaKing", unlockedAt: Date.now() - 3 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 11 * 24 * 60 * 60 * 1000 },
-  { creatorId: "5", creatorName: "MaxFitness", unlockedAt: Date.now() - 13 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 18 * 60 * 60 * 1000 },
-];
-
 const MY_REQUESTS: CustomRequest[] = [
   { id: "r1", creatorName: "LunaCosplay", description: "Custom cosplay photoshoot", amountUsd: 500, totalTokens: 26, status: "accepted", createdAt: Date.now() - 86400000 },
   { id: "r2", creatorName: "FitJessie", description: "Exclusive workout video", amountUsd: 250, totalTokens: 13.5, status: "pending", createdAt: Date.now() - 43200000 },
   { id: "r3", creatorName: "BlondieVibes", description: "Behind the scenes content", amountUsd: 100, totalTokens: 6, status: "declined", createdAt: Date.now() - 172800000 },
 ];
-
-const CREATOR_GENDER: Record<string, "women" | "men"> = {
-  "LunaCosplay": "women",
-  "FitJessie": "women",
-  "BlondieVibes": "women",
-  "AlphaKing": "men",
-  "MaxFitness": "men",
-};
 
 interface MemberDashboardProps {
   balance: number;
