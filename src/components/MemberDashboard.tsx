@@ -49,6 +49,25 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
 
   const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
   const { toast } = useToast();
+  const { subs } = useSubscriptions();
+  const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
+
+  useEffect(() => {
+    const ids = Array.from(new Set(subs.map((s) => s.creator_id)));
+    if (ids.length === 0) { setGenderMap({}); return; }
+    let cancel = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, vault_side")
+        .in("user_id", ids);
+      if (cancel || !data) return;
+      const map: Record<string, "women" | "men"> = {};
+      data.forEach((p: any) => { map[p.user_id] = (p.vault_side === "men" ? "men" : "women"); });
+      setGenderMap(map);
+    })();
+    return () => { cancel = true; };
+  }, [subs]);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
@@ -101,9 +120,16 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     });
   };
 
-  const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
-  const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
-  const myGuys = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "men");
+  const activeUnlocks: CreatorUnlock[] = subs
+    .filter((s) => s.status === "active" && new Date(s.expires_at) > new Date())
+    .map((s) => ({
+      creatorId: s.creator_id,
+      creatorName: s.creator_name || "creator",
+      unlockedAt: new Date(s.started_at).getTime(),
+      expiresAt: new Date(s.expires_at).getTime(),
+    }));
+  const myGirls = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "women");
+  const myGuys  = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "men");
 
   const hasUnlocks = activeUnlocks.length > 0;
 
