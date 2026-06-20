@@ -1,10 +1,16 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera, Heart, DollarSign } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
 import CustomRequestModal from "@/components/CustomRequestModal";
 import { ADMIN_FEE_USD } from "@/lib/tokenEconomy";
+import { supabase } from "@/integrations/supabase/client";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
+import { toast } from "@/hooks/use-toast";
+import BuyTokensModal from "@/components/BuyTokensModal";
+import { formatUnlockCountdown } from "@/lib/tokenEconomy";
 
 interface Vault {
   name: string;
@@ -12,15 +18,6 @@ interface Vault {
   price: number;
   emoji: string;
 }
-
-const VAULTS: Vault[] = [
-  { name: "Cosplay Vault", videoCount: 24, price: 5, emoji: "🎭" },
-  { name: "Gym Sessions", videoCount: 18, price: 10, emoji: "💪" },
-  { name: "Behind the Scenes", videoCount: 32, price: 5, emoji: "🎬" },
-  { name: "Exclusive Shoots", videoCount: 12, price: 15, emoji: "📸" },
-  { name: "Daily Vlogs", videoCount: 45, price: 3, emoji: "🌟" },
-  { name: "Collabs", videoCount: 8, price: 10, emoji: "🤝" },
-];
 
 const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: () => void }) => {
   const [showRequest, setShowRequest] = useState(false);
@@ -30,6 +27,86 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
   const [tipSent, setTipSent] = useState(false);
   const [tipNotification, setTipNotification] = useState<string | null>(null);
+
+  const [creatorId, setCreatorId] = useState<string | null>(null);
+  const [vaultCount, setVaultCount] = useState<number>(0);
+  const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
+  const [unlocking, setUnlocking] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const { balance, refresh: refreshBalance } = useTokenBalance();
+  const { subs, refresh: refreshSubs } = useSubscriptions();
+
+  // Resolve creator by display_name
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("display_name", creatorName)
+        .limit(1)
+        .maybeSingle();
+      if (!cancel) setCreatorId(data?.user_id ?? null);
+    })();
+    return () => { cancel = true; };
+  }, [creatorName]);
+
+  // Public vault count (so locked users still see how many videos are inside)
+  useEffect(() => {
+    if (!creatorId) return;
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("creator_media")
+        .select("id", { count: "exact", head: true })
+        .eq("creator_id", creatorId)
+        .eq("bucket", "vault");
+      if (!cancel) setVaultCount(count ?? 0);
+    })();
+    return () => { cancel = true; };
+  }, [creatorId]);
+
+  const activeSub = creatorId
+    ? subs.find((s) => s.creator_id === creatorId && s.status === "active" && new Date(s.expires_at) > new Date())
+    : undefined;
+  const isUnlocked = !!activeSub;
+
+  // Fetch unlocked vault items via edge function
+  useEffect(() => {
+    if (!isUnlocked || !creatorId) { setVaultItems([]); return; }
+    let cancel = false;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("vault-media", { body: { creator_id: creatorId } });
+      if (!cancel && !error && data?.items) setVaultItems(data.items);
+    })();
+    return () => { cancel = true; };
+  }, [isUnlocked, creatorId]);
+
+  const handleUnlock = async () => {
+    if (!creatorId) {
+      toast({ title: "Creator not found", description: "We couldn't find this creator's account.", variant: "destructive" });
+      return;
+    }
+    if (balance < 1) {
+      toast({ title: "Need Bit-Tokens", description: "Buy at least 1 Bit-Token to unlock 14 days of access." });
+      setShowBuyModal(true);
+      return;
+    }
+    setUnlocking(true);
+    const { error } = await supabase.rpc("unlock_creator", { _creator_id: creatorId });
+    setUnlocking(false);
+    if (error) {
+      if (error.message?.includes("INSUFFICIENT_TOKENS")) {
+        toast({ title: "Not enough Bit-Tokens", description: "Top up to unlock 14 days of access." });
+        setShowBuyModal(true);
+      } else {
+        toast({ title: "Unlock failed", description: error.message, variant: "destructive" });
+      }
+      return;
+    }
+    await Promise.all([refreshBalance(), refreshSubs()]);
+    toast({ title: `Unlocked @${creatorName} ✓`, description: "14 days of full library access added." });
+  };
 
   const TIP_AMOUNTS = [5, 10, 20, 50, 100];
 
