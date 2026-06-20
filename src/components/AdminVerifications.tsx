@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock, Lock, Mail } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { ADMIN_PASSCODE_KEY } from "@/components/MasterAdminPanel";
 
 interface VerificationRow {
   id: string;
@@ -25,104 +25,37 @@ interface VerificationRow {
 
 const StatusFilter = ["pending", "approved", "rejected", "all"] as const;
 type Filter = typeof StatusFilter[number];
-const ADMIN_EMAIL = "dropthatthingmedia@gmail.com";
 
 const AdminVerifications = () => {
   const [rows, setRows] = useState<VerificationRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [accessStatus, setAccessStatus] = useState<"checking" | "allowed" | "signed-out" | "not-admin">("checking");
-  const [accessMessage, setAccessMessage] = useState("");
   const [filter, setFilter] = useState<Filter>("pending");
   const [open, setOpen] = useState<VerificationRow | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [adminEmail, setAdminEmail] = useState(ADMIN_EMAIL);
-  const [adminPassword, setAdminPassword] = useState("");
-  const [authSubmitting, setAuthSubmitting] = useState(false);
 
-  const ensureAdminAccess = async () => {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      setRows([]);
-      setAccessStatus("signed-out");
-      setAccessMessage("Cory Quel is saved as pending. Sign in below with the admin email account to view, approve, or reject ID submissions.");
-      return false;
-    }
-
-    const { data: role, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (roleError || !role) {
-      setRows([]);
-      setAccessStatus("not-admin");
-      setAccessMessage(`Signed in as ${user.email ?? "this account"}, but this account does not have admin approval access.`);
-      return false;
-    }
-
-    setAccessStatus("allowed");
-    setAccessMessage("");
-    return true;
+  const getPasscode = () => {
+    try { return sessionStorage.getItem(ADMIN_PASSCODE_KEY) ?? ""; } catch { return ""; }
   };
 
-  const signInAdmin = async () => {
-    const email = adminEmail.trim();
-    if (!email || !adminPassword) {
-      toast({ title: "Admin sign-in required", description: "Enter the admin email and password." });
-      return;
-    }
-
-    setAuthSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password: adminPassword });
-    if (error) {
-      setAuthSubmitting(false);
-      toast({ title: "Admin sign-in failed", description: error.message, variant: "destructive" });
-      return;
-    }
-
-    setAdminPassword("");
-    await load();
-    setAuthSubmitting(false);
-  };
-
-  const signOutAdmin = async () => {
-    await supabase.auth.signOut();
-    setRows([]);
-    setAccessStatus("signed-out");
-    setAccessMessage("Signed out. Sign in with the admin email account to review ID submissions.");
+  const callAdmin = async (body: Record<string, unknown>) => {
+    const passcode = getPasscode();
+    return await supabase.functions.invoke("admin-verifications", {
+      body,
+      headers: { "x-admin-passcode": passcode },
+    });
   };
 
   const load = async () => {
     setLoading(true);
-    const allowed = await ensureAdminAccess();
-    if (!allowed) {
+    const { data, error } = await callAdmin({ action: "list", filter });
+    if (error || (data as any)?.error) {
+      toast({ title: "Failed to load verifications", description: error?.message || (data as any)?.error });
       setLoading(false);
       return;
     }
-    let q = supabase.from("creator_verifications")
-      .select("*")
-      .order("submitted_at", { ascending: false });
-    if (filter !== "all") q = q.eq("status", filter);
-    const { data, error } = await q;
-    if (error) {
-      toast({ title: "Failed to load verifications", description: error.message });
-      setLoading(false);
-      return;
-    }
-    const userIds = Array.from(new Set((data || []).map((r) => r.user_id)));
-    let profMap: Record<string, { email: string | null; display_name: string | null }> = {};
-    if (userIds.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("user_id, email, display_name")
-        .in("user_id", userIds);
-      profs?.forEach((p) => { profMap[p.user_id] = { email: p.email, display_name: p.display_name }; });
-    }
-    setRows((data || []).map((r) => ({ ...r, email: profMap[r.user_id]?.email, display_name: profMap[r.user_id]?.display_name })));
+    setRows(((data as any)?.rows ?? []) as VerificationRow[]);
     setLoading(false);
   };
 
@@ -133,14 +66,12 @@ const AdminVerifications = () => {
     setNotes(row.reviewer_notes ?? "");
     setSignedUrls({});
     const paths = [row.id_front_path, row.id_back_path, row.selfie_path];
-    const { data, error } = await supabase.storage.from("id-verifications").createSignedUrls(paths, 60 * 30);
-    if (error || !data) {
-      toast({ title: "Couldn't load images", description: error?.message });
+    const { data, error } = await callAdmin({ action: "signed_urls", paths });
+    if (error || (data as any)?.error) {
+      toast({ title: "Couldn't load images", description: error?.message || (data as any)?.error });
       return;
     }
-    const map: Record<string, string> = {};
-    data.forEach((d, i) => { if (d.signedUrl) map[paths[i]] = d.signedUrl; });
-    setSignedUrls(map);
+    setSignedUrls(((data as any)?.urls ?? {}) as Record<string, string>);
   };
 
   const decide = async (status: "approved" | "rejected") => {
@@ -150,21 +81,15 @@ const AdminVerifications = () => {
       return;
     }
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setSaving(false);
-      toast({ title: "Admin sign-in required", description: "Sign in with your admin account before approving or rejecting IDs." });
-      return;
-    }
-    const { error } = await supabase.from("creator_verifications").update({
+    const { data, error } = await callAdmin({
+      action: "decide",
+      id: open.id,
       status,
-      reviewer_notes: notes.trim() || null,
-      reviewer_id: user?.id ?? null,
-      reviewed_at: new Date().toISOString(),
-    }).eq("id", open.id);
+      notes: notes.trim() || null,
+    });
     setSaving(false);
-    if (error) {
-      toast({ title: "Save failed", description: error.message });
+    if (error || (data as any)?.error) {
+      toast({ title: "Save failed", description: error?.message || (data as any)?.error });
       return;
     }
     toast({ title: status === "approved" ? "Creator approved ✓" : "Creator rejected" });
@@ -195,55 +120,6 @@ const AdminVerifications = () => {
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-      ) : accessStatus !== "allowed" ? (
-        <Card className="p-6 text-center space-y-3">
-          <ShieldCheck className="w-8 h-8 text-primary mx-auto" />
-          <div>
-            <p className="font-bold text-foreground tracking-wider">ADMIN SIGN-IN REQUIRED</p>
-            <p className="text-sm text-muted-foreground mt-1">{accessMessage}</p>
-          </div>
-          {accessStatus === "signed-out" && (
-            <div className="space-y-2 max-w-sm mx-auto text-left">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="Admin email"
-                  className="pl-9"
-                  autoComplete="email"
-                />
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && signInAdmin()}
-                  placeholder="Admin password"
-                  className="pl-9"
-                  autoComplete="current-password"
-                />
-              </div>
-              <Button variant="neon" className="w-full" onClick={signInAdmin} disabled={authSubmitting}>
-                {authSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
-                SIGN IN & LOAD IDS
-              </Button>
-            </div>
-          )}
-          <div className="flex justify-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={load}>
-              <RefreshCw className="w-3.5 h-3.5 mr-2" /> RECHECK ACCESS
-            </Button>
-            {accessStatus === "not-admin" && (
-              <Button variant="outline" size="sm" onClick={signOutAdmin}>
-                SIGN OUT
-              </Button>
-            )}
-          </div>
-        </Card>
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">No {filter === "all" ? "" : filter + " "}submissions.</Card>
       ) : (
