@@ -331,7 +331,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       {showBuyModal && (
         <BuyTokensModal
           onClose={() => setShowBuyModal(false)}
-          onPurchaseComplete={() => { setShowBuyModal(false); refreshBalance(); }}
+          onPurchase={() => { setShowBuyModal(false); refreshBalance(); }}
         />
       )}
     </div>
