@@ -13,6 +13,8 @@ import {
   type CreatorUnlock, type CustomRequest,
 } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
+import { supabase } from "@/integrations/supabase/client";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
@@ -24,27 +26,11 @@ function saveAutorenew(map: Record<string, boolean>) {
   localStorage.setItem(AUTORENEW_KEY, JSON.stringify(map));
 }
 
-const MOCK_UNLOCKS: CreatorUnlock[] = [
-  { creatorId: "1", creatorName: "LunaCosplay", unlockedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 12 * 24 * 60 * 60 * 1000 },
-  { creatorId: "2", creatorName: "FitJessie", unlockedAt: Date.now() - 10 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 4 * 24 * 60 * 60 * 1000 },
-  { creatorId: "3", creatorName: "BlondieVibes", unlockedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, expiresAt: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-  { creatorId: "4", creatorName: "AlphaKing", unlockedAt: Date.now() - 3 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 11 * 24 * 60 * 60 * 1000 },
-  { creatorId: "5", creatorName: "MaxFitness", unlockedAt: Date.now() - 13 * 24 * 60 * 60 * 1000, expiresAt: Date.now() + 18 * 60 * 60 * 1000 },
-];
-
 const MY_REQUESTS: CustomRequest[] = [
   { id: "r1", creatorName: "LunaCosplay", description: "Custom cosplay photoshoot", amountUsd: 500, totalTokens: 26, status: "accepted", createdAt: Date.now() - 86400000 },
   { id: "r2", creatorName: "FitJessie", description: "Exclusive workout video", amountUsd: 250, totalTokens: 13.5, status: "pending", createdAt: Date.now() - 43200000 },
   { id: "r3", creatorName: "BlondieVibes", description: "Behind the scenes content", amountUsd: 100, totalTokens: 6, status: "declined", createdAt: Date.now() - 172800000 },
 ];
-
-const CREATOR_GENDER: Record<string, "women" | "men"> = {
-  "LunaCosplay": "women",
-  "FitJessie": "women",
-  "BlondieVibes": "women",
-  "AlphaKing": "men",
-  "MaxFitness": "men",
-};
 
 interface MemberDashboardProps {
   balance: number;
@@ -63,6 +49,25 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
 
   const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
   const { toast } = useToast();
+  const { subs } = useSubscriptions();
+  const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
+
+  useEffect(() => {
+    const ids = Array.from(new Set(subs.map((s) => s.creator_id)));
+    if (ids.length === 0) { setGenderMap({}); return; }
+    let cancel = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, vault_side")
+        .in("user_id", ids);
+      if (cancel || !data) return;
+      const map: Record<string, "women" | "men"> = {};
+      data.forEach((p: any) => { map[p.user_id] = (p.vault_side === "men" ? "men" : "women"); });
+      setGenderMap(map);
+    })();
+    return () => { cancel = true; };
+  }, [subs]);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
@@ -115,9 +120,16 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     });
   };
 
-  const activeUnlocks = MOCK_UNLOCKS.filter(u => isUnlockActive(u));
-  const myGirls = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "women");
-  const myGuys = activeUnlocks.filter(u => CREATOR_GENDER[u.creatorName] === "men");
+  const activeUnlocks: CreatorUnlock[] = subs
+    .filter((s) => s.status === "active" && new Date(s.expires_at) > new Date())
+    .map((s) => ({
+      creatorId: s.creator_id,
+      creatorName: s.creator_name || "creator",
+      unlockedAt: new Date(s.started_at).getTime(),
+      expiresAt: new Date(s.expires_at).getTime(),
+    }));
+  const myGirls = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "women");
+  const myGuys  = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "men");
 
   const hasUnlocks = activeUnlocks.length > 0;
 

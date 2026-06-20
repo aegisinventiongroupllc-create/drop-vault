@@ -428,6 +428,7 @@ export type Database = {
           role_chosen: boolean
           updated_at: string
           user_id: string
+          vault_side: string
           verification_reviewed_at: string | null
           verification_reviewer_notes: string | null
           verification_status: string
@@ -447,6 +448,7 @@ export type Database = {
           role_chosen?: boolean
           updated_at?: string
           user_id: string
+          vault_side?: string
           verification_reviewed_at?: string | null
           verification_reviewer_notes?: string | null
           verification_status?: string
@@ -466,6 +468,7 @@ export type Database = {
           role_chosen?: boolean
           updated_at?: string
           user_id?: string
+          vault_side?: string
           verification_reviewed_at?: string | null
           verification_reviewer_notes?: string | null
           verification_status?: string
@@ -655,6 +658,30 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      unlock_creator: {
+        Args: { _creator_id: string }
+        Returns: {
+          autorenew: boolean
+          created_at: string
+          creator_id: string
+          creator_name: string | null
+          customer_id: string
+          expires_at: string
+          id: string
+          last_renewed_at: string | null
+          renewal_count: number
+          started_at: string
+          status: string
+          updated_at: string
+          warned_24h: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
