@@ -28,14 +28,49 @@ type Filter = typeof StatusFilter[number];
 const AdminVerifications = () => {
   const [rows, setRows] = useState<VerificationRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [accessStatus, setAccessStatus] = useState<"checking" | "allowed" | "signed-out" | "not-admin">("checking");
+  const [accessMessage, setAccessMessage] = useState("");
   const [filter, setFilter] = useState<Filter>("pending");
   const [open, setOpen] = useState<VerificationRow | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const ensureAdminAccess = async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      setRows([]);
+      setAccessStatus("signed-out");
+      setAccessMessage("Sign in with your DropThatThing admin account first, then reopen the admin panel.");
+      return false;
+    }
+
+    const { data: role, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError || !role) {
+      setRows([]);
+      setAccessStatus("not-admin");
+      setAccessMessage(`Signed in as ${user.email ?? "this account"}, but this account does not have admin approval access.`);
+      return false;
+    }
+
+    setAccessStatus("allowed");
+    setAccessMessage("");
+    return true;
+  };
+
   const load = async () => {
     setLoading(true);
+    const allowed = await ensureAdminAccess();
+    if (!allowed) {
+      setLoading(false);
+      return;
+    }
     let q = supabase.from("creator_verifications")
       .select("*")
       .order("submitted_at", { ascending: false });
@@ -84,6 +119,11 @@ const AdminVerifications = () => {
     }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setSaving(false);
+      toast({ title: "Admin sign-in required", description: "Sign in with your admin account before approving or rejecting IDs." });
+      return;
+    }
     const { error } = await supabase.from("creator_verifications").update({
       status,
       reviewer_notes: notes.trim() || null,
@@ -123,6 +163,17 @@ const AdminVerifications = () => {
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+      ) : accessStatus !== "allowed" ? (
+        <Card className="p-6 text-center space-y-3">
+          <ShieldCheck className="w-8 h-8 text-primary mx-auto" />
+          <div>
+            <p className="font-bold text-foreground tracking-wider">ADMIN SIGN-IN REQUIRED</p>
+            <p className="text-sm text-muted-foreground mt-1">{accessMessage}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={load}>
+            <RefreshCw className="w-3.5 h-3.5 mr-2" /> RECHECK ACCESS
+          </Button>
+        </Card>
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">No {filter === "all" ? "" : filter + " "}submissions.</Card>
       ) : (
