@@ -200,13 +200,12 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const tabPending = creatorGenderTab === "women" ? womenPending : menPending;
   const tabEarned = activeCreators.reduce((s, c) => s + c.earned, 0);
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
+  const handleLogin = async () => {
+    // The code is checked on the server; it is never present in the app bundle.
+    const ok = await verifyAdminPasscode(password);
+    if (ok) {
       setAuthenticated(true);
       setError(false);
-      // Grant admin override across the app — free vault access, bypass age/safety gates
-      try { localStorage.setItem(ADMIN_OVERRIDE_KEY, "1"); } catch {}
-      try { sessionStorage.setItem(ADMIN_PASSCODE_KEY, password); } catch {}
       fetchLiveCreators();
     } else {
       setError(true);

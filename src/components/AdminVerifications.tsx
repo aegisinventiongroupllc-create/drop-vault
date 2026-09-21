@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { ADMIN_PASSCODE_KEY, ADMIN_PASSCODE } from "@/components/MasterAdminPanel";
+import { getAdminPasscode } from "@/lib/adminSession";
 
 interface VerificationRow {
   id: string;
