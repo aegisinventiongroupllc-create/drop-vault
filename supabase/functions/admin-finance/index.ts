@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    if (!ADMIN_PASSCODE) return json({ error: "Admin access is not configured" }, 503);
     const passcode = req.headers.get("x-admin-passcode") ?? "";
     if (passcode !== ADMIN_PASSCODE) return json({ error: "Invalid admin passcode" }, 401);
 
