@@ -221,7 +221,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/legal-logs?search=${encodeURIComponent(search)}`;
-      const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() },
+      });
       const data = await res.json();
       setLegalLogs(Array.isArray(data) ? data : []);
     } catch {
