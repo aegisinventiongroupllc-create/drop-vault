@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, Star } from "lucide-react";
+import { verifyAdminPasscode } from "@/lib/adminSession";
 
 export type UserRole = "creator" | "customer";
 
