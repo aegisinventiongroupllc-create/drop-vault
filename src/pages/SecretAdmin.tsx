@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -8,16 +7,15 @@ const ADMIN_PASSWORD = "052417";
 const SESSION_KEY = "dtt_secret_admin_ok";
 
 const SecretAdmin = () => {
-  const navigate = useNavigate();
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (pw === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
+      try { sessionStorage.setItem(SESSION_KEY, "1"); } catch {}
       setErr("");
-      navigate("/admin-portal", { replace: true });
+      window.location.replace("/admin-portal");
     } else {
       setErr("Invalid code. Please contact support: office@dttmediallc.com");
     }
