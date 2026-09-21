@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 
-const SESSION_KEY = "dtt_secret_admin_ok";
-const ADMIN_PASSCODE = "052417";
+import { getAdminPasscode, isAdminUnlocked } from "@/lib/adminSession";
+
+const ADMIN_ENTRY_PATH = "/admin-access";
 
 interface WalletRow {
   user_id: string;
