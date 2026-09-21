@@ -164,6 +164,13 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [cooldownDisplay, setCooldownDisplay] = useState("");
 
   useEffect(() => {
+    if (!authenticated) return;
+    if (activeSection === "revenue" || activeSection === "payouts") fetchFinance();
+    if (activeSection === "requests") fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, activeSection]);
+
+  useEffect(() => {
     if (!payoutState.lastPayoutAt) return;
     const interval = setInterval(() => {
       const result = canExecutePayout(payoutState);
