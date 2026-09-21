@@ -13,10 +13,11 @@ import {
   type PayoutState,
 } from "@/lib/paymentSplit";
 
-export const ADMIN_PASSCODE = "052417";
-const ADMIN_PASSWORD = ADMIN_PASSCODE;
-export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
-export const ADMIN_PASSCODE_KEY = "dtt_admin_passcode";
+import {
+  ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY, getAdminPasscode, verifyAdminPasscode,
+} from "@/lib/adminSession";
+
+export { ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY };
 
 interface CreatorRow {
   user_id: string;
