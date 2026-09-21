@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-const ADMIN_PASSCODE = "052417";
+import { verifyAdminPasscode } from "@/lib/adminSession";
 
 interface AuthScreenProps {
   onAdmin: () => void;
@@ -25,7 +25,6 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
 
   const validate = (): string | null => {
     const e = email.trim();
-    if (e === ADMIN_PASSCODE) return null;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return "Please enter a valid email address.";
     if (password.length < 6) return "Password must be at least 6 characters.";
     return null;
@@ -33,10 +32,12 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
 
   const handleSubmit = async () => {
     const trimmed = email.trim();
-    if (trimmed === ADMIN_PASSCODE) {
-      sessionStorage.setItem("dtt_secret_admin_ok", "1");
-      onAdmin();
-      return;
+    // Staff access code (verified on the server, never stored in the app)
+    if (trimmed && !trimmed.includes("@")) {
+      if (await verifyAdminPasscode(trimmed)) {
+        onAdmin();
+        return;
+      }
     }
 
     // Forgot password — only email needed

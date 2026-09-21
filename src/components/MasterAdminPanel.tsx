@@ -13,10 +13,11 @@ import {
   type PayoutState,
 } from "@/lib/paymentSplit";
 
-export const ADMIN_PASSCODE = "052417";
-const ADMIN_PASSWORD = ADMIN_PASSCODE;
-export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
-export const ADMIN_PASSCODE_KEY = "dtt_admin_passcode";
+import {
+  ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY, getAdminPasscode, verifyAdminPasscode,
+} from "@/lib/adminSession";
+
+export { ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY };
 
 interface CreatorRow {
   user_id: string;
@@ -97,8 +98,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
   const callFinance = async (payload: Record<string, unknown>) => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    let passcode = ADMIN_PASSCODE;
-    try { passcode = sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE; } catch {}
+    const passcode = getAdminPasscode();
     const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-finance`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
@@ -200,13 +200,12 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const tabPending = creatorGenderTab === "women" ? womenPending : menPending;
   const tabEarned = activeCreators.reduce((s, c) => s + c.earned, 0);
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
+  const handleLogin = async () => {
+    // The code is checked on the server; it is never present in the app bundle.
+    const ok = await verifyAdminPasscode(password);
+    if (ok) {
       setAuthenticated(true);
       setError(false);
-      // Grant admin override across the app — free vault access, bypass age/safety gates
-      try { localStorage.setItem(ADMIN_OVERRIDE_KEY, "1"); } catch {}
-      try { sessionStorage.setItem(ADMIN_PASSCODE_KEY, password); } catch {}
       fetchLiveCreators();
     } else {
       setError(true);
@@ -222,7 +221,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/legal-logs?search=${encodeURIComponent(search)}`;
-      const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() },
+      });
       const data = await res.json();
       setLegalLogs(Array.isArray(data) ? data : []);
     } catch {

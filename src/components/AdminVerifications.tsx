@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle, RefreshCw, ShieldCheck, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { ADMIN_PASSCODE_KEY, ADMIN_PASSCODE } from "@/components/MasterAdminPanel";
+import { getAdminPasscode } from "@/lib/adminSession";
 
 interface VerificationRow {
   id: string;
@@ -35,16 +35,8 @@ const AdminVerifications = () => {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const getPasscode = () => {
-    try {
-      return sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE;
-    } catch {
-      return ADMIN_PASSCODE;
-    }
-  };
-
   const callAdmin = async (body: Record<string, unknown>) => {
-    const passcode = getPasscode();
+    const passcode = getAdminPasscode();
     return await supabase.functions.invoke("admin-verifications", {
       body,
       headers: { "x-admin-passcode": passcode },

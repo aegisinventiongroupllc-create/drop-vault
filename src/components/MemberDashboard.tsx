@@ -58,7 +58,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     let cancel = false;
     (async () => {
       const { data } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("user_id, vault_side")
         .in("user_id", ids);
       if (cancel || !data) return;

@@ -13,8 +13,23 @@ const TOKEN_BASE_USD = 20;
 const CREATOR_PCT = 90;
 const PLATFORM_PCT = 10;
 
+const CRON_SECRET = Deno.env.get("CRON_SECRET") ?? "";
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Scheduler-only endpoint: it moves money (token deductions, creator wallet credits).
+  const providedSecret = req.headers.get("x-cron-secret") ?? "";
+  const bearer = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+  const authorized =
+    (CRON_SECRET !== "" && providedSecret === CRON_SECRET) || bearer === SERVICE_ROLE_KEY;
+  if (!authorized) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,

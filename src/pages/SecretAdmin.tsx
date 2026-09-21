@@ -2,18 +2,19 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const ADMIN_PASSWORD = "052417";
-const SESSION_KEY = "dtt_secret_admin_ok";
+import { verifyAdminPasscode } from "@/lib/adminSession";
 
 const SecretAdmin = () => {
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pw === ADMIN_PASSWORD) {
-      try { sessionStorage.setItem(SESSION_KEY, "1"); } catch {}
+    setBusy(true);
+    const ok = await verifyAdminPasscode(pw);
+    setBusy(false);
+    if (ok) {
       setErr("");
       window.location.replace("/admin-portal");
     } else {
@@ -42,7 +43,9 @@ const SecretAdmin = () => {
           {err && (
             <p className="text-xs text-destructive text-center leading-relaxed">{err}</p>
           )}
-          <Button type="submit" variant="neon" className="w-full">ENTER</Button>
+          <Button type="submit" variant="neon" className="w-full" disabled={busy}>
+            {busy ? "CHECKING…" : "ENTER"}
+          </Button>
         </form>
       </div>
     </>

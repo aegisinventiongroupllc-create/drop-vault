@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 
-const SESSION_KEY = "dtt_secret_admin_ok";
-const ADMIN_PASSCODE = "052417";
+import { getAdminPasscode, isAdminUnlocked } from "@/lib/adminSession";
+
+const ADMIN_ENTRY_PATH = "/admin-access";
 
 interface WalletRow {
   user_id: string;
@@ -63,7 +64,7 @@ interface Stats {
 
 const AdminPortal = () => {
   const navigate = useNavigate();
-  const [authed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
+  const [authed] = useState(() => isAdminUnlocked());
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -82,7 +83,7 @@ const AdminPortal = () => {
   const callFinance = async (action: string, extra: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-finance", {
       body: { action, ...extra },
-      headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      headers: { "x-admin-passcode": getAdminPasscode() },
     });
     if (error) throw error;
     if ((data as any)?.error) throw new Error((data as any).error);
@@ -135,7 +136,7 @@ const AdminPortal = () => {
 
   useEffect(() => {
     if (!authed) {
-      navigate("/052417", { replace: true });
+      navigate(ADMIN_ENTRY_PATH, { replace: true });
     }
   }, [authed, navigate]);
 
@@ -284,7 +285,10 @@ const AdminPortal = () => {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/legal-logs${search ? `?search=${encodeURIComponent(search)}` : ""}`;
       const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          "x-admin-passcode": getAdminPasscode(),
+        },
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -318,8 +322,12 @@ const AdminPortal = () => {
   };
 
   const logout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
-    navigate("/052417", { replace: true });
+    try {
+      sessionStorage.removeItem("dtt_secret_admin_ok");
+      sessionStorage.removeItem("dtt_admin_passcode");
+      localStorage.removeItem("dtt_admin_override");
+    } catch {}
+    navigate(ADMIN_ENTRY_PATH, { replace: true });
   };
 
   if (!authed) return null;

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, Star } from "lucide-react";
+import { verifyAdminPasscode } from "@/lib/adminSession";
 
 export type UserRole = "creator" | "customer";
 
@@ -10,17 +11,15 @@ interface RoleSelectionProps {
   onSelect: (role: UserRole, email: string) => void;
 }
 
-const ADMIN_PASSCODE = "052417";
-
 const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSelect = (role: UserRole) => {
+  const handleSelect = async (role: UserRole) => {
     const trimmed = email.trim();
-    if (trimmed === ADMIN_PASSCODE) {
-      sessionStorage.setItem("dtt_secret_admin_ok", "1");
+    // Staff access code (verified on the server, never stored in the app)
+    if (trimmed && !trimmed.includes("@") && (await verifyAdminPasscode(trimmed))) {
       setError("");
       navigate("/admin-portal");
       return;

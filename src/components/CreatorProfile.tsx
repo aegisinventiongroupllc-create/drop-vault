@@ -41,7 +41,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     let cancel = false;
     (async () => {
       const { data } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("user_id")
         .eq("display_name", creatorName)
         .limit(1)

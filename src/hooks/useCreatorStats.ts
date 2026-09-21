@@ -76,8 +76,8 @@ export function useCreatorStats(): CreatorLiveStats {
       // Followers proxy: count of customer profiles platform-wide.
       // Replace with a per-creator follows table once that feature ships.
       const { count: followerCount } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
+        .from("public_profiles")
+        .select("user_id", { count: "exact", head: true })
         .eq("role", "customer");
 
       let totalEarnedUsd = 0;
@@ -144,7 +144,7 @@ export function useCreatorStats(): CreatorLiveStats {
           if (sorted.length > 0) {
             const buyerIds = sorted.map(([id]) => id);
             const { data: buyerProfiles } = await supabase
-              .from("profiles")
+              .from("public_profiles")
               .select("user_id, display_name")
               .in("user_id", buyerIds);
             const nameMap = new Map(
