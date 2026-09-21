@@ -56,7 +56,7 @@ function priceRequest(body: any): { amount_usd: number; tokens: number } | { err
 
     return {
       amount_usd: base + ADMIN_FEE_USD,
-      tokens: base / TOKEN_BASE_VALUE_USD + CONVENIENCE_FEE_TOKENS,
+      tokens: Math.round(base / TOKEN_BASE_VALUE_USD) + CONVENIENCE_FEE_TOKENS,
     };
   }
 
