@@ -49,7 +49,25 @@ const PLATFORM_FEES = [
 
 const POWER_WEEK_CREATORS: { name: string; side: "Women" | "Men"; followers: number; milestone: number; active: boolean; endsIn: string }[] = [];
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "health" | "demand" | "powerweek";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "health" | "demand" | "powerweek";
+
+interface FinanceWallet {
+  user_id: string;
+  ltc_address: string | null;
+  pending_balance: number;
+  total_earned: number;
+  total_paid: number;
+  email: string | null;
+  display_name: string | null;
+}
+
+interface FinanceOverview {
+  totals: { gross_volume: number; creator_share: number; platform_share: number; entry_tax: number; transactions: number };
+  wallets: FinanceWallet[];
+  batches: any[];
+}
+
+const money = (n: number) => `$${(Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -67,6 +85,61 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [demandLoading, setDemandLoading] = useState(false);
   const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
   const [creatorGenderTab, setCreatorGenderTab] = useState<"women" | "men">("women");
+
+  // Live finance / payouts / requests
+  const [finance, setFinance] = useState<FinanceOverview | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
+  const [payAllBusy, setPayAllBusy] = useState(false);
+  const [payAllMessage, setPayAllMessage] = useState<string | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [deletingConsentId, setDeletingConsentId] = useState<string | null>(null);
+
+  const callFinance = async (payload: Record<string, unknown>) => {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    let passcode = ADMIN_PASSCODE;
+    try { passcode = sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE; } catch {}
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-finance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  };
+
+  const fetchFinance = async () => {
+    setFinanceLoading(true);
+    const data = await callFinance({ action: "overview" });
+    if (!data?.error) setFinance(data as FinanceOverview);
+    setFinanceLoading(false);
+  };
+
+  const fetchRequests = async () => {
+    setRequestsLoading(true);
+    const data = await callFinance({ action: "list_requests" });
+    setRequests(Array.isArray(data?.requests) ? data.requests : []);
+    setRequestsLoading(false);
+  };
+
+  const handlePayAll = async () => {
+    if (!confirm("Mark all pending creator balances as PAID? Send the LTC from your wallet first — this records the payout and resets pending balances.")) return;
+    setPayAllBusy(true);
+    setPayAllMessage(null);
+    const data = await callFinance({ action: "pay_all" });
+    if (data?.error) setPayAllMessage(data.error);
+    else if (data?.ok === false) setPayAllMessage(data.message);
+    else setPayAllMessage(`Recorded ${money(data.total)} paid to ${data.details?.length ?? 0} creator(s).`);
+    setPayAllBusy(false);
+    fetchFinance();
+  };
+
+  const deleteConsent = async (id: string) => {
+    if (!confirm("Delete this consent record permanently?")) return;
+    setDeletingConsentId(id);
+    const data = await callFinance({ action: "delete_consent", id });
+    if (!data?.error) setLegalLogs((prev) => prev.filter((l: any) => l.id !== id));
+    setDeletingConsentId(null);
+  };
 
   // Live creator log
   const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
@@ -89,6 +162,13 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   });
   const [payoutMessage, setPayoutMessage] = useState("");
   const [cooldownDisplay, setCooldownDisplay] = useState("");
+
+  useEffect(() => {
+    if (!authenticated) return;
+    if (activeSection === "revenue" || activeSection === "payouts") fetchFinance();
+    if (activeSection === "requests") fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, activeSection]);
 
   useEffect(() => {
     if (!payoutState.lastPayoutAt) return;
@@ -198,6 +278,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "creators", label: "CREATORS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "requests", label: "REQUESTS" },
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
@@ -368,22 +449,39 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Revenue Monitor */}
       {activeSection === "revenue" && (
         <div className="px-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Live totals from confirmed payments</p>
+            <Button variant="neon" size="sm" disabled={financeLoading} onClick={fetchFinance}>
+              {financeLoading ? "LOADING..." : "REFRESH"}
+            </Button>
+          </div>
           {/* Three big numbers */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-gradient-to-br from-green-900/20 to-green-700/10 border border-green-500/30 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Creator Payouts</p>
-              <p className="text-2xl font-bold text-green-400">${(tabEarned + (creatorGenderTab === "women" ? menPending : womenPending)).toLocaleString()}</p>
-              <p className="text-[9px] text-muted-foreground mt-1">The $18s</p>
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Creators (90%)</p>
+              <p className="text-xl font-bold text-green-400">{money(finance?.totals.creator_share ?? 0)}</p>
+              <p className="text-[9px] text-muted-foreground mt-1">Owed / paid to creators</p>
             </div>
             <div className="bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Entry Tax</p>
-              <p className="text-2xl font-bold text-gold">$0</p>
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Entry Tax</p>
+              <p className="text-xl font-bold text-gold">{money(finance?.totals.entry_tax ?? 0)}</p>
               <p className="text-[9px] text-muted-foreground mt-1">The $1s</p>
             </div>
             <div className="bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Total Commission</p>
-              <p className="text-2xl font-bold text-primary">$0</p>
-              <p className="text-[9px] text-muted-foreground mt-1">The 10%s</p>
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Your Cut (10%)</p>
+              <p className="text-xl font-bold text-primary">{money(finance?.totals.platform_share ?? 0)}</p>
+              <p className="text-[9px] text-muted-foreground mt-1">Platform commission</p>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-4 grid grid-cols-2 gap-3 text-center">
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gross Volume</p>
+              <p className="text-lg font-bold text-foreground">{money(finance?.totals.gross_volume ?? 0)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Payments</p>
+              <p className="text-lg font-bold text-foreground">{finance?.totals.transactions ?? 0}</p>
             </div>
           </div>
 
@@ -441,37 +539,115 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Mass Payout */}
       {activeSection === "payouts" && (
         <div className="px-4 space-y-4">
-          <div className="bg-gradient-to-br from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-5 text-center">
-            <p className="text-xs text-muted-foreground mb-1">CREATOR PAYOUTS (MANUAL LTC)</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              All payouts are sent manually from your LTC wallet. Use the list below to view each creator's pending balance and saved LTC address, send the payout from your wallet, then mark it paid here.
-            </p>
-          </div>
-
           <div className="bg-card border border-primary/30 rounded-xl p-5 space-y-4">
             <div className="text-center">
-              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">CREATOR PAYOUT CONTROL</p>
-              <p className="text-2xl font-bold text-primary">${totalPending.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Pending from all creators</p>
-            </div>
-
-            <div className="bg-gold/5 border border-gold/30 rounded-lg p-3 text-center">
-              <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ MANUAL PAYOUT MODE</p>
-              <p className="text-[10px] text-muted-foreground">
-                Send LTC manually from your wallet to each creator's saved LTC address. Automated mass-payout is disabled.
+              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">PENDING TO ALL CREATORS (90%)</p>
+              <p className="text-3xl font-bold text-primary">
+                {money((finance?.wallets || []).reduce((s, w) => s + w.pending_balance, 0))}
               </p>
+              <p className="text-xs text-muted-foreground">Your 10% so far: {money(finance?.totals.platform_share ?? 0)}</p>
             </div>
-
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" disabled={financeLoading} onClick={fetchFinance}>
+                {financeLoading ? "LOADING..." : "REFRESH"}
+              </Button>
+              <Button variant="neon" size="sm" className="flex-1 font-bold tracking-widest" disabled={payAllBusy} onClick={handlePayAll}>
+                {payAllBusy ? "WORKING..." : "PAY ALL CREATORS"}
+              </Button>
+            </div>
+            {payAllMessage && (
+              <div className="bg-secondary/60 border border-primary/20 rounded-lg p-3 text-center">
+                <p className="text-xs text-foreground">{payAllMessage}</p>
+              </div>
+            )}
             <p className="text-[10px] text-muted-foreground text-center">
-              All pending creator balances above are computed from confirmed transactions. Send from your LTC wallet, then update the creator's balance accordingly.
+              Send the LTC from your wallet to the addresses below, then press PAY ALL CREATORS to zero out pending balances and log the payout batch.
             </p>
           </div>
 
-          <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
-            <DollarSign className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground">
-              The 90/10 split (Creator/Platform) is applied at transaction time. This view only shows the already-calculated creator share.
-            </p>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="px-4 py-2.5 bg-secondary/50 border-b border-border">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Creator wallets</span>
+            </div>
+            <div className="divide-y divide-border">
+              {(finance?.wallets || []).map((w) => (
+                <div key={w.user_id} className="px-4 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{w.display_name || "Unnamed"}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{w.email || "—"}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-gold">{money(w.pending_balance)}</p>
+                      <p className="text-[9px] text-muted-foreground">paid {money(w.total_paid)}</p>
+                    </div>
+                  </div>
+                  <p className={`text-[10px] font-mono mt-1 truncate ${w.ltc_address ? "text-muted-foreground" : "text-destructive"}`}>
+                    {w.ltc_address || "NO LTC ADDRESS SAVED — cannot be paid"}
+                  </p>
+                </div>
+              ))}
+              {(finance?.wallets || []).length === 0 && (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  {financeLoading ? "Loading..." : "No creator wallets yet."}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {(finance?.batches || []).length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-4 space-y-2">
+              <p className="text-xs font-bold text-foreground">RECENT PAYOUT BATCHES</p>
+              {(finance?.batches || []).map((b: any) => (
+                <div key={b.id} className="flex justify-between text-[11px] border-b border-border pb-1">
+                  <span className="text-muted-foreground">{new Date(b.created_at).toLocaleString()}</span>
+                  <span className="text-foreground font-bold">{money(b.total_amount)} · {b.total_creators} creators</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Customer → Creator dollar requests */}
+      {activeSection === "requests" && (
+        <div className="px-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-foreground">Custom Dollar Requests</p>
+              <p className="text-xs text-muted-foreground">Money customers offered creators for custom content</p>
+            </div>
+            <Button variant="neon" size="sm" disabled={requestsLoading} onClick={fetchRequests}>
+              {requestsLoading ? "LOADING..." : "REFRESH"}
+            </Button>
+          </div>
+          <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+            {requests.map((r: any) => (
+              <div key={r.id} className="px-4 py-3 space-y-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {r.customer_name || r.customer_email || "Customer"} → @{r.creator_name || "creator"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleString()}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-gold">{money(r.amount_usd)}</p>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border uppercase">{r.status}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>Creator 90%: {money(r.creator_share_usd)}</span>
+                  <span>You: {money(r.platform_share_usd)}</span>
+                </div>
+                {r.description && <p className="text-[11px] text-muted-foreground/80 line-clamp-3">{r.description}</p>}
+              </div>
+            ))}
+            {requests.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                {requestsLoading ? "Loading..." : "No custom requests yet."}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -698,6 +874,15 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                     <summary className="text-muted-foreground cursor-pointer hover:text-primary">View consent text</summary>
                     <p className="mt-1 text-muted-foreground/70 leading-relaxed">{log.consent_text}</p>
                   </details>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-destructive border-destructive/40 hover:bg-destructive/10"
+                    disabled={deletingConsentId === log.id}
+                    onClick={() => deleteConsent(log.id)}
+                  >
+                    {deletingConsentId === log.id ? "DELETING..." : "DELETE RECORD"}
+                  </Button>
                 </div>
               ))}
             </div>
