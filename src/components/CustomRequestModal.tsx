@@ -60,19 +60,47 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     setStep("processing");
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("ltc-create-checkout", {
+      const invoiceTotal = activePrice + ADMIN_FEE_USD;
+      const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: {
-          amount_usd: activePrice + ADMIN_FEE_USD,
+          amount_usd: invoiceTotal,
           tokens: tokenCalc.total,
         },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      setPaymentInfo({ pay_address: data.ltc_address, pay_amount: data.ltc_amount, pay_currency: "LTC", payment_id: data.payment_id });
+
+      // Record the dollar request so it shows up for the creator and in the admin portal
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        const uid = u.user?.id;
+        if (uid) {
+          const { data: creatorProfile } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .eq("display_name", creatorName)
+            .maybeSingle();
+          await supabase.from("custom_requests").insert({
+            customer_id: uid,
+            creator_id: creatorProfile?.user_id ?? null,
+            creator_name: creatorName,
+            description,
+            amount_usd: invoiceTotal,
+            tokens: tokenCalc.total,
+            creator_share_usd: Math.round(activePrice * 0.9 * 100) / 100,
+            platform_share_usd: Math.round((activePrice * 0.1 + ADMIN_FEE_USD) * 100) / 100,
+            status: "pending",
+            payment_id: data?.invoice_id ?? null,
+          });
+        }
+      } catch {}
+
+      setPaymentInfo({ invoice_url: data.invoice_url, payment_id: data.invoice_id, pay_currency: "LTC" });
+      if (data?.invoice_url) window.open(data.invoice_url, "_blank");
       setStep("success");
       import("@/lib/activityLog").then(({ logActivity }) =>
         logActivity("custom_request_sent", `Crypto request to ${creatorName}`, {
-          creator: creatorName, amount_usd: activePrice + ADMIN_FEE_USD, tokens: tokenCalc.total, currency,
+          creator: creatorName, amount_usd: invoiceTotal, tokens: tokenCalc.total, currency,
         })
       );
     } catch (err: any) {
