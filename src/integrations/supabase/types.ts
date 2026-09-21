@@ -170,6 +170,54 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_requests: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          creator_id: string | null
+          creator_name: string | null
+          creator_share_usd: number
+          customer_id: string
+          description: string
+          id: string
+          payment_id: string | null
+          platform_share_usd: number
+          status: string
+          tokens: number
+          updated_at: string
+        }
+        Insert: {
+          amount_usd?: number
+          created_at?: string
+          creator_id?: string | null
+          creator_name?: string | null
+          creator_share_usd?: number
+          customer_id: string
+          description?: string
+          id?: string
+          payment_id?: string | null
+          platform_share_usd?: number
+          status?: string
+          tokens?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          creator_id?: string | null
+          creator_name?: string | null
+          creator_share_usd?: number
+          customer_id?: string
+          description?: string
+          id?: string
+          payment_id?: string | null
+          platform_share_usd?: number
+          status?: string
+          tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dmca_requests: {
         Row: {
           accuracy_statement: boolean
