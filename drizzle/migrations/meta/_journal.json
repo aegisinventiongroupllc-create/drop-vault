@@ -8,6 +8,13 @@
       "when": 1789996895212,
       "tag": "0000_create_custom_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789997751237,
+      "tag": "0001_unlock_creator_credits_earnings",
+      "breakpoints": true
     }
   ]
 }
