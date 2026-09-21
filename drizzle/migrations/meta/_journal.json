@@ -15,6 +15,13 @@
       "when": 1789997751237,
       "tag": "0001_unlock_creator_credits_earnings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789998777266,
+      "tag": "0002_restrict_profiles_and_function_grants",
+      "breakpoints": true
     }
   ]
 }

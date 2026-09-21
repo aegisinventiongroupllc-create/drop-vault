@@ -688,7 +688,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          role: string | null
+          user_id: string | null
+          vault_side: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          role?: string | null
+          user_id?: string | null
+          vault_side?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          role?: string | null
+          user_id?: string | null
+          vault_side?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       credit_tokens: {
