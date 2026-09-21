@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE") ?? "052417";
+const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE") ?? "";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
