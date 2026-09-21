@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 
 const SESSION_KEY = "dtt_secret_admin_ok";
+const ADMIN_PASSCODE = "052417";
 
 interface WalletRow {
   user_id: string;
@@ -73,6 +74,64 @@ const AdminPortal = () => {
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityRoleFilter, setActivityRoleFilter] = useState<"all" | "creator" | "customer">("all");
   const [activityDateFilter, setActivityDateFilter] = useState<string>(""); // YYYY-MM-DD
+  const [finance, setFinance] = useState<any | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [payingAll, setPayingAll] = useState(false);
+
+  const callFinance = async (action: string, extra: Record<string, unknown> = {}) => {
+    const { data, error } = await supabase.functions.invoke("admin-finance", {
+      body: { action, ...extra },
+      headers: { "x-admin-passcode": ADMIN_PASSCODE },
+    });
+    if (error) throw error;
+    if ((data as any)?.error) throw new Error((data as any).error);
+    return data as any;
+  };
+
+  const loadFinance = async () => {
+    setFinanceLoading(true);
+    try {
+      const [ov, rq] = await Promise.all([callFinance("overview"), callFinance("list_requests")]);
+      setFinance(ov);
+      setRequests(rq?.requests ?? []);
+    } catch (err) {
+      toast({ title: "Failed to load finances", description: String(err), variant: "destructive" });
+    } finally {
+      setFinanceLoading(false);
+    }
+  };
+
+  const payAllCreators = async () => {
+    if (!confirm("Record a payout batch for every creator with a balance and an LTC address? Their balances will be cleared.")) return;
+    setPayingAll(true);
+    try {
+      const res = await callFinance("pay_all");
+      if (res?.ok) {
+        toast({ title: "Payout batch recorded", description: `$${Number(res.total).toFixed(2)} across ${res.details.length} creator(s). Send the LTC from your wallet using the list below.` });
+      } else {
+        toast({ title: "Nothing to pay", description: res?.message ?? "No payable creators." });
+      }
+      await Promise.all([loadFinance(), loadStats()]);
+    } catch (err) {
+      toast({ title: "Payout failed", description: String(err), variant: "destructive" });
+    } finally {
+      setPayingAll(false);
+    }
+  };
+
+  const deleteConsent = async (id: string) => {
+    if (!confirm("Delete this consent record? This cannot be undone and removes legal proof.")) return;
+    try {
+      await callFinance("delete_consent", { id });
+      setConsents((prev) => prev.filter((c) => c.id !== id));
+      toast({ title: "Consent record deleted" });
+    } catch (err) {
+      toast({ title: "Delete failed", description: String(err), variant: "destructive" });
+    }
+  };
+
+
 
   useEffect(() => {
     if (!authed) {
@@ -144,6 +203,7 @@ const AdminPortal = () => {
     loadStats();
     loadConsents("");
     loadActivity();
+    loadFinance();
     const channel = supabase
       .channel("admin-portal-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadStats)
@@ -312,22 +372,66 @@ const AdminPortal = () => {
             <AdminVerifications />
           </Card>
 
+          {/* Revenue split */}
+          <Card className="p-4">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
+                <DollarSign className="w-4 h-4" /> Revenue Split
+              </div>
+              <Button size="sm" variant="outline" className="h-7 px-2" onClick={loadFinance} disabled={financeLoading}>
+                {financeLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Gross paid in</div>
+                <div className="text-xl font-bold mt-1">${Number(finance?.totals?.gross_volume ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Completed payments</div>
+                <div className="text-xl font-bold mt-1">{finance?.totals?.transactions ?? 0}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Creators owed 90%</div>
+                <div className="text-xl font-bold mt-1 text-primary">${Number(finance?.totals?.creator_share ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Your 10%</div>
+                <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.totals?.platform_share ?? 0).toFixed(2)}</div>
+              </div>
+            </div>
+          </Card>
+
           {/* Payout Management */}
           <Card className="p-4">
             <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-3">
               <Wallet className="w-4 h-4" /> Payout Management (LTC)
             </div>
-            {!stats || stats.wallets.length === 0 ? (
+            <Button
+              className="w-full mb-3 font-bold tracking-wider"
+              onClick={payAllCreators}
+              disabled={payingAll || financeLoading}
+            >
+              {payingAll ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wallet className="w-4 h-4 mr-2" />}
+              PAY ALL CREATORS
+            </Button>
+            <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+              This records the payout batch and clears creator balances. Send the LTC from your own wallet to each address listed below — the app cannot move coins out of your wallet for you.
+            </p>
+            {!finance || (finance.wallets ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">No creator wallets registered yet.</p>
             ) : (
               <div className="space-y-2">
-                {stats.wallets.map((w) => (
+                {(finance.wallets as any[]).map((w) => (
                   <div key={w.user_id} className="border border-border rounded-md p-3 text-xs space-y-2">
                     <div className="flex justify-between gap-2">
                       <span className="font-semibold truncate">
                         {w.display_name || w.email || w.user_id.slice(0, 8)}
                       </span>
-                      <span className="text-primary font-mono">${w.pending_balance.toFixed(2)}</span>
+                      <span className="text-primary font-mono">${Number(w.pending_balance).toFixed(2)}</span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Earned ${Number(w.total_earned).toFixed(2)} · Paid ${Number(w.total_paid).toFixed(2)}
                     </div>
                     <div className="flex items-center gap-2">
                       <code className="font-mono break-all flex-1 text-muted-foreground bg-muted/40 px-2 py-1 rounded">
@@ -353,6 +457,35 @@ const AdminPortal = () => {
               </div>
             )}
           </Card>
+
+          {/* Customer dollar requests */}
+          <Card className="p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+              <DollarSign className="w-4 h-4" /> Custom Requests ($ from customers)
+            </div>
+            {requests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No custom requests yet.</p>
+            ) : (
+              <div className="space-y-2 max-h-[360px] overflow-y-auto">
+                {requests.map((r) => (
+                  <div key={r.id} className="border border-border rounded-md p-3 text-xs space-y-1">
+                    <div className="flex justify-between gap-2">
+                      <span className="font-semibold truncate">{r.customer_email || r.customer_name || "Customer"}</span>
+                      <span className="font-mono text-primary">${Number(r.amount_usd ?? 0).toFixed(2)}</span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      To: {r.creator_email || r.creator_name || "creator"} · {new Date(r.created_at).toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Creator 90%: ${Number(r.creator_share_usd ?? 0).toFixed(2)} · You 10%: ${Number(r.platform_share_usd ?? 0).toFixed(2)} · {r.status}
+                    </div>
+                    {r.description && <div className="text-[10px]">{r.description}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
 
           {/* Content Moderation */}
           <Card className="p-4">
@@ -459,9 +592,19 @@ const AdminPortal = () => {
                             {dt.toLocaleDateString()} · {dt.toLocaleTimeString()}
                           </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary/20 text-primary shrink-0">
-                          v{c.terms_version}
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary/20 text-primary">
+                            v{c.terms_version}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-7 px-2"
+                            onClick={() => deleteConsent(c.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${checkedAge ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"}`}>
