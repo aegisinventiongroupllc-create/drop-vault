@@ -35,16 +35,8 @@ const AdminVerifications = () => {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const getPasscode = () => {
-    try {
-      return sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE;
-    } catch {
-      return ADMIN_PASSCODE;
-    }
-  };
-
   const callAdmin = async (body: Record<string, unknown>) => {
-    const passcode = getPasscode();
+    const passcode = getAdminPasscode();
     return await supabase.functions.invoke("admin-verifications", {
       body,
       headers: { "x-admin-passcode": passcode },
