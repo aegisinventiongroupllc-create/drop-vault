@@ -49,7 +49,25 @@ const PLATFORM_FEES = [
 
 const POWER_WEEK_CREATORS: { name: string; side: "Women" | "Men"; followers: number; milestone: number; active: boolean; endsIn: string }[] = [];
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "health" | "demand" | "powerweek";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "health" | "demand" | "powerweek";
+
+interface FinanceWallet {
+  user_id: string;
+  ltc_address: string | null;
+  pending_balance: number;
+  total_earned: number;
+  total_paid: number;
+  email: string | null;
+  display_name: string | null;
+}
+
+interface FinanceOverview {
+  totals: { gross_volume: number; creator_share: number; platform_share: number; entry_tax: number; transactions: number };
+  wallets: FinanceWallet[];
+  batches: any[];
+}
+
+const money = (n: number) => `$${(Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -67,6 +85,61 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [demandLoading, setDemandLoading] = useState(false);
   const [healthData, setHealthData] = useState({ cpu: 0, ram: 0, uptime: "—", lastCheck: "" });
   const [creatorGenderTab, setCreatorGenderTab] = useState<"women" | "men">("women");
+
+  // Live finance / payouts / requests
+  const [finance, setFinance] = useState<FinanceOverview | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
+  const [payAllBusy, setPayAllBusy] = useState(false);
+  const [payAllMessage, setPayAllMessage] = useState<string | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [deletingConsentId, setDeletingConsentId] = useState<string | null>(null);
+
+  const callFinance = async (payload: Record<string, unknown>) => {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    let passcode = ADMIN_PASSCODE;
+    try { passcode = sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE; } catch {}
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-finance`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  };
+
+  const fetchFinance = async () => {
+    setFinanceLoading(true);
+    const data = await callFinance({ action: "overview" });
+    if (!data?.error) setFinance(data as FinanceOverview);
+    setFinanceLoading(false);
+  };
+
+  const fetchRequests = async () => {
+    setRequestsLoading(true);
+    const data = await callFinance({ action: "list_requests" });
+    setRequests(Array.isArray(data?.requests) ? data.requests : []);
+    setRequestsLoading(false);
+  };
+
+  const handlePayAll = async () => {
+    if (!confirm("Mark all pending creator balances as PAID? Send the LTC from your wallet first — this records the payout and resets pending balances.")) return;
+    setPayAllBusy(true);
+    setPayAllMessage(null);
+    const data = await callFinance({ action: "pay_all" });
+    if (data?.error) setPayAllMessage(data.error);
+    else if (data?.ok === false) setPayAllMessage(data.message);
+    else setPayAllMessage(`Recorded ${money(data.total)} paid to ${data.details?.length ?? 0} creator(s).`);
+    setPayAllBusy(false);
+    fetchFinance();
+  };
+
+  const deleteConsent = async (id: string) => {
+    if (!confirm("Delete this consent record permanently?")) return;
+    setDeletingConsentId(id);
+    const data = await callFinance({ action: "delete_consent", id });
+    if (!data?.error) setLegalLogs((prev) => prev.filter((l: any) => l.id !== id));
+    setDeletingConsentId(null);
+  };
 
   // Live creator log
   const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
@@ -198,6 +271,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "creators", label: "CREATORS" },
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
+    { id: "requests", label: "REQUESTS" },
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
