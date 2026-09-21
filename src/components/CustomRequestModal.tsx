@@ -62,10 +62,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     try {
       const invoiceTotal = activePrice + ADMIN_FEE_USD;
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: {
-          amount_usd: invoiceTotal,
-          tokens: tokenCalc.total,
-        },
+        body: useCustomBid
+          ? { kind: "custom_request", bid_tokens: bidTokens }
+          : { kind: "custom_request", tier_price: tier?.price },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
