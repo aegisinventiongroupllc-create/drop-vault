@@ -98,8 +98,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
   const callFinance = async (payload: Record<string, unknown>) => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    let passcode = ADMIN_PASSCODE;
-    try { passcode = sessionStorage.getItem(ADMIN_PASSCODE_KEY) || ADMIN_PASSCODE; } catch {}
+    const passcode = getAdminPasscode();
     const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-finance`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
