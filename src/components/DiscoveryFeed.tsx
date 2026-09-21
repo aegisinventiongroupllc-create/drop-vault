@@ -260,7 +260,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (!media || cancelled) return;
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("user_id, display_name, country")
         .in("user_id", creatorIds);
       const profMap: Record<string, { name: string; country: string }> = {};

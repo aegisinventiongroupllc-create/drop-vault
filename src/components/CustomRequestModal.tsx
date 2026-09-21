@@ -76,7 +76,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
         const uid = u.user?.id;
         if (uid) {
           const { data: creatorProfile } = await supabase
-            .from("profiles")
+            .from("public_profiles")
             .select("user_id")
             .eq("display_name", creatorName)
             .maybeSingle();
