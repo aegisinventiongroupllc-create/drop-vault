@@ -6,6 +6,16 @@ const corsHeaders = {
 };
 
 const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY")!;
+
+// Server-side price catalog (must mirror cryptocloud-create-invoice)
+const MAX_TOKENS = 501;
+function expectedAmountsForTokens(tokens: number): number[] {
+  if (tokens === 1) return [21];
+  if (tokens === 5) return [101];
+  const amounts = [(tokens - 1) * 20 + 1];
+  if (tokens === 501) amounts.push(10002); // "Legendary" $10,001 tier + $1 admin fee
+  return amounts;
+}
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
