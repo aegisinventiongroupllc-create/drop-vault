@@ -32,10 +32,12 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
 
   const handleSubmit = async () => {
     const trimmed = email.trim();
-    if (trimmed === ADMIN_PASSCODE) {
-      sessionStorage.setItem("dtt_secret_admin_ok", "1");
-      onAdmin();
-      return;
+    // Staff access code (verified on the server, never stored in the app)
+    if (trimmed && !trimmed.includes("@")) {
+      if (await verifyAdminPasscode(trimmed)) {
+        onAdmin();
+        return;
+      }
     }
 
     // Forgot password — only email needed
