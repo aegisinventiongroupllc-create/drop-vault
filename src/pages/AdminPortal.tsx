@@ -64,7 +64,7 @@ interface Stats {
 
 const AdminPortal = () => {
   const navigate = useNavigate();
-  const [authed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
+  const [authed] = useState(() => isAdminUnlocked());
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -83,7 +83,7 @@ const AdminPortal = () => {
   const callFinance = async (action: string, extra: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-finance", {
       body: { action, ...extra },
-      headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      headers: { "x-admin-passcode": getAdminPasscode() },
     });
     if (error) throw error;
     if ((data as any)?.error) throw new Error((data as any).error);
@@ -136,7 +136,7 @@ const AdminPortal = () => {
 
   useEffect(() => {
     if (!authed) {
-      navigate("/052417", { replace: true });
+      navigate(ADMIN_ENTRY_PATH, { replace: true });
     }
   }, [authed, navigate]);
 
@@ -319,8 +319,12 @@ const AdminPortal = () => {
   };
 
   const logout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
-    navigate("/052417", { replace: true });
+    try {
+      sessionStorage.removeItem("dtt_secret_admin_ok");
+      sessionStorage.removeItem("dtt_admin_passcode");
+      localStorage.removeItem("dtt_admin_override");
+    } catch {}
+    navigate(ADMIN_ENTRY_PATH, { replace: true });
   };
 
   if (!authed) return null;

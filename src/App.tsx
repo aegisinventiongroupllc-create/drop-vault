@@ -36,7 +36,7 @@ const App = () => (
             <GeoGate>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/052417" element={<SecretAdmin />} />
+                <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
