@@ -72,6 +72,7 @@ const Index = () => {
   const [tokenBalance, setTokenBalance] = useState(0);
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
+  const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
 
@@ -110,24 +111,30 @@ const Index = () => {
         // User hasn't picked yet — clear any stale role so the picker shows.
         setRole(null);
       }
+      setRoleHydrated(true);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        setRoleHydrated(false);
         setAuthedUserId(session.user.id);
         // Defer Supabase calls to avoid deadlocks inside the callback
         setTimeout(() => hydrateRole(session.user.id, session.user.email ?? null), 0);
       } else {
         setAuthedUserId(null);
         setRoleChosen(false);
+        setRoleHydrated(true);
       }
       setAuthReady(true);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        setRoleHydrated(false);
         setAuthedUserId(session.user.id);
         hydrateRole(session.user.id, session.user.email ?? null);
+      } else {
+        setRoleHydrated(true);
       }
       setAuthReady(true);
     });
@@ -146,7 +153,7 @@ const Index = () => {
   }
 
   // Wait for session check before deciding what to render
-  if (!authReady) {
+  if (!authReady || (authedUserId && !roleHydrated)) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
         <div className="text-xs tracking-widest text-muted-foreground">LOADING…</div>
