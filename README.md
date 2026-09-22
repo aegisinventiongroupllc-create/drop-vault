@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# DropThatThing
 
-TODO: Document your project here
+Private creator vault and discovery platform for DTT.

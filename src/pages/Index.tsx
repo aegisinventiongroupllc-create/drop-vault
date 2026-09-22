@@ -32,6 +32,11 @@ interface UserPrefs {
   preference?: GenderPreference;
 }
 
+interface AccountPreference {
+  account_type: UserRole | null;
+  customer_preference: GenderPreference | null;
+}
+
 const loadPrefs = (): UserPrefs | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -67,51 +72,69 @@ const Index = () => {
   const [tokenBalance, setTokenBalance] = useState(0);
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
+  const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
 
-  // Listen for auth changes + hydrate role from profiles
+  // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("role, role_chosen")
+      const { data, error } = await supabase
+        .from("account_preferences")
+        .select("account_type, customer_preference")
         .eq("user_id", userId)
         .maybeSingle();
-      const chosen = !!(data as any)?.role_chosen;
+      if (error) console.error("Failed to restore account preference", error);
+      const preferenceRow = data as AccountPreference | null;
+      const dbRole = preferenceRow?.account_type ?? null;
+      const chosen = dbRole === "creator" || dbRole === "customer";
       setRoleChosen(chosen);
       if (userEmail) setEmail(userEmail);
       if (chosen) {
-        const dbRole = (data?.role === "creator" ? "creator" : "customer") as UserRole;
         setRole(dbRole);
         if (dbRole === "creator") {
           setVault("women");
           setPreference("women");
           const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: "women", preference: "women" };
           savePrefs(prefs);
+        } else if (preferenceRow?.customer_preference) {
+          const customerPreference = preferenceRow.customer_preference;
+          const activeVault: VaultType = customerPreference === "both" ? "women" : customerPreference;
+          setPreference(customerPreference);
+          setVault(activeVault);
+          savePrefs({ email: userEmail ?? "", role: "customer", vault: activeVault, preference: customerPreference });
+        } else {
+          setPreference(null);
+          setVault(null);
         }
       } else {
         // User hasn't picked yet — clear any stale role so the picker shows.
         setRole(null);
       }
+      setRoleHydrated(true);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        setRoleHydrated(false);
         setAuthedUserId(session.user.id);
         // Defer Supabase calls to avoid deadlocks inside the callback
         setTimeout(() => hydrateRole(session.user.id, session.user.email ?? null), 0);
       } else {
         setAuthedUserId(null);
         setRoleChosen(false);
+        setRoleHydrated(true);
       }
       setAuthReady(true);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        setRoleHydrated(false);
         setAuthedUserId(session.user.id);
         hydrateRole(session.user.id, session.user.email ?? null);
+      } else {
+        setRoleHydrated(true);
       }
       setAuthReady(true);
     });
@@ -130,7 +153,7 @@ const Index = () => {
   }
 
   // Wait for session check before deciding what to render
-  if (!authReady) {
+  if (!authReady || (authedUserId && !roleHydrated)) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
         <div className="text-xs tracking-widest text-muted-foreground">LOADING…</div>
@@ -152,10 +175,7 @@ const Index = () => {
         email={email}
         onSelect={async (chosenRole) => {
           // Persist choice
-          const { error } = await supabase
-            .from("profiles")
-            .update({ role: chosenRole, role_chosen: true } as any)
-            .eq("user_id", authedUserId);
+          const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
             console.error("Failed to save role", error);
             return;
@@ -194,6 +214,13 @@ const Index = () => {
           setVault(activeVault);
           const prefs: UserPrefs = { email, role: "customer", vault: activeVault, preference: pref };
           savePrefs(prefs);
+          supabase
+            .from("account_preferences")
+            .update({ customer_preference: pref })
+            .eq("user_id", authedUserId)
+            .then(({ error }) => {
+              if (error) console.error("Failed to save customer preference", error);
+            });
           if (!hasSeenCoins) setShowKnowYourCoins(true);
         }}
       />
