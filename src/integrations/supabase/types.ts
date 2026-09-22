@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_preferences: {
+        Row: {
+          account_type: string | null
+          created_at: string
+          customer_preference: string | null
+          email: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: string | null
+          created_at?: string
+          customer_preference?: string | null
+          email: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string | null
+          created_at?: string
+          customer_preference?: string | null
+          email?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action_detail: string | null
@@ -732,6 +759,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      set_my_account_type: {
+        Args: { _account_type: string }
+        Returns: {
+          account_type: string | null
+          created_at: string
+          customer_preference: string | null
+          email: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_preferences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       unlock_creator: {
         Args: { _creator_id: string }
