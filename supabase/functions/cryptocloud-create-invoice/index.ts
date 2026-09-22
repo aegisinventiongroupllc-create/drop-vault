@@ -106,8 +106,14 @@ Deno.serve(async (req) => {
     const ccJson = await ccRes.json();
     if (!ccRes.ok || ccJson?.status !== "success") {
       console.error("CryptoCloud error", ccJson);
+      const detail = String(ccJson?.detail ?? "");
+      const invalidToken = /токен|token/i.test(detail);
       return json(
-        { error: ccJson?.result?.message || "CryptoCloud invoice creation failed", details: ccJson },
+        {
+          error: invalidToken
+            ? "Payments are temporarily unavailable: the payment provider rejected the store credentials."
+            : ccJson?.result?.message || "CryptoCloud invoice creation failed",
+        },
         502
       );
     }
