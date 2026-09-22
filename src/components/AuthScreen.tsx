@@ -114,6 +114,9 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
         },
       });
       if (error) throw error;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Google sign-in failed", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

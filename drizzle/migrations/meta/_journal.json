@@ -29,6 +29,13 @@
       "when": 1790074288421,
       "tag": "0003_create_account_preferences_and_role_persistence",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790074351092,
+      "tag": "0004_harden_account_preference_writes",
+      "breakpoints": true
     }
   ]
 }
