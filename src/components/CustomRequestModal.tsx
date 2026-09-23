@@ -54,6 +54,18 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     : (tier?.price ?? 0);
   const tokenCalc = calculateRequestTokens(activePrice);
 
+  // Edge functions that return a non-2xx status give a generic message — dig out the real one.
+  const readFunctionError = async (fnError: any): Promise<string> => {
+    try {
+      const res = fnError?.context;
+      if (res && typeof res.json === "function") {
+        const body = await res.clone().json();
+        if (body?.error) return String(body.error);
+      }
+    } catch {}
+    return fnError?.message || "Payment failed.";
+  };
+
   const handleCryptoPay = async (currency: string) => {
     if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
     await logConsent("crypto", currency);
@@ -66,7 +78,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           ? { kind: "custom_request", bid_tokens: bidTokens }
           : { kind: "custom_request", tier_price: tier?.price },
       });
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
 
       // Record the dollar request so it shows up for the creator and in the admin portal

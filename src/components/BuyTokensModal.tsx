@@ -85,6 +85,18 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     } catch {}
   };
 
+  // Edge functions that return a non-2xx status give a generic message — dig out the real one.
+  const readFunctionError = async (fnError: any): Promise<string> => {
+    try {
+      const res = fnError?.context;
+      if (res && typeof res.json === "function") {
+        const body = await res.clone().json();
+        if (body?.error) return String(body.error);
+      }
+    } catch {}
+    return fnError?.message || "Checkout failed. Please try again.";
+  };
+
   const handleStartCheckout = async () => {
     if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
     await logConsent();
@@ -94,7 +106,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: { kind: "token_package", package: selectedOption === "bundle" ? "bundle" : "single" },
       });
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
       setCheckout(data as Checkout);
       setStep("awaiting");
