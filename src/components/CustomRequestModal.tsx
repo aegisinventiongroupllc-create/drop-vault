@@ -54,6 +54,18 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     : (tier?.price ?? 0);
   const tokenCalc = calculateRequestTokens(activePrice);
 
+  // Edge functions that return a non-2xx status give a generic message — dig out the real one.
+  const readFunctionError = async (fnError: any): Promise<string> => {
+    try {
+      const res = fnError?.context;
+      if (res && typeof res.json === "function") {
+        const body = await res.clone().json();
+        if (body?.error) return String(body.error);
+      }
+    } catch {}
+    return fnError?.message || "Payment failed.";
+  };
+
   const handleCryptoPay = async (currency: string) => {
     if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
     await logConsent("crypto", currency);
