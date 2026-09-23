@@ -78,7 +78,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           ? { kind: "custom_request", bid_tokens: bidTokens }
           : { kind: "custom_request", tier_price: tier?.price },
       });
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
 
       // Record the dollar request so it shows up for the creator and in the admin portal
