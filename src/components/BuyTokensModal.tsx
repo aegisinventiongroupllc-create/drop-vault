@@ -106,7 +106,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: { kind: "token_package", package: selectedOption === "bundle" ? "bundle" : "single" },
       });
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
       setCheckout(data as Checkout);
       setStep("awaiting");
