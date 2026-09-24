@@ -8,6 +8,7 @@ import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, Log
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
+import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 
 import { getAdminPasscode, isAdminUnlocked } from "@/lib/adminSession";
 
@@ -79,6 +80,7 @@ const AdminPortal = () => {
   const [financeLoading, setFinanceLoading] = useState(false);
   const [requests, setRequests] = useState<any[]>([]);
   const [payingAll, setPayingAll] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<{ user_id: string; display_name: string | null; email: string | null } | null>(null);
 
   const callFinance = async (action: string, extra: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-finance", {
@@ -433,9 +435,12 @@ const AdminPortal = () => {
                 {(finance.wallets as any[]).map((w) => (
                   <div key={w.user_id} className="border border-border rounded-md p-3 text-xs space-y-2">
                     <div className="flex justify-between gap-2">
-                      <span className="font-semibold truncate">
+                      <button
+                        className="font-semibold truncate underline text-left"
+                        onClick={() => setSelectedCreator({ user_id: w.user_id, display_name: w.display_name, email: w.email })}
+                      >
                         {w.display_name || w.email || w.user_id.slice(0, 8)}
-                      </span>
+                      </button>
                       <span className="text-primary font-mono">${Number(w.pending_balance).toFixed(2)}</span>
                     </div>
                     <div className="text-[10px] text-muted-foreground">
