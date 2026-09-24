@@ -139,9 +139,81 @@ Deno.serve(async (req) => {
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", w.user_id);
-      }
+    }
+      await supabase.from("creator_payouts").insert(
+        payable.map((w: any) => ({
+          creator_id: w.user_id, batch_id: batch.id, amount_usd: Number(w.pending_balance),
+          ltc_address: w.ltc_address, status: "recorded", balance_before: Number(w.pending_balance),
+          completed_at: new Date().toISOString(),
+        })),
+      );
 
       return json({ ok: true, batch, details, total, skipped: skipped.length });
+    }
+
+    if (action === "creator_detail" || action === "creator_payout") {
+      const creatorId = String(body?.creator_id ?? "");
+      if (!/^[0-9a-f-]{36}$/i.test(creatorId)) return json({ error: "Invalid creator_id" }, 400);
+
+      if (action === "creator_payout") {
+        const { data: w } = await supabase
+          .from("creator_wallets")
+          .select("ltc_address, pending_balance, total_paid")
+          .eq("user_id", creatorId)
+          .maybeSingle();
+        const owed = Math.round((Number(w?.pending_balance) || 0) * 100) / 100;
+        if (!w || owed <= 0) return json({ ok: false, message: "This creator has no balance owed." });
+        if (!(w.ltc_address || "").trim()) return json({ ok: false, message: "Creator has no LTC address saved." });
+        const txHash = typeof body?.tx_hash === "string" ? body.tx_hash.trim().slice(0, 200) : null;
+        const now = new Date().toISOString();
+        // Only the creator's own balance moves; platform fees in transactions are never touched.
+        const { error: uErr } = await supabase
+          .from("creator_wallets")
+          .update({ pending_balance: 0, total_paid: (Number(w.total_paid) || 0) + owed, updated_at: now })
+          .eq("user_id", creatorId)
+          .eq("pending_balance", w.pending_balance);
+        if (uErr) return json({ error: uErr.message }, 500);
+        const { error: pErr } = await supabase.from("creator_payouts").insert({
+          creator_id: creatorId,
+          amount_usd: owed,
+          ltc_address: w.ltc_address,
+          status: txHash ? "sent" : "recorded",
+          tx_hash: txHash || null,
+          balance_before: owed,
+          completed_at: now,
+        });
+        if (pErr) return json({ error: pErr.message }, 500);
+        await supabase.from("activity_logs").insert({
+          user_id: creatorId, user_role: "creator", action_type: "payout",
+          action_detail: `Admin payout of $${owed.toFixed(2)}`, metadata: { ltc_address: w.ltc_address, tx_hash: txHash },
+        });
+      }
+
+      const [{ data: wallet }, { data: txs }, { data: payouts }, prof] = await Promise.all([
+        supabase.from("creator_wallets").select("ltc_address, pending_balance, total_earned, total_paid").eq("user_id", creatorId).maybeSingle(),
+        supabase.from("transactions").select("id, amount_usd, creator_share_usd, platform_share_usd, entry_tax, platform_commission, status, created_at").eq("creator_id", creatorId).order("created_at", { ascending: false }).limit(1000),
+        supabase.from("creator_payouts").select("*").eq("creator_id", creatorId).order("created_at", { ascending: false }).limit(200),
+        loadProfiles([creatorId]),
+      ]);
+      const done = (txs || []).filter((t: any) => t.status === "completed");
+      const s = (k: string) => done.reduce((a: number, t: any) => a + (Number(t[k]) || 0), 0);
+      return json({
+        ok: true,
+        profile: prof[creatorId] ?? null,
+        wallet: wallet ?? null,
+        ledger: {
+          unlocks: done.length,
+          access_credits: done.length,
+          gross: s("amount_usd"),
+          creator_share: s("creator_share_usd"),
+          platform_fee: s("platform_share_usd"),
+          entry_tax: s("entry_tax"),
+          total_paid: Number(wallet?.total_paid) || 0,
+          owed: Number(wallet?.pending_balance) || 0,
+        },
+        transactions: (txs || []).slice(0, 25),
+        payouts: payouts || [],
+      });
     }
 
     if (action === "delete_consent") {
