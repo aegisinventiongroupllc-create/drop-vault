@@ -334,6 +334,10 @@ const AdminPortal = () => {
 
   if (!authed) return null;
 
+  if (selectedCreator) {
+    return <AdminCreatorDetail creator={selectedCreator} onBack={() => { setSelectedCreator(null); loadFinance(); }} />;
+  }
+
   return (
     <>
       <Helmet>
