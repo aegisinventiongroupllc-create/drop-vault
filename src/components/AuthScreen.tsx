@@ -103,24 +103,6 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
     }
   };
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin,
-          queryParams: { prompt: "select_account" },
-        },
-      });
-      if (error) throw error;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Please try again.";
-      toast({ title: "Google sign-in failed", description: message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background overflow-y-auto">
@@ -203,25 +185,6 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
                 : "SEND RESET LINK"}
         </Button>
 
-        {mode !== "forgot" && (
-          <>
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] text-muted-foreground tracking-widest">OR</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full text-sm font-semibold border-primary/30 hover:border-primary"
-              onClick={handleGoogle}
-              disabled={loading}
-            >
-              CONTINUE WITH GOOGLE
-            </Button>
-          </>
-        )}
 
         <div className="flex flex-col items-center gap-1.5 mt-1">
           {mode === "login" && (
