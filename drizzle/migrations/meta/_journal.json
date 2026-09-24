@@ -43,6 +43,13 @@
       "when": 1790259255424,
       "tag": "0005_creator_payouts_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790259746049,
+      "tag": "0006_tighten_open_inserts_and_teaser_listing",
+      "breakpoints": true
     }
   ]
 }
