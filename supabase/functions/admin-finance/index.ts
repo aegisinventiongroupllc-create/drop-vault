@@ -139,7 +139,14 @@ Deno.serve(async (req) => {
             updated_at: new Date().toISOString(),
           })
           .eq("user_id", w.user_id);
-      }
+    }
+      await supabase.from("creator_payouts").insert(
+        payable.map((w: any) => ({
+          creator_id: w.user_id, batch_id: batch.id, amount_usd: Number(w.pending_balance),
+          ltc_address: w.ltc_address, status: "recorded", balance_before: Number(w.pending_balance),
+          completed_at: new Date().toISOString(),
+        })),
+      );
 
       return json({ ok: true, batch, details, total, skipped: skipped.length });
     }
