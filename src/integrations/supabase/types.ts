@@ -110,6 +110,48 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_payouts: {
+        Row: {
+          amount_usd: number
+          balance_before: number
+          batch_id: string | null
+          completed_at: string | null
+          created_at: string
+          creator_id: string
+          id: string
+          ltc_address: string | null
+          notes: string | null
+          status: string
+          tx_hash: string | null
+        }
+        Insert: {
+          amount_usd: number
+          balance_before?: number
+          batch_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          creator_id: string
+          id?: string
+          ltc_address?: string | null
+          notes?: string | null
+          status?: string
+          tx_hash?: string | null
+        }
+        Update: {
+          amount_usd?: number
+          balance_before?: number
+          batch_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          creator_id?: string
+          id?: string
+          ltc_address?: string | null
+          notes?: string | null
+          status?: string
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
       creator_verifications: {
         Row: {
           created_at: string
