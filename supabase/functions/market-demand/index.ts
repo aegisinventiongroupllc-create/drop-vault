@@ -2,12 +2,23 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-passcode",
 };
+
+const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE") ?? "";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Admin-only: demand data is private.
+  const passcode = req.headers.get("x-admin-passcode") ?? "";
+  if (!ADMIN_PASSCODE || passcode !== ADMIN_PASSCODE) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {

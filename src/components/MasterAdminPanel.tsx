@@ -753,7 +753,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                 setDemandLoading(true);
                 try {
                   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/market-demand`, { headers: { "Content-Type": "application/json" } });
+                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/market-demand`, { headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() } });
                   const data = await res.json();
                   setDemandKeywords(Array.isArray(data) ? data : []);
                 } catch { setDemandKeywords([]); }
