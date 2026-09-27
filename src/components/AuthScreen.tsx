@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Star, Mail, Lock } from "lucide-react";
+import { Users, Star, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
@@ -15,10 +15,13 @@ interface AuthScreenProps {
 
 type Mode = "login" | "signup" | "forgot";
 
+const AUTH_REDIRECT_ORIGIN = "https://dropthatthing.com";
+
 const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +51,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
       setLoading(true);
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${AUTH_REDIRECT_ORIGIN}/reset-password`,
         });
         if (error) throw error;
         toast({
@@ -74,7 +77,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           email: trimmed,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: AUTH_REDIRECT_ORIGIN,
             data: { role },
           },
         });
@@ -159,14 +162,25 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-9"
+                className="pl-9 pr-11"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
               />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0.5 top-1/2 h-9 w-9 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </Button>
             </div>
           )}
         </div>
