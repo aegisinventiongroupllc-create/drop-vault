@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activityLog";
@@ -16,6 +16,8 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recoveryReady, setRecoveryReady] = useState(false);
 
@@ -71,25 +73,47 @@ const ResetPassword = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="New password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 pr-11"
                   autoComplete="new-password"
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0.5 top-1/2 h-9 w-9 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Hide new password" : "Show new password"}
+                  title={showPassword ? "Hide new password" : "Show new password"}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </Button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  type="password"
+                  type={showConfirm ? "text" : "password"}
                   placeholder="Confirm new password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 pr-11"
                   autoComplete="new-password"
                   onKeyDown={(e) => { if (e.key === "Enter") handleUpdate(); }}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0.5 top-1/2 h-9 w-9 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowConfirm((visible) => !visible)}
+                  aria-label={showConfirm ? "Hide confirmed password" : "Show confirmed password"}
+                  title={showConfirm ? "Hide confirmed password" : "Show confirmed password"}
+                >
+                  {showConfirm ? <EyeOff /> : <Eye />}
+                </Button>
               </div>
             </div>
 
