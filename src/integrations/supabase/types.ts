@@ -74,6 +74,65 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          creator_id: string
+          id: string
+          media_id: string | null
+          parent_id: string | null
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          media_id?: string | null
+          parent_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          media_id?: string | null
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "creator_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_hearts: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       creator_media: {
         Row: {
           bucket: string
@@ -786,6 +845,7 @@ export type Database = {
       }
     }
     Functions: {
+      comment_author: { Args: { _id: string }; Returns: string }
       credit_tokens: {
         Args: {
           _amount_usd: number
@@ -794,6 +854,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      get_heart_counts: {
+        Args: { _creator_ids: string[] }
+        Returns: {
+          creator_id: string
+          hearts: number
+        }[]
       }
       has_role: {
         Args: {

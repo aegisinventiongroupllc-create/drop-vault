@@ -66,6 +66,18 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     return () => { cancel = true; };
   }, [creatorId]);
 
+  const [heartCount, setHeartCount] = useState(0);
+  useEffect(() => {
+    if (!creatorId) return;
+    const load = async () => {
+      const { data } = await supabase.rpc("get_heart_counts", { _creator_ids: [creatorId] });
+      setHeartCount(Number((data as any)?.[0]?.hearts ?? 0));
+    };
+    load();
+    window.addEventListener("dtt-hearts-changed", load);
+    return () => window.removeEventListener("dtt-hearts-changed", load);
+  }, [creatorId]);
+
   const activeSub = creatorId
     ? subs.find((s) => s.creator_id === creatorId && s.status === "active" && new Date(s.expires_at) > new Date())
     : undefined;
@@ -165,7 +177,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <h2 className="text-xl font-bold text-foreground">{creatorName}</h2>
           <BadgeCheck className="w-5 h-5 text-primary" />
         </div>
-        <p className="text-sm text-muted-foreground mt-1">Content Creator • 0 followers</p>
+        <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
 
         {/* King of the Vault — empty until first top supporter */}
         <div className="mt-4 mx-auto max-w-xs bg-secondary/50 border border-gold/30 rounded-lg px-4 py-3 gold-glow">
