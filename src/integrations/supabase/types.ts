@@ -845,6 +845,7 @@ export type Database = {
       }
     }
     Functions: {
+      comment_author: { Args: { _id: string }; Returns: string }
       credit_tokens: {
         Args: {
           _amount_usd: number

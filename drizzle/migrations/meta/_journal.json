@@ -57,6 +57,13 @@
       "when": 1790600630900,
       "tag": "0007_creator_hearts_and_private_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790600652506,
+      "tag": "0008_fix_comment_policy_recursion",
+      "breakpoints": true
     }
   ]
 }
