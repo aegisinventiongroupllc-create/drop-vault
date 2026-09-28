@@ -15,6 +15,7 @@ import {
 import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
+import { useMyHearts } from "@/hooks/useHearts";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
@@ -51,23 +52,28 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const { toast } = useToast();
   const { subs } = useSubscriptions();
   const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
+  const { hearts } = useMyHearts();
+  const [savedNames, setSavedNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const ids = Array.from(new Set(subs.map((s) => s.creator_id)));
+    const ids = Array.from(new Set([...subs.map((s) => s.creator_id), ...hearts.map((h) => h.creator_id)]));
     if (ids.length === 0) { setGenderMap({}); return; }
     let cancel = false;
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, vault_side")
+        .select("user_id, vault_side, display_name")
         .in("user_id", ids);
       if (cancel || !data) return;
       const map: Record<string, "women" | "men"> = {};
       data.forEach((p: any) => { map[p.user_id] = (p.vault_side === "men" ? "men" : "women"); });
       setGenderMap(map);
+      const names: Record<string, string> = {};
+      data.forEach((p: any) => { names[p.user_id] = p.display_name || "creator"; });
+      setSavedNames(names);
     })();
     return () => { cancel = true; };
-  }, [subs]);
+  }, [subs, hearts]);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 60000);
@@ -131,7 +137,12 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const myGirls = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "women");
   const myGuys  = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "men");
 
-  const hasUnlocks = activeUnlocks.length > 0;
+  const unlockedIds = new Set(activeUnlocks.map((u) => u.creatorId));
+  const savedLocked = hearts
+    .filter((h) => !unlockedIds.has(h.creator_id))
+    .map((h) => ({ id: h.creator_id, name: savedNames[h.creator_id] || "creator", side: genderMap[h.creator_id] ?? "women" }))
+    .filter((c) => !vault || c.side === vault);
+  const hasUnlocks = activeUnlocks.length > 0 || savedLocked.length > 0;
 
   // Dynamic header based on vault preference
   const libraryTitle = vault === "men" ? "MY GUYS" : vault === "women" ? "MY GIRLS" : "MY LIBRARY";
@@ -286,6 +297,23 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
             </div>
           ) : (
             <>
+              {savedLocked.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">SAVED — LOCKED</h3>
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                    {savedLocked.map((c) => (
+                      <button key={c.id} onClick={() => onCreatorClick?.(c.name)} className="flex flex-col items-center gap-1 flex-shrink-0 w-20">
+                        <div className="w-16 h-16 rounded-full bg-secondary border-2 border-border flex items-center justify-center text-lg font-bold text-muted-foreground">
+                          {c.name.slice(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-[10px] text-foreground truncate w-full text-center">@{c.name}</span>
+                        <span className="text-[9px] font-bold text-primary">UNLOCK 14D</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* My Girls */}
               {(vault !== "men") && (
                 <div>

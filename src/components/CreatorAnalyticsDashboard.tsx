@@ -114,7 +114,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const [editingTitle, setEditingTitle] = useState("");
 
   const STATS = [
-    { label: "Followers", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
+    { label: "Hearts", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
     { label: "Total Views", value: liveStats.totalViews.toLocaleString(), change: "+0%", icon: Eye },
     { label: "Bit-Token Revenue", value: `${liveStats.bitTokenRevenue.toFixed(1)} BT`, change: `$${liveStats.totalEarnedUsd.toFixed(0)}`, icon: BarChart3 },
     { label: "Growth Rate", value: `${liveStats.growthRate >= 0 ? "+" : ""}${liveStats.growthRate}%`, change: "vs last month", icon: TrendingUp },

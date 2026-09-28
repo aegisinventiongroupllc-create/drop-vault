@@ -73,12 +73,10 @@ export function useCreatorStats(): CreatorLiveStats {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id ?? null;
 
-      // Followers proxy: count of customer profiles platform-wide.
-      // Replace with a per-creator follows table once that feature ships.
-      const { count: followerCount } = await supabase
-        .from("public_profiles")
-        .select("user_id", { count: "exact", head: true })
-        .eq("role", "customer");
+      // Followers = fans who hearted (saved) this creator
+      const { count: followerCount } = userId
+        ? await supabase.from("creator_hearts").select("id", { count: "exact", head: true }).eq("creator_id", userId)
+        : { count: 0 };
 
       let totalEarnedUsd = 0;
       let totalPaidUsd = 0;
