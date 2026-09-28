@@ -50,6 +50,13 @@
       "when": 1790259746049,
       "tag": "0006_tighten_open_inserts_and_teaser_listing",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790600630900,
+      "tag": "0007_creator_hearts_and_private_comments",
+      "breakpoints": true
     }
   ]
 }
