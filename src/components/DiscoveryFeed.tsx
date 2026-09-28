@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, Lock, Volume2, VolumeX, X, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Lock, Volume2, VolumeX, X, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -8,6 +8,7 @@ import LegalFooter from "@/components/LegalFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
+import { toggleHeart } from "@/hooks/useHearts";
 
 interface VideoItem {
   id: string;
@@ -21,7 +22,10 @@ interface VideoItem {
   vault: VaultType;
   country: string;
   videoUrl?: string;
+  creatorId?: string;
 }
+
+interface CommentRow { id: string; author_id: string; parent_id: string | null; body: string; created_at: string }
 
 // Production launch — empty until real creators sign up
 const MOCK_VIDEOS: VideoItem[] = [];
@@ -29,30 +33,27 @@ const MOCK_VIDEOS: VideoItem[] = [];
 export { MOCK_VIDEOS };
 export type { VideoItem };
 
-const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreatorClick: (name: string) => void }) => {
+const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { video: VideoItem; onCreatorClick: (name: string) => void; initiallyLiked: boolean; viewerId: string | null }) => {
   const { toast } = useToast();
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const [following, setFollowing] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initiallyLiked);
   const [likeCount, setLikeCount] = useState(video.likes);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [heartBusy, setHeartBusy] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<{ user: string; text: string }[]>([]);
+  const [comments, setComments] = useState<CommentRow[]>([]);
+  const [replyTo, setReplyTo] = useState<CommentRow | null>(null);
+  const isOwner = !!viewerId && viewerId === video.creatorId;
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isRealTeaser = !!video.videoUrl;
 
-  // Check if already bookmarked
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("dtt_bookmarks") || "[]");
-      setBookmarked(saved.includes(video.creator));
-    } catch { /* ignore */ }
-  }, [video.creator]);
+  useEffect(() => { setLiked(initiallyLiked); }, [initiallyLiked]);
+  useEffect(() => { setLikeCount(video.likes); }, [video.likes]);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -88,40 +89,62 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
 
   const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
 
-  const handleLike = () => {
-    setLiked(prev => !prev);
-    setLikeCount(prev => liked ? prev - 1 : prev + 1);
-  };
-
-  const handleBookmark = () => {
-    try {
-      const saved: string[] = JSON.parse(localStorage.getItem("dtt_bookmarks") || "[]");
-      let updated: string[];
-      if (bookmarked) {
-        updated = saved.filter(c => c !== video.creator);
-        toast({ title: "Removed from Library", description: `@${video.creator} removed` });
-      } else {
-        updated = [...new Set([...saved, video.creator])];
-        toast({ title: "Saved to Library", description: `@${video.creator} added to My Library` });
-      }
-      localStorage.setItem("dtt_bookmarks", JSON.stringify(updated));
-      setBookmarked(!bookmarked);
-    } catch { /* ignore */ }
+  const handleLike = async () => {
+    if (!video.creatorId || heartBusy) return;
+    if (isOwner) { toast({ title: "That's you!", description: "You can't heart your own profile." }); return; }
+    setHeartBusy(true);
+    const next = await toggleHeart(video.creatorId, liked);
+    setHeartBusy(false);
+    if (next === null) { toast({ title: "Sign in to save creators", variant: "destructive" }); return; }
+    setLiked(next);
+    setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
+    toast(next
+      ? { title: "Saved to your library", description: `@${video.creator} added. Spend 1 Bit-Token on their profile to unlock 14 days.` }
+      : { title: "Removed from your library", description: `@${video.creator} removed` });
   };
 
   const handleShare = async () => {
-    const shareData = { title: video.title, text: `Check out @${video.creator} on DropThatThing!`, url: window.location.href };
+    const url = `${window.location.origin}/?creator=${encodeURIComponent(video.creator)}`;
+    const shareData = { title: `@${video.creator} on DropThatThing`, text: `Check out @${video.creator} on DropThatThing!`, url };
     try {
       if (navigator.share) { await navigator.share(shareData); }
-      else { await navigator.clipboard.writeText(shareData.url); toast({ title: "Link copied!" }); }
+      else { await navigator.clipboard.writeText(url); toast({ title: "Link copied!" }); }
     } catch { /* cancelled */ }
   };
 
-  const handlePostComment = () => {
-    if (!commentText.trim()) return;
-    setComments(prev => [...prev, { user: "You", text: commentText.trim() }]);
-    setCommentText("");
+  const loadComments = useCallback(async () => {
+    if (!video.creatorId) return;
+    const { data } = await supabase
+      .from("creator_comments")
+      .select("id, author_id, parent_id, body, created_at")
+      .eq("creator_id", video.creatorId)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    setComments((data ?? []) as CommentRow[]);
+  }, [video.creatorId]);
+
+  useEffect(() => { if (showComments) loadComments(); }, [showComments, loadComments]);
+
+  const handlePostComment = async () => {
+    const body = commentText.trim();
+    if (!body || !video.creatorId) return;
+    if (!viewerId) { toast({ title: "Sign in to message this creator", variant: "destructive" }); return; }
+    if (isOwner && !replyTo) { toast({ title: "Pick a comment to reply to" }); return; }
+    const { error } = await supabase.from("creator_comments").insert({
+      creator_id: video.creatorId,
+      media_id: video.id,
+      author_id: viewerId,
+      parent_id: isOwner ? replyTo!.id : null,
+      body: body.slice(0, 1000),
+    });
+    if (error) { toast({ title: "Couldn't send", description: error.message, variant: "destructive" }); return; }
+    setCommentText(""); setReplyTo(null);
+    if (!isOwner) toast({ title: "Sent privately", description: `Only @${video.creator} can read this.` });
+    loadComments();
   };
+
+  const topLevel = comments.filter((c) => !c.parent_id);
+  const repliesFor = (id: string) => comments.filter((c) => c.parent_id === id);
 
   return (
     <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
@@ -179,19 +202,16 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
         <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
         </button>
-        <button onClick={handleLike} className={`flex flex-col items-center gap-1 active:scale-90 transition-all ${liked ? "text-red-500" : "text-foreground hover:text-primary"}`}>
+        <button onClick={handleLike} disabled={heartBusy} aria-label={liked ? "Remove from library" : "Save to library"} className={`flex flex-col items-center gap-1 active:scale-90 transition-all ${liked ? "text-red-500" : "text-foreground hover:text-primary"}`}>
           <Heart className="w-7 h-7" fill={liked ? "currentColor" : "none"} />
           <span className="text-xs">{formatCount(likeCount)}</span>
         </button>
         <button onClick={() => setShowComments(true)} className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all">
           <MessageCircle className="w-7 h-7" />
-          <span className="text-xs">{formatCount(video.comments + comments.length)}</span>
+          <span className="text-[10px] font-bold">{isOwner ? "INBOX" : "DM"}</span>
         </button>
         <button onClick={handleShare} className="text-foreground hover:text-primary active:scale-90 transition-all">
           <Share2 className="w-6 h-6" />
-        </button>
-        <button onClick={handleBookmark} className={`active:scale-90 transition-all ${bookmarked ? "text-primary" : "text-foreground hover:text-primary"}`}>
-          <Bookmark className="w-6 h-6" fill={bookmarked ? "currentColor" : "none"} />
         </button>
       </div>
 
@@ -201,22 +221,34 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
           <div className="absolute inset-0 bg-background/40" onClick={() => setShowComments(false)} />
           <div className="relative bg-card border-t border-border rounded-t-2xl max-h-[60vh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <h3 className="text-sm font-bold text-foreground tracking-wider">COMMENTS</h3>
+              <h3 className="text-sm font-bold text-foreground tracking-wider">{isOwner ? "FAN MESSAGES" : "MESSAGE CREATOR"}</h3>
               <button onClick={() => setShowComments(false)} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
                 <X className="w-5 h-5" />
               </button>
             </div>
+            <p className="px-4 pt-2 text-[10px] text-muted-foreground tracking-wider">
+              {isOwner ? "PRIVATE INBOX — ONLY YOU SEE THESE. TAP A MESSAGE TO REPLY." : `PRIVATE — ONLY @${video.creator.toUpperCase()} CAN READ YOUR MESSAGES`}
+            </p>
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[100px]">
-              {comments.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No comments yet. Be the first!</p>
+              {topLevel.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">{isOwner ? "No fan messages yet." : "Send a private message to this creator."}</p>
               )}
-              {comments.map((c, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">{c.user[0]}</div>
-                  <div>
-                    <p className="text-xs font-bold text-foreground">{c.user}</p>
-                    <p className="text-xs text-foreground/80">{c.text}</p>
-                  </div>
+              {topLevel.map((c) => (
+                <div key={c.id} className="space-y-1">
+                  <button
+                    disabled={!isOwner}
+                    onClick={() => setReplyTo(c)}
+                    className={`w-full text-left rounded-lg p-2 ${replyTo?.id === c.id ? "bg-primary/10 border border-primary/40" : "bg-secondary/50"}`}
+                  >
+                    <p className="text-[10px] font-bold text-muted-foreground">{c.author_id === viewerId ? "YOU" : "FAN"} · {new Date(c.created_at).toLocaleString()}</p>
+                    <p className="text-xs text-foreground/90 break-words">{c.body}</p>
+                  </button>
+                  {repliesFor(c.id).map((r) => (
+                    <div key={r.id} className="ml-4 rounded-lg p-2 bg-primary/10">
+                      <p className="text-[10px] font-bold text-primary">@{video.creator.toUpperCase()}</p>
+                      <p className="text-xs text-foreground/90 break-words">{r.body}</p>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -226,7 +258,8 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handlePostComment()}
-                placeholder="Add a comment..."
+                placeholder={isOwner ? (replyTo ? "Write your reply..." : "Tap a message to reply") : "Private message..."}
+                maxLength={1000}
                 className="flex-1 bg-secondary rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <button onClick={handlePostComment} className="text-primary hover:text-primary/80 active:scale-95 transition-all disabled:opacity-40" disabled={!commentText.trim()}>
@@ -247,6 +280,19 @@ const VideoCard = memo(({ video, onCreatorClick }: { video: VideoItem; onCreator
 });
 const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string }) => {
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
+  const [viewerId, setViewerId] = useState<string | null>(null);
+  const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id ?? null;
+      setViewerId(uid);
+      if (!uid) return;
+      const { data } = await supabase.from("creator_hearts").select("creator_id").eq("user_id", uid);
+      setMyHearts(new Set((data ?? []).map((r) => r.creator_id)));
+    })();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -263,6 +309,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         .from("public_profiles")
         .select("user_id, display_name, country")
         .in("user_id", creatorIds);
+      const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
+      const countMap: Record<string, number> = {};
+      (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
       const profMap: Record<string, { name: string; country: string }> = {};
       profs?.forEach((p) => {
         profMap[p.user_id] = {
@@ -280,7 +329,8 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           creatorAvatar: name.charAt(0).toUpperCase(),
           title: m.title || "Teaser",
           description: "",
-          likes: 0,
+          likes: countMap[m.creator_id] ?? 0,
+          creatorId: m.creator_id,
           comments: 0,
           color: "from-primary/20 to-background",
           vault,
@@ -319,7 +369,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       <div className={`h-[100dvh] snap-y snap-mandatory overflow-y-auto bottom-nav-scroll-area ${hasVaultToggle ? "pt-[9rem]" : "pt-[7rem]"}`}>
         {filteredVideos.length > 0 ? (
           filteredVideos.map((video) => (
-            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} />
+            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} initiallyLiked={!!video.creatorId && myHearts.has(video.creatorId)} viewerId={viewerId} />
           ))
         ) : (
           countryFilter && countryFilter !== "GLOBAL" ? (
