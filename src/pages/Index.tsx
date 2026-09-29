@@ -144,6 +144,30 @@ const Index = () => {
 
   const onboardingComplete = !!(role && vault);
 
+  const exitCreatorPreview = () => {
+    try { localStorage.removeItem("dtt_admin_view_as_creator"); } catch {}
+    navigate("/admin-portal");
+  };
+  const adminCreatorPreview =
+    typeof window !== "undefined" && localStorage.getItem("dtt_admin_view_as_creator") === "1";
+
+  // --- Admin "View as Creator" preview ---
+  if (adminCreatorPreview && verified && authReady) {
+    return (
+      <div className="min-h-[100dvh]">
+        <div className="fixed top-0 left-0 right-0 z-[70] bg-primary text-primary-foreground flex items-center justify-between px-4 py-2">
+          <span className="text-[10px] font-bold tracking-widest">ADMIN PREVIEW — CREATOR VIEW</span>
+          <button onClick={exitCreatorPreview} className="text-[10px] font-bold tracking-widest underline">
+            EXIT TO ADMIN
+          </button>
+        </div>
+        <div className="pt-9">
+          <CreatorAnalyticsDashboard onBack={exitCreatorPreview} />
+        </div>
+      </div>
+    );
+  }
+
   // --- Onboarding screens ---
   if (!verified) {
     return <AgeVerification onVerified={() => {
