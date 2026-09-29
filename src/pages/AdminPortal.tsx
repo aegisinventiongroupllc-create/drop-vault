@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home, Activity } from "lucide-react";
+import { Loader2, Users, DollarSign, Wallet, RefreshCw, Copy, Trash2, Check, LogOut, FileVideo, ShieldCheck, Search, Home, Activity, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
@@ -351,6 +351,17 @@ const AdminPortal = () => {
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-xl sm:text-2xl font-bold tracking-wider">ADMIN PORTAL</h1>
             <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                title="Preview the creator dashboard"
+                onClick={() => {
+                  try { localStorage.setItem("dtt_admin_view_as_creator", "1"); } catch {}
+                  navigate("/");
+                }}
+              >
+                <Eye className="w-4 h-4 mr-1" /> CREATOR VIEW
+              </Button>
               <Button size="sm" variant="outline" onClick={() => navigate("/")}>
                 <Home className="w-4 h-4" />
               </Button>
