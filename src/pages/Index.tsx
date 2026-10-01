@@ -26,6 +26,17 @@ import LegalFooter from "@/components/LegalFooter";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 
 const STORAGE_KEY = "dtt_user_prefs";
+const ACTIVE_TAB_KEY = "dtt_active_tab";
+const VALID_TABS: Tab[] = ["home", "trending", "vaults", "profile"];
+
+const loadActiveTab = (): Tab => {
+  try {
+    const stored = sessionStorage.getItem(ACTIVE_TAB_KEY) as Tab | null;
+    return stored && VALID_TABS.includes(stored) ? stored : "home";
+  } catch {
+    return "home";
+  }
+};
 
 interface UserPrefs {
   email: string;
@@ -66,7 +77,7 @@ const Index = () => {
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
-  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [activeTab, setActiveTab] = useState<Tab>(loadActiveTab);
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -145,6 +156,11 @@ const Index = () => {
   }, []);
 
   const onboardingComplete = !!(role && vault);
+
+  const navigateToTab = (tab: Tab) => {
+    sessionStorage.setItem(ACTIVE_TAB_KEY, tab);
+    setActiveTab(tab);
+  };
 
   const exitCreatorPreview = () => {
     try { localStorage.removeItem("dtt_admin_view_as_creator"); } catch {}
@@ -297,7 +313,7 @@ const Index = () => {
     return (
       <>
         <CreatorProfile creatorName={selectedCreator} onBack={() => setSelectedCreator(null)} />
-        <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={(tab) => { setSelectedCreator(null); setActiveTab(tab); }} />
+        <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={(tab) => { setSelectedCreator(null); navigateToTab(tab); }} />
       </>
     );
   }
@@ -363,7 +379,7 @@ const Index = () => {
           balance={tokenBalance}
           onBuyTokens={handleBuyTokens}
           vault={vault ?? undefined}
-          onNavigateHome={() => setActiveTab("home")}
+          onNavigateHome={() => navigateToTab("home")}
           onCreatorClick={handleCreatorClick}
         />
       )}
@@ -397,7 +413,7 @@ const Index = () => {
           <LegalFooter />
         </div>
       )}
-      <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={setActiveTab} />
+      <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={navigateToTab} />
       <PWAInstallPrompt />
     </div>
   );
