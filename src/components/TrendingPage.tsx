@@ -4,6 +4,7 @@ import GlobalPassport from "@/components/GlobalPassport";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
 import LegalFooter from "@/components/LegalFooter";
 import type { VaultType } from "@/lib/tokenEconomy";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 const TRENDING_WOMEN = [
   { rank: 1, creator: "LunaCosplay", views: "1.2M", category: "Cosplay", country: "US" },
@@ -48,9 +49,7 @@ const TrendingPage = ({ onCreatorClick, vault, hasVaultToggle, countryFilter }: 
               <span className={`text-2xl font-bold font-display w-8 text-right ${idx < 3 ? "text-primary neon-text" : "text-muted-foreground"}`}>
                 {idx + 1}
               </span>
-              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">
-                {item.creator.slice(0, 2).toUpperCase()}
-              </div>
+              <ProfileAvatar label={item.creator} className="h-12 w-12" />
               <div className="flex-1 text-left">
                 <p className="font-semibold text-foreground">@{item.creator}</p>
                 <p className="text-xs text-muted-foreground">{item.category}</p>
