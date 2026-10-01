@@ -126,7 +126,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     const { data: { user } } = await supabase.auth.getUser();
     let avatarToSave = avatar;
     if (user && portraitBlob) {
-      const portraitPath = `${user.id}/portrait.webp`;
+      const previousPortraitPath = avatar.portraitPath;
+      const portraitPath = `${user.id}/portrait-${Date.now()}.webp`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
       if (uploadError) {
         setSaving(false);
@@ -134,6 +135,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         return;
       }
       avatarToSave = { ...avatar, portraitPath };
+      if (previousPortraitPath?.startsWith(`${user.id}/`) && previousPortraitPath !== portraitPath) {
+        void supabase.storage.from("profile-avatars").remove([previousPortraitPath]);
+      }
     }
     const { error } = user
       ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
@@ -291,7 +295,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           <div className="grid grid-cols-4 gap-2 p-1">
             {AVATAR_CLOTHING.map((value) => <Button key={value} type="button" variant="outline" title={pretty(value)} aria-pressed={avatar.clothing === value} onClick={() => updateAvatar((current) => ({ ...current, clothing: value }))} className={`h-14 min-w-0 flex-col gap-0.5 rounded-md bg-secondary px-1 text-foreground ${avatar.clothing === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><Shirt className="h-5 w-5"/><span className="truncate text-[8px] font-bold uppercase">{pretty(value)}</span></Button>)}
           </div>
-          {portraitPreview && <p className="mt-2 text-[10px] text-muted-foreground">Snap again after changing features or clothing to refresh your illustrated portrait.</p>}
+          {(portraitPreview || avatar.portraitPath) && <p className="mt-2 text-[10px] text-muted-foreground">Snap again after changing features or clothing to refresh your illustrated portrait.</p>}
         </div>
       </div>
 

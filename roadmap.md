@@ -7,5 +7,5 @@
 - [x] Verify mobile studio flow, AI response, tests, and preview build
 - [x] Restrict generated portrait downloads to an explicitly approved access model
 
-- [ ] Upgrade photo-generated avatars to a consistent high-detail illustrated portrait style for women and men
+- [x] Upgrade photo-generated avatars to a consistent high-detail illustrated portrait style for women and men
 - [ ] Verify generated portraits remain saved to the correct profile
