@@ -3,6 +3,7 @@ import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import ProfileAvatar, {
   AVATAR_ACCENTS,
@@ -43,7 +44,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = user
-      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatar }).eq("user_id", user.id)
+      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatar as unknown as Json }).eq("user_id", user.id)
       : { error: new Error("Please sign in again.") };
     setSaving(false);
     if (error) {
