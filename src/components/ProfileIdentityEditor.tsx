@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
+import { mapFaceLandmarks } from "@/lib/mapFaceLandmarks";
+import { streamPortrait } from "@/lib/streamPortrait";
 import ProfileAvatar, {
   AVATAR_EARS, AVATAR_EYEBROWS, AVATAR_FACIAL_HAIR, AVATAR_GLASSES, AVATAR_HAIR,
   AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
@@ -54,77 +56,6 @@ const SunglassesIcon = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16h38M8 18h14v5q0 9-7 9t-7-9Zm18 0h14v5q0 9-7 9t-7-9Zm-4 3h4" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
 );
 
-const loadImage = (file: File): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
-  const image = new Image();
-  const objectUrl = URL.createObjectURL(file);
-  image.onload = () => {
-    URL.revokeObjectURL(objectUrl);
-    resolve(image);
-  };
-  image.onerror = () => {
-    URL.revokeObjectURL(objectUrl);
-    reject(new Error("This image could not be read."));
-  };
-  image.src = objectUrl;
-});
-
-const averageRegion = (context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
-  const pixels = context.getImageData(x, y, width, height).data;
-  let red = 0;
-  let green = 0;
-  let blue = 0;
-  let samples = 0;
-  for (let index = 0; index < pixels.length; index += 16) {
-    if (pixels[index + 3] < 128) continue;
-    red += pixels[index];
-    green += pixels[index + 1];
-    blue += pixels[index + 2];
-    samples += 1;
-  }
-  return samples ? { red: red / samples, green: green / samples, blue: blue / samples } : { red: 128, green: 100, blue: 85 };
-};
-
-const mapPhotoToAvatar = async (file: File, current: AvatarConfig): Promise<AvatarConfig> => {
-  const image = await loadImage(file);
-  const canvas = document.createElement("canvas");
-  canvas.width = 160;
-  canvas.height = 160;
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) throw new Error("Photo processing is unavailable on this device.");
-
-  const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
-  const sourceX = Math.max(0, (image.naturalWidth - sourceSize) / 2);
-  const sourceY = Math.max(0, (image.naturalHeight - sourceSize) / 2);
-  context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, 160, 160);
-
-  const face = averageRegion(context, 52, 50, 56, 72);
-  const hair = averageRegion(context, 42, 18, 76, 34);
-  const full = averageRegion(context, 20, 20, 120, 120);
-  const faceLight = (face.red * 0.299) + (face.green * 0.587) + (face.blue * 0.114);
-  const hairLight = (hair.red * 0.299) + (hair.green * 0.587) + (hair.blue * 0.114);
-  const contrast = Math.abs(faceLight - hairLight);
-  const imageSeed = Math.round(full.red + full.green * 2 + full.blue * 3);
-
-  const skinTone: AvatarConfig["skinTone"] = faceLight > 210 ? "light" : faceLight > 180 ? "warm" : faceLight > 145 ? "medium" : faceLight > 110 ? "deep" : faceLight > 78 ? "rich" : "dark";
-  const hairColor: AvatarConfig["hairColor"] = hairLight < 55 ? "dark" : hair.red > hair.green * 1.3 ? "red" : hair.red > 145 && hair.green > 120 ? "blonde" : hairLight > 175 ? "silver" : "brown";
-  const womanHair: AvatarConfig["hair"][] = ["waves", "long", "curls", "crop"];
-  const manHair: AvatarConfig["hair"][] = ["crop", "waves", "curls", "mohawk"];
-  const hairOptions = current.style === "woman" ? womanHair : manHair;
-  const browOptions: AvatarConfig["eyebrows"][] = ["soft", "straight", "arched", "bold"];
-  const jawOptions: AvatarConfig["jawline"][] = current.style === "woman" ? ["oval", "heart", "soft", "tapered"] : ["square", "strong", "tapered", "oval"];
-
-  return {
-    ...current,
-    skinTone,
-    hairColor,
-    hair: contrast < 18 ? "none" : hairOptions[imageSeed % hairOptions.length],
-    eyebrows: browOptions[Math.floor(imageSeed / 3) % browOptions.length],
-    jawline: jawOptions[Math.floor(imageSeed / 7) % jawOptions.length],
-    ears: contrast > 95 ? "large" : contrast > 55 ? "medium" : "small",
-    facialHair: current.style === "man" && hairLight < 80 ? (["stubble", "goatee", "beard"] as const)[imageSeed % 3] : "none",
-  };
-};
-
 const DRAFT_KEY = "dtt_avatar_draft";
 
 const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
@@ -144,6 +75,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [processingPhoto, setProcessingPhoto] = useState(false);
+  const [portraitPreview, setPortraitPreview] = useState<string>();
+  const [portraitBlob, setPortraitBlob] = useState<Blob>();
+  const [photoStage, setPhotoStage] = useState("");
   const cameraInput = useRef<HTMLInputElement>(null);
   const dirty = useRef(false);
 
@@ -181,8 +115,19 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
+    let avatarToSave = avatar;
+    if (user && portraitBlob) {
+      const portraitPath = `${user.id}/portrait.webp`;
+      const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
+      if (uploadError) {
+        setSaving(false);
+        toast({ title: "Couldn't save portrait", description: uploadError.message, variant: "destructive" });
+        return;
+      }
+      avatarToSave = { ...avatar, portraitPath };
+    }
     const { error } = user
-      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatar as unknown as Json }).eq("user_id", user.id)
+      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
       : { error: new Error("Please sign in again.") };
     setSaving(false);
     if (error) {
@@ -191,23 +136,47 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       return;
     }
     setHandle(clean);
+    setAvatar(avatarToSave);
+    setPortraitBlob(undefined);
     dirty.current = false;
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-    onSaved?.(clean, avatar);
+    onSaved?.(clean, avatarToSave);
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Character saved", description: `Your new look is live as @${clean}.` });
   };
 
   const processPhoto = async (file: File) => {
     setProcessingPhoto(true);
+    setPhotoStage("Mapping facial details…");
     try {
-      const mappedAvatar = await mapPhotoToAvatar(file, avatar);
+      if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
+      const mappedAvatar = await mapFaceLandmarks(file, avatar);
       updateAvatar(mappedAvatar);
-      toast({ title: "Your emoji is ready", description: "Review the preview, tweak any feature, then save your profile." });
+      setPhotoStage("Creating realistic portrait…");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Please sign in again.");
+      const form = new FormData();
+      form.set("image", file, file.name || "selfie.jpg");
+      form.set("style", mappedAvatar.style);
+      form.set("appearance", JSON.stringify({
+        skinTone: mappedAvatar.skinTone, hairColor: mappedAvatar.hairColor, eyebrows: mappedAvatar.eyebrows,
+        ears: mappedAvatar.ears, jawline: mappedAvatar.jawline, eyeSpacing: mappedAvatar.eyeSpacing, noseShape: mappedAvatar.noseShape,
+      }));
+      const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-avatar-portrait`;
+      await streamPortrait(endpoint, form, {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      }, (dataUrl, isFinal) => {
+        setPortraitPreview(dataUrl);
+        setPhotoStage(isFinal ? "Portrait ready" : "Rendering preview…");
+        if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then(setPortraitBlob);
+      });
+      toast({ title: "Your portrait is ready", description: "Review it, fine-tune your features, then save your profile." });
     } catch (error) {
-      toast({ title: "Couldn't process photo", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
+      toast({ title: "Couldn't create portrait", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
       setProcessingPhoto(false);
+      setPhotoStage("");
     }
   };
 
@@ -217,7 +186,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <div className="relative shrink-0 p-1">
-          <ProfileAvatar config={avatar} className="h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32" label={handle || "Your"} />
+          <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">Avatar studio</span>
         </div>
         <div className="min-w-0 flex-1 text-left">
@@ -270,7 +239,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           cameraInput.current?.click();
         }}>
           {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
-          {processingPhoto ? "Creating Your Emoji…" : "Snap Your Face for Emoji"}
+           {processingPhoto ? (photoStage || "Creating Your Portrait…") : "Snap Your Face for Emoji"}
         </Button>
 
         <div>
