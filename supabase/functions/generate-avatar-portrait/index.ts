@@ -39,6 +39,8 @@ Deno.serve(async (req) => {
       return json({ error: "Use a JPG, PNG, WEBP, HEIC, or HEIF photo under 8 MB." }, 400);
     }
     if (style !== "woman" && style !== "man") return json({ error: "Choose a portrait style." }, 400);
+    const appearanceRaw = incoming.get("appearance");
+    const appearance = typeof appearanceRaw === "string" ? appearanceRaw.slice(0, 800) : "";
 
     const prompt = [
       "Create a premium, high-detail realistic illustrated profile portrait from the uploaded selfie.",
@@ -47,6 +49,7 @@ Deno.serve(async (req) => {
       "Head and shoulders, centered and facing camera, natural expression, realistic skin texture, dimensional rim lighting, subtle studio shadows, crisp eyes, detailed hair, dark charcoal background with restrained pink edge light.",
       "Polished luxury gaming-profile artwork, realistic illustration rather than a flat cartoon, icon, caricature, or plastic 3D character.",
       "No words, logo, frame, watermark, extra people, altered ethnicity, or exaggerated features.",
+      appearance ? `User-confirmed appearance notes to preserve: ${appearance}.` : "",
     ].join(" ");
 
     const upstreamForm = new FormData();
