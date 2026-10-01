@@ -125,8 +125,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     let avatarToSave = avatar;
+    let previousPortraitPath: string | undefined;
     if (user && portraitBlob) {
-      const previousPortraitPath = avatar.portraitPath;
+      previousPortraitPath = avatar.portraitPath;
       const portraitPath = `${user.id}/portrait-${Date.now()}.webp`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
       if (uploadError) {
@@ -135,9 +136,6 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         return;
       }
       avatarToSave = { ...avatar, portraitPath };
-      if (previousPortraitPath?.startsWith(`${user.id}/`) && previousPortraitPath !== portraitPath) {
-        void supabase.storage.from("profile-avatars").remove([previousPortraitPath]);
-      }
     }
     const { error } = user
       ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
@@ -151,6 +149,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setHandle(clean);
     setAvatar(avatarToSave);
     setPortraitBlob(undefined);
+    if (user && previousPortraitPath?.startsWith(`${user.id}/`) && previousPortraitPath !== avatarToSave.portraitPath) {
+      void supabase.storage.from("profile-avatars").remove([previousPortraitPath]);
+    }
     dirty.current = false;
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     void clearPortraitDraft().catch(() => undefined);
@@ -166,7 +167,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
       const mappedAvatar = await mapFaceLandmarks(file, avatar);
       updateAvatar(mappedAvatar);
-      setPhotoStage("Creating realistic portrait…");
+       setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Please sign in again.");
       const form = new FormData();
