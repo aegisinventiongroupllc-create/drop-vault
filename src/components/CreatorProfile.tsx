@@ -11,6 +11,7 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown } from "@/lib/tokenEconomy";
+import LegalFooter from "@/components/LegalFooter";
 
 interface Vault {
   name: string;
@@ -335,6 +336,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           </>
         )}
       </div>
+
+      <LegalFooter />
 
       {/* Custom Request Modal */}
       {showRequest && (

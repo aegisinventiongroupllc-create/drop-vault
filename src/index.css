@@ -83,12 +83,12 @@
     min-height: 100dvh;
     overflow-x: hidden;
     overflow-y: auto;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 11rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem);
     -webkit-overflow-scrolling: touch;
   }
 
   .bottom-nav-scroll-area {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 11rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 4.5rem);
     -webkit-overflow-scrolling: touch;
   }
 
