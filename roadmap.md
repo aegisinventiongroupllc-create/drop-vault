@@ -1,5 +1,7 @@
 # Roadmap
 
-- [x] Add women and men character styles to saved avatar profiles
-- [x] Rebuild profile controls as the selected cyber-neon visual studio
-- [x] Verify avatar rendering, saving, and mobile layout
+- [ ] Add robust on-device facial landmark mapping
+- [ ] Add authenticated streamed realistic portrait generation
+- [ ] Save generated portraits privately and render them across social views
+- [ ] Preserve Avatar Studio state through camera handoff and generation
+- [ ] Verify mobile studio flow, AI response, tests, and preview build
