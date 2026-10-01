@@ -42,6 +42,13 @@
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
 
+    --skin-light: 26 100% 88%;
+    --skin-warm: 27 72% 76%;
+    --skin-medium: 27 53% 65%;
+    --skin-deep: 25 37% 48%;
+    --skin-rich: 24 33% 34%;
+    --skin-dark: 23 28% 23%;
+
     --neon-glow: 0 0 12px hsl(330, 100%, 50%), 0 0 30px hsl(330, 100%, 50%, 0.3);
     --neon-glow-sm: 0 0 8px hsl(330, 100%, 50%, 0.6);
 
