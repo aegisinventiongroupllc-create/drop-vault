@@ -43,15 +43,16 @@ Deno.serve(async (req) => {
     const appearance = typeof appearanceRaw === "string" ? appearanceRaw.slice(0, 800) : "";
 
     const prompt = [
-      "Transform the uploaded selfie into a premium, high-detail illustrated gaming profile portrait.",
-      "The source selfie is the identity reference. Preserve the same person's recognizable face exactly: facial proportions, jaw and chin structure, eye shape and spacing, nose shape, eyebrow shape, skin tone, hairline, hairstyle and texture, facial hair, glasses, apparent age, and ethnicity.",
-      `Use the same clean, friendly, high-fidelity illustration standard for this ${style === "woman" ? "woman" : "man"}; gender changes presentation only and must never change rendering quality or facial identity.`,
-      "Visual medium: refined hand-painted digital character illustration with crisp intentional linework, softly modeled skin, layered cel shading, subtle pore and fabric texture, dimensional highlights and shadows, individually defined hair clumps and strands, expressive detailed eyes, and natural facial depth.",
-      "Composition: one person only, head and upper shoulders, centered, straight-on three-quarter-friendly portrait crop, relaxed confident expression, fully visible hair and chin, suitable for a circular profile crop.",
-      "Wardrobe: follow the user-confirmed clothing choice; use a clean dark garment with believable seams, folds, collar and fabric texture. Do not add writing or logos.",
-      "Lighting and backdrop: soft cool frontal key light, gentle charcoal shadows, restrained hot-pink rim light, deep charcoal studio background, premium dark-luxury social profile aesthetic.",
-      "The result must look like a polished professional illustrated character portrait—not a photograph, flat vector, simple emoji, generic cartoon, caricature, anime, children's art, plastic 3D render, or low-detail game asset.",
-      "Do not beautify away distinctive traits. Do not change body type, ethnicity, age, skin tone, facial structure, hair, facial hair, or eyewear. No words, logo, border, frame, watermark, extra person, extra face, extra limbs, or cropped chin.",
+      "IDENTITY-FIRST SELFIE EDIT: turn the person in the uploaded selfie into their own illustrated profile avatar. The uploaded selfie is the sole identity reference, not merely inspiration.",
+      "The finished face must remain unmistakably the same individual at first glance. Faithfully retain the person's exact face silhouette, forehead and hairline, cheek width, jaw and chin geometry, eye shape/color/spacing, eyelids, nose bridge/tip/width, mouth and lip shape, eyebrows, ears, skin tone and undertone, hairstyle/color/texture, facial hair, glasses, apparent age, ethnicity, asymmetry, and other distinguishing traits visible in the selfie.",
+      "Do not replace the face with a generic attractive man or woman. Do not average, idealize, slim, age, de-age, masculinize, feminize, change ethnicity, remove distinguishing features, or copy the facial identity of any example character.",
+      `Presentation mode is ${style === "woman" ? "woman" : "man"}. This controls styling only; it must not alter the source person's identity, and both modes receive identical detail and finish quality.`,
+      "ART DIRECTION: polished friendly semi-realistic 2D character portrait, like premium creator-profile artwork. Use crisp dark contour linework, softly painted skin, layered cel shading blended with subtle gradients, dimensional cheek and nose shadows, bright expressive detailed eyes with catchlights, carefully separated hair locks and strands, detailed facial hair where present, and believable fabric folds. Keep realistic human proportions while clearly remaining an illustration.",
+      "Composition: exactly one person, centered head and upper shoulders, near-front view matching the selfie, relaxed approachable expression, full hair and chin visible, generous safe space for a circular crop. Keep the selfie's camera orientation unless a small adjustment improves the profile crop.",
+      "Wardrobe: follow the user-confirmed clothing choice. Render a clean dark garment with visible collar, seams, folds, and soft fabric texture, without writing or logos.",
+      "Lighting and backdrop: soft cool frontal portrait light, dimensional charcoal shadows, a restrained pink edge light, and a simple deep-charcoal studio background. The face must be brighter and clearer than the background.",
+      "Avoid photorealism, flat vector art, basic emoji shapes, generic cartoon faces, caricature, anime, children's art, plastic 3D rendering, videogame screenshots, glamour retouching, or low-detail assets.",
+      "Output only the finished portrait. No words, letters, logo, watermark, border, frame, UI, extra person, extra face, extra limbs, obscured face, or cropped chin.",
       appearance ? `User-confirmed mapped appearance and wardrobe to preserve: ${appearance}.` : "",
     ].filter(Boolean).join(" ");
 
