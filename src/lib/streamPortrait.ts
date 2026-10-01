@@ -16,7 +16,26 @@ export async function streamPortrait(
   onFrame: (dataUrl: string, isFinal: boolean) => void,
 ) {
   const send = (stream: boolean) => fetch(endpoint, { method: "POST", headers, body: copyForm(input, stream) });
-  const response = await send(true);
+  const replayOnce = async () => {
+    const replay = await send(false);
+    if (!replay.ok) {
+      const body = await replay.text().catch(() => "");
+      let message = body;
+      try { message = (JSON.parse(body) as { error?: string }).error ?? body; } catch { /* use text */ }
+      throw new Error(message || `Portrait creation failed (${replay.status}).`);
+    }
+    const payload = await replay.json() as { data?: Array<{ b64_json?: string }> };
+    const image = payload.data?.[0]?.b64_json;
+    if (!image) throw new Error("Portrait creation returned no image.");
+    onFrame(`data:image/webp;base64,${image}`, true);
+  };
+  let response: Response;
+  try {
+    response = await send(true);
+  } catch {
+    // Mobile networks often drop live streams ("Load failed"); retry once without streaming.
+    return replayOnce();
+  }
   if (!response.ok || !response.body) {
     const body = await response.text().catch(() => "");
     let message = body;
@@ -53,22 +72,12 @@ export async function streamPortrait(
       if (chunk.done) break;
       parser.feed(chunk.value);
     }
-  } catch (error) {
-    if (sawEvent) throw error;
+  } catch {
+    // Connection dropped mid-stream; fall through to a single non-streaming retry.
   } finally {
     await reader.cancel().catch(() => undefined);
   }
   if (streamError) throw new Error(streamError);
   if (completed) return;
-  if (sawEvent) throw new Error("Portrait creation stopped before the final image was ready.");
-
-  const replay = await send(false);
-  if (!replay.ok) {
-    const body = await replay.text().catch(() => "");
-    throw new Error(body || `Portrait creation failed (${replay.status}).`);
-  }
-  const payload = await replay.json() as { data?: Array<{ b64_json?: string }> };
-  const image = payload.data?.[0]?.b64_json;
-  if (!image) throw new Error("Portrait creation returned no image.");
-  onFrame(`data:image/webp;base64,${image}`, true);
+  await replayOnce();
 }

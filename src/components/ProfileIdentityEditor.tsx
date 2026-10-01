@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
+import { normalizeSelfie } from "@/lib/normalizeSelfie";
 import { mapFaceLandmarks } from "@/lib/mapFaceLandmarks";
 import { streamPortrait } from "@/lib/streamPortrait";
 import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
@@ -164,6 +165,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setProcessingPhoto(true);
     setPhotoStage("Mapping facial details…");
     try {
+      file = await normalizeSelfie(file);
       if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
       // Landmark detection improves the editable controls, but it must never block
       // the server portrait generator on devices that cannot load MediaPipe/WASM
