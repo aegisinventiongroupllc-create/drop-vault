@@ -43,14 +43,17 @@ Deno.serve(async (req) => {
     const appearance = typeof appearanceRaw === "string" ? appearanceRaw.slice(0, 800) : "";
 
     const prompt = [
-      "Create a premium, high-detail realistic illustrated profile portrait from the uploaded selfie.",
-      "Preserve the same person's recognizable facial identity: exact face proportions, jaw structure, eye spacing, nose shape, eyebrows, skin tone, hairline, hair texture, facial hair, and eyewear.",
-      `Present the subject with a refined ${style === "woman" ? "feminine" : "masculine"} editorial finish without changing identity or apparent age.`,
-      "Head and shoulders, centered and facing camera, natural expression, realistic skin texture, dimensional rim lighting, subtle studio shadows, crisp eyes, detailed hair, dark charcoal background with restrained pink edge light.",
-      "Polished luxury gaming-profile artwork, realistic illustration rather than a flat cartoon, icon, caricature, or plastic 3D character.",
-      "No words, logo, frame, watermark, extra people, altered ethnicity, or exaggerated features.",
-      appearance ? `User-confirmed appearance notes to preserve: ${appearance}.` : "",
-    ].join(" ");
+      "Transform the uploaded selfie into a premium, high-detail illustrated gaming profile portrait.",
+      "The source selfie is the identity reference. Preserve the same person's recognizable face exactly: facial proportions, jaw and chin structure, eye shape and spacing, nose shape, eyebrow shape, skin tone, hairline, hairstyle and texture, facial hair, glasses, apparent age, and ethnicity.",
+      `Use the same clean, friendly, high-fidelity illustration standard for this ${style === "woman" ? "woman" : "man"}; gender changes presentation only and must never change rendering quality or facial identity.`,
+      "Visual medium: refined hand-painted digital character illustration with crisp intentional linework, softly modeled skin, layered cel shading, subtle pore and fabric texture, dimensional highlights and shadows, individually defined hair clumps and strands, expressive detailed eyes, and natural facial depth.",
+      "Composition: one person only, head and upper shoulders, centered, straight-on three-quarter-friendly portrait crop, relaxed confident expression, fully visible hair and chin, suitable for a circular profile crop.",
+      "Wardrobe: follow the user-confirmed clothing choice; use a clean dark garment with believable seams, folds, collar and fabric texture. Do not add writing or logos.",
+      "Lighting and backdrop: soft cool frontal key light, gentle charcoal shadows, restrained hot-pink rim light, deep charcoal studio background, premium dark-luxury social profile aesthetic.",
+      "The result must look like a polished professional illustrated character portrait—not a photograph, flat vector, simple emoji, generic cartoon, caricature, anime, children's art, plastic 3D render, or low-detail game asset.",
+      "Do not beautify away distinctive traits. Do not change body type, ethnicity, age, skin tone, facial structure, hair, facial hair, or eyewear. No words, logo, border, frame, watermark, extra person, extra face, extra limbs, or cropped chin.",
+      appearance ? `User-confirmed mapped appearance and wardrobe to preserve: ${appearance}.` : "",
+    ].filter(Boolean).join(" ");
 
     const upstreamForm = new FormData();
     upstreamForm.set("prompt", prompt);

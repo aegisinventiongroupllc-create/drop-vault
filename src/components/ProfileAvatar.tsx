@@ -16,6 +16,7 @@ export type AvatarJawline = "oval" | "heart" | "soft" | "square" | "strong" | "t
 export type AvatarStyle = "woman" | "man";
 export type AvatarEyeSpacing = "close" | "balanced" | "wide";
 export type AvatarNoseShape = "narrow" | "balanced" | "broad";
+export type AvatarClothing = "hoodie" | "crewneck" | "jacket" | "tshirt";
 
 export interface AvatarConfig {
   style: AvatarStyle;
@@ -32,6 +33,7 @@ export interface AvatarConfig {
   jawline: AvatarJawline;
   eyeSpacing: AvatarEyeSpacing;
   noseShape: AvatarNoseShape;
+  clothing: AvatarClothing;
   portraitPath?: string;
 }
 
@@ -43,11 +45,12 @@ export const AVATAR_GLASSES: AvatarGlasses[] = ["none", "round", "square", "avia
 export const AVATAR_EYEBROWS: AvatarEyebrows[] = ["soft", "straight", "arched", "bold", "split"];
 export const AVATAR_EARS: AvatarEars[] = ["small", "medium", "large", "pointed"];
 export const AVATAR_JAWLINES: AvatarJawline[] = ["oval", "heart", "soft", "square", "strong", "tapered"];
+export const AVATAR_CLOTHING: AvatarClothing[] = ["hoodie", "crewneck", "jacket", "tshirt"];
 
 export const DEFAULT_AVATAR: AvatarConfig = {
   style: "woman", face: "spark", tone: "rose", accent: "star", skinTone: "medium", hair: "waves",
   hairColor: "dark", facialHair: "none", glasses: "none", eyebrows: "soft", ears: "medium", jawline: "oval",
-  eyeSpacing: "balanced", noseShape: "balanced",
+  eyeSpacing: "balanced", noseShape: "balanced", clothing: "hoodie",
 };
 
 const allowed = <T extends string>(values: readonly T[], value: unknown, fallback: T): T =>
@@ -71,6 +74,7 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
     jawline: allowed(AVATAR_JAWLINES, candidate.jawline, DEFAULT_AVATAR.jawline),
     eyeSpacing: allowed(["close", "balanced", "wide"], candidate.eyeSpacing, DEFAULT_AVATAR.eyeSpacing),
     noseShape: allowed(["narrow", "balanced", "broad"], candidate.noseShape, DEFAULT_AVATAR.noseShape),
+    clothing: allowed(AVATAR_CLOTHING, candidate.clothing, DEFAULT_AVATAR.clothing),
     portraitPath: typeof candidate.portraitPath === "string" && candidate.portraitPath ? candidate.portraitPath : undefined,
   };
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, Ear, Glasses, Loader2, RotateCcw } from "lucide-react";
+import { Camera, Check, Ear, Glasses, Loader2, RotateCcw, Shirt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { streamPortrait } from "@/lib/streamPortrait";
 import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
 import ProfileAvatar, {
   AVATAR_EARS, AVATAR_EYEBROWS, AVATAR_FACIAL_HAIR, AVATAR_GLASSES, AVATAR_HAIR,
-  AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
+  AVATAR_JAWLINES, AVATAR_SKIN_TONES, AVATAR_CLOTHING, DEFAULT_AVATAR,
   parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
 
@@ -125,8 +125,10 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     let avatarToSave = avatar;
+    let previousPortraitPath: string | undefined;
     if (user && portraitBlob) {
-      const portraitPath = `${user.id}/portrait.webp`;
+      previousPortraitPath = avatar.portraitPath;
+      const portraitPath = `${user.id}/portrait-${Date.now()}.webp`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
       if (uploadError) {
         setSaving(false);
@@ -147,6 +149,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setHandle(clean);
     setAvatar(avatarToSave);
     setPortraitBlob(undefined);
+    if (user && previousPortraitPath?.startsWith(`${user.id}/`) && previousPortraitPath !== avatarToSave.portraitPath) {
+      void supabase.storage.from("profile-avatars").remove([previousPortraitPath]);
+    }
     dirty.current = false;
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     void clearPortraitDraft().catch(() => undefined);
@@ -162,7 +167,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
       const mappedAvatar = await mapFaceLandmarks(file, avatar);
       updateAvatar(mappedAvatar);
-      setPhotoStage("Creating realistic portrait…");
+       setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Please sign in again.");
       const form = new FormData();
@@ -171,6 +176,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       form.set("appearance", JSON.stringify({
         skinTone: mappedAvatar.skinTone, hairColor: mappedAvatar.hairColor, eyebrows: mappedAvatar.eyebrows,
         ears: mappedAvatar.ears, jawline: mappedAvatar.jawline, eyeSpacing: mappedAvatar.eyeSpacing, noseShape: mappedAvatar.noseShape,
+        hair: mappedAvatar.hair, facialHair: mappedAvatar.facialHair, glasses: mappedAvatar.glasses, clothing: mappedAvatar.clothing,
       }));
       const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-avatar-portrait`;
       await streamPortrait(endpoint, form, {
@@ -283,6 +289,14 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           <div className="flex gap-3 p-1">
             {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => updateAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <SunglassesIcon/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Clothing</p>
+          <div className="grid grid-cols-4 gap-2 p-1">
+            {AVATAR_CLOTHING.map((value) => <Button key={value} type="button" variant="outline" title={pretty(value)} aria-pressed={avatar.clothing === value} onClick={() => updateAvatar((current) => ({ ...current, clothing: value }))} className={`h-14 min-w-0 flex-col gap-0.5 rounded-md bg-secondary px-1 text-foreground ${avatar.clothing === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><Shirt className="h-5 w-5"/><span className="truncate text-[8px] font-bold uppercase">{pretty(value)}</span></Button>)}
+          </div>
+          {(portraitPreview || avatar.portraitPath) && <p className="mt-2 text-[10px] text-muted-foreground">Snap again after changing features or clothing to refresh your illustrated portrait.</p>}
         </div>
       </div>
 
