@@ -125,6 +125,19 @@ const mapPhotoToAvatar = async (file: File, current: AvatarConfig): Promise<Avat
   };
 };
 
+const DRAFT_KEY = "dtt_avatar_draft";
+
+const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { handle: typeof parsed.handle === "string" ? parsed.handle : undefined, avatar: parsed.avatar ? parseAvatarConfig(parsed.avatar) : undefined };
+  } catch {
+    return null;
+  }
+};
+
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -132,6 +145,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [saving, setSaving] = useState(false);
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
+  const dirty = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -142,9 +156,22 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         setHandle(data.display_name ?? "");
         setAvatar(parseAvatarConfig(data.avatar_config));
       }
+      // Unsaved edits (e.g. from before the camera opened) win over the stored profile.
+      const draft = readDraft();
+      if (draft?.handle !== undefined) setHandle(draft.handle);
+      if (draft?.avatar) { setAvatar(draft.avatar); dirty.current = true; }
       setLoading(false);
     })();
   }, []);
+
+  // Keep a draft of unsaved changes so nothing is lost if the screen reloads.
+  useEffect(() => {
+    if (loading || !dirty.current) return;
+    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ handle, avatar })); } catch { /* storage full */ }
+  }, [handle, avatar, loading]);
+
+  const updateAvatar: typeof setAvatar = (value) => { dirty.current = true; setAvatar(value); };
+  const updateHandle = (value: string) => { dirty.current = true; setHandle(value); };
 
   const save = async () => {
     const clean = handle.trim().replace(/^@/, "");
@@ -164,6 +191,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       return;
     }
     setHandle(clean);
+    dirty.current = false;
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     onSaved?.(clean, avatar);
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Character saved", description: `Your new look is live as @${clean}.` });
@@ -173,7 +202,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setProcessingPhoto(true);
     try {
       const mappedAvatar = await mapPhotoToAvatar(file, avatar);
-      setAvatar(mappedAvatar);
+      updateAvatar(mappedAvatar);
       toast({ title: "Your emoji is ready", description: "Review the preview, tweak any feature, then save your profile." });
     } catch (error) {
       toast({ title: "Couldn't process photo", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
@@ -196,14 +225,14 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           <p className="truncate text-lg font-bold text-foreground">@{handle || "your_handle"}</p>
           <p className="text-xs text-muted-foreground">Your email always stays private.</p>
         </div>
-        <Button type="button" variant="ghost" size="icon" onClick={() => setAvatar(DEFAULT_AVATAR)} title="Reset character" aria-label="Reset character">
+        <Button type="button" variant="ghost" size="icon" onClick={() => updateAvatar(DEFAULT_AVATAR)} title="Reset character" aria-label="Reset character">
           <RotateCcw />
         </Button>
       </div>
 
       <div className="text-left">
         <label htmlFor="display-handle" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Display name / gaming handle</label>
-        <Input id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" onChange={(event) => setHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
+        <Input id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" onChange={(event) => updateHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
       </div>
 
       <div className="space-y-5 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
@@ -218,7 +247,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
                 size="sm"
                 className="h-7 rounded-full px-4 text-[9px] font-black uppercase"
                 aria-pressed={avatar.style === style}
-                onClick={() => setAvatar((current) => ({
+                onClick={() => updateAvatar((current) => ({
                   ...current,
                   style,
                   jawline: style === "woman" ? "oval" : "strong",
@@ -247,30 +276,30 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Skin tone</p>
           <div className="grid grid-cols-6 gap-2 px-1">
-            {AVATAR_SKIN_TONES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.skinTone === value} onClick={() => setAvatar((current) => ({ ...current, skinTone: value }))} className={`aspect-square h-auto w-full rounded-full p-1 ${avatar.skinTone === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><span className={`h-full w-full rounded-full ${skinSwatches[value]}`} /><span className="sr-only">{pretty(value)}</span></Button>)}
+            {AVATAR_SKIN_TONES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.skinTone === value} onClick={() => updateAvatar((current) => ({ ...current, skinTone: value }))} className={`aspect-square h-auto w-full rounded-full p-1 ${avatar.skinTone === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><span className={`h-full w-full rounded-full ${skinSwatches[value]}`} /><span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
         </div>
 
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Hair &amp; facial hair</p>
           <div className="flex gap-2 overflow-x-auto p-1 pb-2 scrollbar-hide">
-            {AVATAR_HAIR.map((value) => <Button key={`hair-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.hair === value} onClick={() => setAvatar((current) => ({ ...current, hair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.hair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><HairIcon value={value}/><span className="sr-only">{pretty(value)} hair</span></Button>)}
-            {AVATAR_FACIAL_HAIR.map((value) => <Button key={`facial-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.facialHair === value} onClick={() => setAvatar((current) => ({ ...current, facialHair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.facialHair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><FacialHairIcon value={value}/><span className="sr-only">{pretty(value)}</span></Button>)}
+            {AVATAR_HAIR.map((value) => <Button key={`hair-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.hair === value} onClick={() => updateAvatar((current) => ({ ...current, hair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.hair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><HairIcon value={value}/><span className="sr-only">{pretty(value)} hair</span></Button>)}
+            {AVATAR_FACIAL_HAIR.map((value) => <Button key={`facial-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.facialHair === value} onClick={() => updateAvatar((current) => ({ ...current, facialHair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.facialHair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><FacialHairIcon value={value}/><span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
         </div>
 
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Facial features</p>
           <div className="space-y-2">
-            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EYEBROWS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} eyebrows`} aria-pressed={avatar.eyebrows === value} onClick={() => setAvatar((current) => ({ ...current, eyebrows: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.eyebrows === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><BrowIcon value={value}/></Button>)}</div>
-            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EARS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} ears`} aria-pressed={avatar.ears === value} onClick={() => setAvatar((current) => ({ ...current, ears: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.ears === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><Ear strokeWidth={value === "small" ? 1.5 : value === "large" ? 3 : 2}/></Button>)}{AVATAR_JAWLINES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} jaw`} aria-pressed={avatar.jawline === value} onClick={() => setAvatar((current) => ({ ...current, jawline: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.jawline === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><JawIcon value={value}/></Button>)}</div>
+            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EYEBROWS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} eyebrows`} aria-pressed={avatar.eyebrows === value} onClick={() => updateAvatar((current) => ({ ...current, eyebrows: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.eyebrows === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><BrowIcon value={value}/></Button>)}</div>
+            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EARS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} ears`} aria-pressed={avatar.ears === value} onClick={() => updateAvatar((current) => ({ ...current, ears: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.ears === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><Ear strokeWidth={value === "small" ? 1.5 : value === "large" ? 3 : 2}/></Button>)}{AVATAR_JAWLINES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} jaw`} aria-pressed={avatar.jawline === value} onClick={() => updateAvatar((current) => ({ ...current, jawline: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.jawline === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><JawIcon value={value}/></Button>)}</div>
           </div>
         </div>
 
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Accessories</p>
           <div className="flex gap-3 p-1">
-            {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => setAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <SunglassesIcon/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
+            {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => updateAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <SunglassesIcon/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
         </div>
       </div>
