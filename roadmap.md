@@ -11,3 +11,4 @@
 - [x] Verify generated portraits remain saved to the correct profile
 - [x] Make each creator's selfie the identity anchor for the polished illustrated avatar style
 - [x] Make snapped avatars privacy-safe cartoon likenesses matching the approved profile example
+- [ ] Creators: real profile photo shown in libraries (My Girls/My Guys); cartoon emoji used for messages, hearts, requests. Customers: cartoon only. (awaiting user go-ahead)

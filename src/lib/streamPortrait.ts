@@ -72,22 +72,12 @@ export async function streamPortrait(
       if (chunk.done) break;
       parser.feed(chunk.value);
     }
-  } catch (error) {
-    if (sawEvent) throw error;
+  } catch {
+    // Connection dropped mid-stream; fall through to a single non-streaming retry.
   } finally {
     await reader.cancel().catch(() => undefined);
   }
   if (streamError) throw new Error(streamError);
   if (completed) return;
-  if (sawEvent) throw new Error("Portrait creation stopped before the final image was ready.");
-
-  const replay = await send(false);
-  if (!replay.ok) {
-    const body = await replay.text().catch(() => "");
-    throw new Error(body || `Portrait creation failed (${replay.status}).`);
-  }
-  const payload = await replay.json() as { data?: Array<{ b64_json?: string }> };
-  const image = payload.data?.[0]?.b64_json;
-  if (!image) throw new Error("Portrait creation returned no image.");
-  onFrame(`data:image/webp;base64,${image}`, true);
+  await replayOnce();
 }
