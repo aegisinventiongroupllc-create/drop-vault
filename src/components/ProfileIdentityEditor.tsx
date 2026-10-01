@@ -7,6 +7,7 @@ import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { mapFaceLandmarks } from "@/lib/mapFaceLandmarks";
 import { streamPortrait } from "@/lib/streamPortrait";
+import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
 import ProfileAvatar, {
   AVATAR_EARS, AVATAR_EYEBROWS, AVATAR_FACIAL_HAIR, AVATAR_GLASSES, AVATAR_HAIR,
   AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
@@ -94,6 +95,14 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       const draft = readDraft();
       if (draft?.handle !== undefined) setHandle(draft.handle);
       if (draft?.avatar) { setAvatar(draft.avatar); dirty.current = true; }
+      try {
+        const portrait = await readPortraitDraft();
+        if (portrait) {
+          setPortraitBlob(portrait);
+          setPortraitPreview(URL.createObjectURL(portrait));
+          dirty.current = true;
+        }
+      } catch { /* device storage may be disabled */ }
       setLoading(false);
     })();
   }, []);
@@ -140,6 +149,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setPortraitBlob(undefined);
     dirty.current = false;
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+    void clearPortraitDraft().catch(() => undefined);
     onSaved?.(clean, avatarToSave);
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Character saved", description: `Your new look is live as @${clean}.` });
@@ -169,7 +179,10 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       }, (dataUrl, isFinal) => {
         setPortraitPreview(dataUrl);
         setPhotoStage(isFinal ? "Portrait ready" : "Rendering preview…");
-        if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then(setPortraitBlob);
+        if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then((blob) => {
+          setPortraitBlob(blob);
+          return savePortraitDraft(blob);
+        }).catch(() => undefined);
       });
       toast({ title: "Your portrait is ready", description: "Review it, fine-tune your features, then save your profile." });
     } catch (error) {
