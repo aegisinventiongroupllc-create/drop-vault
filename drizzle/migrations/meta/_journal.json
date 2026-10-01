@@ -64,6 +64,20 @@
       "when": 1790600652506,
       "tag": "0008_fix_comment_policy_recursion",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790883159904,
+      "tag": "0009_add_profile_avatar_and_unique_handles",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790883211108,
+      "tag": "0010_allow_safe_public_profile_view_reads",
+      "breakpoints": true
     }
   ]
 }

@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { useMyHearts } from "@/hooks/useHearts";
 import LegalFooter from "@/components/LegalFooter";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
@@ -55,6 +56,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
   const { hearts } = useMyHearts();
   const [savedNames, setSavedNames] = useState<Record<string, string>>({});
+  const [savedAvatars, setSavedAvatars] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     const ids = Array.from(new Set([...subs.map((s) => s.creator_id), ...hearts.map((h) => h.creator_id)]));
@@ -63,7 +65,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, vault_side, display_name")
+        .select("user_id, vault_side, display_name, avatar_config")
         .in("user_id", ids);
       if (cancel || !data) return;
       const map: Record<string, "women" | "men"> = {};
@@ -72,6 +74,9 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
       const names: Record<string, string> = {};
       data.forEach((p: any) => { names[p.user_id] = p.display_name || "creator"; });
       setSavedNames(names);
+      const avatars: Record<string, unknown> = {};
+      data.forEach((p: any) => { avatars[p.user_id] = p.avatar_config; });
+      setSavedAvatars(avatars);
     })();
     return () => { cancel = true; };
   }, [subs, hearts]);
@@ -187,7 +192,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
             isExpiringSoon ? "border-gold animate-pulse" : "border-primary/50"
           }`}
         >
-          {unlock.creatorName.slice(0, 2).toUpperCase()}
+          <ProfileAvatar config={savedAvatars[unlock.creatorId]} label={unlock.creatorName} className="h-full w-full border-0" />
         </button>
         <p className="text-[10px] font-semibold text-foreground truncate max-w-[96px] text-center">@{unlock.creatorName}</p>
         <p className={`text-[9px] ${isExpiringSoon ? "text-gold font-bold" : "text-primary"}`}>
@@ -304,9 +309,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                     {savedLocked.map((c) => (
                       <button key={c.id} onClick={() => onCreatorClick?.(c.name)} className="flex flex-col items-center gap-1 flex-shrink-0 w-20">
-                        <div className="w-16 h-16 rounded-full bg-secondary border-2 border-border flex items-center justify-center text-lg font-bold text-muted-foreground">
-                          {c.name.slice(0, 2).toUpperCase()}
-                        </div>
+                        <ProfileAvatar config={savedAvatars[c.id]} label={c.name} className="h-16 w-16" />
                         <span className="text-[10px] text-foreground truncate w-full text-center">@{c.name}</span>
                         <span className="text-[9px] font-bold text-primary">UNLOCK 14D</span>
                       </button>

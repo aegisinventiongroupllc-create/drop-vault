@@ -9,11 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { toggleHeart } from "@/hooks/useHearts";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 interface VideoItem {
   id: string;
   creator: string;
-  creatorAvatar: string;
+  creatorAvatar: unknown;
   title: string;
   description: string;
   likes: number;
@@ -26,6 +27,7 @@ interface VideoItem {
 }
 
 interface CommentRow { id: string; author_id: string; parent_id: string | null; body: string; created_at: string }
+interface PublicIdentity { display_name: string | null; avatar_config: unknown }
 
 // Production launch — empty until real creators sign up
 const MOCK_VIDEOS: VideoItem[] = [];
@@ -45,6 +47,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<CommentRow[]>([]);
+  const [commentAuthors, setCommentAuthors] = useState<Record<string, PublicIdentity>>({});
   const [replyTo, setReplyTo] = useState<CommentRow | null>(null);
   const isOwner = !!viewerId && viewerId === video.creatorId;
   const [isVisible, setIsVisible] = useState(false);
@@ -120,7 +123,15 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
       .eq("creator_id", video.creatorId)
       .order("created_at", { ascending: true })
       .limit(200);
-    setComments((data ?? []) as CommentRow[]);
+    const rows = (data ?? []) as CommentRow[];
+    setComments(rows);
+    const ids = Array.from(new Set(rows.map((comment) => comment.author_id)));
+    if (ids.length) {
+      const { data: authors } = await supabase.from("public_profiles").select("user_id, display_name, avatar_config").in("user_id", ids);
+      const mapped: Record<string, PublicIdentity> = {};
+      authors?.forEach((author) => { mapped[author.user_id] = { display_name: author.display_name, avatar_config: author.avatar_config }; });
+      setCommentAuthors(mapped);
+    }
   }, [video.creatorId]);
 
   useEffect(() => { if (showComments) loadComments(); }, [showComments, loadComments]);
@@ -197,7 +208,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
 
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
         <button className="flex flex-col items-center gap-1 active:scale-95 transition-transform" onClick={() => onCreatorClick(video.creator)}>
-          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">{video.creatorAvatar}</div>
+          <ProfileAvatar config={video.creatorAvatar} label={video.creator} />
         </button>
         <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
@@ -240,12 +251,15 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
                     onClick={() => setReplyTo(c)}
                     className={`w-full text-left rounded-lg p-2 ${replyTo?.id === c.id ? "bg-primary/10 border border-primary/40" : "bg-secondary/50"}`}
                   >
-                    <p className="text-[10px] font-bold text-muted-foreground">{c.author_id === viewerId ? "YOU" : "FAN"} · {new Date(c.created_at).toLocaleString()}</p>
+                    <div className="mb-1 flex items-center gap-2">
+                      <ProfileAvatar config={commentAuthors[c.author_id]?.avatar_config} label={commentAuthors[c.author_id]?.display_name || "Fan"} className="h-7 w-7" />
+                      <p className="text-[10px] font-bold text-muted-foreground">@{commentAuthors[c.author_id]?.display_name || (c.author_id === viewerId ? "you" : "fan")} · {new Date(c.created_at).toLocaleString()}</p>
+                    </div>
                     <p className="text-xs text-foreground/90 break-words">{c.body}</p>
                   </button>
                   {repliesFor(c.id).map((r) => (
                     <div key={r.id} className="ml-4 rounded-lg p-2 bg-primary/10">
-                      <p className="text-[10px] font-bold text-primary">@{video.creator.toUpperCase()}</p>
+                      <div className="mb-1 flex items-center gap-2"><ProfileAvatar config={video.creatorAvatar} label={video.creator} className="h-7 w-7" /><p className="text-[10px] font-bold text-primary">@{video.creator}</p></div>
                       <p className="text-xs text-foreground/90 break-words">{r.body}</p>
                     </div>
                   ))}
@@ -307,16 +321,17 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country")
+        .select("user_id, display_name, country, avatar_config")
         .in("user_id", creatorIds);
       const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
       const countMap: Record<string, number> = {};
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
-      const profMap: Record<string, { name: string; country: string }> = {};
+      const profMap: Record<string, { name: string; country: string; avatar: unknown }> = {};
       profs?.forEach((p) => {
         profMap[p.user_id] = {
           name: p.display_name || "creator",
           country: p.country || "GLOBAL",
+          avatar: p.avatar_config,
         };
       });
       const items: VideoItem[] = media.map((m) => {
@@ -326,7 +341,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         return {
           id: m.id,
           creator: name,
-          creatorAvatar: name.charAt(0).toUpperCase(),
+          creatorAvatar: prof?.avatar,
           title: m.title || "Teaser",
           description: "",
           likes: countMap[m.creator_id] ?? 0,

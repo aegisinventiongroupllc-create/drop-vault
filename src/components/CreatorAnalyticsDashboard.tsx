@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
+import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -43,9 +44,6 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
 
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [profileUsername, setProfileUsername] = useState("");
-  const [profileDisplayName, setProfileDisplayName] = useState("");
-  const [profileSaved, setProfileSaved] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified" | "failed">("none");
   const [idUploaded, setIdUploaded] = useState(false);
   const [ltcAddress, setLtcAddress] = useState("");
@@ -170,41 +168,14 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       if (!user) return;
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, email")
+        .select("display_name")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
-        setProfileDisplayName(data.display_name ?? "");
-        if (data.email) setProfileUsername(data.email.split("@")[0]);
+        setProfileUsername(data.display_name ?? "");
       }
     })();
   }, []);
-
-  const saveProfileInfo = async () => {
-    if (!profileUsername.trim() || !profileDisplayName.trim()) {
-      toast.error("Username and display name are required.");
-      return;
-    }
-    setSavingProfile(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please sign in first.");
-        return;
-      }
-      const { error } = await supabase
-        .from("profiles")
-        .update({ display_name: profileDisplayName.trim() } as any)
-        .eq("user_id", user.id);
-      if (error) throw error;
-      setProfileSaved(true);
-      toast.success("Profile info saved.");
-    } catch (e: any) {
-      toast.error(e?.message || "Could not save profile.");
-    } finally {
-      setSavingProfile(false);
-    }
-  };
 
   // Camera helpers for ID verification
   const startCamera = async () => {
@@ -695,43 +666,8 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <Users className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Profile Info</h3>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              Set your public username and display name. This is what fans will see on your vault.
-            </p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground tracking-wider">USERNAME</label>
-                <input
-                  type="text"
-                  value={profileUsername}
-                  onChange={(e) => { setProfileUsername(e.target.value.replace(/\s+/g, "").toLowerCase()); setProfileSaved(false); }}
-                  placeholder="e.g. neonqueen"
-                  className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1">dttmediallc.com/creator/{profileUsername || "username"}</p>
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground tracking-wider">DISPLAY NAME</label>
-                <input
-                  type="text"
-                  value={profileDisplayName}
-                  onChange={(e) => { setProfileDisplayName(e.target.value); setProfileSaved(false); }}
-                  placeholder="e.g. Neon Queen"
-                  className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
-                />
-              </div>
-              <Button
-                variant="neon"
-                className="w-full"
-                disabled={savingProfile || !profileUsername.trim() || !profileDisplayName.trim()}
-                onClick={saveProfileInfo}
-              >
-                {savingProfile ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> SAVING…</> : "SAVE PROFILE INFO"}
-              </Button>
-              {profileSaved && (
-                <p className="text-xs text-green-400 font-bold text-center">✓ Profile saved</p>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground mb-3">Build the private identity fans see throughout DTT. Your email and legal name are never shown.</p>
+            <ProfileIdentityEditor compact onSaved={(handle) => setProfileUsername(handle)} />
           </div>
 
           {/* ID Verification — manual KYC */}
