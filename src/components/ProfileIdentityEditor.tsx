@@ -7,7 +7,7 @@ import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import ProfileAvatar, {
   AVATAR_EARS, AVATAR_EYEBROWS, AVATAR_FACIAL_HAIR, AVATAR_GLASSES, AVATAR_HAIR,
-  AVATAR_HAIR_COLORS, AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
+  AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
   parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
 
@@ -20,8 +20,6 @@ const skinSwatches: Record<string, string> = {
 };
 
 const pretty = (value: string) => value.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
-
-const previewConfig = (avatar: AvatarConfig, key: LayerKey, value: string): AvatarConfig => ({ ...avatar, [key]: value });
 
 const HairIcon = ({ value }: { value: string }) => (
   <svg viewBox="0 0 48 48" aria-hidden="true">
