@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Camera, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 interface Vault {
   name: string;
@@ -22,8 +23,7 @@ interface Vault {
 
 const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: () => void }) => {
   const [showRequest, setShowRequest] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarConfig, setAvatarConfig] = useState<unknown>(null);
   const [showTipModal, setShowTipModal] = useState(false);
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
   const [tipSent, setTipSent] = useState(false);
@@ -43,11 +43,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id")
-        .eq("display_name", creatorName)
+        .select("user_id, avatar_config")
+        .ilike("display_name", creatorName)
         .limit(1)
         .maybeSingle();
-      if (!cancel) setCreatorId(data?.user_id ?? null);
+      if (!cancel) {
+        setCreatorId(data?.user_id ?? null);
+        setAvatarConfig(data?.avatar_config ?? null);
+      }
     })();
     return () => { cancel = true; };
   }, [creatorName]);
@@ -131,14 +134,6 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
   };
 
-  const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setProfileImage(url);
-    }
-  };
-
   return (
     <div className="mobile-scroll-shell">
       {/* Header */}
@@ -151,31 +146,16 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <WalletIndicator />
         </div>
 
-        {/* Avatar with upload */}
+        {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="relative w-24 h-24 rounded-full bg-secondary border-4 border-background flex items-center justify-center overflow-hidden neon-glow group"
-          >
-            {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-2xl font-bold text-primary">
-                {creatorName.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-            <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera className="w-6 h-6 text-primary" />
-            </div>
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleProfileUpload} />
+          <ProfileAvatar config={avatarConfig} label={creatorName} className="h-24 w-24 border-4 border-background neon-glow" />
         </div>
       </div>
 
       {/* Info */}
       <div className="pt-16 px-4 text-center">
         <div className="flex items-center justify-center gap-2">
-          <h2 className="text-xl font-bold text-foreground">{creatorName}</h2>
+          <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
           <BadgeCheck className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>

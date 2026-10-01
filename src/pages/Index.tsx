@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { logActivity } from "@/lib/activityLog";
 import LegalFooter from "@/components/LegalFooter";
+import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 
 const STORAGE_KEY = "dtt_user_prefs";
 
@@ -373,7 +374,7 @@ const Index = () => {
               <LanguageToggle />
             </div>
             <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
-            <p className="text-sm text-muted-foreground">{email}</p>
+            <ProfileIdentityEditor />
             <button
               onClick={() => {
                 logActivity("logout", "Customer profile tab").finally(() => {
