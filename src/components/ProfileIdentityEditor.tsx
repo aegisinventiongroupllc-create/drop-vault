@@ -162,6 +162,12 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   };
 
   const processPhoto = async (file: File) => {
+    // Admin passcode previews have no member account, so portraits can't be made or saved there.
+    const { data: { session: startSession } } = await supabase.auth.getSession();
+    if (!startSession) {
+      toast({ title: "Log in with a real account", description: "Admin preview has no account. Log in with a creator or customer email to make and save your emoji.", variant: "destructive" });
+      return;
+    }
     setProcessingPhoto(true);
     setPhotoStage("Mapping facial details…");
     try {
@@ -179,7 +185,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       updateAvatar(mappedAvatar);
       setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Please sign in again.");
+      if (!session) throw new Error("Your login expired. Log in again, then retake your photo.");
       const form = new FormData();
       form.set("image", file, file.name || "selfie.jpg");
       form.set("style", mappedAvatar.style);
