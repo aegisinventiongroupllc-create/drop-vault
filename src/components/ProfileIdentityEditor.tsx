@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, Ear, Glasses, Loader2, RotateCcw, Sunglasses } from "lucide-react";
+import { Camera, Check, Ear, Glasses, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,10 @@ const BrowIcon = ({ value }: { value: string }) => (
 
 const JawIcon = ({ value }: { value: string }) => (
   <svg viewBox="0 0 48 48" aria-hidden="true"><path d={value === "square" || value === "strong" ? "M8 8v21l10 11h12l10-11V8" : value === "heart" ? "M8 8v17q3 11 16 17 13-6 16-17V8" : value === "tapered" ? "M8 8v16q4 12 16 20 12-8 16-20V8" : "M8 8v18q4 14 16 16 12-2 16-16V8"} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
+);
+
+const SunglassesIcon = () => (
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16h38M8 18h14v5q0 9-7 9t-7-9Zm18 0h14v5q0 9-7 9t-7-9Zm-4 3h4" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
 );
 
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
@@ -176,7 +180,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Accessories</p>
           <div className="flex gap-3 p-1">
-            {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => setAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <Sunglasses/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
+            {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => setAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <SunglassesIcon/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
         </div>
       </div>
