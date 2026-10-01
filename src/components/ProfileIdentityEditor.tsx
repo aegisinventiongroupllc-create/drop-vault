@@ -125,6 +125,19 @@ const mapPhotoToAvatar = async (file: File, current: AvatarConfig): Promise<Avat
   };
 };
 
+const DRAFT_KEY = "dtt_avatar_draft";
+
+const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { handle: typeof parsed.handle === "string" ? parsed.handle : undefined, avatar: parsed.avatar ? parseAvatarConfig(parsed.avatar) : undefined };
+  } catch {
+    return null;
+  }
+};
+
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -132,6 +145,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [saving, setSaving] = useState(false);
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
+  const dirty = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -142,9 +156,22 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         setHandle(data.display_name ?? "");
         setAvatar(parseAvatarConfig(data.avatar_config));
       }
+      // Unsaved edits (e.g. from before the camera opened) win over the stored profile.
+      const draft = readDraft();
+      if (draft?.handle !== undefined) setHandle(draft.handle);
+      if (draft?.avatar) { setAvatar(draft.avatar); dirty.current = true; }
       setLoading(false);
     })();
   }, []);
+
+  // Keep a draft of unsaved changes so nothing is lost if the screen reloads.
+  useEffect(() => {
+    if (loading || !dirty.current) return;
+    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ handle, avatar })); } catch { /* storage full */ }
+  }, [handle, avatar, loading]);
+
+  const updateAvatar: typeof setAvatar = (value) => { dirty.current = true; setAvatar(value); };
+  const updateHandle = (value: string) => { dirty.current = true; setHandle(value); };
 
   const save = async () => {
     const clean = handle.trim().replace(/^@/, "");
@@ -164,6 +191,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       return;
     }
     setHandle(clean);
+    dirty.current = false;
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     onSaved?.(clean, avatar);
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Character saved", description: `Your new look is live as @${clean}.` });
@@ -173,7 +202,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setProcessingPhoto(true);
     try {
       const mappedAvatar = await mapPhotoToAvatar(file, avatar);
-      setAvatar(mappedAvatar);
+      updateAvatar(mappedAvatar);
       toast({ title: "Your emoji is ready", description: "Review the preview, tweak any feature, then save your profile." });
     } catch (error) {
       toast({ title: "Couldn't process photo", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });

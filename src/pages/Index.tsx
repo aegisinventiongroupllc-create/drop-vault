@@ -127,29 +127,34 @@ const Index = () => {
       setRoleHydrated(true);
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setRoleHydrated(false);
-        setAuthedUserId(session.user.id);
-        // Defer Supabase calls to avoid deadlocks inside the callback
-        setTimeout(() => hydrateRole(session.user.id, session.user.email ?? null), 0);
+    // Track which user we've already hydrated so token refreshes / tab refocus
+    // (e.g. returning from the phone camera) never unmount the current screen.
+    let hydratedUserId: string | null = null;
+    const handleSession = (userId: string | null, userEmail: string | null, defer: boolean) => {
+      if (userId) {
+        setAuthedUserId(userId);
+        if (hydratedUserId !== userId) {
+          hydratedUserId = userId;
+          setRoleHydrated(false);
+          if (defer) setTimeout(() => hydrateRole(userId, userEmail), 0);
+          else hydrateRole(userId, userEmail);
+        }
       } else {
+        hydratedUserId = null;
         setAuthedUserId(null);
         setRoleChosen(false);
         setRoleHydrated(true);
       }
       setAuthReady(true);
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Defer Supabase calls to avoid deadlocks inside the callback
+      handleSession(session?.user?.id ?? null, session?.user?.email ?? null, true);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setRoleHydrated(false);
-        setAuthedUserId(session.user.id);
-        hydrateRole(session.user.id, session.user.email ?? null);
-      } else {
-        setRoleHydrated(true);
-      }
-      setAuthReady(true);
+      handleSession(session?.user?.id ?? null, session?.user?.email ?? null, false);
     });
 
     return () => sub.subscription.unsubscribe();
