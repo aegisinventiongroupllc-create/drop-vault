@@ -8,7 +8,7 @@ export async function editImage(config: ImageConfig, form: FormData) {
   const streaming = form.get("stream") !== "false";
   form.set("model", config.model);
   form.set("size", "1024x1024");
-  form.set("quality", "high");
+  form.set("quality", "max");
   form.set("output_format", "webp");
   if (streaming) {
     form.set("stream", "true");

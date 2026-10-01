@@ -9,3 +9,4 @@
 
 - [x] Upgrade photo-generated avatars to a consistent high-detail illustrated portrait style for women and men
 - [x] Verify generated portraits remain saved to the correct profile
+- [x] Make each creator's selfie the identity anchor for the polished illustrated avatar style
