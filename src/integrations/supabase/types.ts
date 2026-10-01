@@ -591,6 +591,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_config: Json
           avatar_url: string | null
           country: string | null
           created_at: string
@@ -611,6 +612,7 @@ export type Database = {
           verification_submitted_at: string | null
         }
         Insert: {
+          avatar_config?: Json
           avatar_url?: string | null
           country?: string | null
           created_at?: string
@@ -631,6 +633,7 @@ export type Database = {
           verification_submitted_at?: string | null
         }
         Update: {
+          avatar_config?: Json
           avatar_url?: string | null
           country?: string | null
           created_at?: string
@@ -818,6 +821,7 @@ export type Database = {
     Views: {
       public_profiles: {
         Row: {
+          avatar_config: Json | null
           country: string | null
           created_at: string | null
           display_name: string | null
@@ -826,6 +830,7 @@ export type Database = {
           vault_side: string | null
         }
         Insert: {
+          avatar_config?: Json | null
           country?: string | null
           created_at?: string | null
           display_name?: string | null
@@ -834,6 +839,7 @@ export type Database = {
           vault_side?: string | null
         }
         Update: {
+          avatar_config?: Json | null
           country?: string | null
           created_at?: string | null
           display_name?: string | null
