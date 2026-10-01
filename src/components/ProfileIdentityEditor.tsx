@@ -54,11 +54,83 @@ const SunglassesIcon = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16h38M8 18h14v5q0 9-7 9t-7-9Zm18 0h14v5q0 9-7 9t-7-9Zm-4 3h4" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
 );
 
+const loadImage = (file: File): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  image.onload = () => {
+    URL.revokeObjectURL(objectUrl);
+    resolve(image);
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(objectUrl);
+    reject(new Error("This image could not be read."));
+  };
+  image.src = objectUrl;
+});
+
+const averageRegion = (context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
+  const pixels = context.getImageData(x, y, width, height).data;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  let samples = 0;
+  for (let index = 0; index < pixels.length; index += 16) {
+    if (pixels[index + 3] < 128) continue;
+    red += pixels[index];
+    green += pixels[index + 1];
+    blue += pixels[index + 2];
+    samples += 1;
+  }
+  return samples ? { red: red / samples, green: green / samples, blue: blue / samples } : { red: 128, green: 100, blue: 85 };
+};
+
+const mapPhotoToAvatar = async (file: File, current: AvatarConfig): Promise<AvatarConfig> => {
+  const image = await loadImage(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = 160;
+  canvas.height = 160;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("Photo processing is unavailable on this device.");
+
+  const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+  const sourceX = Math.max(0, (image.naturalWidth - sourceSize) / 2);
+  const sourceY = Math.max(0, (image.naturalHeight - sourceSize) / 2);
+  context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, 160, 160);
+
+  const face = averageRegion(context, 52, 50, 56, 72);
+  const hair = averageRegion(context, 42, 18, 76, 34);
+  const full = averageRegion(context, 20, 20, 120, 120);
+  const faceLight = (face.red * 0.299) + (face.green * 0.587) + (face.blue * 0.114);
+  const hairLight = (hair.red * 0.299) + (hair.green * 0.587) + (hair.blue * 0.114);
+  const contrast = Math.abs(faceLight - hairLight);
+  const imageSeed = Math.round(full.red + full.green * 2 + full.blue * 3);
+
+  const skinTone: AvatarConfig["skinTone"] = faceLight > 210 ? "light" : faceLight > 180 ? "warm" : faceLight > 145 ? "medium" : faceLight > 110 ? "deep" : faceLight > 78 ? "rich" : "dark";
+  const hairColor: AvatarConfig["hairColor"] = hairLight < 55 ? "dark" : hair.red > hair.green * 1.3 ? "red" : hair.red > 145 && hair.green > 120 ? "blonde" : hairLight > 175 ? "silver" : "brown";
+  const womanHair: AvatarConfig["hair"][] = ["waves", "long", "curls", "crop"];
+  const manHair: AvatarConfig["hair"][] = ["crop", "waves", "curls", "mohawk"];
+  const hairOptions = current.style === "woman" ? womanHair : manHair;
+  const browOptions: AvatarConfig["eyebrows"][] = ["soft", "straight", "arched", "bold"];
+  const jawOptions: AvatarConfig["jawline"][] = current.style === "woman" ? ["oval", "heart", "soft", "tapered"] : ["square", "strong", "tapered", "oval"];
+
+  return {
+    ...current,
+    skinTone,
+    hairColor,
+    hair: contrast < 18 ? "none" : hairOptions[imageSeed % hairOptions.length],
+    eyebrows: browOptions[Math.floor(imageSeed / 3) % browOptions.length],
+    jawline: jawOptions[Math.floor(imageSeed / 7) % jawOptions.length],
+    ears: contrast > 95 ? "large" : contrast > 55 ? "medium" : "small",
+    facialHair: current.style === "man" && hairLight < 80 ? (["stubble", "goatee", "beard"] as const)[imageSeed % 3] : "none",
+  };
+};
+
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [processingPhoto, setProcessingPhoto] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -95,6 +167,19 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     onSaved?.(clean, avatar);
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Character saved", description: `Your new look is live as @${clean}.` });
+  };
+
+  const processPhoto = async (file: File) => {
+    setProcessingPhoto(true);
+    try {
+      const mappedAvatar = await mapPhotoToAvatar(file, avatar);
+      setAvatar(mappedAvatar);
+      toast({ title: "Your emoji is ready", description: "Review the preview, tweak any feature, then save your profile." });
+    } catch (error) {
+      toast({ title: "Couldn't process photo", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
+    } finally {
+      setProcessingPhoto(false);
+    }
   };
 
   if (loading) return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
@@ -147,11 +232,16 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           </div>
         </div>
         <input ref={cameraInput} type="file" accept="image/*" capture="user" className="sr-only" onChange={(event) => {
-          if (event.target.files?.[0]) toast({ title: "Face captured", description: "Use the choices below to create your emoji." });
+          const file = event.target.files?.[0];
+          if (file) void processPhoto(file);
           event.target.value = "";
         }} />
-        <Button type="button" variant="outline" className="h-14 w-full border-primary/70 bg-secondary text-base font-bold text-foreground hover:bg-secondary/80" onClick={() => cameraInput.current?.click()}>
-          <Camera className="h-6 w-6" /> Snap Your Face for Emoji
+        <Button type="button" variant="outline" disabled={processingPhoto} className="h-14 w-full border-primary/70 bg-secondary text-base font-bold text-foreground hover:bg-secondary/80" onClick={() => {
+          sessionStorage.setItem("dtt_active_tab", "profile");
+          cameraInput.current?.click();
+        }}>
+          {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+          {processingPhoto ? "Creating Your Emoji…" : "Snap Your Face for Emoji"}
         </Button>
 
         <div>
