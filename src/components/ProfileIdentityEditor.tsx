@@ -165,9 +165,17 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     setPhotoStage("Mapping facial details…");
     try {
       if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
-      const mappedAvatar = await mapFaceLandmarks(file, avatar);
+      // Landmark detection improves the editable controls, but it must never block
+      // the server portrait generator on devices that cannot load MediaPipe/WASM
+      // or decode a camera-specific image format.
+      let mappedAvatar = avatar;
+      try {
+        mappedAvatar = await mapFaceLandmarks(file, avatar);
+      } catch {
+        setPhotoStage("Reading your photo securely…");
+      }
       updateAvatar(mappedAvatar);
-       setPhotoStage("Creating illustrated portrait…");
+      setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Please sign in again.");
       const form = new FormData();
