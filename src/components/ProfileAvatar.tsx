@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export type AvatarFace = "spark" | "rogue" | "nova" | "pixel" | "orbit" | "crown";
 export type AvatarTone = "rose" | "cyan" | "gold" | "lime" | "violet" | "silver";
@@ -12,6 +14,8 @@ export type AvatarEyebrows = "soft" | "straight" | "arched" | "bold" | "split";
 export type AvatarEars = "small" | "medium" | "large" | "pointed";
 export type AvatarJawline = "oval" | "heart" | "soft" | "square" | "strong" | "tapered";
 export type AvatarStyle = "woman" | "man";
+export type AvatarEyeSpacing = "close" | "balanced" | "wide";
+export type AvatarNoseShape = "narrow" | "balanced" | "broad";
 
 export interface AvatarConfig {
   style: AvatarStyle;
@@ -26,6 +30,9 @@ export interface AvatarConfig {
   eyebrows: AvatarEyebrows;
   ears: AvatarEars;
   jawline: AvatarJawline;
+  eyeSpacing: AvatarEyeSpacing;
+  noseShape: AvatarNoseShape;
+  portraitPath?: string;
 }
 
 export const AVATAR_SKIN_TONES: AvatarSkinTone[] = ["light", "warm", "medium", "deep", "rich", "dark"];
@@ -40,6 +47,7 @@ export const AVATAR_JAWLINES: AvatarJawline[] = ["oval", "heart", "soft", "squar
 export const DEFAULT_AVATAR: AvatarConfig = {
   style: "woman", face: "spark", tone: "rose", accent: "star", skinTone: "medium", hair: "waves",
   hairColor: "dark", facialHair: "none", glasses: "none", eyebrows: "soft", ears: "medium", jawline: "oval",
+  eyeSpacing: "balanced", noseShape: "balanced",
 };
 
 const allowed = <T extends string>(values: readonly T[], value: unknown, fallback: T): T =>
@@ -61,6 +69,9 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
     eyebrows: allowed(AVATAR_EYEBROWS, candidate.eyebrows, DEFAULT_AVATAR.eyebrows),
     ears: allowed(AVATAR_EARS, candidate.ears, DEFAULT_AVATAR.ears),
     jawline: allowed(AVATAR_JAWLINES, candidate.jawline, DEFAULT_AVATAR.jawline),
+    eyeSpacing: allowed(["close", "balanced", "wide"], candidate.eyeSpacing, DEFAULT_AVATAR.eyeSpacing),
+    noseShape: allowed(["narrow", "balanced", "broad"], candidate.noseShape, DEFAULT_AVATAR.noseShape),
+    portraitPath: typeof candidate.portraitPath === "string" && candidate.portraitPath ? candidate.portraitPath : undefined,
   };
 };
 
@@ -120,13 +131,29 @@ const FacialHair = ({ style, color }: { style: AvatarFacialHair; color: string }
   return <path d="M32 61 Q37 74 42 78 L50 87 L58 78 Q65 74 68 61 Q63 72 57 70 Q50 76 43 70 Q37 72 32 61Z" className={color} />;
 };
 
-const ProfileAvatar = ({ config, className, label }: { config?: unknown; className?: string; label?: string }) => {
+const portraitCache = new Map<string, string>();
+
+const ProfileAvatar = ({ config, className, label, previewUrl }: { config?: unknown; className?: string; label?: string; previewUrl?: string }) => {
   const avatar = parseAvatarConfig(config);
+  const [portraitUrl, setPortraitUrl] = useState(previewUrl ?? (avatar.portraitPath ? portraitCache.get(avatar.portraitPath) : undefined));
   const skin = skinClasses[avatar.skinTone];
   const hair = hairClasses[avatar.hairColor];
+  useEffect(() => {
+    if (previewUrl) { setPortraitUrl(previewUrl); return; }
+    if (!avatar.portraitPath) { setPortraitUrl(undefined); return; }
+    const cached = portraitCache.get(avatar.portraitPath);
+    if (cached) { setPortraitUrl(cached); return; }
+    let active = true;
+    void supabase.storage.from("profile-avatars").createSignedUrl(avatar.portraitPath, 3600).then(({ data }) => {
+      if (!active || !data?.signedUrl) return;
+      portraitCache.set(avatar.portraitPath as string, data.signedUrl);
+      setPortraitUrl(data.signedUrl);
+    });
+    return () => { active = false; };
+  }, [avatar.portraitPath, previewUrl]);
   return (
     <div className={cn("relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-secondary", className)} role="img" aria-label={label ? `${label}'s custom avatar` : "Custom profile avatar"}>
-      <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+      {portraitUrl ? <img src={portraitUrl} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
         <circle cx="50" cy="50" r="50" className="fill-card" />
         <Ears style={avatar.ears} skin={skin} />
         <path d={jawPaths[avatar.jawline]} className={skin} />
@@ -139,7 +166,7 @@ const ProfileAvatar = ({ config, className, label }: { config?: unknown; classNa
         <path d={avatar.style === "woman" ? "M42 68 Q50 74 58 68" : "M43 69 Q50 71 57 69"} fill="none" className="stroke-foreground/70" strokeWidth="1.7" strokeLinecap="round" />
         <FacialHair style={avatar.facialHair} color={hair} />
         <Glasses style={avatar.glasses} />
-      </svg>
+      </svg>}
     </div>
   );
 };

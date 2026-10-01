@@ -92,6 +92,27 @@
       "when": 1790885011280,
       "tag": "0012_add_avatar_style_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790887950229,
+      "tag": "0013_secure_profile_avatar_uploads",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790888005962,
+      "tag": "0014_remove_anonymous_avatar_storage_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790888075195,
+      "tag": "0015_extend_portrait_avatar_configuration",
+      "breakpoints": true
     }
   ]
 }

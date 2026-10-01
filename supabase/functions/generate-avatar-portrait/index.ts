@@ -1,0 +1,78 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { editImage } from "../_shared/image-gateway.ts";
+
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
+
+const json = (body: unknown, status: number) => new Response(JSON.stringify(body), {
+  status,
+  headers: { ...corsHeaders, "Content-Type": "application/json" },
+});
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) return json({ error: "Please sign in again." }, 401);
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!supabaseUrl || !anonKey || !lovableApiKey) return json({ error: "Portrait creation is not configured." }, 500);
+
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const token = authHeader.slice(7);
+    const { data: claims, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claims?.claims?.sub) return json({ error: "Please sign in again." }, 401);
+
+    const incoming = await req.formData();
+    const image = incoming.get("image");
+    const style = incoming.get("style");
+    if (!(image instanceof File)) return json({ error: "Choose a selfie first." }, 400);
+    if (!ALLOWED_IMAGE_TYPES.has(image.type) || image.size <= 0 || image.size > MAX_IMAGE_BYTES) {
+      return json({ error: "Use a JPG, PNG, WEBP, HEIC, or HEIF photo under 8 MB." }, 400);
+    }
+    if (style !== "woman" && style !== "man") return json({ error: "Choose a portrait style." }, 400);
+    const appearanceRaw = incoming.get("appearance");
+    const appearance = typeof appearanceRaw === "string" ? appearanceRaw.slice(0, 800) : "";
+
+    const prompt = [
+      "Create a premium, high-detail realistic illustrated profile portrait from the uploaded selfie.",
+      "Preserve the same person's recognizable facial identity: exact face proportions, jaw structure, eye spacing, nose shape, eyebrows, skin tone, hairline, hair texture, facial hair, and eyewear.",
+      `Present the subject with a refined ${style === "woman" ? "feminine" : "masculine"} editorial finish without changing identity or apparent age.`,
+      "Head and shoulders, centered and facing camera, natural expression, realistic skin texture, dimensional rim lighting, subtle studio shadows, crisp eyes, detailed hair, dark charcoal background with restrained pink edge light.",
+      "Polished luxury gaming-profile artwork, realistic illustration rather than a flat cartoon, icon, caricature, or plastic 3D character.",
+      "No words, logo, frame, watermark, extra people, altered ethnicity, or exaggerated features.",
+      appearance ? `User-confirmed appearance notes to preserve: ${appearance}.` : "",
+    ].join(" ");
+
+    const upstreamForm = new FormData();
+    upstreamForm.set("prompt", prompt);
+    upstreamForm.set("image", image, "selfie");
+    upstreamForm.set("stream", incoming.get("stream") === "false" ? "false" : "true");
+
+    const upstream = await editImage({
+      baseURL: "https://ai.gateway.lovable.dev",
+      apiKey: lovableApiKey,
+      model: "openai/gpt-image-2.5-sunburst",
+    }, upstreamForm);
+
+    const headers = new Headers(corsHeaders);
+    headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "application/json");
+    headers.set("Cache-Control", "no-store");
+    upstream.headers.forEach((value, name) => {
+      if (name.toLowerCase().startsWith("x-lovable-aig-")) headers.set(name, value);
+    });
+    headers.set("Access-Control-Expose-Headers", "X-Lovable-AIG-Run-ID");
+    return new Response(upstream.body, { status: upstream.status, headers });
+  } catch (error) {
+    console.error("Avatar portrait generation failed", error);
+    return json({ error: error instanceof Error ? error.message : "Portrait creation failed." }, 500);
+  }
+});
