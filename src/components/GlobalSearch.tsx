@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import { MOCK_VIDEOS, type VideoItem } from "@/components/DiscoveryFeed";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 interface SearchResult {
   name: string;
@@ -89,9 +90,7 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
             onClick={() => { onCreatorClick(creator.name); onClose(); }}
             className="w-full flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:border-primary/50 active:bg-card/80 transition-all"
           >
-            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-primary">
-              {creator.name.slice(0, 2).toUpperCase()}
-            </div>
+            <ProfileAvatar label={creator.name} className="h-12 w-12" />
             <div className="flex-1 text-left">
               <div className="flex items-center gap-1.5">
                 <p className="font-semibold text-foreground">@{creator.name}</p>

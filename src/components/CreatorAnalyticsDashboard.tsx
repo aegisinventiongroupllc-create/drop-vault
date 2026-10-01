@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
+import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -54,6 +55,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileAvatar, setProfileAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
   const [requestActions, setRequestActions] = useState<Record<string, { action: "accepted" | "declined"; tokenPrice?: number; reason?: string }>>({});
@@ -88,12 +90,13 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
     const load = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("verification_status")
+        .select("verification_status, avatar_config")
         .eq("user_id", authUserId)
         .maybeSingle();
       if (!cancelled && data?.verification_status) {
         setKycStatus(data.verification_status as any);
       }
+      if (!cancelled && data?.avatar_config) setProfileAvatar(parseAvatarConfig(data.avatar_config));
     };
     load();
     const channel = supabase
@@ -409,17 +412,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           <button onClick={handleLogout} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground" aria-label="Log out">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="relative w-10 h-10 rounded-full bg-secondary border-2 border-primary/50 flex items-center justify-center overflow-hidden group"
-          >
-            {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <Camera className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-            )}
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleProfileUpload} />
+          <ProfileAvatar config={profileAvatar} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -571,9 +564,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               {TOP_FANS.map(fan => (
                 <div key={fan.rank} className="flex items-center gap-3">
                   <span className={`text-sm font-bold w-5 text-right ${fan.rank <= 3 ? "text-gold" : "text-muted-foreground"}`}>{fan.rank}</span>
-                  <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-primary">
-                    {fan.name.slice(0, 2).toUpperCase()}
-                  </div>
+                  <ProfileAvatar label={fan.name} className="h-7 w-7" />
                   <span className="text-xs text-foreground flex-1">@{fan.name}</span>
                   <span className="text-xs font-bold text-gold">${fan.spent}</span>
                 </div>
@@ -667,7 +658,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
               <h3 className="text-base font-semibold text-foreground">Profile Info</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-3">Build the private identity fans see throughout DTT. Your email and legal name are never shown.</p>
-            <ProfileIdentityEditor compact onSaved={(handle) => setProfileUsername(handle)} />
+              <ProfileIdentityEditor compact onSaved={(handle, avatar) => { setProfileUsername(handle); setProfileAvatar(avatar); }} />
           </div>
 
           {/* ID Verification — manual KYC */}
