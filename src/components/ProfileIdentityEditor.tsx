@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Glasses, Loader2, RotateCcw, UserRound } from "lucide-react";
+import { Check, Glasses, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
