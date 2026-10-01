@@ -22,6 +22,7 @@ import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { logActivity } from "@/lib/activityLog";
+import LegalFooter from "@/components/LegalFooter";
 
 const STORAGE_KEY = "dtt_user_prefs";
 
@@ -366,36 +367,33 @@ const Index = () => {
         />
       )}
       {activeTab === "profile" && (
-        <div className="mobile-scroll-shell flex flex-col items-center justify-center gap-4">
-          <div className="absolute top-4 right-4">
-            <LanguageToggle />
+        <div className="mobile-scroll-shell flex flex-col">
+          <div className="relative flex flex-1 flex-col items-center justify-center gap-4 px-4 py-16">
+            <div className="absolute top-4 right-4">
+              <LanguageToggle />
+            </div>
+            <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
+            <p className="text-sm text-muted-foreground">{email}</p>
+            <button
+              onClick={() => {
+                logActivity("logout", "Customer profile tab").finally(() => {
+                  supabase.auth.signOut();
+                });
+                localStorage.removeItem(STORAGE_KEY);
+                setRole(null);
+                setVault(null);
+                setPreference(null);
+                setEmail("");
+                setAuthedUserId(null);
+                setRoleChosen(false);
+                setVerified(true);
+              }}
+              className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"
+            >
+              {t.log_out}
+            </button>
           </div>
-          <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
-          <p className="text-sm text-muted-foreground">{email}</p>
-          <button
-            onClick={() => {
-              logActivity("logout", "Customer profile tab").finally(() => {
-                supabase.auth.signOut();
-              });
-              localStorage.removeItem(STORAGE_KEY);
-              setRole(null);
-              setVault(null);
-              setPreference(null);
-              setEmail("");
-              setAuthedUserId(null);
-              setRoleChosen(false);
-              setVerified(true);
-            }}
-            className="px-6 py-2.5 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-bold tracking-wider text-destructive hover:bg-destructive/30 transition-all"
-          >
-            {t.log_out}
-          </button>
-          <button
-            onClick={() => setShowLegal(true)}
-            className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors mt-2"
-          >
-            {t.terms} & {t.privacy}
-          </button>
+          <LegalFooter />
         </div>
       )}
       <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={setActiveTab} />

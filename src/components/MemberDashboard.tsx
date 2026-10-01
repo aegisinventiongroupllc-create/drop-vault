@@ -16,6 +16,7 @@ import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { useMyHearts } from "@/hooks/useHearts";
+import LegalFooter from "@/components/LegalFooter";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
@@ -419,6 +420,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
           ))}
         </div>
       )}
+
+      <LegalFooter />
 
       {showBuyModal && (
         <BuyTokensModal onClose={() => { setShowBuyModal(false); setRenewCreator(null); }} onPurchase={onBuyTokens} />

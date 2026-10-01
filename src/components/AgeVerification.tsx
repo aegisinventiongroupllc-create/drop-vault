@@ -5,6 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import LanguageToggle from "@/components/LanguageToggle";
+import LegalFooter from "@/components/LegalFooter";
 
 const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const { t } = useI18n();
@@ -40,13 +41,14 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
       {/* Language toggle top-right */}
       <div className="absolute top-4 right-4 z-50">
         <LanguageToggle />
       </div>
 
-      <div className="flex flex-col items-center gap-5 px-6 text-center max-w-sm">
+      <div className="flex min-h-full flex-col">
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center neon-glow">
             <ShieldCheck className="w-10 h-10 text-primary" />
@@ -92,9 +94,8 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
           </Button>
         </div>
 
-        <p className="text-[10px] text-muted-foreground/50">
-          {t.copyright}
-        </p>
+      </div>
+      <LegalFooter />
       </div>
     </div>
   );

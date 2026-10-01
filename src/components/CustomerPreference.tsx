@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import LegalFooter from "@/components/LegalFooter";
 
 export type GenderPreference = "women" | "men" | "both";
 
@@ -8,8 +9,9 @@ interface CustomerPreferenceProps {
 
 const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-8 px-6 text-center max-w-sm w-full">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+      <div className="flex min-h-full flex-col">
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-8 px-6 py-12 text-center">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
             DROPTHAT<span className="text-primary">THING</span>
@@ -44,9 +46,8 @@ const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
           </Button>
         </div>
 
-        <p className="text-[10px] text-muted-foreground/50">
-          © {new Date().getFullYear()} DTT. All rights reserved.
-        </p>
+      </div>
+      <LegalFooter />
       </div>
     </div>
   );
