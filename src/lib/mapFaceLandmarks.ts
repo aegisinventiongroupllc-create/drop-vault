@@ -28,10 +28,7 @@ const getLandmarker = async () => {
     landmarkerPromise = (async () => {
       const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
       const wasmRoot = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm";
-      const vision = await FilesetResolver.forVisionTasks({
-        wasmLoaderPath: `${wasmRoot}/vision_wasm_internal.js`,
-        wasmBinaryPath: `${wasmRoot}/vision_wasm_internal.wasm`,
-      });
+      const vision = await FilesetResolver.forVisionTasks(wasmRoot);
       return FaceLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: "/models/mediapipe/face_landmarker.task" },
         runningMode: "IMAGE",
