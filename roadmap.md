@@ -5,4 +5,4 @@
 - [x] Save generated portraits privately and render them across social views
 - [x] Preserve Avatar Studio state through camera handoff and generation
 - [x] Verify mobile studio flow, AI response, tests, and preview build
-- [ ] Restrict generated portrait downloads to an explicitly approved access model
+- [x] Restrict generated portrait downloads to an explicitly approved access model
