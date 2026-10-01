@@ -54,12 +54,12 @@ export async function mapFaceLandmarks(file: File, current: AvatarConfig): Promi
 
   const faceWidth = distance(points[234], points[454]);
   const faceHeight = distance(points[10], points[152]);
-  const eyeGap = distance(points[133], points[362]) / faceWidth;
-  const noseWidth = distance(points[129], points[358]) / faceWidth;
-  const jawWidth = distance(points[172], points[397]) / faceWidth;
+  const eyeGap = distance(points[133] ?? points[33], points[362] ?? points[263]) / faceWidth;
+  const noseWidth = distance(points[129] ?? points[48], points[358] ?? points[278]) / faceWidth;
+  const jawWidth = distance(points[172] ?? points[234], points[397] ?? points[454]) / faceWidth;
   const chinRatio = faceHeight / faceWidth;
-  const browRise = ((points[105].y + points[334].y) / 2 - (points[33].y + points[263].y) / 2) / faceHeight;
-  const earHeight = (distance(points[127], points[162]) + distance(points[356], points[389])) / (2 * faceHeight);
+  const browRise = (((points[105] ?? points[70]).y + (points[334] ?? points[300]).y) / 2 - (points[33].y + points[263].y) / 2) / faceHeight;
+  const earHeight = (distance(points[127] ?? points[234], points[162] ?? points[93]) + distance(points[356] ?? points[454], points[389] ?? points[323])) / (2 * faceHeight);
 
   const canvas = document.createElement("canvas");
   canvas.width = 240; canvas.height = 240;
