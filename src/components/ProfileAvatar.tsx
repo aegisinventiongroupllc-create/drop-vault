@@ -11,8 +11,10 @@ export type AvatarGlasses = "none" | "round" | "square" | "aviator";
 export type AvatarEyebrows = "soft" | "straight" | "arched" | "bold" | "split";
 export type AvatarEars = "small" | "medium" | "large" | "pointed";
 export type AvatarJawline = "oval" | "heart" | "soft" | "square" | "strong" | "tapered";
+export type AvatarStyle = "woman" | "man";
 
 export interface AvatarConfig {
+  style: AvatarStyle;
   face: AvatarFace;
   tone: AvatarTone;
   accent: AvatarAccent;
@@ -36,7 +38,7 @@ export const AVATAR_EARS: AvatarEars[] = ["small", "medium", "large", "pointed"]
 export const AVATAR_JAWLINES: AvatarJawline[] = ["oval", "heart", "soft", "square", "strong", "tapered"];
 
 export const DEFAULT_AVATAR: AvatarConfig = {
-  face: "spark", tone: "rose", accent: "star", skinTone: "medium", hair: "waves",
+  style: "woman", face: "spark", tone: "rose", accent: "star", skinTone: "medium", hair: "waves",
   hairColor: "dark", facialHair: "none", glasses: "none", eyebrows: "soft", ears: "medium", jawline: "oval",
 };
 
@@ -47,6 +49,7 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
   if (!value || typeof value !== "object") return DEFAULT_AVATAR;
   const candidate = value as Partial<AvatarConfig>;
   return {
+    style: allowed(["woman", "man"], candidate.style, DEFAULT_AVATAR.style),
     face: allowed(["spark", "rogue", "nova", "pixel", "orbit", "crown"], candidate.face, DEFAULT_AVATAR.face),
     tone: allowed(["rose", "cyan", "gold", "lime", "violet", "silver"], candidate.tone, DEFAULT_AVATAR.tone),
     accent: allowed(["star", "bolt", "moon", "flame", "heart", "diamond"], candidate.accent, DEFAULT_AVATAR.accent),
@@ -129,10 +132,11 @@ const ProfileAvatar = ({ config, className, label }: { config?: unknown; classNa
         <path d={jawPaths[avatar.jawline]} className={skin} />
         <Hair style={avatar.hair} color={hair} />
         <Brows style={avatar.eyebrows} color={hair} />
-        <ellipse cx="40" cy="49" rx="2.6" ry="3.2" className="fill-foreground" />
-        <ellipse cx="60" cy="49" rx="2.6" ry="3.2" className="fill-foreground" />
+        {avatar.style === "woman" && <><path d="M35 47 Q40 43 45 47" fill="none" className="stroke-foreground" strokeWidth="1.2"/><path d="M55 47 Q60 43 65 47" fill="none" className="stroke-foreground" strokeWidth="1.2"/></>}
+        <ellipse cx="40" cy="49" rx={avatar.style === "man" ? 2.8 : 2.5} ry={avatar.style === "man" ? 2.8 : 3.3} className="fill-foreground" />
+        <ellipse cx="60" cy="49" rx={avatar.style === "man" ? 2.8 : 2.5} ry={avatar.style === "man" ? 2.8 : 3.3} className="fill-foreground" />
         <path d="M48 53 Q50 60 47 61" fill="none" className="stroke-foreground/40" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M43 68 Q50 72 57 68" fill="none" className="stroke-foreground/70" strokeWidth="1.7" strokeLinecap="round" />
+        <path d={avatar.style === "woman" ? "M42 68 Q50 74 58 68" : "M43 69 Q50 71 57 69"} fill="none" className="stroke-foreground/70" strokeWidth="1.7" strokeLinecap="round" />
         <FacialHair style={avatar.facialHair} color={hair} />
         <Glasses style={avatar.glasses} />
       </svg>
