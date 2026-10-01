@@ -65,8 +65,8 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
 };
 
 const skinClasses: Record<AvatarSkinTone, string> = {
-  light: "fill-amber-100", warm: "fill-orange-200", medium: "fill-amber-400",
-  deep: "fill-amber-700", rich: "fill-orange-900", dark: "fill-stone-900",
+  light: "fill-skin-light", warm: "fill-skin-warm", medium: "fill-skin-medium",
+  deep: "fill-skin-deep", rich: "fill-skin-rich", dark: "fill-skin-dark",
 };
 const hairClasses: Record<AvatarHairColor, string> = {
   dark: "fill-stone-950", brown: "fill-amber-950", blonde: "fill-yellow-300",

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Check, Glasses, Loader2, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, Ear, Glasses, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,33 +7,59 @@ import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import ProfileAvatar, {
   AVATAR_EARS, AVATAR_EYEBROWS, AVATAR_FACIAL_HAIR, AVATAR_GLASSES, AVATAR_HAIR,
-  AVATAR_HAIR_COLORS, AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
+  AVATAR_JAWLINES, AVATAR_SKIN_TONES, DEFAULT_AVATAR,
   parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
 
 const HANDLE_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/;
 type LayerKey = "skinTone" | "hair" | "hairColor" | "eyebrows" | "ears" | "jawline" | "facialHair" | "glasses";
 
-const LAYERS: Array<{ key: LayerKey; label: string; values: readonly string[] }> = [
-  { key: "skinTone", label: "Skin tone", values: AVATAR_SKIN_TONES },
-  { key: "hair", label: "Hair", values: AVATAR_HAIR },
-  { key: "hairColor", label: "Hair color", values: AVATAR_HAIR_COLORS },
-  { key: "eyebrows", label: "Eyebrows", values: AVATAR_EYEBROWS },
-  { key: "ears", label: "Ears", values: AVATAR_EARS },
-  { key: "jawline", label: "Chin / jawline", values: AVATAR_JAWLINES },
-  { key: "facialHair", label: "Facial hair", values: AVATAR_FACIAL_HAIR },
-  { key: "glasses", label: "Glasses", values: AVATAR_GLASSES },
-];
+const skinSwatches: Record<string, string> = {
+  light: "bg-skin-light", warm: "bg-skin-warm", medium: "bg-skin-medium",
+  deep: "bg-skin-deep", rich: "bg-skin-rich", dark: "bg-skin-dark",
+};
 
 const pretty = (value: string) => value.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
 
-const previewConfig = (avatar: AvatarConfig, key: LayerKey, value: string): AvatarConfig => ({ ...avatar, [key]: value });
+const HairIcon = ({ value }: { value: string }) => (
+  <svg viewBox="0 0 48 48" aria-hidden="true">
+    {value === "none" ? <><circle cx="24" cy="22" r="13" fill="currentColor"/><path d="M12 34Q24 41 36 34" fill="none" stroke="currentColor" strokeWidth="4"/></> :
+      value === "crop" ? <path d="M10 26Q9 9 24 8q16 1 15 18l-6-7-5 4-6-6-5 6-7-3Z" fill="currentColor"/> :
+      value === "waves" ? <path d="M7 33Q5 12 19 9q20-6 23 19-7-12-13-5-7-12-13 7Z" fill="currentColor"/> :
+      value === "curls" ? <path d="M7 31Q2 22 10 18q-1-10 9-7 6-9 12-1 11-3 10 10 7 7 0 14-8-9-15-5-9-8-19 2Z" fill="currentColor"/> :
+      value === "long" ? <path d="M8 42V25Q7 7 24 7t16 18v17l-9-4V21q-7-8-14 0v17Z" fill="currentColor"/> :
+      <path d="m15 27 5-20 5 12 8-14v24q-9-5-18-2Z" fill="currentColor"/>}
+  </svg>
+);
+
+const FacialHairIcon = ({ value }: { value: string }) => (
+  <svg viewBox="0 0 48 48" aria-hidden="true">
+    {value === "none" ? <path d="M12 24h24" stroke="currentColor" strokeWidth="3"/> :
+      value === "stubble" ? <path d="M12 18q12 17 24 0-1 19-12 22Q13 37 12 18Z" fill="currentColor" opacity=".7"/> :
+      value === "mustache" ? <path d="M24 24Q16 15 7 25q9 8 17 1 8 7 17-1-9-10-17-1Z" fill="currentColor"/> :
+      value === "goatee" ? <><path d="M24 22Q16 16 10 24q7 6 14 1 7 5 14-1-6-8-14-2Z" fill="currentColor"/><path d="m18 29 6 13 6-13Z" fill="currentColor"/></> :
+      <path d="M9 16q4 19 15 26 11-7 15-26-7 9-15 8-8 1-15-8Z" fill="currentColor"/>}
+  </svg>
+);
+
+const BrowIcon = ({ value }: { value: string }) => (
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d={value === "arched" ? "M8 28Q16 14 23 25M26 25Q34 14 41 28" : value === "straight" ? "M8 22h14M26 22h14" : value === "split" ? "M8 25l7-3m3-1 5 2m3 0 7-2m3 1 5 3" : "M8 26q8-7 15-1m3 0q8-6 15 1"} fill="none" stroke="currentColor" strokeWidth={value === "bold" ? 6 : 4} strokeLinecap="round"/></svg>
+);
+
+const JawIcon = ({ value }: { value: string }) => (
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d={value === "square" || value === "strong" ? "M8 8v21l10 11h12l10-11V8" : value === "heart" ? "M8 8v17q3 11 16 17 13-6 16-17V8" : value === "tapered" ? "M8 8v16q4 12 16 20 12-8 16-20V8" : "M8 8v18q4 14 16 16 12-2 16-16V8"} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
+);
+
+const SunglassesIcon = () => (
+  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16h38M8 18h14v5q0 9-7 9t-7-9Zm18 0h14v5q0 9-7 9t-7-9Zm-4 3h4" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
+);
 
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const cameraInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -74,10 +100,10 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   if (loading) return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
 
   return (
-    <section className={compact ? "space-y-6" : "w-full max-w-md space-y-6"}>
-      <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-4 backdrop-blur">
+    <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
+      <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <div className="relative shrink-0 p-1">
-          <ProfileAvatar config={avatar} className="h-24 w-24 border-primary neon-glow transition-all duration-200" label={handle || "Your"} />
+          <ProfileAvatar config={avatar} className="h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32" label={handle || "Your"} />
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">Avatar studio</span>
         </div>
         <div className="min-w-0 flex-1 text-left">
@@ -95,7 +121,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <Input id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" onChange={(event) => setHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
       </div>
 
-      <div className="space-y-6 rounded-lg border border-border bg-card/50 p-4 text-left shadow-2xl">
+      <div className="space-y-5 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avatar creator</p>
           <div className="flex rounded-full border border-border bg-background p-1" role="group" aria-label="Character style">
@@ -120,40 +146,43 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
             ))}
           </div>
         </div>
-        {LAYERS.map((layer) => (
-          <div key={layer.key}>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{layer.label}</p>
-            <div className="flex gap-2.5 overflow-x-auto p-1 pb-2 scrollbar-hide">
-              {layer.values.map((value) => {
-                const selected = avatar[layer.key] === value;
-                const swatch = layer.key === "skinTone" || layer.key === "hairColor";
-                return (
-                  <Button
-                    key={value}
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-secondary p-0 transition-all ${selected ? "border-primary ring-2 ring-primary/30 neon-glow-sm" : "border-border opacity-70 hover:opacity-100"}`}
-                    aria-pressed={selected}
-                    title={pretty(value)}
-                    onClick={() => setAvatar((current) => ({ ...current, [layer.key]: value }))}
-                  >
-                    {swatch ? (
-                      <ProfileAvatar config={previewConfig(avatar, layer.key, value)} className="h-full w-full border-0" />
-                    ) : layer.key === "glasses" && value === "none" ? (
-                      <span className="text-lg text-muted-foreground">—</span>
-                    ) : layer.key === "glasses" ? (
-                      <Glasses className="h-6 w-6" />
-                    ) : (
-                      <ProfileAvatar config={previewConfig(avatar, layer.key, value)} className="h-full w-full border-0" />
-                    )}
-                    <span className="sr-only">{pretty(value)}</span>
-                  </Button>
-                );
-              })}
-            </div>
+        <input ref={cameraInput} type="file" accept="image/*" capture="user" className="sr-only" onChange={(event) => {
+          if (event.target.files?.[0]) toast({ title: "Face captured", description: "Use the choices below to create your emoji." });
+          event.target.value = "";
+        }} />
+        <Button type="button" variant="outline" className="h-14 w-full border-primary/70 bg-secondary text-base font-bold text-foreground hover:bg-secondary/80" onClick={() => cameraInput.current?.click()}>
+          <Camera className="h-6 w-6" /> Snap Your Face for Emoji
+        </Button>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Skin tone</p>
+          <div className="grid grid-cols-6 gap-2 px-1">
+            {AVATAR_SKIN_TONES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.skinTone === value} onClick={() => setAvatar((current) => ({ ...current, skinTone: value }))} className={`aspect-square h-auto w-full rounded-full p-1 ${avatar.skinTone === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><span className={`h-full w-full rounded-full ${skinSwatches[value]}`} /><span className="sr-only">{pretty(value)}</span></Button>)}
           </div>
-        ))}
+        </div>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Hair &amp; facial hair</p>
+          <div className="flex gap-2 overflow-x-auto p-1 pb-2 scrollbar-hide">
+            {AVATAR_HAIR.map((value) => <Button key={`hair-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.hair === value} onClick={() => setAvatar((current) => ({ ...current, hair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.hair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><HairIcon value={value}/><span className="sr-only">{pretty(value)} hair</span></Button>)}
+            {AVATAR_FACIAL_HAIR.map((value) => <Button key={`facial-${value}`} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.facialHair === value} onClick={() => setAvatar((current) => ({ ...current, facialHair: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.facialHair === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}><FacialHairIcon value={value}/><span className="sr-only">{pretty(value)}</span></Button>)}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Facial features</p>
+          <div className="space-y-2">
+            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EYEBROWS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} eyebrows`} aria-pressed={avatar.eyebrows === value} onClick={() => setAvatar((current) => ({ ...current, eyebrows: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.eyebrows === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><BrowIcon value={value}/></Button>)}</div>
+            <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">{AVATAR_EARS.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} ears`} aria-pressed={avatar.ears === value} onClick={() => setAvatar((current) => ({ ...current, ears: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.ears === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><Ear strokeWidth={value === "small" ? 1.5 : value === "large" ? 3 : 2}/></Button>)}{AVATAR_JAWLINES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={`${pretty(value)} jaw`} aria-pressed={avatar.jawline === value} onClick={() => setAvatar((current) => ({ ...current, jawline: value }))} className={`h-12 w-12 shrink-0 rounded-full bg-secondary p-2 text-foreground [&_svg]:h-full [&_svg]:w-full ${avatar.jawline === value ? "border-primary ring-2 ring-primary/40" : "border-border"}`}><JawIcon value={value}/></Button>)}</div>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Accessories</p>
+          <div className="flex gap-3 p-1">
+            {AVATAR_GLASSES.map((value) => <Button key={value} type="button" variant="outline" size="icon" title={pretty(value)} aria-pressed={avatar.glasses === value} onClick={() => setAvatar((current) => ({ ...current, glasses: value }))} className={`h-12 w-12 rounded-full bg-secondary text-foreground [&_svg]:h-7 [&_svg]:w-7 ${avatar.glasses === value ? "border-primary ring-2 ring-primary/40 neon-glow-sm" : "border-border"}`}>{value === "none" ? <span className="text-lg text-muted-foreground">—</span> : value === "aviator" ? <SunglassesIcon/> : <Glasses/>}<span className="sr-only">{pretty(value)}</span></Button>)}
+          </div>
+        </div>
       </div>
 
       <Button variant="neon" className="w-full" onClick={save} disabled={saving}>
