@@ -258,6 +258,13 @@ const AdminPortal = () => {
   }, [activityRoleFilter, activityDateFilter, authed]);
 
   const exportActivityCsv = () => {
+    const csvCell = (value: unknown) => {
+      let text = String(value ?? "");
+      // Spreadsheet applications execute cells beginning with these characters.
+      // Prefixing an apostrophe preserves the visible value while forcing text.
+      if (/^[\t\r\n ]*[=+\-@]/.test(text)) text = `'${text}`;
+      return `"${text.replace(/"/g, '""')}"`;
+    };
     const header = ["date", "time", "role", "user", "email", "action", "detail"];
     const rows = activity.map((r) => {
       const dt = new Date(r.created_at);
@@ -268,10 +275,10 @@ const AdminPortal = () => {
         r.display_name ?? "",
         r.email ?? "",
         r.action_type,
-        (r.action_detail ?? "").replace(/"/g, '""'),
+        r.action_detail ?? "",
       ];
     });
-    const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
+    const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
