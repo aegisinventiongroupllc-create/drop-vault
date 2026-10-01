@@ -1,7 +1,5 @@
 # Roadmap
 
-- [x] Route password recovery and confirmation links through dropthatthing.com
-- [x] Add password visibility control to login and signup
-- [x] Add independent password visibility controls to password reset
-- [x] Disable third-party sign-in methods
-- [x] Verify branding scan, tests, and app build
+- [x] Add women and men character styles to saved avatar profiles
+- [x] Rebuild profile controls as the selected cyber-neon visual studio
+- [x] Verify avatar rendering, saving, and mobile layout

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Loader2, RotateCcw } from "lucide-react";
+import { Check, Glasses, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,8 @@ const LAYERS: Array<{ key: LayerKey; label: string; values: readonly string[] }>
 ];
 
 const pretty = (value: string) => value.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
+
+const previewConfig = (avatar: AvatarConfig, key: LayerKey, value: string): AvatarConfig => ({ ...avatar, [key]: value });
 
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
@@ -72,11 +74,14 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   if (loading) return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
 
   return (
-    <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
-      <div className="sticky top-0 z-10 flex items-center gap-4 border-b border-border bg-background/95 py-3 backdrop-blur">
-        <ProfileAvatar config={avatar} className="h-24 w-24 border-primary neon-glow" label={handle || "Your"} />
+    <section className={compact ? "space-y-6" : "w-full max-w-md space-y-6"}>
+      <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-4 backdrop-blur">
+        <div className="relative shrink-0 p-1">
+          <ProfileAvatar config={avatar} className="h-24 w-24 border-primary neon-glow transition-all duration-200" label={handle || "Your"} />
+          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">Avatar studio</span>
+        </div>
         <div className="min-w-0 flex-1 text-left">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Live preview</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Public identity</p>
           <p className="truncate text-lg font-bold text-foreground">@{handle || "your_handle"}</p>
           <p className="text-xs text-muted-foreground">Your email always stays private.</p>
         </div>
@@ -90,24 +95,59 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <Input id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" onChange={(event) => setHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
       </div>
 
-      <div className="space-y-4 text-left">
+      <div className="space-y-6 rounded-lg border border-border bg-card/50 p-4 text-left shadow-2xl">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avatar creator</p>
+          <div className="flex rounded-full border border-border bg-background p-1" role="group" aria-label="Character style">
+            {(["woman", "man"] as const).map((style) => (
+              <Button
+                key={style}
+                type="button"
+                variant={avatar.style === style ? "default" : "ghost"}
+                size="sm"
+                className="h-7 rounded-full px-4 text-[9px] font-black uppercase"
+                aria-pressed={avatar.style === style}
+                onClick={() => setAvatar((current) => ({
+                  ...current,
+                  style,
+                  jawline: style === "woman" ? "oval" : "strong",
+                  hair: style === "woman" ? "waves" : "crop",
+                  facialHair: style === "woman" ? "none" : current.facialHair,
+                }))}
+              >
+                {style === "woman" ? "Women" : "Men"}
+              </Button>
+            ))}
+          </div>
+        </div>
         {LAYERS.map((layer) => (
           <div key={layer.key}>
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{layer.label}</p>
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex gap-2.5 overflow-x-auto p-1 pb-2 scrollbar-hide">
               {layer.values.map((value) => {
                 const selected = avatar[layer.key] === value;
+                const swatch = layer.key === "skinTone" || layer.key === "hairColor";
                 return (
                   <Button
                     key={value}
                     type="button"
-                    variant={selected ? "default" : "outline"}
-                    size="sm"
-                    className="shrink-0"
+                    variant="outline"
+                    size="icon"
+                    className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-secondary p-0 transition-all ${selected ? "border-primary ring-2 ring-primary/30 neon-glow-sm" : "border-border opacity-70 hover:opacity-100"}`}
                     aria-pressed={selected}
+                    title={pretty(value)}
                     onClick={() => setAvatar((current) => ({ ...current, [layer.key]: value }))}
                   >
-                    {pretty(value)}
+                    {swatch ? (
+                      <ProfileAvatar config={previewConfig(avatar, layer.key, value)} className="h-full w-full border-0" />
+                    ) : layer.key === "glasses" && value === "none" ? (
+                      <span className="text-lg text-muted-foreground">—</span>
+                    ) : layer.key === "glasses" ? (
+                      <Glasses className="h-6 w-6" />
+                    ) : (
+                      <ProfileAvatar config={previewConfig(avatar, layer.key, value)} className="h-full w-full border-0" />
+                    )}
+                    <span className="sr-only">{pretty(value)}</span>
                   </Button>
                 );
               })}
@@ -118,7 +158,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
 
       <Button variant="neon" className="w-full" onClick={save} disabled={saving}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-        SAVE CHARACTER
+        SAVE PUBLIC PROFILE
       </Button>
     </section>
   );
