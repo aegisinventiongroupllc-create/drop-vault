@@ -127,6 +127,13 @@
       "when": 1790889284124,
       "tag": "0017_add_avatar_clothing_configuration",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790893831511,
+      "tag": "0018_secure_paid_media_wallets_and_media_ownership",
+      "breakpoints": true
     }
   ]
 }

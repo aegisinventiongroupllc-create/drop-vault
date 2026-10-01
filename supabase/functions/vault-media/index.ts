@@ -69,7 +69,15 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: false });
     if (mediaErr) return json({ error: mediaErr.message }, 500);
 
-    const paths = (media ?? []).map((m) => m.storage_path);
+    // Storage objects are namespaced under the owning creator's UUID. Never let
+    // a creator_media row reference another creator's private object.
+    const ownerPrefix = `${creatorId}/`;
+    const ownedMedia = (media ?? []).filter((m) =>
+      typeof m.storage_path === "string" &&
+      m.storage_path.startsWith(ownerPrefix) &&
+      !m.storage_path.includes("..")
+    );
+    const paths = ownedMedia.map((m) => m.storage_path);
     let urlMap: Record<string, string> = {};
     if (paths.length) {
       const { data: signed } = await admin.storage
@@ -80,7 +88,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const items = (media ?? []).map((m) => ({ ...m, url: urlMap[m.storage_path] ?? null }));
+    const items = ownedMedia.map((m) => ({ ...m, url: urlMap[m.storage_path] ?? null }));
     return json({ items });
   } catch (e: any) {
     return json({ error: e?.message ?? "Unexpected error" }, 500);

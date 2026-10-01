@@ -38,23 +38,16 @@ export async function logActivity(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Read role from profile (cached in localStorage to avoid extra calls)
+    // Read the role from protected account data. Never trust browser storage for
+    // values that are written into an administrative audit record.
     let role = "customer";
     try {
-      const cached = localStorage.getItem(`dtt_role_${user.id}`);
-      if (cached) {
-        role = cached;
-      } else {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (prof?.role) {
-          role = prof.role;
-          localStorage.setItem(`dtt_role_${user.id}`, role);
-        }
-      }
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (prof?.role === "creator" || prof?.role === "customer") role = prof.role;
     } catch { /* non-fatal */ }
 
     await supabase.from("activity_logs").insert([{
