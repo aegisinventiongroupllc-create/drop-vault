@@ -211,6 +211,33 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_profile_photos: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: string
+          is_active: boolean
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: string
+          is_active?: boolean
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: string
+          is_active?: boolean
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_verifications: {
         Row: {
           created_at: string
@@ -825,6 +852,7 @@ export type Database = {
           country: string | null
           created_at: string | null
           display_name: string | null
+          profile_photo_path: string | null
           role: string | null
           user_id: string | null
           vault_side: string | null
@@ -834,6 +862,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           display_name?: string | null
+          profile_photo_path?: never
           role?: string | null
           user_id?: string | null
           vault_side?: string | null
@@ -843,6 +872,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           display_name?: string | null
+          profile_photo_path?: never
           role?: string | null
           user_id?: string | null
           vault_side?: string | null
@@ -874,6 +904,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      set_active_creator_profile_photo: {
+        Args: { _photo_id: string }
+        Returns: {
+          created_at: string
+          creator_id: string
+          id: string
+          is_active: boolean
+          storage_path: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "creator_profile_photos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       set_my_account_type: {
         Args: { _account_type: string }
