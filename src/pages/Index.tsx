@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { logActivity } from "@/lib/activityLog";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
 
 const STORAGE_KEY = "dtt_user_prefs";
 const ACTIVE_TAB_KEY = "dtt_active_tab";
@@ -82,7 +83,7 @@ const Index = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
-  const [tokenBalance, setTokenBalance] = useState(0);
+  const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
   const [roleHydrated, setRoleHydrated] = useState(false);
@@ -324,7 +325,7 @@ const Index = () => {
   }
 
   const handleCreatorClick = (name: string) => setSelectedCreator(name);
-  const handleBuyTokens = (n: number) => setTokenBalance(prev => prev + n);
+  const handleBuyTokens = () => { void refreshTokenBalance(); };
 
   return (
     <div className="min-h-[100dvh] overflow-x-hidden">

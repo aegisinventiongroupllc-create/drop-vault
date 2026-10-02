@@ -146,11 +146,6 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       const form = new FormData();
       form.set("image", file, file.name || "selfie.jpg");
       form.set("style", mappedAvatar.style);
-      form.set("appearance", JSON.stringify({
-        skinTone: mappedAvatar.skinTone, hairColor: mappedAvatar.hairColor, eyebrows: mappedAvatar.eyebrows,
-        ears: mappedAvatar.ears, jawline: mappedAvatar.jawline, eyeSpacing: mappedAvatar.eyeSpacing, noseShape: mappedAvatar.noseShape,
-        hair: mappedAvatar.hair, facialHair: mappedAvatar.facialHair, glasses: mappedAvatar.glasses, clothing: mappedAvatar.clothing,
-      }));
       const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-avatar-portrait`;
       await streamPortrait(endpoint, form, {
         Authorization: `Bearer ${session.access_token}`,

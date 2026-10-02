@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, RefreshCw, Compass, Heart } from "lucide-react";
+import { Bell, RefreshCw, Compass, Heart, Vault } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -250,16 +250,20 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         </div>
       )}
 
-      {/* Balance Card */}
-      <div className="mx-4 mb-4 bg-card border border-border rounded-xl p-5 text-center">
-        <p className="text-xs text-muted-foreground mb-1">Current Balance</p>
+      {/* Fill Your Vault */}
+      <div className="mx-4 mb-4 bg-card border border-primary/40 rounded-xl p-5 text-center neon-glow-sm">
+        <div className="mb-2 flex items-center justify-center gap-2">
+          <Vault className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-lg font-bold uppercase tracking-wider text-foreground">Fill Your Vault</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-1">Coins in your vault</p>
         <div className="flex items-center justify-center gap-2">
           <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
           <span className="text-3xl font-bold text-foreground">{balance}</span>
           <span className="text-sm text-muted-foreground">Bit-Tokens</span>
         </div>
         <Button variant="neon" className="mt-4 w-full" onClick={() => setShowBuyModal(true)}>
-          BUY TOKENS
+          FILL YOUR VAULT
         </Button>
       </div>
 

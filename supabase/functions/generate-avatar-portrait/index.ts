@@ -39,23 +39,37 @@ Deno.serve(async (req) => {
       return json({ error: "Use a JPG, PNG, WEBP, HEIC, or HEIF photo under 8 MB." }, 400);
     }
     if (style !== "woman" && style !== "man") return json({ error: "Choose a portrait style." }, 400);
-    const appearanceRaw = incoming.get("appearance");
-    const appearance = typeof appearanceRaw === "string" ? appearanceRaw.slice(0, 800) : "";
+    const userId = String(claims.claims.sub);
+    const { data: account, error: accountError } = await authClient
+      .from("account_preferences")
+      .select("account_type")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (accountError) return json({ error: "We couldn't verify your profile type. Please try again." }, 500);
+    const accountType = account?.account_type;
+    if (accountType !== "creator" && accountType !== "customer") {
+      return json({ error: "Choose Customer or Creator before making your portrait." }, 400);
+    }
 
-    const prompt = [
-      "STRICT PRIVACY-SAFE CARTOON LIKENESS EDIT: use the uploaded selfie only as a visual reference for a discreet, friendly illustrated avatar of that person. The output must be unmistakably hand-illustrated cartoon artwork at first glance, never a realistic portrait, painted photograph, photo filter, or near-photographic face.",
-      "Retain only recognizable broad traits: overall face silhouette and fullness, complexion, hair color/style/texture, eyebrow character, eye color and general shape, broad nose character, smile character, facial hair, glasses, and apparent age range. Deliberately simplify and redesign fine biometric details, pores, wrinkles, skin texture, exact facial measurements, tiny asymmetries, and camera-specific detail so acquaintances may recognize the vibe while the person's exact identity remains discreet.",
-      "FACE-SHAPE INCLUSION IS CRITICAL: faithfully and respectfully represent slim, oval, square, round, wide, very full, or extremely large faces. A very full face must remain recognizably full and attractive—never thin it, narrow it, stretch it, mock it, or turn it into an extreme caricature. Use balanced cartoon proportions, a slightly zoomed-out head-and-shoulders framing, and enough margin that both cheeks, ears when visible, complete hair, jaw, and chin fit comfortably inside a circular profile crop.",
-      "Do not replace the person with a generic stock avatar. Do not change ethnicity, complexion, body-associated facial fullness, hair, facial hair, glasses, age range, or the broad features that make the person visually recognizable. Do not copy another person's face.",
-      `Presentation mode is ${style === "woman" ? "woman" : "man"}. This controls styling only; both modes must use the same polished cartoon quality and respect the selfie-derived traits.`,
-      "TARGET CARTOON STYLE: premium modern social-profile character illustration. Use confident clean dark contour lines, gently enlarged expressive eyes with illustrated catchlights, simplified smooth facial planes, flat-to-soft-gradient skin colors, two or three clearly visible levels of cel shading, controlled graphic highlights, tidy sculpted hair clumps, clean facial-hair shapes, and a warm approachable expression. Keep surfaces graphic and illustrated rather than textured or lifelike. The finish must resemble a professionally drawn animated profile character—not a real person with a filter.",
+    const sharedPrompt = [
+      `Presentation mode is ${style === "woman" ? "woman" : "man"}. This controls presentation only; both modes must receive the same high production quality and respect the selfie-derived traits.`,
       "Composition: exactly one character, centered head and upper shoulders, near-front pose, relaxed friendly expression, complete hair and chin visible, and generous safe space for a circular crop. Choose the camera distance based on the person's natural face width so no cheek, ear, hair, jaw, or chin is clipped. Keep a clean readable silhouette suitable for a small profile icon.",
-      "Wardrobe: follow the user-confirmed clothing choice. Render a clean dark garment with visible collar, seams, folds, and soft fabric texture, without writing or logos.",
+      "Wardrobe: render a clean dark hoodie or crewneck with visible collar, seams, folds, and soft fabric texture, without writing or logos.",
       "Lighting and backdrop: soft cool frontal illustration lighting, simple charcoal cel shadows, a restrained pink edge light, and a smooth deep-charcoal circular-profile background. Keep the face bright, clean, and readable.",
-      "Avoid photorealism, realistic skin texture, camera-like detail, individual pores, exact biometric reproduction, uncanny face filters, flat geometric vector art, basic emoji shapes, generic faces, weight-loss beautification, face slimming, distorted wide-angle proportions, extreme caricature, anime, children's art, plastic 3D rendering, videogame screenshots, glamour retouching, or low-detail assets.",
       "Output only the finished portrait. No words, letters, logo, watermark, border, frame, UI, extra person, extra face, extra limbs, obscured face, or cropped chin.",
-      appearance ? `User-confirmed mapped appearance and wardrobe to preserve: ${appearance}.` : "",
-    ].filter(Boolean).join(" ");
+    ];
+    const customerPrompt = [
+      "PRIVACY-SAFE CUSTOMER CARTOON AVATAR EDIT: use the selfie only as a temporary visual reference for a discreet illustrated resemblance. The result must look unmistakably like a polished hand-drawn cartoon avatar, matching the provided visual direction of a friendly social-profile character with crisp dark outlines, expressive slightly enlarged eyes, sculpted hair shapes, clean facial-hair shapes, and layered cel shading.",
+      "Preserve only broad recognizable traits: overall face silhouette and fullness, complexion, hair color/style/texture, eyebrow character, general eye and nose character, smile, facial hair, glasses, and apparent age range. Intentionally redesign exact eye spacing, exact nose geometry, skin detail, pores, wrinkles, tiny asymmetries, and other biometric measurements so the customer remains discreet and cannot be mistaken for a photograph.",
+      "FACE-SHAPE INCLUSION IS CRITICAL: faithfully and respectfully represent slim, oval, square, round, wide, very full, or extremely large faces. Keep a full face recognizably full and attractive. Never slim, narrow, stretch, mock, exaggerate, or crop the face.",
+      "Style target: premium animated social avatar, bold clean contour linework, simplified smooth facial planes, two or three visible levels of cel shading, graphic highlights, friendly expression, and clear cartoon proportions. Avoid photorealism, exact biometric reproduction, realistic skin texture, camera detail, uncanny filters, generic stock faces, extreme caricature, anime, children's art, plastic 3D, or flat basic emoji art.",
+    ];
+    const creatorPrompt = [
+      "CREATOR LIKENESS PORTRAIT EDIT: use the selfie as the identity anchor and create a polished, realistic illustrated portrait that allows customers to recognize the creator. Preserve the creator's actual face silhouette, complexion, eyes, nose, brows, mouth, hair, facial hair, glasses, age range, ethnicity, distinctive proportions, and natural asymmetry.",
+      "Render a high-detail editorial digital illustration with dimensional lighting, refined skin shading, detailed hair strands and facial hair, natural facial proportions, and a warm authentic expression. It should remain clearly illustrated, but substantially more lifelike and identity-faithful than the customer cartoon treatment. Do not beautify into a different person, slim the face, alter ethnicity, or replace distinctive features.",
+      "Avoid generic stock faces, exaggerated cartoon proportions, basic emoji art, anime, children's art, plastic 3D rendering, glamour retouching, or photographic artifacts.",
+    ];
+    const prompt = [...(accountType === "creator" ? creatorPrompt : customerPrompt), ...sharedPrompt].join(" ");
 
     const upstreamForm = new FormData();
     upstreamForm.set("prompt", prompt);

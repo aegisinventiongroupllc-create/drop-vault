@@ -19,12 +19,18 @@ export function useTokenBalance() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
+    const { data: authSubscription } = supabase.auth.onAuthStateChange(() => {
+      window.setTimeout(() => { void refresh(); }, 0);
+    });
     const channel = supabase
       .channel("token-balance-mine")
       .on("postgres_changes", { event: "*", schema: "public", table: "token_balances" }, () => refresh())
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      authSubscription.subscription.unsubscribe();
+      void supabase.removeChannel(channel);
+    };
   }, [refresh]);
 
   return { balance, loading, refresh };
