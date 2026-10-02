@@ -84,15 +84,17 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     const { data: { user } } = await supabase.auth.getUser();
     let avatarToSave = avatar;
     let previousPortraitPath: string | undefined;
+    let uploadedPortraitPath: string | undefined;
     if (user && portraitBlob) {
       previousPortraitPath = avatar.portraitPath;
-      const portraitPath = `${user.id}/portrait-${Date.now()}.webp`;
+      const portraitPath = `${user.id}/portrait-${crypto.randomUUID()}.webp`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
       if (uploadError) {
         setSaving(false);
         toast({ title: "Couldn't save portrait", description: uploadError.message, variant: "destructive" });
         return;
       }
+      uploadedPortraitPath = portraitPath;
       avatarToSave = { ...avatar, portraitPath };
     }
     const { error } = user
@@ -100,6 +102,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       : { error: new Error("Please sign in again.") };
     setSaving(false);
     if (error) {
+      if (uploadedPortraitPath) void supabase.storage.from("profile-avatars").remove([uploadedPortraitPath]);
       const duplicate = "code" in error && error.code === "23505";
       toast({ title: duplicate ? "Handle already taken" : "Couldn't save profile", description: duplicate ? "Try another handle." : error.message, variant: "destructive" });
       return;
@@ -160,7 +163,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       });
       toast({ title: "Your emoji is ready", description: "Review it, then save your private identity." });
     } catch (error) {
-      toast({ title: "Couldn't create portrait", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
+      toast({ title: "Couldn't create avatar", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
       setProcessingPhoto(false);
       setPhotoStage("");
@@ -223,7 +226,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           cameraInput.current?.click();
         }}>
           {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
-           {processingPhoto ? (photoStage || "Creating Your Portrait…") : "Snap Your Face for Emoji"}
+           {processingPhoto ? (photoStage || "Creating Your 3D Avatar…") : "Snap Your Face for Emoji"}
         </Button>
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           Your selfie is never saved. It is processed securely and deleted from our systems after your emoji is created.

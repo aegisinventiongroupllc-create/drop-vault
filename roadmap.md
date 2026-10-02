@@ -16,3 +16,5 @@
 - [x] Simplify customer profiles to selfie-only private emoji identities with saved Women/Men style and public avatar names
 - [x] Add Fill Your Vault purchase entry, account-backed balance, and return-to-dashboard control
 - [x] Generate discreet cartoon customer avatars and more realistic creator likeness portraits from secure account roles
+- [x] Standardize customer and creator generation on one polished matte 3D animated portrait style
+- [x] Harden portrait replacement with collision-safe account paths and failed-save cleanup
