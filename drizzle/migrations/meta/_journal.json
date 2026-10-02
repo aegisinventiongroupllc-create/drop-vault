@@ -134,6 +134,13 @@
       "when": 1790893831511,
       "tag": "0018_secure_paid_media_wallets_and_media_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790953554454,
+      "tag": "0019_add_creator_profile_photo_gallery",
+      "breakpoints": true
     }
   ]
 }
