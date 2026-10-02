@@ -13,3 +13,4 @@
 - [x] Make snapped avatars privacy-safe cartoon likenesses matching the approved profile example
 - [x] Make customer portraits more discreet and cartoon-like, with respectful framing for every face shape and size
 - [ ] Creators: real profile photo shown in libraries (My Girls/My Guys); cartoon emoji used for messages, hearts, requests. Customers: cartoon only. (awaiting user go-ahead)
+- [x] Simplify customer profiles to selfie-only private emoji identities with saved Women/Men style and public avatar names
