@@ -163,7 +163,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           return savePortraitDraft(blob);
         }).catch(() => undefined);
       });
-      toast({ title: "Your portrait is ready", description: "Review it, fine-tune your features, then save your profile." });
+      toast({ title: "Your emoji is ready", description: "Review it, then save your private identity." });
     } catch (error) {
       toast({ title: "Couldn't create portrait", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
