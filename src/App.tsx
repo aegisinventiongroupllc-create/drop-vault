@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound.tsx";
 import SecretAdmin from "./pages/SecretAdmin.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import Pricing from "./pages/Pricing.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ const App = () => (
                 <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/pricing" element={<Pricing />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
