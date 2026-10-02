@@ -50,7 +50,7 @@ const Pricing = () => (
       </div>
 
       <Button asChild className="w-full font-bold tracking-wider">
-        <Link to="/?buy=1">FILL YOUR VAULT</Link>
+        <Link to="/" onClick={() => { sessionStorage.setItem("dtt_active_tab", "vaults"); sessionStorage.setItem("dtt_open_buy", "1"); }}>FILL YOUR VAULT</Link>
       </Button>
 
       <section className="space-y-4">
