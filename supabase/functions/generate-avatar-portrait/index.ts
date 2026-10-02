@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     }
 
     const sharedPrompt = [
-      `Presentation mode is ${style === "woman" ? "woman" : "man"}. This controls styling only; both modes must use the same polished cartoon quality and respect the selfie-derived traits.`,
+      `Presentation mode is ${style === "woman" ? "woman" : "man"}. This controls presentation only; both modes must receive the same high production quality and respect the selfie-derived traits.`,
       "Composition: exactly one character, centered head and upper shoulders, near-front pose, relaxed friendly expression, complete hair and chin visible, and generous safe space for a circular crop. Choose the camera distance based on the person's natural face width so no cheek, ear, hair, jaw, or chin is clipped. Keep a clean readable silhouette suitable for a small profile icon.",
       "Wardrobe: render a clean dark hoodie or crewneck with visible collar, seams, folds, and soft fabric texture, without writing or logos.",
       "Lighting and backdrop: soft cool frontal illustration lighting, simple charcoal cel shadows, a restrained pink edge light, and a smooth deep-charcoal circular-profile background. Keep the face bright, clean, and readable.",
