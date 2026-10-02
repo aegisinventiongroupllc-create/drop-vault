@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD,
@@ -122,8 +122,11 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center overscroll-contain">
       <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-bold text-foreground font-display tracking-wider">BUY TOKENS</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+          <Button type="button" variant="ghost" size="sm" className="gap-2 px-2" onClick={onClose}>
+            <ArrowLeft className="h-4 w-4" />
+            GO BACK TO DASHBOARD
+          </Button>
+          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">BUY COINS</h2>
         </div>
 
         {step === "select" && (
