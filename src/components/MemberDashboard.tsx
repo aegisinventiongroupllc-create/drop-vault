@@ -48,6 +48,12 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "requests">("library");
   const [, setTick] = useState(0);
+  useEffect(() => {
+    if (sessionStorage.getItem("dtt_open_buy") === "1") {
+      sessionStorage.removeItem("dtt_open_buy");
+      setShowBuyModal(true);
+    }
+  }, []);
   const [notification, setNotification] = useState<string | null>(null);
 
   const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
@@ -265,6 +271,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         <Button variant="neon" className="mt-4 w-full" onClick={() => setShowBuyModal(true)}>
           FILL YOUR VAULT
         </Button>
+        <a href="/pricing" className="mt-3 inline-block text-xs font-semibold uppercase tracking-wider text-primary underline">See pricing</a>
       </div>
 
       {/* Top-up history */}

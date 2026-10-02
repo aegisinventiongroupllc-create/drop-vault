@@ -127,6 +127,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             GO BACK TO DASHBOARD
           </Button>
           <h2 className="text-sm font-bold text-foreground font-display tracking-wider">BUY COINS</h2>
+          <a href="/pricing" className="text-[10px] font-semibold uppercase text-primary underline">Pricing</a>
         </div>
 
         {step === "select" && (
