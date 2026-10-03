@@ -19,4 +19,12 @@ describe("avatar prompt style", () => {
     expect(buildAvatarPrompt("customer", "woman")).toContain("Presentation mode is woman");
     expect(buildAvatarPrompt("creator", "man")).toContain("Presentation mode is man");
   });
+
+  it("keeps distinctive traits and the selfie expression", () => {
+    const prompt = buildAvatarPrompt("customer", "man");
+    expect(prompt).toContain("eye color");
+    expect(prompt).toContain("visible facial tattoos");
+    expect(prompt).toContain("kiss face");
+    expect(prompt).toContain("intimidating");
+  });
 });

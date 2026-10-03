@@ -24,6 +24,7 @@ interface Vault {
 const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: () => void }) => {
   const [showRequest, setShowRequest] = useState(false);
   const [avatarConfig, setAvatarConfig] = useState<unknown>(null);
+  const [profilePhotoPath, setProfilePhotoPath] = useState<string | null>(null);
   const [showTipModal, setShowTipModal] = useState(false);
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
   const [tipSent, setTipSent] = useState(false);
@@ -43,13 +44,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, avatar_config")
+        .select("user_id, avatar_config, profile_photo_path")
         .ilike("display_name", creatorName)
         .limit(1)
         .maybeSingle();
       if (!cancel) {
         setCreatorId(data?.user_id ?? null);
         setAvatarConfig(data?.avatar_config ?? null);
+        setProfilePhotoPath(data?.profile_photo_path ?? null);
       }
     })();
     return () => { cancel = true; };
@@ -148,7 +150,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
         {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <ProfileAvatar config={avatarConfig} label={creatorName} className="h-24 w-24 border-4 border-background neon-glow" />
+          <ProfileAvatar config={avatarConfig} creatorPhotoPath={profilePhotoPath} label={creatorName} className="h-24 w-24 border-4 border-background neon-glow" />
         </div>
       </div>
 

@@ -136,10 +136,12 @@ const FacialHair = ({ style, color }: { style: AvatarFacialHair; color: string }
 };
 
 const portraitCache = new Map<string, string>();
+const creatorPhotoCache = new Map<string, string>();
 
-const ProfileAvatar = ({ config, className, label, previewUrl }: { config?: unknown; className?: string; label?: string; previewUrl?: string }) => {
+const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath }: { config?: unknown; className?: string; label?: string; previewUrl?: string; creatorPhotoPath?: string | null }) => {
   const avatar = parseAvatarConfig(config);
   const [portraitUrl, setPortraitUrl] = useState(previewUrl ?? (avatar.portraitPath ? portraitCache.get(avatar.portraitPath) : undefined));
+  const [creatorPhotoUrl, setCreatorPhotoUrl] = useState(creatorPhotoPath ? creatorPhotoCache.get(creatorPhotoPath) : undefined);
   const skin = skinClasses[avatar.skinTone];
   const hair = hairClasses[avatar.hairColor];
   useEffect(() => {
@@ -155,9 +157,22 @@ const ProfileAvatar = ({ config, className, label, previewUrl }: { config?: unkn
     });
     return () => { active = false; };
   }, [avatar.portraitPath, previewUrl]);
+  useEffect(() => {
+    if (!creatorPhotoPath) { setCreatorPhotoUrl(undefined); return; }
+    const cached = creatorPhotoCache.get(creatorPhotoPath);
+    if (cached) { setCreatorPhotoUrl(cached); return; }
+    let active = true;
+    void supabase.storage.from("creator-profile-photos").createSignedUrl(creatorPhotoPath, 3600).then(({ data }) => {
+      if (!active || !data?.signedUrl) return;
+      creatorPhotoCache.set(creatorPhotoPath, data.signedUrl);
+      setCreatorPhotoUrl(data.signedUrl);
+    });
+    return () => { active = false; };
+  }, [creatorPhotoPath]);
+  const visibleImage = creatorPhotoUrl ?? portraitUrl;
   return (
     <div className={cn("relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-secondary", className)} role="img" aria-label={label ? `${label}'s custom avatar` : "Custom profile avatar"}>
-      {portraitUrl ? <img src={portraitUrl} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+      {visibleImage ? <img src={visibleImage} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
         <circle cx="50" cy="50" r="50" className="fill-card" />
         <Ears style={avatar.ears} skin={skin} />
         <path d={jawPaths[avatar.jawline]} className={skin} />
