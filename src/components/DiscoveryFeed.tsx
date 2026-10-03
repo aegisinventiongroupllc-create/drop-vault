@@ -15,6 +15,7 @@ interface VideoItem {
   id: string;
   creator: string;
   creatorAvatar: unknown;
+  creatorPhotoPath?: string | null;
   title: string;
   description: string;
   likes: number;
@@ -208,7 +209,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
 
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
         <button className="flex flex-col items-center gap-1 active:scale-95 transition-transform" onClick={() => onCreatorClick(video.creator)}>
-          <ProfileAvatar config={video.creatorAvatar} label={video.creator} />
+          <ProfileAvatar config={video.creatorAvatar} creatorPhotoPath={video.creatorPhotoPath} label={video.creator} />
         </button>
         <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
@@ -321,17 +322,18 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path")
         .in("user_id", creatorIds);
       const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
       const countMap: Record<string, number> = {};
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
-      const profMap: Record<string, { name: string; country: string; avatar: unknown }> = {};
+      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null }> = {};
       profs?.forEach((p) => {
         profMap[p.user_id] = {
           name: p.display_name || "creator",
           country: p.country || "GLOBAL",
           avatar: p.avatar_config,
+          photoPath: p.profile_photo_path,
         };
       });
       const items: VideoItem[] = media.map((m) => {
@@ -342,6 +344,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           id: m.id,
           creator: name,
           creatorAvatar: prof?.avatar,
+          creatorPhotoPath: prof?.photoPath,
           title: m.title || "Teaser",
           description: "",
           likes: countMap[m.creator_id] ?? 0,

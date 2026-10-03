@@ -63,6 +63,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const { hearts } = useMyHearts();
   const [savedNames, setSavedNames] = useState<Record<string, string>>({});
   const [savedAvatars, setSavedAvatars] = useState<Record<string, unknown>>({});
+  const [savedPhotoPaths, setSavedPhotoPaths] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
     const ids = Array.from(new Set([...subs.map((s) => s.creator_id), ...hearts.map((h) => h.creator_id)]));
@@ -71,7 +72,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, vault_side, display_name, avatar_config")
+        .select("user_id, vault_side, display_name, avatar_config, profile_photo_path")
         .in("user_id", ids);
       if (cancel || !data) return;
       const map: Record<string, "women" | "men"> = {};
@@ -83,6 +84,9 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
       const avatars: Record<string, unknown> = {};
       data.forEach((p: any) => { avatars[p.user_id] = p.avatar_config; });
       setSavedAvatars(avatars);
+      const photoPaths: Record<string, string | null> = {};
+      data.forEach((p) => { photoPaths[p.user_id] = p.profile_photo_path; });
+      setSavedPhotoPaths(photoPaths);
     })();
     return () => { cancel = true; };
   }, [subs, hearts]);
@@ -198,7 +202,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
             isExpiringSoon ? "border-gold animate-pulse" : "border-primary/50"
           }`}
         >
-          <ProfileAvatar config={savedAvatars[unlock.creatorId]} label={unlock.creatorName} className="h-full w-full border-0" />
+          <ProfileAvatar config={savedAvatars[unlock.creatorId]} creatorPhotoPath={savedPhotoPaths[unlock.creatorId]} label={unlock.creatorName} className="h-full w-full border-0" />
         </button>
         <p className="text-[10px] font-semibold text-foreground truncate max-w-[96px] text-center">@{unlock.creatorName}</p>
         <p className={`text-[9px] ${isExpiringSoon ? "text-gold font-bold" : "text-primary"}`}>
@@ -320,7 +324,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                     {savedLocked.map((c) => (
                       <button key={c.id} onClick={() => onCreatorClick?.(c.name)} className="flex flex-col items-center gap-1 flex-shrink-0 w-20">
-                        <ProfileAvatar config={savedAvatars[c.id]} label={c.name} className="h-16 w-16" />
+                        <ProfileAvatar config={savedAvatars[c.id]} creatorPhotoPath={savedPhotoPaths[c.id]} label={c.name} className="h-16 w-16" />
                         <span className="text-[10px] text-foreground truncate w-full text-center">@{c.name}</span>
                         <span className="text-[9px] font-bold text-primary">UNLOCK 14D</span>
                       </button>

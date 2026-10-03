@@ -17,14 +17,16 @@ const SHARED_COMPOSITION = [
 ];
 
 const CUSTOMER_IDENTITY = [
-  "CUSTOMER PRIVACY RULE: use the selfie only as a temporary reference for a discreet 3D cartoon resemblance. Preserve broad recognizable traits—face silhouette and fullness, complexion, hair color/style/texture, eyebrow character, general eye and nose character, smile, facial hair, glasses, and age range—while intentionally redesigning exact biometric measurements and fine identifying details.",
+  "CUSTOMER PRIVACY RULE: use the selfie only as a temporary reference for a discreet 3D cartoon resemblance. Preserve broad recognizable traits—face silhouette and fullness, complexion, eye color, hair color/style/texture, eyebrow character, general eye and nose character, facial hair, glasses, visible facial tattoos, and age range—while intentionally redesigning exact biometric measurements and fine identifying details.",
   "FACE-SHAPE INCLUSION IS CRITICAL: respectfully preserve slim, oval, square, round, wide, very full, or extremely large face shapes. Keep a full face recognizably full and attractive. Never slim, narrow, stretch, mock, exaggerate, or crop it.",
+  "EXPRESSION: retain the person's intentional selfie expression—cute, smiling, playful, kiss face, sexy/confident, serious, or intimidating—while keeping the result tasteful, friendly, and suitable for a profile icon.",
   "The customer must recognize their overall look, but the result must never be mistaken for their real photograph or an exact biometric reconstruction. Avoid generic stock faces and do not change ethnicity, complexion, hair, facial hair, glasses, age range, or broad facial character.",
 ];
 
 const CREATOR_IDENTITY = [
   "CREATOR IDENTITY RULE: use the selfie as the identity anchor for a recognizable 3D animated likeness. Preserve the creator's face silhouette and fullness, complexion, eye and nose character, brows, mouth, hair, facial hair, glasses, age range, ethnicity, distinctive proportions, and natural asymmetry.",
   "Keep the creator more identity-faithful than a customer while still obeying the same matte, stylized 3D animated art direction. Do not become photorealistic, copy camera texture, beautify into a different person, slim the face, alter ethnicity, or replace distinctive features.",
+  "Retain the creator's intentional selfie expression, including cute, smiling, playful, kiss face, sexy/confident, serious, or intimidating, without exaggeration or distortion.",
 ];
 
 export function buildAvatarPrompt(accountType: AvatarAccountType, presentation: AvatarPresentation) {

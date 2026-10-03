@@ -16,6 +16,7 @@ import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
+import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -56,6 +57,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileAvatar, setProfileAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [profilePhotoPath, setProfilePhotoPath] = useState<string | undefined>();
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
   const [requestActions, setRequestActions] = useState<Record<string, { action: "accepted" | "declined"; tokenPrice?: number; reason?: string }>>({});
@@ -97,6 +99,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
         setKycStatus(data.verification_status as any);
       }
       if (!cancelled && data?.avatar_config) setProfileAvatar(parseAvatarConfig(data.avatar_config));
+      const { data: publicProfile } = await supabase
+        .from("public_profiles")
+        .select("profile_photo_path")
+        .eq("user_id", authUserId)
+        .maybeSingle();
+      if (!cancelled) setProfilePhotoPath(publicProfile?.profile_photo_path ?? undefined);
     };
     load();
     const channel = supabase
@@ -412,7 +420,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           <button onClick={handleLogout} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground" aria-label="Log out">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <ProfileAvatar config={profileAvatar} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
+          <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -660,6 +668,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
             <p className="text-xs text-muted-foreground mb-3">Build the private identity fans see throughout DTT. Your email and legal name are never shown.</p>
               <ProfileIdentityEditor compact onSaved={(handle, avatar) => { setProfileUsername(handle); setProfileAvatar(avatar); }} />
           </div>
+
+          {authUserId && (
+            <div className="bg-card border border-border rounded-xl p-4">
+              <CreatorProfilePhotoGallery creatorId={authUserId} onActiveChange={setProfilePhotoPath} />
+            </div>
+          )}
 
           {/* ID Verification — manual KYC */}
           <div className="bg-card border border-border rounded-xl p-4">
