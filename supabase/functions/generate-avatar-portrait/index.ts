@@ -64,11 +64,13 @@ Deno.serve(async (req) => {
       model: "openai/gpt-image-2.5-sunburst",
     }, upstreamForm);
 
+    // Expected service limits are reported as handled results (200 + error) so the
+    // client can show a friendly notice instead of treating them as a crash.
     if (upstream.status === 402) {
-      return json({ error: "Emoji creation is temporarily unavailable. Please try again later." }, 503);
+      return json({ error: "Emoji creation is temporarily unavailable. Please try again later.", unavailable: true }, 200);
     }
     if (upstream.status === 429) {
-      return json({ error: "Too many emoji requests right now. Please wait a minute and try again." }, 429);
+      return json({ error: "Too many emoji requests right now. Please wait a minute and try again.", unavailable: true }, 200);
     }
 
     const headers = new Headers(corsHeaders);
