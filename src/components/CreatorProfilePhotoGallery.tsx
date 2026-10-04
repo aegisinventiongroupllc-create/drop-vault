@@ -55,6 +55,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
     }
     setBusy(true);
     let storagePath: string | undefined;
+    let insertedPhotoId: string | undefined;
     try {
       const normalized = await normalizeSelfie(file, 1600);
       if (normalized.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
@@ -69,6 +70,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
         .select("id")
         .single();
       if (insertError || !inserted) throw insertError ?? new Error("Couldn't register this photo.");
+      insertedPhotoId = inserted.id;
       if (photos.length === 0) {
         const { error: activeError } = await supabase.rpc("set_active_creator_profile_photo", { _photo_id: inserted.id });
         if (activeError) throw activeError;
@@ -77,6 +79,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
       window.dispatchEvent(new Event("dtt-creator-photo-changed"));
       toast({ title: photos.length === 0 ? "Public profile photo saved" : "Photo added", description: photos.length === 0 ? "Members can now recognize your creator profile." : "Tap a photo to make it public." });
     } catch (error) {
+      if (insertedPhotoId) void supabase.from("creator_profile_photos").delete().eq("id", insertedPhotoId).eq("creator_id", creatorId);
       if (storagePath) void supabase.storage.from("creator-profile-photos").remove([storagePath]);
       toast({ title: "Couldn't upload photo", description: error instanceof Error ? error.message : "Try another image.", variant: "destructive" });
     } finally {
