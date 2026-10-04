@@ -24,7 +24,8 @@ export async function streamPortrait(
       try { message = (JSON.parse(body) as { error?: string }).error ?? body; } catch { /* use text */ }
       throw new Error(message || `Portrait creation failed (${replay.status}).`);
     }
-    const payload = await replay.json() as { data?: Array<{ b64_json?: string }> };
+    const payload = await replay.json() as { data?: Array<{ b64_json?: string }>; error?: string };
+    if (payload.error) throw new Error(payload.error);
     const image = payload.data?.[0]?.b64_json;
     if (!image) throw new Error("Portrait creation returned no image.");
     onFrame(`data:image/webp;base64,${image}`, true);
@@ -41,6 +42,13 @@ export async function streamPortrait(
     let message = body;
     try { message = (JSON.parse(body) as { error?: string }).error ?? body; } catch { /* use text */ }
     throw new Error(message || `Portrait creation failed (${response.status}).`);
+  }
+  // Handled service limits come back as plain JSON with an error message, not a stream.
+  if ((response.headers.get("Content-Type") ?? "").includes("application/json")) {
+    const payload = await response.json().catch(() => ({})) as { error?: string; data?: Array<{ b64_json?: string }> };
+    if (payload.error) throw new Error(payload.error);
+    const image = payload.data?.[0]?.b64_json;
+    if (image) { onFrame(`data:image/webp;base64,${image}`, true); return; }
   }
 
   let sawEvent = false;
