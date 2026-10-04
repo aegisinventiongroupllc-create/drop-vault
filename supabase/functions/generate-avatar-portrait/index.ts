@@ -64,6 +64,13 @@ Deno.serve(async (req) => {
       model: "openai/gpt-image-2.5-sunburst",
     }, upstreamForm);
 
+    if (upstream.status === 402) {
+      return json({ error: "Emoji creation is temporarily unavailable. Please try again later." }, 503);
+    }
+    if (upstream.status === 429) {
+      return json({ error: "Too many emoji requests right now. Please wait a minute and try again." }, 429);
+    }
+
     const headers = new Headers(corsHeaders);
     headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "application/json");
     headers.set("Cache-Control", "no-store");
