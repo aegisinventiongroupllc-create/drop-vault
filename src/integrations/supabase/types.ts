@@ -753,27 +753,36 @@ export type Database = {
           amount_usd: number
           created_at: string
           id: string
+          package_type: string | null
           payment_id: string
+          platform_fee_collected: number
           status: string
           tokens_credited: number
+          tokens_remaining: number
           user_id: string
         }
         Insert: {
           amount_usd: number
           created_at?: string
           id?: string
+          package_type?: string | null
           payment_id: string
+          platform_fee_collected?: number
           status?: string
           tokens_credited: number
+          tokens_remaining?: number
           user_id: string
         }
         Update: {
           amount_usd?: number
           created_at?: string
           id?: string
+          package_type?: string | null
           payment_id?: string
+          platform_fee_collected?: number
           status?: string
           tokens_credited?: number
+          tokens_remaining?: number
           user_id?: string
         }
         Relationships: []
@@ -791,6 +800,7 @@ export type Database = {
           payment_id: string | null
           platform_commission: number
           platform_share_usd: number
+          purchase_id: string | null
           status: string
         }
         Insert: {
@@ -805,6 +815,7 @@ export type Database = {
           payment_id?: string | null
           platform_commission?: number
           platform_share_usd: number
+          purchase_id?: string | null
           status?: string
         }
         Update: {
@@ -819,9 +830,18 @@ export type Database = {
           payment_id?: string | null
           platform_commission?: number
           platform_share_usd?: number
+          purchase_id?: string | null
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transactions_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "token_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -882,6 +902,7 @@ export type Database = {
     }
     Functions: {
       comment_author: { Args: { _id: string }; Returns: string }
+      consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       credit_tokens: {
         Args: {
           _amount_usd: number

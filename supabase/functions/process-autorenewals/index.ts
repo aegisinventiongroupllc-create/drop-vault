@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
         .update({ balance: bal.balance - 1 })
         .eq("user_id", sub.customer_id);
       if (balErr) { failed++; continue; }
+      const { data: purchaseId } = await supabase.rpc("consume_purchase_token", { _user_id: sub.customer_id });
 
       const newExpiry = new Date(now.getTime() + FOURTEEN_DAYS_MS).toISOString();
 
@@ -119,6 +120,7 @@ Deno.serve(async (req) => {
         platform_commission: PLATFORM_PCT,
         status: "completed",
         payment_id: `autorenew-${sub.id}-${now.getTime()}`,
+        purchase_id: purchaseId ?? null,
       });
 
       // Credit creator wallet
