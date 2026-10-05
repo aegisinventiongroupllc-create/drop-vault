@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Burn DTT branding into new creator videos and photos, with the second T pink; browser-exported photo and video visibly verified and video audio retained.
+- [x] Assess already-uploaded media separately: existing uploads require replacement/reprocessing; no claim that old files are branded. Large videos above the current 512 MB device-processing limit require a dedicated processing service.
+
 - [x] Default to DTT during loading and before selfies; add full per-letter circular color selection (12 tests and browser save/reload check passed with mocked persistence); deploy further simplified customer cartoon instructions (new selfie appearance not yet reviewed)
 
 - [x] Add robust on-device facial landmark mapping

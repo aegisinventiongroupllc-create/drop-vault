@@ -3,6 +3,7 @@ import { Camera, Check, Loader2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeSelfie } from "@/lib/normalizeSelfie";
+import { watermarkCreatorMedia } from "@/lib/mediaWatermark";
 import { toast } from "@/hooks/use-toast";
 
 type CreatorPhoto = {
@@ -58,11 +59,12 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
     let insertedPhotoId: string | undefined;
     try {
       const normalized = await normalizeSelfie(file, 1600);
-      if (normalized.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
+      const branded = await watermarkCreatorMedia(new File([normalized], "profile.jpg", { type: "image/jpeg" }));
+      if (branded.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
       storagePath = `${creatorId}/profile-${crypto.randomUUID()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("creator-profile-photos")
-        .upload(storagePath, normalized, { contentType: "image/jpeg", upsert: false });
+        .upload(storagePath, branded, { contentType: "image/jpeg", upsert: false });
       if (uploadError) throw uploadError;
       const { data: inserted, error: insertError } = await supabase
         .from("creator_profile_photos")

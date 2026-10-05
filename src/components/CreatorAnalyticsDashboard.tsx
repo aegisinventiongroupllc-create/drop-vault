@@ -302,7 +302,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       description: "Please wait — don't close this tab.",
       duration: Infinity,
     });
-    const result = await uploadMedia(file, bucket, authUserId);
+    const result = await uploadMedia(file, bucket, authUserId, undefined, (message, percent) => {
+      clearInterval(interval);
+      setUploadProgress(percent);
+      setUploadMsg(message);
+      toast.loading(message, { id: uploadToastId });
+    });
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
@@ -346,7 +351,12 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       description: "Please wait — don't close this tab.",
       duration: Infinity,
     });
-    const result = await uploadMedia(file, "teasers", authUserId);
+    const result = await uploadMedia(file, "teasers", authUserId, undefined, (message, percent) => {
+      clearInterval(interval);
+      setUploadProgress(percent);
+      setUploadMsg(message);
+      toast.loading(message, { id: uploadToastId });
+    });
     clearInterval(interval);
     setUploadProgress(100);
     if ("error" in result) {
