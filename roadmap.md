@@ -18,5 +18,5 @@
 - [x] Generate discreet cartoon customer avatars and more realistic creator likeness portraits from secure account roles
 - [x] Standardize customer and creator generation on one polished matte 3D animated portrait style
 - [x] Harden portrait replacement with collision-safe account paths and failed-save cleanup
-- [ ] Add per-letter DTT icon colors with saved choices and optional selfie portraits
-- [ ] Tighten customer cartoon privacy and verify icon rendering, saving, and tests
+- [x] Add per-letter DTT icon colors with saved choices and optional selfie portraits
+- [x] Tighten customer cartoon privacy; verify icon rendering, save payload/reload with mocked persistence, and tests (new selfie output not tested)

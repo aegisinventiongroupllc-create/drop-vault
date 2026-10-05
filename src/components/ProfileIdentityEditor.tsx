@@ -159,19 +159,20 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       form.set("image", file, file.name || "selfie.jpg");
       form.set("style", mappedAvatar.style);
       const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-avatar-portrait`;
+      let finalSave: Promise<void> | undefined;
       await streamPortrait(endpoint, form, {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       }, (dataUrl, isFinal) => {
         setPortraitPreview(dataUrl);
         setPhotoStage(isFinal ? "Portrait ready" : "Rendering preview…");
-        if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then((blob) => {
+        if (isFinal) finalSave = fetch(dataUrl).then((response) => response.blob()).then((blob) => {
           setPortraitBlob(blob);
           void savePortraitDraft(blob).catch(() => undefined);
            return saveRef.current(blob, mappedAvatar);
-        }).catch(() => undefined);
+         });
       });
-      
+      await finalSave;
     } catch (error) {
       toast({ title: "Couldn't create avatar", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
