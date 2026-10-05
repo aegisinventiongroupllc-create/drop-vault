@@ -54,6 +54,10 @@ export function buildAvatarPrompt(accountType: AvatarAccountType, presentation: 
     `Presentation mode is ${presentation}. This changes presentation only; women and men receive identical production quality and the same account-specific illustration standard.`,
     ...SHARED_COMPOSITION.map((rule) => accountType === "customer" && rule.startsWith("Lighting and backdrop:")
       ? "Lighting and backdrop: simple drawn highlights and clean cel-shaded shadows on a smooth deep-charcoal background, with a restrained illustrated pink edge accent. No photographic studio illumination. Keep the face bright and readable."
-      : rule),
+      : accountType === "creator" && rule.startsWith("Lighting and backdrop:")
+        ? "Lighting and backdrop: flattering beauty lighting with soft key light, glowing skin highlights, vivid pink-magenta neon rim light and a deep charcoal background. Keep the face bright and readable."
+        : accountType === "creator" && rule.startsWith("Wardrobe:")
+          ? "Wardrobe: stylish, fully clothed, fashionable outfit that suits the person, without writing or logos."
+          : rule),
   ].join(" ");
 }
