@@ -41,7 +41,19 @@ const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media";
 
-const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
+const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: () => void; adminPreview?: boolean }) => {
+  const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
+  const logoTaps = useRef({ count: 0, lastAt: 0 });
+  const previewCoinRain = () => {
+    const now = Date.now();
+    const count = now - logoTaps.current.lastAt < 1500 ? logoTaps.current.count + 1 : 1;
+    logoTaps.current = { count, lastAt: now };
+    if (count === 3) {
+      logoTaps.current.count = 0;
+      setRewardPreview({ usd: 180, tokens: 10 });
+    }
+  };
+  const dismissReward = () => { setRewardPreview(null); welcomeBack.dismiss(); };
   const handleLogout = async () => {
     await logActivity("logout", "Creator dashboard");
     onBack();
@@ -427,8 +439,8 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="mobile-scroll-shell">
-      <CreatorWelcomeBack summary={welcomeBack.summary} onDismiss={welcomeBack.dismiss} onAnalytics={() => {
-        welcomeBack.dismiss();
+      <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
+        dismissReward();
         setActiveSection("overview");
         window.scrollTo({ top: 0, behavior: "auto" });
       }} />
@@ -439,7 +451,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
           <button onClick={handleLogout} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground" aria-label="Log out">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
+          {adminPreview ? (
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full p-0" aria-label="DTT celebration preview" title="Triple-tap to preview coin rain" onClick={previewCoinRain}>
+              <ProfileAvatar config={DEFAULT_AVATAR} label="DTT" className="h-10 w-10 border-primary/50" />
+            </Button>
+          ) : <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />}
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">
