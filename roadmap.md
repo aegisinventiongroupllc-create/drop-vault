@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Default to DTT during loading and before selfies; add full per-letter circular color selection and further simplify customer cartoon generation
+
 - [x] Add robust on-device facial landmark mapping
 - [x] Add authenticated streamed realistic portrait generation
 - [x] Save generated portraits privately and render them across social views
