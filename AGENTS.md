@@ -7,3 +7,4 @@
 - Generate role-specific illustrated portraits server-side (drawn customer cartoons, animated creator likenesses) from in-memory selfies; never persist originals, and store only generated portraits in account-scoped private paths to protect identity.
 - Store creator public photos in an account-owned private gallery; show the selected real photo on creator discovery surfaces while private interactions continue using the generated emoji.
 - Capture selfies in an in-page camera with bounded resolution and release tracks on capture/close; skip client landmark scanning in the selfie-only flow to avoid phone camera handoffs and heavy WASM processing.
+- Prebundle the color-picker dependencies alongside the deduplicated React runtime in Vite so lazy profile loading does not trigger dependency optimization and mixed React hook chunks in active previews.
