@@ -9,6 +9,13 @@ const UNIFORM_3D_STYLE = [
   "The finish should resemble a high-end animated feature character rendered as a polished social portrait: friendly, modern, dimensional, consistent, and unmistakably illustrated rather than photographed.",
 ];
 
+const CUSTOMER_DRAWN_STYLE = [
+  "CUSTOMER ART DIRECTION: a professionally DRAWN CARTOON profile avatar, like a clean editorial character sticker or a polished comic-style social avatar. NOT a realistic 3D render. This art direction takes priority over the source image's photographic appearance.",
+  "Draw crisp dark contour outlines around the face, ears, nose, brows, hair, beard and clothing; use smooth flat color fills with only two or three deliberate cel-shaded shadow shapes per feature. Subtle illustrated depth is allowed, but no physically rendered skin, clay sculpture, glossy materials or cinematic lighting.",
+  "Use slightly enlarged expressive illustrated eyes, strong graphic brows, a short simplified nose, simplified lips, and friendly stylized facial planes. Hair and beard are bold grouped graphic shapes with a few clean accent strokes, never individual realistic strands.",
+  "The final portrait must immediately read as a hand-drawn adult cartoon character at small icon size, not a photo, painted photograph, face filter, realistic digital portrait, or lifelike game character. Do not render pores, photo texture, realistic eyelids, noisy shading, photographic gradients or hyper-realism.",
+];
+
 const SHARED_COMPOSITION = [
   "Composition: exactly one character, centered head and upper shoulders, near-front pose, relaxed friendly expression, complete hair and chin visible, and generous safe space for a circular crop. Choose the camera distance for the person's natural face width so no cheek, ear, hair, jaw, or chin is clipped.",
   "Wardrobe: render a clean dark hoodie or crewneck with defined collar, seams, and simplified matte fabric folds, without writing or logos.",
@@ -17,9 +24,9 @@ const SHARED_COMPOSITION = [
 ];
 
 const CUSTOMER_IDENTITY = [
-  "CUSTOMER CARTOON OVERRIDE (takes priority over likeness): create an unmistakably fictional, rounded 3D emoji character, not a realistic illustrated headshot or a real face with a smoothing filter. Use visibly simplified sculpted facial geometry, slightly larger expressive eyes, a compact simplified nose, graphic brows, simplified mouth, and chunky grouped hair and beard shapes. No individual photo-like hair strands, realistic eyelids, skin texture, lifelike anatomy, cinematic photographic lighting, or exact facial reconstruction.",
+  "CUSTOMER CARTOON OVERRIDE (takes priority over likeness): rebuild the person as an unmistakably fictional drawn cartoon emoji, not a realistic illustrated headshot or a real face with a smoothing filter. Use simplified drawn facial shapes, slightly larger expressive eyes, a compact simplified nose, graphic brows, simplified mouth, and chunky grouped hair and beard shapes. No individual photo-like hair strands, realistic eyelids, skin texture, lifelike anatomy, cinematic photographic lighting, or exact facial reconstruction.",
   "Privacy matters more than exact resemblance. Translate only broad recognizable traits and the expression into the cartoon vocabulary; deliberately change precise eye/nose/mouth proportions and small identifying details. A viewer must immediately see a cartoon avatar rather than recognize a realistic portrait. Retain face fullness respectfully without copying biometric geometry.",
-  "CUSTOMER PRIVACY RULE: use the selfie only as a temporary reference for a discreet 3D cartoon resemblance. Preserve broad recognizable traits—face silhouette and fullness, complexion, eye color, hair color/style/texture, eyebrow character, general eye and nose character, facial hair, glasses, visible facial tattoos, and age range—while intentionally redesigning exact biometric measurements and fine identifying details.",
+  "CUSTOMER PRIVACY RULE: use the selfie only as a temporary reference for a discreet drawn cartoon resemblance. Preserve broad recognizable traits—face silhouette and fullness, complexion, eye color, hair color/style/texture, eyebrow character, general eye and nose character, facial hair, glasses, visible facial tattoos, and age range—while intentionally redesigning exact biometric measurements and fine identifying details.",
   "FACE-SHAPE INCLUSION IS CRITICAL: respectfully preserve slim, oval, square, round, wide, very full, or extremely large face shapes. Keep a full face recognizably full and attractive. Never slim, narrow, stretch, mock, exaggerate, or crop it.",
   "EXPRESSION: retain the person's intentional selfie expression—cute, smiling, playful, kiss face, sexy/confident, serious, or intimidating—while keeping the result tasteful, friendly, and suitable for a profile icon.",
   "The customer must recognize their overall look, but the result must never be mistaken for their real photograph or an exact biometric reconstruction. Avoid generic stock faces and do not change ethnicity, complexion, hair, facial hair, glasses, age range, or broad facial character.",
@@ -33,10 +40,13 @@ const CREATOR_IDENTITY = [
 
 export function buildAvatarPrompt(accountType: AvatarAccountType, presentation: AvatarPresentation) {
   const identityRules = accountType === "creator" ? CREATOR_IDENTITY : CUSTOMER_IDENTITY;
+  const artDirection = accountType === "creator" ? UNIFORM_3D_STYLE : CUSTOMER_DRAWN_STYLE;
   return [
-    ...UNIFORM_3D_STYLE,
+    ...artDirection,
     ...identityRules,
-    `Presentation mode is ${presentation}. This changes presentation only; women and men receive identical production quality and the same uniform 3D animated rendering standard.`,
-    ...SHARED_COMPOSITION,
+    `Presentation mode is ${presentation}. This changes presentation only; women and men receive identical production quality and the same account-specific illustration standard.`,
+    ...SHARED_COMPOSITION.map((rule) => accountType === "customer" && rule.startsWith("Lighting and backdrop:")
+      ? "Lighting and backdrop: simple drawn highlights and clean cel-shaded shadows on a smooth deep-charcoal background, with a restrained illustrated pink edge accent. No photographic studio illumination. Keep the face bright and readable."
+      : rule),
   ].join(" ");
 }

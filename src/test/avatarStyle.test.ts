@@ -2,12 +2,23 @@ import { describe, expect, it } from "vitest";
 import { buildAvatarPrompt } from "../../supabase/functions/generate-avatar-portrait/avatar-style";
 
 describe("avatar prompt style", () => {
-  it.each(["customer", "creator"] as const)("enforces the uniform 3D style for %s accounts", (accountType) => {
-    const prompt = buildAvatarPrompt(accountType, "woman");
+  it("preserves the creator 3D style", () => {
+    const prompt = buildAvatarPrompt("creator", "woman");
     expect(prompt).toContain("professional 3D animated character portrait");
     expect(prompt).toContain("smooth matte clay-like materials");
     expect(prompt).toContain("Do not render pores");
     expect(prompt).toContain("hyper-realism");
+  });
+
+  it.each(["woman", "man"] as const)("uses drawn cel-shaded cartoons for customer %s portraits", (presentation) => {
+    const prompt = buildAvatarPrompt("customer", presentation);
+    expect(prompt).toContain("professionally DRAWN CARTOON");
+    expect(prompt).toContain("crisp dark contour outlines");
+    expect(prompt).toContain("cel-shaded shadow shapes");
+    expect(prompt).toContain("NOT a realistic 3D render");
+    expect(prompt).not.toContain("UNIFORM ART DIRECTION");
+    expect(prompt).not.toContain("soft cool frontal studio light");
+    expect(prompt).not.toContain("smooth matte clay-like materials");
   });
 
   it("keeps customer identity discreet and creator identity recognizable", () => {
