@@ -33,21 +33,31 @@ const CUSTOMER_IDENTITY = [
   "The customer must recognize their overall look, but the result must never be mistaken for their real photograph or an exact biometric reconstruction. Avoid generic stock faces and do not change ethnicity, complexion, hair, facial hair, glasses, age range, or broad facial character.",
 ];
 
+const CREATOR_GLAM_STYLE = [
+  "CREATOR ART DIRECTION: a near-photoreal, high-end glamour beauty portrait of the same person — as realistic as possible, like a professional magazine or fashion-campaign headshot with flattering retouching.",
+  "Make it sexy, confident and vibrant: rich saturated color, luminous glowing skin with natural texture lightly retouched, sharp detailed eyes with bright catchlights, glossy healthy hair, defined lips, polished makeup or grooming that suits the person, and a vivid pink-and-magenta neon rim light against a deep charcoal background.",
+  "Keep it tasteful and fully clothed; alluring through expression, lighting and styling only. No nudity, no lingerie, no explicit content.",
+];
+
 const CREATOR_IDENTITY = [
-  "CREATOR IDENTITY RULE: use the selfie as the identity anchor for a recognizable 3D animated likeness. Preserve the creator's face silhouette and fullness, complexion, eye and nose character, brows, mouth, hair, facial hair, glasses, age range, ethnicity, distinctive proportions, and natural asymmetry.",
-  "Keep the creator more identity-faithful than a customer while still obeying the same matte, stylized 3D animated art direction. Do not become photorealistic, copy camera texture, beautify into a different person, slim the face, alter ethnicity, or replace distinctive features.",
-  "Retain the creator's intentional selfie expression, including cute, smiling, playful, kiss face, sexy/confident, serious, or intimidating, without exaggeration or distortion.",
+  "CREATOR IDENTITY RULE: the selfie is the identity anchor. The creator must look clearly like themselves: keep complexion, eye color and shape, nose, lips, brows, hair, facial hair, glasses, tattoos, age range, ethnicity and distinctive features.",
+  "FLATTERING FACE CONTOUR: if the face is fuller or wider, gently slim it a little — a subtly more defined jawline and chin, softly contoured cheeks, and a slightly slimming three-quarter-friendly angle and lighting — so the creator loves the result. Keep the change subtle (about 5-10%) so they remain instantly recognizable; never change ethnicity or turn them into a different person.",
+  "Retain the creator's intentional selfie expression, including cute, smiling, playful, kiss face, sexy/confident, serious, or intimidating.",
 ];
 
 export function buildAvatarPrompt(accountType: AvatarAccountType, presentation: AvatarPresentation) {
   const identityRules = accountType === "creator" ? CREATOR_IDENTITY : CUSTOMER_IDENTITY;
-  const artDirection = accountType === "creator" ? UNIFORM_3D_STYLE : CUSTOMER_DRAWN_STYLE;
+  const artDirection = accountType === "creator" ? CREATOR_GLAM_STYLE : CUSTOMER_DRAWN_STYLE;
   return [
     ...artDirection,
     ...identityRules,
     `Presentation mode is ${presentation}. This changes presentation only; women and men receive identical production quality and the same account-specific illustration standard.`,
     ...SHARED_COMPOSITION.map((rule) => accountType === "customer" && rule.startsWith("Lighting and backdrop:")
       ? "Lighting and backdrop: simple drawn highlights and clean cel-shaded shadows on a smooth deep-charcoal background, with a restrained illustrated pink edge accent. No photographic studio illumination. Keep the face bright and readable."
-      : rule),
+      : accountType === "creator" && rule.startsWith("Lighting and backdrop:")
+        ? "Lighting and backdrop: flattering beauty lighting with soft key light, glowing skin highlights, vivid pink-magenta neon rim light and a deep charcoal background. Keep the face bright and readable."
+        : accountType === "creator" && rule.startsWith("Wardrobe:")
+          ? "Wardrobe: stylish, fully clothed, fashionable outfit that suits the person, without writing or logos."
+          : rule),
   ].join(" ");
 }

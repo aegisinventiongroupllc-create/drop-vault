@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { buildAvatarPrompt } from "../../supabase/functions/generate-avatar-portrait/avatar-style";
 
 describe("avatar prompt style", () => {
-  it("preserves the creator 3D style", () => {
+  it("uses a realistic, vibrant, flattering creator style", () => {
     const prompt = buildAvatarPrompt("creator", "woman");
-    expect(prompt).toContain("professional 3D animated character portrait");
-    expect(prompt).toContain("smooth matte clay-like materials");
-    expect(prompt).toContain("Do not render pores");
-    expect(prompt).toContain("hyper-realism");
+    expect(prompt).toContain("near-photoreal");
+    expect(prompt).toContain("vibrant");
+    expect(prompt).toContain("gently slim it a little");
+    expect(prompt).toContain("No nudity");
   });
 
   it.each(["woman", "man"] as const)("uses drawn cel-shaded cartoons for customer %s portraits", (presentation) => {
@@ -26,7 +26,7 @@ describe("avatar prompt style", () => {
     expect(buildAvatarPrompt("customer", "man")).toContain("Privacy matters more than exact resemblance");
     expect(buildAvatarPrompt("creator", "man")).not.toContain("CUSTOMER CARTOON OVERRIDE");
     expect(buildAvatarPrompt("customer", "man")).toContain("redesigning exact biometric measurements");
-    expect(buildAvatarPrompt("creator", "man")).toContain("recognizable 3D animated likeness");
+    expect(buildAvatarPrompt("creator", "man")).toContain("look clearly like themselves");
   });
 
   it("uses the selected presentation without changing quality", () => {
