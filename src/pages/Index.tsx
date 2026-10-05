@@ -186,7 +186,7 @@ const Index = () => {
           </button>
         </div>
         <div className="pt-9">
-          <CreatorAnalyticsDashboard onBack={exitCreatorPreview} />
+          <CreatorAnalyticsDashboard onBack={exitCreatorPreview} adminPreview />
         </div>
       </div>
     );
