@@ -250,7 +250,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           event.target.value = "";
         }} />
         <div className="grid grid-cols-[1fr_auto] gap-2">
-          <Button type="button" variant="outline" disabled={processingPhoto} className="h-14 w-full border-primary/70 bg-secondary px-3 text-sm font-bold text-foreground hover:bg-secondary/80 sm:text-base" onClick={() => {
+          <Button type="button" variant="outline" disabled={processingPhoto || saving} className="h-14 w-full min-w-0 whitespace-normal border-primary/70 bg-secondary px-3 text-xs font-bold text-foreground hover:bg-secondary/80 sm:text-base" onClick={() => {
             sessionStorage.setItem("dtt_active_tab", "profile");
             cameraInput.current?.click();
           }}>
@@ -260,7 +260,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           <Button
             type="button"
             variant={avatar.useDttIcon && !portraitBlob ? "default" : "outline"}
-            disabled={processingPhoto}
+            disabled={processingPhoto || saving}
             aria-pressed={!!avatar.useDttIcon && !portraitBlob}
             className="h-14 border-primary/70 px-4 text-sm font-black"
             onClick={() => {
