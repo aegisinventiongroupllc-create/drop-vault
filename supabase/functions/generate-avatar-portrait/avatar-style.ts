@@ -10,6 +10,7 @@ const UNIFORM_3D_STYLE = [
 ];
 
 const CUSTOMER_DRAWN_STYLE = [
+  "DISCRETION FIRST: create a visibly fictional, bold 2D cartoon mascot, NOT a detailed handsome illustrated headshot. Use oversized expressive cartoon eyes, a tiny symbolic nose, a simplified mouth and boldly redesigned facial proportions. Keep only broad complexion, eye color, hairstyle, beard and expression cues; do not trace or reconstruct the photographed face. Use minimal flat graphic shadows, never finely modeled facial anatomy, realistic cheekbones, realistic skin shading or identity-faithful portrait detail.",
   "CUSTOMER ART DIRECTION: a professionally DRAWN CARTOON profile avatar, like a clean editorial character sticker or a polished comic-style social avatar. NOT a realistic 3D render. This art direction takes priority over the source image's photographic appearance.",
   "Draw crisp dark contour outlines around the face, ears, nose, brows, hair, beard and clothing; use smooth flat color fills with only two or three deliberate cel-shaded shadow shapes per feature. Subtle illustrated depth is allowed, but no physically rendered skin, clay sculpture, glossy materials or cinematic lighting.",
   "Use slightly enlarged expressive illustrated eyes, strong graphic brows, a short simplified nose, simplified lips, and friendly stylized facial planes. Hair and beard are bold grouped graphic shapes with a few clean accent strokes, never individual realistic strands.",

@@ -8,6 +8,18 @@ describe("private DTT icons", () => {
     expect(parseDttColors(null)).toEqual(DEFAULT_DTT_COLORS);
     expect(parseDttColors(["blue", "invalid", "mint"])).toEqual(["blue", "silver", "mint"]);
   });
+  it("accepts arbitrary full-spectrum hex colors but rejects CSS injection", () => {
+    expect(parseDttColors(["#123abc", "#ffffff", "url(evil)"])).toEqual(["#123abc", "#ffffff", "pink"]);
+  });
+  it("uses DTT rather than a generic face before a selfie exists", () => {
+    const { container } = render(<ProfileAvatar />);
+    expect(container.querySelectorAll("text")).toHaveLength(3);
+    expect(container.querySelector("path")).toBeNull();
+  });
+  it("renders custom saved colors as validated SVG fills", () => {
+    const { container } = render(<ProfileAvatar config={{ useDttIcon: true, dttLetterColors: ["#abcdef", "#123456", "#fedcba"] }} />);
+    expect(container.querySelector("text")).toHaveAttribute("fill", "#abcdef");
+  });
   it("preserves saved per-letter choices", () => {
     const stored = JSON.parse(JSON.stringify({ useDttIcon: true, dttLetterColors: ["gold", "blue", "red"] }));
     expect(parseAvatarConfig(stored).dttLetterColors).toEqual(["gold", "blue", "red"]);

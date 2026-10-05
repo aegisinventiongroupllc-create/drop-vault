@@ -9,7 +9,8 @@ import { normalizeSelfie } from "@/lib/normalizeSelfie";
 import SelfieCamera from "@/components/SelfieCamera";
 import { streamPortrait } from "@/lib/streamPortrait";
 import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
-import { DTT_COLORS, DTT_COLOR_CLASSES, parseDttColors } from "@/lib/dttIcon";
+import { parseDttColors } from "@/lib/dttIcon";
+import DttColorWheel from "@/components/DttColorWheel";
 import ProfileAvatar, {
   DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
@@ -31,7 +32,7 @@ const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
 
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
-  const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [avatar, setAvatar] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, useDttIcon: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [processingPhoto, setProcessingPhoto] = useState(false);
@@ -205,15 +206,11 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
               <Button key={letter} type="button" variant={letterIndex === index ? "default" : "outline"} aria-pressed={letterIndex === index} onClick={() => setLetterIndex(index)}>{letter}</Button>
             ))}
           </div>
-          <div className="flex justify-between gap-2" role="group" aria-label="Letter color">
-            {DTT_COLORS.map((color) => (
-              <Button key={color} type="button" variant="ghost" size="icon" title={color} aria-label={`${color} for ${["D", "first T", "second T"][letterIndex]}`} aria-pressed={parseDttColors(avatar.dttLetterColors)[letterIndex] === color} className={`h-9 w-9 shrink-0 rounded-full border-2 p-1 ${parseDttColors(avatar.dttLetterColors)[letterIndex] === color ? "border-foreground" : "border-transparent"}`} onClick={() => updateAvatar((current) => {
+          <DttColorWheel letter={["D", "first T", "second T"][letterIndex]} color={parseDttColors(avatar.dttLetterColors)[letterIndex]} onChange={(color) => updateAvatar((current) => {
                 const colors = parseDttColors(current.dttLetterColors);
                 colors[letterIndex] = color;
                 return { ...current, dttLetterColors: colors, useDttIcon: true };
-              })}><span className={`h-5 w-5 rounded-full bg-current ${DTT_COLOR_CLASSES[color]}`} /></Button>
-            ))}
-          </div>
+              })} />
         </div>}
         {!avatar.useDttIcon && <div>
           <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Choose your emoji style</p>
@@ -246,7 +243,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
             setCameraOpen(true);
           }}>
             {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
-             {processingPhoto ? (photoStage || "Creating Your 3D Avatar…") : "Snap Your Face for Emoji"}
+             {processingPhoto ? (photoStage || "Creating Your Cartoon…") : "Snap Your Face for Emoji"}
           </Button>
           <Button
             type="button"
