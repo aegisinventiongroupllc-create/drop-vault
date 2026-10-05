@@ -8,6 +8,7 @@ interface Purchase {
   tokens_credited: number;
   amount_usd: number;
   status: string;
+  tokens_remaining?: number;
   created_at: string;
 }
 
@@ -27,7 +28,7 @@ const TokenPurchaseHistory = () => {
       }
       const { data } = await supabase
         .from("token_purchases")
-        .select("id, payment_id, tokens_credited, amount_usd, status, created_at")
+        .select("id, payment_id, tokens_credited, amount_usd, status, created_at, tokens_remaining")
         .eq("user_id", uid)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -88,7 +89,7 @@ const TokenPurchaseHistory = () => {
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold text-primary">${Number(p.amount_usd).toFixed(2)}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{p.status}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{p.tokens_remaining ?? 0} of {p.tokens_credited} left</p>
               </div>
             </li>
           ))}
