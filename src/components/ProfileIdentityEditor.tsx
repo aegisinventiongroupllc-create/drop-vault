@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { normalizeSelfie } from "@/lib/normalizeSelfie";
-import { mapFaceLandmarks } from "@/lib/mapFaceLandmarks";
+import SelfieCamera from "@/components/SelfieCamera";
 import { streamPortrait } from "@/lib/streamPortrait";
 import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
 import { DTT_COLORS, DTT_COLOR_CLASSES, parseDttColors } from "@/lib/dttIcon";
@@ -39,7 +39,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [portraitBlob, setPortraitBlob] = useState<Blob>();
   const [photoStage, setPhotoStage] = useState("");
   const [letterIndex, setLetterIndex] = useState(0);
-  const cameraInput = useRef<HTMLInputElement>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [photoError, setPhotoError] = useState("");
   const dirty = useRef(false);
 
   useEffect(() => {
@@ -137,20 +138,13 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       return;
     }
     setProcessingPhoto(true);
-    setPhotoStage("Mapping facial details…");
+    setPhotoError("");
+    setPhotoStage("Preparing your photo…");
     try {
       file = await normalizeSelfie(file);
       if (file.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
-      // Landmark detection improves the editable controls, but it must never block
-      // the server portrait generator on devices that cannot load MediaPipe/WASM
-      // or decode a camera-specific image format.
-      let mappedAvatar = avatar;
-      try {
-        mappedAvatar = await mapFaceLandmarks(file, avatar);
-      } catch {
-        setPhotoStage("Reading your photo securely…");
-      }
-       mappedAvatar = { ...mappedAvatar, useDttIcon: undefined };
+      // The portrait service reads the selfie directly; no device-side WASM scan is needed.
+      const mappedAvatar = { ...avatar, useDttIcon: undefined };
        updateAvatar(mappedAvatar);
       setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
@@ -174,6 +168,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       });
       await finalSave;
     } catch (error) {
+      setPhotoError(error instanceof Error ? error.message : "Try another photo.");
       toast({ title: "Couldn't create avatar", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
       setProcessingPhoto(false);
@@ -244,15 +239,11 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
             ))}
           </div>
         </div>}
-        <input ref={cameraInput} type="file" accept="image/*" capture="user" className="sr-only" onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) void processPhoto(file);
-          event.target.value = "";
-        }} />
+        <SelfieCamera open={cameraOpen} onOpenChange={setCameraOpen} onPhoto={(file) => void processPhoto(file)} />
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <Button type="button" variant="outline" disabled={processingPhoto || saving} className="h-14 w-full min-w-0 whitespace-normal border-primary/70 bg-secondary px-3 text-xs font-bold text-foreground hover:bg-secondary/80 sm:text-base" onClick={() => {
-            sessionStorage.setItem("dtt_active_tab", "profile");
-            cameraInput.current?.click();
+            try { sessionStorage.setItem("dtt_active_tab", "profile"); } catch { /* camera stays in page */ }
+            setCameraOpen(true);
           }}>
             {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
              {processingPhoto ? (photoStage || "Creating Your 3D Avatar…") : "Snap Your Face for Emoji"}
@@ -273,6 +264,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
             Use DTT
           </Button>
         </div>
+        {photoError && <p role="alert" className="text-sm text-destructive">{photoError}</p>}
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           Your selfie is never saved. It is processed securely and deleted from our systems after your emoji is created.
         </p>
