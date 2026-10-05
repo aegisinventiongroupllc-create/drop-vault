@@ -192,6 +192,77 @@ const Index = () => {
     );
   }
 
+  const exitCustomerPreview = () => {
+    try { localStorage.removeItem("dtt_admin_view_as_customer"); } catch {}
+    navigate("/admin-portal");
+  };
+  const adminCustomerPreview =
+    typeof window !== "undefined" && localStorage.getItem("dtt_admin_view_as_customer") === "1";
+
+  // --- Admin "View as Customer" preview ---
+  if (adminCustomerPreview && verified && authReady) {
+    const previewVault = vault ?? "women";
+    return (
+      <div className="min-h-[100dvh] overflow-x-hidden">
+        <div className="fixed top-0 left-0 right-0 z-[70] bg-primary text-primary-foreground flex items-center justify-between px-4 py-2">
+          <span className="text-[10px] font-bold tracking-widest">ADMIN PREVIEW — CUSTOMER VIEW</span>
+          <button onClick={exitCustomerPreview} className="text-[10px] font-bold tracking-widest underline">
+            EXIT TO ADMIN
+          </button>
+        </div>
+        <div className="pt-9">
+          {showSearch ? (
+            <GlobalSearch
+              onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
+              onClose={() => setShowSearch(false)}
+            />
+          ) : selectedCreator ? (
+            <CreatorProfile creatorName={selectedCreator} onBack={() => setSelectedCreator(null)} />
+          ) : (
+            <>
+              {activeTab === "home" && (
+                <DiscoveryFeed
+                  onCreatorClick={(name) => setSelectedCreator(name)}
+                  vault={previewVault}
+                  onSearch={() => setShowSearch(true)}
+                  hasVaultToggle={false}
+                  countryFilter={countryFilter}
+                />
+              )}
+              {activeTab === "trending" && (
+                <TrendingPage
+                  onCreatorClick={(name) => setSelectedCreator(name)}
+                  vault={previewVault}
+                  hasVaultToggle={false}
+                  countryFilter={countryFilter}
+                />
+              )}
+              {activeTab === "vaults" && (
+                <MemberDashboard
+                  balance={tokenBalance}
+                  onBuyTokens={() => { void refreshTokenBalance(); }}
+                  vault={previewVault}
+                  onNavigateHome={() => navigateToTab("home")}
+                  onCreatorClick={(name) => setSelectedCreator(name)}
+                />
+              )}
+              {activeTab === "profile" && (
+                <div className="mobile-scroll-shell flex flex-col">
+                  <div className="relative flex flex-1 flex-col items-center justify-center gap-4 px-4 py-16">
+                    <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
+                    <ProfileIdentityEditor />
+                  </div>
+                  <LegalFooter />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <BottomNav active={activeTab} vault={previewVault} onNavigate={navigateToTab} />
+      </div>
+    );
+  }
+
   // --- Onboarding screens ---
   if (!verified) {
     return <AgeVerification onVerified={() => {

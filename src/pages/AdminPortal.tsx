@@ -369,6 +369,17 @@ const AdminPortal = () => {
               >
                 <Eye className="w-4 h-4 mr-1" /> CREATOR VIEW
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                title="Preview the customer experience"
+                onClick={() => {
+                  try { localStorage.setItem("dtt_admin_view_as_customer", "1"); } catch {}
+                  navigate("/");
+                }}
+              >
+                <Eye className="w-4 h-4 mr-1" /> CUSTOMER VIEW
+              </Button>
               <Button size="sm" variant="outline" onClick={() => navigate("/")}>
                 <Home className="w-4 h-4" />
               </Button>
