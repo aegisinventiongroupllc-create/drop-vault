@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add creator welcome-back gold DTT token cascade with actual away earnings, optional coin sound, and detailed analytics navigation; verify return-to-tab and dismissal.
+
 - [x] Burn DTT branding into new creator videos and photos, with the second T pink; browser-exported photo and video visibly verified and video audio retained.
 - [x] Assess already-uploaded media separately: existing uploads require replacement/reprocessing; no claim that old files are branded. Large videos above the current 512 MB device-processing limit require a dedicated processing service.
 
