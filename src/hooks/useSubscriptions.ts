@@ -36,7 +36,7 @@ export function useSubscriptions() {
   useEffect(() => {
     refresh();
     const channel = supabase
-      .channel("subscriptions-mine")
+      .channel(`subscriptions-mine-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions" }, () => refresh())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
