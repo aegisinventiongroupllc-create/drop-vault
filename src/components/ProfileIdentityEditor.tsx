@@ -74,7 +74,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const updateAvatar: typeof setAvatar = (value) => { dirty.current = true; setAvatar(value); };
   const updateHandle = (value: string) => { dirty.current = true; setHandle(value); };
 
-  const save = async () => {
+  const save = async (blobOverride?: Blob) => {
+    const blobToUpload = blobOverride ?? portraitBlob;
     const clean = handle.trim().replace(/^@/, "");
     if (!HANDLE_PATTERN.test(clean)) {
       toast({ title: "Choose a valid handle", description: "Use 3–24 letters, numbers, underscores, or periods.", variant: "destructive" });
@@ -85,17 +86,17 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     let avatarToSave = avatar;
     let previousPortraitPath: string | undefined;
     let uploadedPortraitPath: string | undefined;
-    if (user && portraitBlob) {
+    if (user && blobToUpload) {
       previousPortraitPath = avatar.portraitPath;
       const portraitPath = `${user.id}/portrait-${crypto.randomUUID()}.webp`;
-      const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, portraitBlob, { contentType: "image/webp", upsert: true });
+      const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, blobToUpload, { contentType: "image/webp", upsert: true });
       if (uploadError) {
         setSaving(false);
         toast({ title: "Couldn't save portrait", description: uploadError.message, variant: "destructive" });
         return;
       }
       uploadedPortraitPath = portraitPath;
-      avatarToSave = { ...avatar, portraitPath };
+      avatarToSave = { ...avatar, portraitPath, useDttIcon: undefined };
     }
     const { error } = user
       ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
@@ -120,6 +121,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     window.dispatchEvent(new Event("dtt-profile-changed"));
     toast({ title: "Private identity saved", description: `Your emoji is saved to @${clean}.` });
   };
+
+  const saveRef = useRef(save);
+  saveRef.current = save;
 
   const processPhoto = async (file: File) => {
     // Admin passcode previews have no member account, so portraits can't be made or saved there.
@@ -158,10 +162,11 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         setPhotoStage(isFinal ? "Portrait ready" : "Rendering preview…");
         if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then((blob) => {
           setPortraitBlob(blob);
-          return savePortraitDraft(blob);
+          void savePortraitDraft(blob).catch(() => undefined);
+          return saveRef.current(blob);
         }).catch(() => undefined);
       });
-      toast({ title: "Your emoji is ready", description: "Review it, then save your private identity." });
+      
     } catch (error) {
       toast({ title: "Couldn't create avatar", description: error instanceof Error ? error.message : "Try another photo.", variant: "destructive" });
     } finally {
@@ -251,7 +256,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         </p>
       </div>
 
-      <Button variant="neon" className="w-full" onClick={save} disabled={saving}>
+      <Button variant="neon" className="w-full" onClick={() => void save()} disabled={saving}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
         SAVE PRIVATE IDENTITY
       </Button>
