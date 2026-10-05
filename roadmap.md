@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Default to DTT during loading and before selfies; add full per-letter circular color selection (12 tests and browser save/reload check passed with mocked persistence); deploy further simplified customer cartoon instructions (new selfie appearance not yet reviewed)
+
 - [x] Add robust on-device facial landmark mapping
 - [x] Add authenticated streamed realistic portrait generation
 - [x] Save generated portraits privately and render them across social views

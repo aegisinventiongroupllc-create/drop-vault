@@ -19,6 +19,8 @@ export default defineConfig(() => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "react-router-dom", "@tanstack/react-query", "@tanstack/query-core"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime", "react-router-dom"],
+    // Prebundle the color wheel with React so opening Profile doesn't rebuild
+    // shared hook chunks underneath a running React DOM renderer.
+    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime", "react-router-dom", "@jaames/iro", "preact"],
   },
 }));

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { DTT_COLOR_CLASSES, parseDttColors, type DttLetterColors } from "@/lib/dttIcon";
+import { dttColorClass, parseDttColors, type DttLetterColors } from "@/lib/dttIcon";
 
 export type AvatarFace = "spark" | "rogue" | "nova" | "pixel" | "orbit" | "crown";
 export type AvatarTone = "rose" | "cyan" | "gold" | "lime" | "violet" | "silver";
@@ -175,12 +175,12 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
     return () => { active = false; };
   }, [creatorPhotoPath]);
   const visibleImage = creatorPhotoUrl ?? (avatar.useDttIcon && !previewUrl ? undefined : portraitUrl);
-  if (!creatorPhotoUrl && avatar.useDttIcon && !previewUrl) {
+  if (!visibleImage) {
     return (
       <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background", className)} role="img" aria-label={label ? `${label}'s DTT icon` : "DTT profile icon"}>
         <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
            {parseDttColors(avatar.dttLetterColors).map((color, index) => (
-             <text key={index} x={25 + index * 25} y="52" textAnchor="middle" dominantBaseline="central" fontSize="32" fontWeight="900" className={`fill-current ${DTT_COLOR_CLASSES[color]}`}>{index === 0 ? "D" : "T"}</text>
+              <text key={index} x={25 + index * 25} y="52" textAnchor="middle" dominantBaseline="central" fontSize="32" fontWeight="900" fill={color.startsWith("#") ? color : "currentColor"} className={dttColorClass(color)}>{index === 0 ? "D" : "T"}</text>
            ))}
         </svg>
       </div>
