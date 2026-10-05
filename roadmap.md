@@ -16,7 +16,8 @@
 - [x] Simplify customer profiles to selfie-only private emoji identities with saved Women/Men style and public avatar names
 - [x] Add Fill Your Vault purchase entry, account-backed balance, and return-to-dashboard control
 - [x] Generate discreet cartoon customer avatars and more realistic creator likeness portraits from secure account roles
-- [x] Standardize customer and creator generation on one polished matte 3D animated portrait style
+- [x] Separate drawn, cel-shaded customer cartoons from creator animated likenesses
 - [x] Harden portrait replacement with collision-safe account paths and failed-save cleanup
 - [x] Add per-letter DTT icon colors with saved choices and optional selfie portraits
 - [x] Tighten customer cartoon privacy; verify icon rendering, save payload/reload with mocked persistence, and tests (new selfie output not tested)
+- [x] Deploy drawn customer cartoon style; nine regression tests pass and live generation from the supplied cartoon reference succeeds (real-selfie likeness still needs user review)
