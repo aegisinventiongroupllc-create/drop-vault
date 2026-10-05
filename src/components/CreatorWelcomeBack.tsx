@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import coinImage from "@/assets/dtt-reward-coin.png";
@@ -17,7 +17,13 @@ export default function CreatorWelcomeBack({ summary, onDismiss, onAnalytics }: 
   onDismiss: () => void;
   onAnalytics: () => void;
 }) {
-  const reducedMotion = useReducedMotion();
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   const audioRef = useRef<AudioContext | null>(null);
   const [sound, setSound] = useState(false);
   const [displayUsd, setDisplayUsd] = useState(0);
@@ -69,7 +75,7 @@ export default function CreatorWelcomeBack({ summary, onDismiss, onAnalytics }: 
 
   return (
     <Dialog open={summary !== null} onOpenChange={(open) => { if (!open) onDismiss(); }}>
-      <DialogContent className="welcome-reward w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-lg border-gold/40 bg-card p-0">
+      <DialogContent className="welcome-reward w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden rounded-lg border-gold/40 bg-card p-0">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
           {!reducedMotion && COINS.map((coin, index) => (
             <motion.img key={index} src={coinImage} alt="" width={816} height={816}
@@ -89,7 +95,7 @@ export default function CreatorWelcomeBack({ summary, onDismiss, onAnalytics }: 
           </div>
           <DialogDescription className="text-base text-foreground">While you were away...</DialogDescription>
           <p className="mt-3 text-sm text-muted-foreground">You earned</p>
-          <p className="my-1 text-5xl font-bold tabular-nums text-gold sm:text-6xl" aria-hidden="true">
+          <p className={`my-1 max-w-full break-all font-bold tabular-nums text-gold ${displayUsd >= 100000 ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`} aria-hidden="true">
             {displayUsd.toLocaleString("en-US", { style: "currency", currency: "USD" })}
           </p>
           <p className="sr-only">You earned {summary?.usd.toFixed(2)} US dollars.</p>
