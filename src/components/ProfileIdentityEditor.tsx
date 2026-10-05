@@ -221,13 +221,31 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           if (file) void processPhoto(file);
           event.target.value = "";
         }} />
-        <Button type="button" variant="outline" disabled={processingPhoto} className="h-14 w-full border-primary/70 bg-secondary text-base font-bold text-foreground hover:bg-secondary/80" onClick={() => {
-          sessionStorage.setItem("dtt_active_tab", "profile");
-          cameraInput.current?.click();
-        }}>
-          {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
-           {processingPhoto ? (photoStage || "Creating Your 3D Avatar…") : "Snap Your Face for Emoji"}
-        </Button>
+        <div className="grid grid-cols-[1fr_auto] gap-2">
+          <Button type="button" variant="outline" disabled={processingPhoto} className="h-14 w-full border-primary/70 bg-secondary px-3 text-sm font-bold text-foreground hover:bg-secondary/80 sm:text-base" onClick={() => {
+            sessionStorage.setItem("dtt_active_tab", "profile");
+            updateAvatar((current) => ({ ...current, useDttIcon: undefined }));
+            cameraInput.current?.click();
+          }}>
+            {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+             {processingPhoto ? (photoStage || "Creating Your 3D Avatar…") : "Snap Your Face for Emoji"}
+          </Button>
+          <Button
+            type="button"
+            variant={avatar.useDttIcon && !portraitBlob ? "default" : "outline"}
+            disabled={processingPhoto}
+            aria-pressed={!!avatar.useDttIcon && !portraitBlob}
+            className="h-14 border-primary/70 px-4 text-sm font-black"
+            onClick={() => {
+              setPortraitBlob(undefined);
+              setPortraitPreview(undefined);
+              void clearPortraitDraft().catch(() => undefined);
+              updateAvatar((current) => ({ ...current, useDttIcon: true }));
+            }}
+          >
+            Use DTT
+          </Button>
+        </div>
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           Your selfie is never saved. It is processed securely and deleted from our systems after your emoji is created.
         </p>

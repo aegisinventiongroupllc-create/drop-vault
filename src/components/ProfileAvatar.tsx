@@ -35,6 +35,7 @@ export interface AvatarConfig {
   noseShape: AvatarNoseShape;
   clothing: AvatarClothing;
   portraitPath?: string;
+  useDttIcon?: boolean;
 }
 
 export const AVATAR_SKIN_TONES: AvatarSkinTone[] = ["light", "warm", "medium", "deep", "rich", "dark"];
@@ -76,6 +77,7 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
     noseShape: allowed(["narrow", "balanced", "broad"], candidate.noseShape, DEFAULT_AVATAR.noseShape),
     clothing: allowed(AVATAR_CLOTHING, candidate.clothing, DEFAULT_AVATAR.clothing),
     portraitPath: typeof candidate.portraitPath === "string" && candidate.portraitPath ? candidate.portraitPath : undefined,
+    useDttIcon: candidate.useDttIcon === true ? true : undefined,
   };
 };
 
@@ -169,7 +171,16 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
     });
     return () => { active = false; };
   }, [creatorPhotoPath]);
-  const visibleImage = creatorPhotoUrl ?? portraitUrl;
+  const visibleImage = creatorPhotoUrl ?? (avatar.useDttIcon && !previewUrl ? undefined : portraitUrl);
+  if (!creatorPhotoUrl && avatar.useDttIcon && !previewUrl) {
+    return (
+      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background", className)} role="img" aria-label={label ? `${label}'s DTT icon` : "DTT profile icon"}>
+        <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+          <text x="50" y="50" textAnchor="middle" dominantBaseline="central" className="fill-primary" style={{ fontSize: 34, fontWeight: 900, letterSpacing: 1 }}>DTT</text>
+        </svg>
+      </div>
+    );
+  }
   return (
     <div className={cn("relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-secondary", className)} role="img" aria-label={label ? `${label}'s custom avatar` : "Custom profile avatar"}>
       {visibleImage ? <img src={visibleImage} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
