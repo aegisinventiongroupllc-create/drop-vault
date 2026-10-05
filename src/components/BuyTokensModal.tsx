@@ -29,6 +29,28 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [creditedTokens, setCreditedTokens] = useState<number>(0);
   const pollRef = useRef<number | null>(null);
+  const [cardEnabled, setCardEnabled] = useState(false);
+
+  // Card checkout appears automatically once CCBill account keys are configured on the server.
+  useEffect(() => {
+    supabase.functions.invoke("ccbill-create-checkout", { body: { probe: true } })
+      .then(({ data }) => setCardEnabled(Boolean(data?.configured)))
+      .catch(() => setCardEnabled(false));
+  }, []);
+
+  const handleCardCheckout = async () => {
+    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    await logConsent();
+    setError(null);
+    const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
+      body: { package: selectedOption },
+    });
+    if (fnError || !data?.checkout_url) {
+      setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
+      return;
+    }
+    window.location.href = data.checkout_url;
+  };
 
   const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
   const invoiceAmount = selectedOption === "bundle" ? BUNDLE_INVOICE_USD : TOKEN_INVOICE_USD;
@@ -188,10 +210,16 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
             </div>
 
-            <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center opacity-70">
-              <p className="text-sm font-bold text-muted-foreground">CREDIT / DEBIT CARD</p>
-              <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
-            </div>
+            {cardEnabled ? (
+              <Button variant="outline" className="w-full" disabled={!consentChecked} onClick={handleCardCheckout}>
+                PAY WITH CARD (CCBILL)
+              </Button>
+            ) : (
+              <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center opacity-70">
+                <p className="text-sm font-bold text-muted-foreground">CREDIT / DEBIT CARD</p>
+                <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
+              </div>
+            )}
 
             <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
               <p className="text-[10px] text-muted-foreground">You'll be redirected to CryptoCloud's secure checkout to complete payment.</p>
