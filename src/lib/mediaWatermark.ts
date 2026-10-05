@@ -80,9 +80,10 @@ async function videoWithMark(file: File, progress?: WatermarkProgress): Promise<
   if (processingVideo) throw new Error("Please wait for your other video to finish.");
   if (file.size > 512 * 1024 * 1024) throw new Error("This video is too large to watermark on this device. Please use a file under 512 MB.");
   processingVideo = true;
-  const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-  const encoder = new FFmpeg();
+  let encoder: import("@ffmpeg/ffmpeg").FFmpeg | undefined;
   try {
+    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+    encoder = new FFmpeg();
     progress?.("Preparing DTT video watermark… Keep this page open.", 1);
     const { width, height } = await videoSize(file);
     const canvas = document.createElement("canvas");
@@ -114,7 +115,7 @@ async function videoWithMark(file: File, progress?: WatermarkProgress): Promise<
     progress?.("DTT video ready. Uploading…", 95);
     return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}-dtt.mp4`, { type: "video/mp4" });
   } finally {
-    encoder.terminate();
+    encoder?.terminate();
     processingVideo = false;
   }
 }
