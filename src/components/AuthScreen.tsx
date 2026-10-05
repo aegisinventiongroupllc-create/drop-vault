@@ -25,6 +25,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
+  const [adminError, setAdminError] = useState("");
 
   const validate = (): string | null => {
     const e = email.trim();
@@ -34,13 +35,19 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   };
 
   const handleSubmit = async () => {
+    if (loading) return;
+    setAdminError("");
     const trimmed = email.trim();
     // Staff access code (verified on the server, never stored in the app)
-    if (trimmed && !trimmed.includes("@")) {
-      if (await verifyAdminPasscode(trimmed)) {
-        onAdmin();
-        return;
+    if (mode === "login" && /^\d{6}$/.test(trimmed)) {
+      setLoading(true);
+      try {
+        if (await verifyAdminPasscode(trimmed)) onAdmin();
+        else setAdminError("Access code not accepted. Check the code and try again.");
+      } finally {
+        setLoading(false);
       }
+      return;
     }
 
     // Forgot password — only email needed
@@ -154,7 +161,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
               inputMode="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setAdminError(""); }}
               className="pl-9"
               autoComplete="email"
               onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
@@ -187,6 +194,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           )}
         </div>
 
+        {adminError && <p role="alert" className="text-sm text-destructive">{adminError}</p>}
         <Button
           variant="neon"
           size="lg"

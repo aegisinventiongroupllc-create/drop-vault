@@ -38,6 +38,9 @@
 
     --gold: 43 96% 56%;
     --gold-foreground: 0 0% 0%;
+    --reward-shadow: 0 24px 100px hsl(var(--gold) / 0.16);
+    --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
+    --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
 
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
@@ -70,6 +73,24 @@
     --sidebar-border: 0 0% 18%;
     --sidebar-ring: 330 100% 50%;
   }
+}
+
+.welcome-reward { box-shadow: var(--reward-shadow); }
+.welcome-reward-content { background: var(--reward-content); }
+.reward-coin-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--reward-shine);
+  transform: translateX(-150%);
+  animation: reward-shine 3.2s ease-in-out infinite;
+}
+@keyframes reward-shine {
+  0%, 20% { transform: translateX(-150%); }
+  65%, 100% { transform: translateX(150%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reward-coin-shine::after { animation: none; }
 }
 
 @layer base {
