@@ -24,7 +24,7 @@ export function useTokenBalance() {
       window.setTimeout(() => { void refresh(); }, 0);
     });
     const channel = supabase
-      .channel("token-balance-mine")
+      .channel(`token-balance-mine-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "token_balances" }, () => refresh())
       .subscribe();
     return () => {
