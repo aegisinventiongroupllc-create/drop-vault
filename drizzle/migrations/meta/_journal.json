@@ -141,6 +141,13 @@
       "when": 1790953554454,
       "tag": "0019_add_creator_profile_photo_gallery",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791216060060,
+      "tag": "0020_migration",
+      "breakpoints": true
     }
   ]
 }
