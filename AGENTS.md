@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Keep creator welcome-back summaries read-only and account-scoped to completed transaction ledger rows; track last activity locally for display only, count tokens from allocation records rather than net revenue, and never alter balances for celebrations.
+
 - Send customer authentication callbacks to `https://dropthatthing.com` so production recovery and confirmation never route through an editor preview domain.
 - Treat `profiles.email` as private account data; social surfaces read only handle and avatar data from `public_profiles`.
 - Keep character configuration in `profiles.avatar_config` and render it through the shared `ProfileAvatar` component so every social surface stays consistent.

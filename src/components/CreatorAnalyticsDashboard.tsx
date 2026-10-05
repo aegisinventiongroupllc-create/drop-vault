@@ -17,6 +17,9 @@ import CreatorIdVerification from "@/components/CreatorIdVerification";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
+import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
+import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
+import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
 
 import {
   getCreatorSplitState, formatCountdown, getMilestoneProgress, FOLLOWER_MILESTONE,
@@ -118,6 +121,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
   }, [authUserId]);
 
   const liveStats = useCreatorStats();
+  const welcomeBack = useCreatorWelcomeBack(authUserId, safetyAgreed);
   const { items: mediaItems, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
@@ -423,6 +427,11 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="mobile-scroll-shell">
+      <CreatorWelcomeBack summary={welcomeBack.summary} onDismiss={welcomeBack.dismiss} onAnalytics={() => {
+        welcomeBack.dismiss();
+        setActiveSection("overview");
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }} />
       {mediaUploadInput}
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
@@ -525,6 +534,7 @@ const CreatorAnalyticsDashboard = ({ onBack }: { onBack: () => void }) => {
       {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
+          <CreatorEarningsBreakdown creatorId={authUserId} />
           <div className="grid grid-cols-2 gap-3">
             {STATS.map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
