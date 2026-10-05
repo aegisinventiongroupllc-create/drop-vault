@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { DTT_COLOR_CLASSES, parseDttColors, type DttLetterColors } from "@/lib/dttIcon";
 
 export type AvatarFace = "spark" | "rogue" | "nova" | "pixel" | "orbit" | "crown";
 export type AvatarTone = "rose" | "cyan" | "gold" | "lime" | "violet" | "silver";
@@ -36,6 +37,7 @@ export interface AvatarConfig {
   clothing: AvatarClothing;
   portraitPath?: string;
   useDttIcon?: boolean;
+  dttLetterColors?: DttLetterColors;
 }
 
 export const AVATAR_SKIN_TONES: AvatarSkinTone[] = ["light", "warm", "medium", "deep", "rich", "dark"];
@@ -78,6 +80,7 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
     clothing: allowed(AVATAR_CLOTHING, candidate.clothing, DEFAULT_AVATAR.clothing),
     portraitPath: typeof candidate.portraitPath === "string" && candidate.portraitPath ? candidate.portraitPath : undefined,
     useDttIcon: candidate.useDttIcon === true ? true : undefined,
+    dttLetterColors: parseDttColors(candidate.dttLetterColors),
   };
 };
 
@@ -176,7 +179,9 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
     return (
       <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-background", className)} role="img" aria-label={label ? `${label}'s DTT icon` : "DTT profile icon"}>
         <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
-          <text x="50" y="50" textAnchor="middle" dominantBaseline="central" className="fill-primary" style={{ fontSize: 34, fontWeight: 900, letterSpacing: 1 }}>DTT</text>
+           {parseDttColors(avatar.dttLetterColors).map((color, index) => (
+             <text key={index} x={25 + index * 25} y="52" textAnchor="middle" dominantBaseline="central" fontSize="32" fontWeight="900" className={`fill-current ${DTT_COLOR_CLASSES[color]}`}>{index === 0 ? "D" : "T"}</text>
+           ))}
         </svg>
       </div>
     );

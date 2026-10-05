@@ -41,6 +41,12 @@
 
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
+    --dtt-pink: 330 100% 60%;
+    --dtt-blue: 205 100% 65%;
+    --dtt-silver: 210 15% 90%;
+    --dtt-gold: 43 96% 62%;
+    --dtt-mint: 155 70% 62%;
+    --dtt-red: 0 90% 68%;
 
     --skin-light: 26 100% 88%;
     --skin-warm: 27 72% 76%;
@@ -86,6 +92,12 @@
 }
 
 @layer utilities {
+  .dtt-color-pink { color: hsl(var(--dtt-pink)); }
+  .dtt-color-blue { color: hsl(var(--dtt-blue)); }
+  .dtt-color-silver { color: hsl(var(--dtt-silver)); }
+  .dtt-color-gold { color: hsl(var(--dtt-gold)); }
+  .dtt-color-mint { color: hsl(var(--dtt-mint)); }
+  .dtt-color-red { color: hsl(var(--dtt-red)); }
   .mobile-scroll-shell {
     min-height: 100dvh;
     overflow-x: hidden;

@@ -11,6 +11,9 @@ describe("avatar prompt style", () => {
   });
 
   it("keeps customer identity discreet and creator identity recognizable", () => {
+    expect(buildAvatarPrompt("customer", "man")).toContain("CUSTOMER CARTOON OVERRIDE");
+    expect(buildAvatarPrompt("customer", "man")).toContain("Privacy matters more than exact resemblance");
+    expect(buildAvatarPrompt("creator", "man")).not.toContain("CUSTOMER CARTOON OVERRIDE");
     expect(buildAvatarPrompt("customer", "man")).toContain("redesigning exact biometric measurements");
     expect(buildAvatarPrompt("creator", "man")).toContain("recognizable 3D animated likeness");
   });

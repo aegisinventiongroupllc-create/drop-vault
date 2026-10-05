@@ -9,6 +9,7 @@ import { normalizeSelfie } from "@/lib/normalizeSelfie";
 import { mapFaceLandmarks } from "@/lib/mapFaceLandmarks";
 import { streamPortrait } from "@/lib/streamPortrait";
 import { clearPortraitDraft, readPortraitDraft, savePortraitDraft } from "@/lib/avatarDraft";
+import { DTT_COLORS, DTT_COLOR_CLASSES, parseDttColors } from "@/lib/dttIcon";
 import ProfileAvatar, {
   DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
@@ -37,6 +38,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [portraitPreview, setPortraitPreview] = useState<string>();
   const [portraitBlob, setPortraitBlob] = useState<Blob>();
   const [photoStage, setPhotoStage] = useState("");
+  const [letterIndex, setLetterIndex] = useState(0);
   const cameraInput = useRef<HTMLInputElement>(null);
   const dirty = useRef(false);
 
@@ -47,7 +49,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       const { data } = await supabase.from("profiles").select("display_name, avatar_config").eq("user_id", user.id).maybeSingle();
       if (data) {
         setHandle(data.display_name ?? "");
-        setAvatar(parseAvatarConfig(data.avatar_config));
+        const stored = parseAvatarConfig(data.avatar_config);
+        setAvatar(stored.portraitPath ? stored : { ...stored, useDttIcon: true });
       }
       // Unsaved edits (e.g. from before the camera opened) win over the stored profile.
       const draft = readDraft();
@@ -74,8 +77,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const updateAvatar: typeof setAvatar = (value) => { dirty.current = true; setAvatar(value); };
   const updateHandle = (value: string) => { dirty.current = true; setHandle(value); };
 
-  const save = async (blobOverride?: Blob) => {
-    const blobToUpload = blobOverride ?? portraitBlob;
+  const save = async (blobOverride?: Blob, avatarOverride?: AvatarConfig) => {
+    const currentAvatar = avatarOverride ?? avatar;
+    const blobToUpload = currentAvatar.useDttIcon ? undefined : blobOverride ?? portraitBlob;
     const clean = handle.trim().replace(/^@/, "");
     if (!HANDLE_PATTERN.test(clean)) {
       toast({ title: "Choose a valid handle", description: "Use 3–24 letters, numbers, underscores, or periods.", variant: "destructive" });
@@ -83,11 +87,11 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    let avatarToSave = avatar;
+    let avatarToSave = currentAvatar;
     let previousPortraitPath: string | undefined;
     let uploadedPortraitPath: string | undefined;
     if (user && blobToUpload) {
-      previousPortraitPath = avatar.portraitPath;
+      previousPortraitPath = currentAvatar.portraitPath;
       const portraitPath = `${user.id}/portrait-${crypto.randomUUID()}.webp`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(portraitPath, blobToUpload, { contentType: "image/webp", upsert: true });
       if (uploadError) {
@@ -96,7 +100,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         return;
       }
       uploadedPortraitPath = portraitPath;
-      avatarToSave = { ...avatar, portraitPath, useDttIcon: undefined };
+      avatarToSave = { ...currentAvatar, portraitPath, useDttIcon: undefined };
     }
     const { error } = user
       ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
@@ -146,7 +150,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       } catch {
         setPhotoStage("Reading your photo securely…");
       }
-      updateAvatar(mappedAvatar);
+       mappedAvatar = { ...mappedAvatar, useDttIcon: undefined };
+       updateAvatar(mappedAvatar);
       setPhotoStage("Creating illustrated portrait…");
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Your login expired. Log in again, then retake your photo.");
@@ -163,7 +168,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         if (isFinal) void fetch(dataUrl).then((response) => response.blob()).then((blob) => {
           setPortraitBlob(blob);
           void savePortraitDraft(blob).catch(() => undefined);
-          return saveRef.current(blob);
+           return saveRef.current(blob, mappedAvatar);
         }).catch(() => undefined);
       });
       
@@ -182,7 +187,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <div className="relative shrink-0 p-1">
           <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
-          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">Private emoji</span>
+          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>
         </div>
         <div className="min-w-0 flex-1 text-left">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Private identity</p>
@@ -197,7 +202,24 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       </div>
 
       <div className="space-y-4 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
-        <div>
+        {avatar.useDttIcon && <div className="space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your DTT colors</p>
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Select DTT letter">
+            {(["D", "First T", "Second T"] as const).map((letter, index) => (
+              <Button key={letter} type="button" variant={letterIndex === index ? "default" : "outline"} aria-pressed={letterIndex === index} onClick={() => setLetterIndex(index)}>{letter}</Button>
+            ))}
+          </div>
+          <div className="flex justify-between gap-2" role="group" aria-label="Letter color">
+            {DTT_COLORS.map((color) => (
+              <Button key={color} type="button" variant="ghost" size="icon" title={color} aria-label={`${color} for ${["D", "first T", "second T"][letterIndex]}`} aria-pressed={parseDttColors(avatar.dttLetterColors)[letterIndex] === color} className={`h-9 w-9 shrink-0 rounded-full border-2 p-1 ${parseDttColors(avatar.dttLetterColors)[letterIndex] === color ? "border-foreground" : "border-transparent"}`} onClick={() => updateAvatar((current) => {
+                const colors = parseDttColors(current.dttLetterColors);
+                colors[letterIndex] = color;
+                return { ...current, dttLetterColors: colors, useDttIcon: true };
+              })}><span className={`h-5 w-5 rounded-full bg-current ${DTT_COLOR_CLASSES[color]}`} /></Button>
+            ))}
+          </div>
+        </div>}
+        {!avatar.useDttIcon && <div>
           <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Choose your emoji style</p>
           <div className="grid grid-cols-2 rounded-md border border-border bg-background p-1" role="group" aria-label="Emoji style">
             {(["woman", "man"] as const).map((style) => (
@@ -220,7 +242,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
               </Button>
             ))}
           </div>
-        </div>
+        </div>}
         <input ref={cameraInput} type="file" accept="image/*" capture="user" className="sr-only" onChange={(event) => {
           const file = event.target.files?.[0];
           if (file) void processPhoto(file);
@@ -229,7 +251,6 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <Button type="button" variant="outline" disabled={processingPhoto} className="h-14 w-full border-primary/70 bg-secondary px-3 text-sm font-bold text-foreground hover:bg-secondary/80 sm:text-base" onClick={() => {
             sessionStorage.setItem("dtt_active_tab", "profile");
-            updateAvatar((current) => ({ ...current, useDttIcon: undefined }));
             cameraInput.current?.click();
           }}>
             {processingPhoto ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
@@ -256,7 +277,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         </p>
       </div>
 
-      <Button variant="neon" className="w-full" onClick={() => void save()} disabled={saving}>
+      <Button variant="neon" className="w-full" onClick={() => void save()} disabled={saving || processingPhoto}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
         SAVE PRIVATE IDENTITY
       </Button>
