@@ -188,7 +188,7 @@ export function useCreatorStats(): CreatorLiveStats {
 
     // Realtime: refetch when transactions or profiles change
     const channel = supabase
-      .channel("creator-stats")
+      .channel(`creator-stats-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, () => load())
