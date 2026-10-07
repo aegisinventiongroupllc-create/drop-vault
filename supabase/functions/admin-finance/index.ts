@@ -224,6 +224,53 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === "clear_consents") {
+      const { error, count } = await supabase
+        .from("legal_consents")
+        .delete({ count: "exact" })
+        .not("id", "is", null);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true, deleted: count ?? 0 });
+    }
+
+    if (action === "top_creators") {
+      const { data: txs, error } = await supabase
+        .from("transactions")
+        .select("creator_id, amount_usd, creator_share_usd, platform_share_usd")
+        .eq("status", "completed")
+        .limit(100000);
+      if (error) return json({ error: error.message }, 500);
+      const agg = new Map<string, { gross: number; creator_share: number; platform_share: number; sales: number }>();
+      for (const t of txs || []) {
+        const a = agg.get(t.creator_id) ?? { gross: 0, creator_share: 0, platform_share: 0, sales: 0 };
+        a.gross += Number(t.amount_usd) || 0;
+        a.creator_share += Number(t.creator_share_usd) || 0;
+        a.platform_share += Number(t.platform_share_usd) || 0;
+        a.sales += 1;
+        agg.set(t.creator_id, a);
+      }
+      const ids = [...agg.keys()];
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("user_id, display_name, vault_side").in("user_id", ids)
+        : { data: [] as any[] };
+      const { data: wallets } = ids.length
+        ? await supabase.from("creator_wallets").select("user_id, pending_balance, total_paid").in("user_id", ids)
+        : { data: [] as any[] };
+      const pMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
+      const wMap = new Map((wallets || []).map((w: any) => [w.user_id, w]));
+      const rows = ids.map((id) => ({
+        user_id: id,
+        display_name: pMap.get(id)?.display_name ?? null,
+        side: pMap.get(id)?.vault_side === "men" ? "men" : "women",
+        ...agg.get(id)!,
+        owed: Number(wMap.get(id)?.pending_balance) || 0,
+        paid: Number(wMap.get(id)?.total_paid) || 0,
+      }));
+      const top = (side: string) =>
+        rows.filter((r) => r.side === side).sort((a, b) => b.creator_share - a.creator_share).slice(0, 10);
+      return json({ ok: true, women: top("women"), men: top("men") });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     return json({ error: (e as Error).message }, 500);

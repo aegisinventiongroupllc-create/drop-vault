@@ -134,6 +134,17 @@ const AdminPortal = () => {
     }
   };
 
+  const clearAllConsents = async () => {
+    if (!confirm("Delete EVERY consent record and start fresh? This cannot be undone and removes legal proof.")) return;
+    try {
+      const res = await callFinance("clear_consents");
+      setConsents([]);
+      toast({ title: "Consent log cleared", description: `${res?.deleted ?? 0} record(s) removed.` });
+    } catch (err) {
+      toast({ title: "Clear failed", description: String(err), variant: "destructive" });
+    }
+  };
+
 
 
   useEffect(() => {
@@ -585,12 +596,17 @@ const AdminPortal = () => {
             )}
           </Card>
 
+          <TopCreatorsBoard callFinance={callFinance} />
+
           {/* Legal Consent Audit Trail */}
           <Card className="p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
                 <ShieldCheck className="w-4 h-4" /> Legal Consent Log
               </div>
+              <Button size="sm" variant="destructive" className="h-7 px-2 text-[10px]" onClick={clearAllConsents}>
+                CLEAR ALL
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
