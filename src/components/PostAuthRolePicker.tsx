@@ -33,6 +33,9 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
             <Star className="w-5 h-5" />
             I'M A CREATOR
           </Button>
+          <p className="text-center text-xs font-bold tracking-widest text-primary">
+            BE ONE OF THE FIRST 100 CREATORS — GET A 92/8 SPLIT FOR YOUR FIRST YEAR
+          </p>
           <Button
             variant="outline"
             size="lg"
