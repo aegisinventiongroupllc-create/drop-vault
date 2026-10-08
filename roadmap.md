@@ -36,5 +36,5 @@
 
 - [ ] Hire a Pennsylvania registered agent (CROP) and file Change of Registered Office so the public LLC record stops showing the home address. Deferred by user.
 - [ ] Register the DMCA agent ($6) using the agent's address, then send it over so the site's DMCA page matches the registration exactly.
-- [ ] CCBill approval plus the four dashboard values: account number, subaccount, FlexForm ID, salt.
+- [ ] CCBill application: DTT Media LLC legal name (becomes the card-statement descriptor), EIN letter or Articles of Incorporation, one US government photo ID for the principal, a business bank account in the LLC's name with a real statement/voided check (app screenshots rejected), dropthatthingmedia@gmail.com as contact, apply as high risk for adult digital products, realistic estimated annual sales. Then approval brings the four dashboard values: account number, subaccount, FlexForm ID, salt. Confirm the per-transaction ticket cap before selling the $101 five-token package.
 - [ ] Switch GoDaddy Email Privacy forwarding from the other business's Gmail to dropthatthingmedia@gmail.com.
