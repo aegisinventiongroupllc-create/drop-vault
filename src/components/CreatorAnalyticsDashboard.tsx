@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
+import YotiAgeCheck from "@/components/YotiAgeCheck";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
@@ -720,6 +721,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
             <p className="text-xs text-muted-foreground mb-4">
               We manually review every creator before they can upload. Submit a Government ID + a verification selfie.
             </p>
+            <div className="mb-4"><YotiAgeCheck /></div>
             {authUserId && (
               <CreatorIdVerification userId={authUserId} onApproved={() => setKycStatus("approved")} />
             )}
