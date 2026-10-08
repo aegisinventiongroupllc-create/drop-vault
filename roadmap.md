@@ -31,3 +31,10 @@
 - [x] Replace native camera handoff with in-page capture/upload and remove device landmark scanning; browser capture/upload and mocked auto-save pass without navigation or page errors (real-phone confirmation pending)
 
 - [x] Yoti age check: use uploaded sandbox key file (signed requests)
+
+## Waiting on the user (off-site)
+
+- [ ] Hire a Pennsylvania registered agent (CROP) and file Change of Registered Office so the public LLC record stops showing the home address. Deferred by user.
+- [ ] Register the DMCA agent ($6) using the agent's address, then send it over so the site's DMCA page matches the registration exactly.
+- [ ] CCBill approval plus the four dashboard values: account number, subaccount, FlexForm ID, salt.
+- [ ] Switch GoDaddy Email Privacy forwarding from the other business's Gmail to dropthatthingmedia@gmail.com.
