@@ -29,3 +29,5 @@
 - [x] Tighten customer cartoon privacy; verify icon rendering, save payload/reload with mocked persistence, and tests (new selfie output not tested)
 - [x] Deploy drawn customer cartoon style; nine regression tests pass and live generation from the supplied cartoon reference succeeds (real-selfie likeness still needs user review)
 - [x] Replace native camera handoff with in-page capture/upload and remove device landmark scanning; browser capture/upload and mocked auto-save pass without navigation or page errors (real-phone confirmation pending)
+
+- [ ] Yoti age check: use uploaded sandbox key file (signed requests)
