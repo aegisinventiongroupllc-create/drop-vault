@@ -31,7 +31,7 @@ const YotiAgeCheck = () => {
         <ShieldCheck className="w-5 h-5 text-primary" />
         <p className="text-sm font-bold tracking-wider text-foreground">QUICK 18+ AGE CHECK</p>
       </div>
-      <p className="text-xs text-muted-foreground">Verified securely by Yoti. Takes about a minute — a face scan or ID photo.</p>
+      <p className="text-xs text-muted-foreground">Verified securely by Yoti. Takes about two minutes — a photo of your ID and a quick face scan.</p>
       {status === "loading" ? (
         <Loader2 className="w-5 h-5 animate-spin text-primary" />
       ) : status === "passed" ? (

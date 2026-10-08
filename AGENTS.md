@@ -14,4 +14,4 @@
 
 - Card checkout runs through CCBill FlexForms built server-side with a salted digest; the unsigned webhook credits only from CCBill IP ranges, re-checks price against the server catalog, and credits idempotently per transaction id. The card button stays hidden until all CCBill secrets exist.
 
-- Creator age checks use Yoti's hosted Age Verification started and resolved server-side; results are stored per account in yoti_age_checks (owner read-only) and the API key lives only in backend secrets.
+- Creator age checks use Yoti's hosted Age Verification started and resolved server-side; results are stored per account in yoti_age_checks (owner read-only) and requests are signed server-side with the Yoti key stored only in backend secrets.
