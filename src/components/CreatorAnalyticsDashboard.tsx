@@ -235,11 +235,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
     setShowCamera(false);
   };
 
-  // Ondato KYC launcher — placeholder until sandbox/production keys are wired up.
+  // KYC launcher — directs creators to the Yoti check in the Creator Studio.
   const launchOndato = () => {
     setVerificationStatus("pending");
     toast("Verification in progress", {
-      description: "Ondato identity verification will launch here once sandbox keys are configured.",
+      description: "Use the Age Verification section in the Creator Studio to complete your Yoti check.",
       duration: 4000,
     });
   };
