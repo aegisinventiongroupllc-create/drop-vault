@@ -123,7 +123,7 @@ const PrivacyPolicy = () => (
     <p><strong className="text-foreground">1. Data Collected.</strong> Email, account info, transaction history, IP address, device data, and (for Creators) government-issued ID and liveness selfies via Yoti.</p>
     <p><strong className="text-foreground">2. Purpose.</strong> Age & identity verification, fraud prevention, payment settlement, AML/KYC compliance, legal audit response.</p>
     <p><strong className="text-foreground">3. Legal Basis (GDPR/UK).</strong> Contract performance, legal obligation (AML/CTF), and legitimate interests in fraud prevention.</p>
-    <p><strong className="text-foreground">4. Third-Party Processors.</strong> Ondato (identity verification), Supabase (database/auth/storage), Blockchair (Litecoin blockchain monitoring). All processors are bound by data processing agreements.</p>
+    <p><strong className="text-foreground">4. Third-Party Processors.</strong> Yoti (identity and age verification), our cloud database and hosting provider, and a Litecoin blockchain monitoring service. All processors are bound by data processing agreements.</p>
     <p><strong className="text-foreground">5. Retention.</strong> KYC records: 5 years post-account-closure (regulatory requirement). Transaction logs: 7 years. Marketing data: until you opt out.</p>
     <p><strong className="text-foreground">6. Your Rights.</strong> Access, correction, deletion (subject to legal retention), portability, objection. Email office@dttmediallc.com to exercise rights.</p>
     <p><strong className="text-foreground">7. Cookies.</strong> Essential cookies only; no third-party advertising trackers.</p>
@@ -146,7 +146,7 @@ const RefundPolicy = () => (
 const AmlPolicy = () => (
   <SectionShell title="AML / KYC Policy">
     <p>DTT maintains a strict Anti-Money Laundering (AML) and Counter-Terrorism Financing (CTF) program in line with FinCEN, FATF, and EU 5AMLD/6AMLD guidance.</p>
-    <p><strong className="text-foreground">Customer Due Diligence (CDD).</strong> Wallet origin screening applies to all crypto payments. Creators must complete full KYC (government ID + liveness selfie) via Ondato before payouts.</p>
+    <p><strong className="text-foreground">Customer Due Diligence (CDD).</strong> Wallet origin screening applies to all crypto payments. Creators must complete full KYC (government ID + liveness selfie) via Yoti before payouts.</p>
     <p><strong className="text-foreground">Sanctions Screening.</strong> All users are screened against OFAC, UN, EU, and UK sanctions lists. Hits result in account freeze and report filing.</p>
     <p><strong className="text-foreground">Transaction Monitoring.</strong> Automated systems flag structuring, velocity anomalies, and high-risk geographies. Suspicious Activity Reports (SARs) are filed where required by law.</p>
     <p><strong className="text-foreground">Prohibited Sources.</strong> Funds derived from criminal activity, mixers/tumblers, darknet markets, or sanctioned entities are refused; accounts are terminated and authorities notified.</p>
