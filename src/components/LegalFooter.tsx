@@ -97,7 +97,7 @@ const Statement2257 = () => (
   <SectionShell title="18 U.S.C. § 2257 Record Keeping Compliance Statement">
     <p>All models, actors, and other persons appearing in visual depictions of actual or simulated sexually explicit conduct on this website were at least 18 years of age at the time the visual depictions were created.</p>
     <p><strong className="text-foreground">DTT</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
-    <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Ondato).</p>
+    <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Yoti).</p>
     <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: office@dttmediallc.com</p>
   </SectionShell>
 );
@@ -120,7 +120,7 @@ const TermsOfService = () => (
 
 const PrivacyPolicy = () => (
   <SectionShell title="Privacy Policy">
-    <p><strong className="text-foreground">1. Data Collected.</strong> Email, account info, transaction history, IP address, device data, and (for Creators) government-issued ID and liveness selfies via Ondato.</p>
+    <p><strong className="text-foreground">1. Data Collected.</strong> Email, account info, transaction history, IP address, device data, and (for Creators) government-issued ID and liveness selfies via Yoti.</p>
     <p><strong className="text-foreground">2. Purpose.</strong> Age & identity verification, fraud prevention, payment settlement, AML/KYC compliance, legal audit response.</p>
     <p><strong className="text-foreground">3. Legal Basis (GDPR/UK).</strong> Contract performance, legal obligation (AML/CTF), and legitimate interests in fraud prevention.</p>
     <p><strong className="text-foreground">4. Third-Party Processors.</strong> Ondato (identity verification), Supabase (database/auth/storage), Blockchair (Litecoin blockchain monitoring). All processors are bound by data processing agreements.</p>
