@@ -457,6 +457,38 @@ const AdminPortal = () => {
             </div>
           </Card>
 
+          {/* Platform earnings breakdown — your money, separate from what creators are owed */}
+          <Card className="p-4">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-3">
+              <DollarSign className="w-4 h-4" /> Your Platform Earnings
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">$1 purchase fees</div>
+                <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.purchase_fees ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">$2 per-token cuts</div>
+                <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.token_cuts ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Entry passes ($20/yr)</div>
+                <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.entry_passes ?? 0).toFixed(2)}</div>
+              </div>
+              <div className="border border-border rounded-md p-3">
+                <div className="text-muted-foreground uppercase text-[10px]">Custom request fees</div>
+                <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.custom_request_fees ?? 0).toFixed(2)}</div>
+              </div>
+            </div>
+            <div className="border border-primary/40 rounded-md p-3 mt-3 flex items-center justify-between">
+              <span className="text-muted-foreground uppercase text-[10px] tracking-wider">Your total (before processor fees)</span>
+              <span className="text-2xl font-bold text-green-400">${Number(finance?.platform_earnings?.total ?? 0).toFixed(2)}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              CCBill's processing fee comes out of these amounts before the money reaches your bank. Creators' 90% is never touched by processor fees.
+            </p>
+          </Card>
+
           {/* Payout Management */}
           <Card className="p-4">
             <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-3">
