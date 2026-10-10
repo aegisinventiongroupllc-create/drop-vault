@@ -131,7 +131,7 @@ const RestrictedCountries = () => (
 
       <p className="text-[10px] text-muted-foreground/70">
         This list is non-exhaustive and updated as sanctions and local law change.
-        Questions or appeals: <a href="mailto:office@dttmediallc.com" className="text-primary hover:underline">office@dttmediallc.com</a>.
+        Questions or appeals: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>.
         Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}.
       </p>
     </div>
