@@ -50,6 +50,22 @@ const CreatorPayoutMethod = () => {
         <p className="text-xs text-muted-foreground">Choose bank transfer (ACH) or Litecoin. Only you and the DTT admin can see these details.</p>
       </div>
 
+      {(() => {
+        const d = new Date(); const add = (5 - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + add);
+        const friday = d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+        const isLtc = (saved?.method ?? method) === "ltc";
+        return (
+          <div className="rounded-lg border border-primary/40 bg-primary/10 p-3">
+            <p className="text-xs font-bold tracking-wide text-primary">NEXT PAYOUT: {friday.toUpperCase()}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isLtc
+                ? "Litecoin: sent every Friday and usually arrives within minutes."
+                : "Bank transfer: sent every Friday and usually arrives in 1–2 business days. Switch to Litecoin for faster payouts."}
+            </p>
+          </div>
+        );
+      })()}
+
       {saved && (
         <div className="bg-secondary/50 rounded-lg p-3 text-xs text-foreground">
           <p className="font-bold">Saved: {saved.method === "ach" ? "BANK TRANSFER" : "LITECOIN"}</p>
