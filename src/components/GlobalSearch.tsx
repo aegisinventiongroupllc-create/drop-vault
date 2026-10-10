@@ -1,56 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
-import { MOCK_VIDEOS, type VideoItem } from "@/components/DiscoveryFeed";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import { COUNTRIES } from "@/components/GlobalPassport";
 
-interface SearchResult {
-  name: string;
-  category: string;
-  verified: boolean;
+interface CreatorRow {
+  user_id: string;
+  display_name: string | null;
+  country: string | null;
+  avatar_config: unknown;
+  profile_photo_path: string | null;
+  tags: string[] | null;
 }
 
-const ALL_CREATORS: SearchResult[] = [
-  { name: "LunaCosplay", category: "Cosplay", verified: true },
-  { name: "FitJessie", category: "Gym", verified: true },
-  { name: "BlondieVibes", category: "Lifestyle", verified: false },
-  { name: "TwinFlames", category: "Groups", verified: true },
-  { name: "PetiteSophie", category: "Fashion", verified: false },
-  { name: "NeonQueen", category: "Cosplay", verified: true },
-  { name: "GymRat_Anna", category: "Gym", verified: false },
-  { name: "DuoVibes", category: "Groups", verified: false },
-];
+const countryFlag = (code: string | null) =>
+  COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
 
 const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: string) => void; onClose: () => void }) => {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [demandSent, setDemandSent] = useState(false);
+  const [creators, setCreators] = useState<CreatorRow[]>([]);
+
+  // Load every public creator identity once; filtering happens on-device.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("public_profiles")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path, tags")
+        .eq("role", "creator")
+        .limit(500);
+      setCreators((data ?? []) as unknown as CreatorRow[]);
+    })();
+  }, []);
 
   const q = query.trim().toLowerCase();
 
-  // Search creators
+  // Search creators by handle, tag, or country
   const creatorResults = q
-    ? ALL_CREATORS.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q)
-      )
+    ? creators.filter((c) => {
+        const name = (c.display_name ?? "").toLowerCase();
+        const tags = (c.tags ?? []).map((tag) => tag.toLowerCase());
+        const country = (COUNTRIES.find((x) => x.code === c.country)?.name ?? "").toLowerCase();
+        return name.includes(q) || tags.some((tag) => tag.includes(q)) || country.includes(q);
+      })
     : [];
 
-  // Search video titles (niche discovery)
-  const videoResults = q
-    ? MOCK_VIDEOS.filter(v =>
-        v.title.toLowerCase().includes(q) ||
-        v.description.toLowerCase().includes(q)
-      )
-    : [];
-
-  // Deduplicate creators from video results
-  const videoCreators = new Set(creatorResults.map(c => c.name));
-  const uniqueVideoResults = videoResults.filter(v => !videoCreators.has(v.creator));
-
-  const noResults = q.length > 0 && creatorResults.length === 0 && videoResults.length === 0;
+  const noResults = q.length > 0 && creatorResults.length === 0;
 
   const handleRequestDemand = async () => {
     if (!query.trim() || demandSent) return;
