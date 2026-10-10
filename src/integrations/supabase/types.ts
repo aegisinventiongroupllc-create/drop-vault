@@ -169,6 +169,42 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_payout_methods: {
+        Row: {
+          account_holder: string | null
+          account_number: string | null
+          account_type: string | null
+          bank_name: string | null
+          ltc_address: string | null
+          method: string
+          routing_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_holder?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          bank_name?: string | null
+          ltc_address?: string | null
+          method: string
+          routing_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_holder?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          bank_name?: string | null
+          ltc_address?: string | null
+          method?: string
+          routing_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       creator_payouts: {
         Row: {
           amount_usd: number
@@ -949,6 +985,19 @@ export type Database = {
           hearts: number
         }[]
       }
+      get_my_payout_method: {
+        Args: never
+        Returns: {
+          account_holder: string
+          account_last4: string
+          account_type: string
+          bank_name: string
+          ltc_address: string
+          method: string
+          routing_last4: string
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -989,6 +1038,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_my_payout_method: {
+        Args: {
+          _account: string
+          _account_holder: string
+          _account_type: string
+          _bank_name: string
+          _ltc: string
+          _method: string
+          _routing: string
+        }
+        Returns: boolean
       }
       unlock_creator: {
         Args: { _creator_id: string }

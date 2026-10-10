@@ -162,6 +162,13 @@
       "when": 1791466264966,
       "tag": "0022_yoti_age_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791637515077,
+      "tag": "0023_creator_payout_methods",
+      "breakpoints": true
     }
   ]
 }
