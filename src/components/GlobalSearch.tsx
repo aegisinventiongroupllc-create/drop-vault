@@ -84,49 +84,28 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
         {/* Creator results */}
         {creatorResults.map((creator) => (
           <button
-            key={creator.name}
-            onClick={() => { onCreatorClick(creator.name); onClose(); }}
+            key={creator.user_id}
+            onClick={() => { if (creator.display_name) { onCreatorClick(creator.display_name); onClose(); } }}
             className="w-full flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:border-primary/50 active:bg-card/80 transition-all"
           >
-            <ProfileAvatar label={creator.name} className="h-12 w-12" />
-            <div className="flex-1 text-left">
-              <div className="flex items-center gap-1.5">
-                <p className="font-semibold text-foreground">@{creator.name}</p>
-                {creator.verified && (
-                  <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-full px-1.5 py-0.5 font-bold">✓</span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">{creator.category}</p>
+            <ProfileAvatar config={creator.avatar_config} creatorPhotoPath={creator.profile_photo_path} label={creator.display_name || "creator"} className="h-12 w-12" />
+            <div className="flex-1 text-left min-w-0">
+              <p className="font-semibold text-foreground truncate">
+                {countryFlag(creator.country)} @{creator.display_name}
+              </p>
+              {(creator.tags ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {(creator.tags ?? []).slice(0, 4).map((tag) => (
+                    <span key={tag} className="text-[10px] bg-primary/10 text-primary border border-primary/20 rounded-full px-1.5 py-0.5 font-bold">{tag}</span>
+                  ))}
+                </div>
+              )}
             </div>
-            <Button variant="neon" size="sm" className="text-[10px]">
+            <Button variant="neon" size="sm" className="text-[10px] shrink-0">
               {t.unlock}
             </Button>
           </button>
         ))}
-
-        {/* Video title matches (Niche Discovery) */}
-        {uniqueVideoResults.length > 0 && (
-          <>
-            {creatorResults.length > 0 && (
-              <p className="text-[10px] font-bold tracking-widest text-muted-foreground pt-2">MATCHING TEASERS</p>
-            )}
-            {uniqueVideoResults.map((video) => (
-              <button
-                key={video.id}
-                onClick={() => { onCreatorClick(video.creator); onClose(); }}
-                className="w-full flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:border-primary/50 active:bg-card/80 transition-all"
-              >
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${video.color} flex items-center justify-center text-xs font-bold text-foreground`}>
-                  ▶
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold text-foreground text-sm">{video.title}</p>
-                  <p className="text-xs text-muted-foreground">@{video.creator}</p>
-                </div>
-              </button>
-            ))}
-          </>
-        )}
 
         {noResults && (
           <div className="text-center py-8 space-y-3">
