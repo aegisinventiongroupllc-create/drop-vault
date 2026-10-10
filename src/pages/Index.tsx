@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
-import GlobalPassport, { COUNTRIES } from "@/components/GlobalPassport";
+import { COUNTRIES } from "@/components/GlobalPassport";
 import GlobePicker from "@/components/GlobePicker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthScreen from "@/components/AuthScreen";
