@@ -232,6 +232,18 @@ const Index = () => {
             <CreatorProfile creatorName={selectedCreator} onBack={() => setSelectedCreator(null)} />
           ) : (
             <>
+              {(activeTab === "home" || activeTab === "trending") && (
+                <div className="flex justify-end px-4 pt-2">
+                  <button
+                    onClick={() => setShowGlobe(true)}
+                    aria-label="Pick a country"
+                    className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+                  >
+                    <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                    <span className="text-foreground">{countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
+                  </button>
+                </div>
+              )}
               {activeTab === "home" && (
                 <DiscoveryFeed
                   onCreatorClick={(name) => setSelectedCreator(name)}
@@ -271,6 +283,13 @@ const Index = () => {
           )}
         </div>
         <BottomNav active={activeTab} vault={previewVault} onNavigate={navigateToTab} />
+        {showGlobe && (
+          <GlobePicker
+            selected={countryFilter}
+            onSelect={setCountryFilter}
+            onClose={() => setShowGlobe(false)}
+          />
+        )}
       </div>
     );
   }
