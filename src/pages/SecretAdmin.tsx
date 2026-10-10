@@ -18,7 +18,7 @@ const SecretAdmin = () => {
       setErr("");
       window.location.replace("/admin-portal");
     } else {
-      setErr("Invalid code. Please contact support: admin@dttmediallc.com");
+      setErr("Invalid code. Please contact support: dropthatthingmedia@gmail.com");
     }
   };
 
