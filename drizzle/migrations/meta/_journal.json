@@ -169,6 +169,20 @@
       "when": 1791637515077,
       "tag": "0023_creator_payout_methods",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791654005891,
+      "tag": "0024_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791654022606,
+      "tag": "0025_migration",
+      "breakpoints": true
     }
   ]
 }

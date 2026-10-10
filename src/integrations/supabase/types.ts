@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_bans: {
+        Row: {
+          created_at: string
+          payment_id: string | null
+          reason: string
+          tokens_revoked: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          payment_id?: string | null
+          reason: string
+          tokens_revoked?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          payment_id?: string | null
+          reason?: string
+          tokens_revoked?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       account_preferences: {
         Row: {
           account_type: string | null
@@ -967,6 +991,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       credit_tokens: {
@@ -997,6 +1022,10 @@ export type Database = {
           routing_last4: string
           updated_at: string
         }[]
+      }
+      handle_chargeback: {
+        Args: { _payment_id: string; _reason: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
