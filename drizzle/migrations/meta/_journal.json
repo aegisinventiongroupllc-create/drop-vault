@@ -183,6 +183,13 @@
       "when": 1791654022606,
       "tag": "0025_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791656563961,
+      "tag": "0026_entry_pass_and_saved_cards",
+      "breakpoints": true
     }
   ]
 }

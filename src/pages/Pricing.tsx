@@ -38,6 +38,14 @@ const Pricing = () => (
         <p className="text-sm text-muted-foreground">Simple coins. No subscriptions. No hidden fees.</p>
       </header>
 
+      <section className="rounded-2xl border-2 border-primary neon-glow-sm bg-card p-5 space-y-2">
+        <p className="text-[10px] font-bold tracking-widest text-gold">VAULT ENTRY PASS</p>
+        <p className="text-3xl font-bold text-primary">$20<span className="text-xs text-muted-foreground"> / YEAR</span></p>
+        <p className="text-xs text-muted-foreground">
+          Required annual entry to the teaser feed and discovery floor. Bit-Tokens to unlock creators are sold separately below.
+        </p>
+      </section>
+
       <div className="grid gap-4 sm:grid-cols-2">
         {plans.map((p) => (
           <div key={p.name} className={`relative rounded-2xl border-2 p-5 bg-card ${p.best ? "border-primary neon-glow-sm" : "border-border"}`}>

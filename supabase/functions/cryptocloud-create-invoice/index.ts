@@ -37,6 +37,11 @@ function priceRequest(body: any): { amount_usd: number; tokens: number } | { err
     return pkg;
   }
 
+  // Vault Entry Pass: $20 flat, no tokens, credited by the webhook.
+  if (kind === "entry_pass") {
+    return { amount_usd: 20, tokens: 0 };
+  }
+
   if (kind === "custom_request") {
     let base: number | null = null;
 
@@ -82,7 +87,10 @@ Deno.serve(async (req) => {
     if ("error" in priced) return json({ error: priced.error }, 400);
 
     const { amount_usd, tokens } = priced;
-    const orderId = `dtt-${Date.now()}-${tokens}-${userId}`;
+    const isEntryPass = body?.kind === "entry_pass";
+    const orderId = isEntryPass
+      ? `dttpass-${Date.now()}-${userId}`
+      : `dtt-${Date.now()}-${tokens}-${userId}`;
 
     const ccRes = await fetch("https://api.cryptocloud.plus/v2/invoice/create", {
       method: "POST",

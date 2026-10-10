@@ -86,6 +86,36 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Vault Entry Pass orders use the dttpass-<ts>-<userId> prefix.
+    if (orderId?.startsWith("dttpass-")) {
+      const parts = orderId.split("-");
+      const userId = parts.slice(2).join("-");
+      if (!/^[0-9a-f-]{36}$/i.test(userId)) {
+        return new Response(JSON.stringify({ error: "invalid pass order" }), { status: 400 });
+      }
+      if (amountUsd > 0 && Math.abs(amountUsd - 20) > 0.5) {
+        console.error("pass amount mismatch", { orderId, amountUsd });
+        return new Response(JSON.stringify({ error: "amount does not match entry pass price" }), { status: 400 });
+      }
+
+      const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { error: passErr } = await supabase.rpc("credit_entry_pass", {
+        _user_id: userId,
+        _payment_id: invoiceId,
+        _amount_usd: amountUsd || 20,
+        _method: "crypto",
+      });
+      if (passErr) {
+        console.error("credit_entry_pass error", passErr);
+        return new Response(JSON.stringify({ error: passErr.message }), { status: 500 });
+      }
+      return new Response(JSON.stringify({ ok: true, entry_pass: true, buyer_id: userId }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // order_id format: dtt-<ts>-<tokens>-<userId>
     if (!orderId?.startsWith("dtt-")) {
       return new Response(JSON.stringify({ ok: true, ignored: "non-dtt order" }), {

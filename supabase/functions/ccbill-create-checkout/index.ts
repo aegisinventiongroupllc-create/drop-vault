@@ -7,6 +7,7 @@ import { encodeHex } from "jsr:@std/encoding@1/hex";
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
   single: { price: "21.00", tokens: 1 },
   bundle: { price: "101.00", tokens: 5 },
+  entry_pass: { price: "20.00", tokens: 0 },
 };
 const INITIAL_PERIOD = "2"; // one-time sale; access length is enforced by our own 14-day logic
 const CURRENCY_USD = "840";
@@ -43,6 +44,7 @@ Deno.serve(async (req) => {
 
     const pkg = TOKEN_PACKAGES[String(body?.package ?? "")];
     if (!pkg) return json({ error: "Unknown token package" }, 400);
+    const isEntryPass = String(body?.package ?? "") === "entry_pass";
 
     const formDigest = await md5(`${pkg.price}${INITIAL_PERIOD}${CURRENCY_USD}${cfg.salt}`);
     const params = new URLSearchParams({
@@ -53,8 +55,10 @@ Deno.serve(async (req) => {
       currencyCode: CURRENCY_USD,
       formDigest,
       dtt_user: userData.user.id,
-      dtt_tokens: String(pkg.tokens),
     });
+    if (isEntryPass) params.set("dtt_pkg", "entry_pass");
+    else params.set("dtt_tokens", String(pkg.tokens));
+    if (body?.savecard === true) params.set("dtt_savecard", "1");
     if (userData.user.email) params.set("customer_email", userData.user.email);
 
     return json({

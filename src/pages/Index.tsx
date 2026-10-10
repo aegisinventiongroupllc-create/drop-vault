@@ -25,6 +25,9 @@ import { logActivity } from "@/lib/activityLog";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useEntryPass } from "@/hooks/useEntryPass";
+import EntryPassGate from "@/components/EntryPassGate";
+import { Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "dtt_user_prefs";
 const ACTIVE_TAB_KEY = "dtt_active_tab";
@@ -89,6 +92,7 @@ const Index = () => {
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
 
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
@@ -397,6 +401,30 @@ const Index = () => {
 
   const handleCreatorClick = (name: string) => setSelectedCreator(name);
   const handleBuyTokens = () => { void refreshTokenBalance(); };
+
+  // Vault Entry Pass: customers need an active $20/year pass before the teaser feed.
+  // Admins (override and CUSTOMER VIEW preview) and creators bypass the gate.
+  const needsEntryPass =
+    role === "customer" &&
+    roleChosen &&
+    entryPass.status === "none" &&
+    !isAdminOverride;
+
+  if (entryPass.status === "loading" && role === "customer" && roleChosen && !isAdminOverride) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (needsEntryPass) {
+    return (
+      <div className="min-h-[100dvh] bg-background text-foreground">
+        <EntryPassGate onPurchased={() => void entryPass.refresh()} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] overflow-x-hidden">

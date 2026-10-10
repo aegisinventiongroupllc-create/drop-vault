@@ -499,6 +499,42 @@ export type Database = {
         }
         Relationships: []
       }
+      entry_passes: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          expires_at: string
+          granted_at: string
+          id: string
+          method: string
+          payment_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          expires_at: string
+          granted_at?: string
+          id?: string
+          method?: string
+          payment_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          expires_at?: string
+          granted_at?: string
+          id?: string
+          method?: string
+          payment_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           consent_text: string
@@ -739,6 +775,36 @@ export type Database = {
           verification_reviewer_notes?: string | null
           verification_status?: string
           verification_submitted_at?: string | null
+        }
+        Relationships: []
+      }
+      saved_payment_methods: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          last4: string | null
+          processor: string
+          processor_token: string | null
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          last4?: string | null
+          processor?: string
+          processor_token?: string | null
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          last4?: string | null
+          processor?: string
+          processor_token?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -994,6 +1060,15 @@ export type Database = {
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
+      credit_entry_pass: {
+        Args: {
+          _amount_usd: number
+          _method?: string
+          _payment_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       credit_tokens: {
         Args: {
           _amount_usd: number
