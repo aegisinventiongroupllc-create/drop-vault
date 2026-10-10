@@ -53,7 +53,10 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
 
 export const useI18n = () => {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
+  // Fail-safe: never blank the screen if a stale bundle renders outside the provider.
+  if (!ctx) {
+    return { locale: "en" as Locale, t: en, setLocale: () => {}, locales: LOCALE_LABELS };
+  }
   return ctx;
 };
 

@@ -621,8 +621,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
           {(() => {
             const handle = (profileUsername || "").trim().replace(/^@/, "").toLowerCase();
             const vaultUrl = handle
-              ? `https://dttmediallc.com/creator/${encodeURIComponent(handle)}`
-              : "https://dttmediallc.com";
+              ? `https://dropthatthing.com/creator/${encodeURIComponent(handle)}`
+              : "https://dropthatthing.com";
             return (
               <div className="bg-card border border-border rounded-xl p-4 text-center">
                 <h3 className="text-sm font-bold text-foreground mb-2">SHARE MY VAULT</h3>
@@ -641,7 +641,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground mb-2 break-all">
-                  {handle ? `dttmediallc.com/creator/${handle}` : "Set your username to personalize this link"}
+                  {handle ? `dropthatthing.com/creator/${handle}` : "Set your username to personalize this link"}
                 </p>
                 <Button
                   variant="neon"
@@ -1130,9 +1130,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
 
       {/* Support footer */}
       <div className="px-4 mt-8 pb-2 text-center">
-        <a href="mailto:admin@dttmediallc.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+        <a href="mailto:dropthatthingmedia@gmail.com" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
           <Mail className="w-3 h-3" />
-          DTT Support: admin@dttmediallc.com
+          DTT Support: dropthatthingmedia@gmail.com
         </a>
       </div>
       <LegalFooter />
