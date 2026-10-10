@@ -4,6 +4,7 @@ import { Users, Star } from "lucide-react";
 import type { UserRole } from "@/components/RoleSelection";
 import type { VaultType } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
+import { useCreatorText } from "@/i18n/creator";
 
 interface PostAuthRolePickerProps {
   email?: string;
@@ -12,6 +13,7 @@ interface PostAuthRolePickerProps {
 
 const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
   const [pickingSide, setPickingSide] = useState(false);
+  const ct = useCreatorText();
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
@@ -22,10 +24,10 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
             DROPTHAT<span className="text-primary">THING</span>
           </h1>
           <p className="text-muted-foreground text-sm">
-            {email ? `Signed in as ${email}.` : "You're signed in."}
+            {email ? ct.signed_in_as(email) : ct.signed_in}
           </p>
           <p className="text-muted-foreground text-sm mt-1">
-            {pickingSide ? "Which vault will you create in?" : "Tell us who you are."}
+            {pickingSide ? ct.which_vault : ct.who_are_you}
           </p>
         </div>
 
@@ -37,7 +39,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               className="w-full text-base font-semibold"
               onClick={() => onSelect("creator", "women")}
             >
-              WOMEN'S VAULT
+              {ct.womens_vault}
             </Button>
             <Button
               variant="outline"
@@ -45,14 +47,14 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               className="w-full text-base font-semibold border-primary/30 hover:border-primary hover:text-primary"
               onClick={() => onSelect("creator", "men")}
             >
-              MEN'S VAULT
+              {ct.mens_vault}
             </Button>
             <button
               type="button"
               className="text-xs text-muted-foreground hover:text-foreground tracking-widest mt-1"
               onClick={() => setPickingSide(false)}
             >
-              BACK
+              {ct.back}
             </button>
           </div>
         ) : (
@@ -64,10 +66,10 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               onClick={() => setPickingSide(true)}
             >
               <Star className="w-5 h-5" />
-              I'M A CREATOR
+              {ct.im_creator}
             </Button>
             <p className="text-center text-xs font-bold tracking-widest text-primary">
-              BE ONE OF THE FIRST 100 CREATORS — GET A 92/8 SPLIT FOR YOUR FIRST YEAR
+              {ct.founding}
             </p>
             <Button
               variant="outline"
@@ -76,7 +78,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               onClick={() => onSelect("customer")}
             >
               <Users className="w-5 h-5" />
-              I'M A CUSTOMER
+              {ct.im_customer}
             </Button>
           </div>
         )}

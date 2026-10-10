@@ -899,24 +899,24 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
           {kycStatus === "approved" && <>
           {/* Step 1: Title */}
           <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
-            <h3 className="text-base font-bold text-foreground tracking-wider">UPLOAD VIDEO</h3>
-            <p className="text-xs text-muted-foreground -mt-2">Three simple steps. Add a title, then upload your teaser and full video.</p>
+            <h3 className="text-base font-bold text-foreground tracking-wider">{ct.upload_video}</h3>
+            <p className="text-xs text-muted-foreground -mt-2">{ct.upload_steps}</p>
 
             <div className="space-y-2">
-              <label htmlFor="upload-title" className="text-xs font-bold text-muted-foreground tracking-wider">1. TITLE</label>
+              <label htmlFor="upload-title" className="text-xs font-bold text-muted-foreground tracking-wider">{ct.step_title}</label>
               <input
                 id="upload-title"
                 type="text"
                 value={uploadTitle}
                 onChange={(e) => setUploadTitle(e.target.value)}
-                placeholder="e.g. Cosplay Reveal — Marin Kitagawa"
+                placeholder={ct.title_ph}
                 className="w-full bg-secondary rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
 
             {/* Step 2: Teaser */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground tracking-wider">2. UPLOAD TEASER (FREE PREVIEW)</label>
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">{ct.step_teaser}</label>
               <Button
                 variant="neon"
                 size="lg"
@@ -925,18 +925,18 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
                 disabled={!!uploading}
               >
                 <Upload className="w-5 h-5 mr-1" />
-                {uploading === "teasers" ? "UPLOADING TEASER..." : "UPLOAD TEASER"}
+                {uploading === "teasers" ? ct.uploading_teaser : ct.upload_teaser}
               </Button>
-              <p className="text-[10px] text-muted-foreground">15-second MP4/WebM with audio. Shows in the Discovery Feed.</p>
+              <p className="text-[10px] text-muted-foreground">{ct.teaser_hint}</p>
               <div className="flex items-start gap-2 bg-primary/10 border border-primary/40 rounded-xl px-3 py-2.5">
                 <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs text-primary font-bold leading-snug">TIP: Dance-style teasers (twerk, dance, playful movement) pull the most customers into your Vault. Keep it energetic and end on a hook that leaves them wanting more.</p>
+                <p className="text-xs text-primary font-bold leading-snug">{ct.teaser_tip}</p>
               </div>
             </div>
 
             {/* Step 3: Full Video */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground tracking-wider">3. UPLOAD FULL VIDEO (PAID CONTENT)</label>
+              <label className="text-xs font-bold text-muted-foreground tracking-wider">{ct.step_full}</label>
               <Button
                 variant="gold"
                 size="lg"
@@ -945,16 +945,16 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
                 disabled={!!uploading}
               >
                 <Lock className="w-5 h-5 mr-1" />
-                {uploading === "vault" ? "UPLOADING FULL VIDEO..." : "UPLOAD FULL VIDEO"}
+                {uploading === "vault" ? ct.uploading_full : ct.upload_full}
               </Button>
-              <p className="text-[10px] text-muted-foreground">Locked vault content — only paying customers can view.</p>
+              <p className="text-[10px] text-muted-foreground">{ct.full_hint}</p>
             </div>
 
             {/* Progress bar */}
             {uploading && (
               <div className="space-y-2">
                 <div className="flex justify-between text-[10px] text-muted-foreground tracking-wider">
-                  <span className="font-bold text-primary">UPLOADING — {uploading === "vault" ? "FULL VIDEO" : "TEASER"}</span>
+                  <span className="font-bold text-primary">{ct.uploading} — {uploading === "vault" ? ct.full_video : ct.teaser}</span>
                   <span className="font-bold text-primary">{uploadProgress}%</span>
                 </div>
                 <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
