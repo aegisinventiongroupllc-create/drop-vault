@@ -10,19 +10,37 @@ const YotiAgeCheck = () => {
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
 
+  // Only call the age-check service with a real signed-in session; otherwise it rejects the request.
+  const hasSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    return Boolean(data.session?.access_token);
+  };
+
   const check = async () => {
-    const { data } = await supabase.functions.invoke("yoti-age-check", { body: { action: "result" } });
-    setStatus((data?.status as Status) ?? "none");
+    try {
+      if (!(await hasSession())) { setStatus("none"); return; }
+      const { data, error: e } = await supabase.functions.invoke("yoti-age-check", { body: { action: "result" } });
+      setStatus(e ? "none" : ((data?.status as Status) ?? "none"));
+    } catch {
+      setStatus("none");
+    }
   };
   useEffect(() => { check(); }, []);
 
   const start = async () => {
     setStarting(true); setError(null);
-    const { data, error: e } = await supabase.functions.invoke("yoti-age-check", {
-      body: { action: "start", return_url: window.location.href },
-    });
-    if (e || !data?.url) { setError("Couldn't start the age check. Please try again."); setStarting(false); return; }
-    window.location.href = data.url;
+    try {
+      if (!(await hasSession())) { setError("Please sign in to your creator account to verify your age."); return; }
+      const { data, error: e } = await supabase.functions.invoke("yoti-age-check", {
+        body: { action: "start", return_url: window.location.href },
+      });
+      if (e || !data?.url) { setError("Couldn't start the age check. Please try again."); return; }
+      window.location.href = data.url;
+    } catch {
+      setError("Couldn't start the age check. Please try again.");
+    } finally {
+      setStarting(false);
+    }
   };
 
   return (
