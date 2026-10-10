@@ -163,7 +163,9 @@ Deno.serve(async (req) => {
           .maybeSingle();
         const owed = Math.round((Number(w?.pending_balance) || 0) * 100) / 100;
         if (!w || owed <= 0) return json({ ok: false, message: "This creator has no balance owed." });
-        if (!(w.ltc_address || "").trim()) return json({ ok: false, message: "Creator has no LTC address saved." });
+        const { data: pm } = await supabase.from("creator_payout_methods").select("method").eq("user_id", creatorId).maybeSingle();
+        const isAch = pm?.method === "ach";
+        if (!isAch && !(w.ltc_address || "").trim()) return json({ ok: false, message: "Creator has no payout method saved." });
         const txHash = typeof body?.tx_hash === "string" ? body.tx_hash.trim().slice(0, 200) : null;
         const now = new Date().toISOString();
         // Only the creator's own balance moves; platform fees in transactions are never touched.
@@ -189,11 +191,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      const [{ data: wallet }, { data: txs }, { data: payouts }, prof] = await Promise.all([
+      const [{ data: wallet }, { data: txs }, { data: payouts }, prof, { data: payoutMethod }] = await Promise.all([
         supabase.from("creator_wallets").select("ltc_address, pending_balance, total_earned, total_paid").eq("user_id", creatorId).maybeSingle(),
         supabase.from("transactions").select("id, amount_usd, creator_share_usd, platform_share_usd, entry_tax, platform_commission, status, created_at").eq("creator_id", creatorId).order("created_at", { ascending: false }).limit(1000),
         supabase.from("creator_payouts").select("*").eq("creator_id", creatorId).order("created_at", { ascending: false }).limit(200),
         loadProfiles([creatorId]),
+        supabase.from("creator_payout_methods").select("*").eq("user_id", creatorId).maybeSingle(),
       ]);
       const done = (txs || []).filter((t: any) => t.status === "completed");
       const s = (k: string) => done.reduce((a: number, t: any) => a + (Number(t[k]) || 0), 0);
@@ -201,6 +204,7 @@ Deno.serve(async (req) => {
         ok: true,
         profile: prof[creatorId] ?? null,
         wallet: wallet ?? null,
+        payout_method: payoutMethod ?? null,
         ledger: {
           unlocks: done.length,
           access_credits: done.length,
