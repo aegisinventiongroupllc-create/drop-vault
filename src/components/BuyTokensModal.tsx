@@ -6,7 +6,7 @@ import {
   TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD,
   BUNDLE_TOKENS, BUNDLE_INVOICE_USD, BUNDLE_BASE_USD,
   PLATFORM_SPLIT_PERCENT, CREATOR_SPLIT_PERCENT,
-  calculateTokenPurchaseSplit,
+  calculateTokenPurchaseSplit, ENTRY_PASS_PRICE_USD,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -167,7 +167,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                   <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">E</span>
                   <span className="font-semibold text-foreground">Vault Entry Pass — 1 Year</span>
                 </div>
-                <span className="text-lg font-bold text-primary">$20</span>
+                <span className="text-lg font-bold text-primary">${ENTRY_PASS_PRICE_USD}</span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-1 ml-11">
                 One pass covers the discovery floor for 365 days. Bit-Tokens to unlock creators are bought separately.
@@ -175,8 +175,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             </div>
 
             <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
-              <p className="text-[10px] font-bold text-muted-foreground tracking-wider">WHERE YOUR $20 GOES</p>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">DTT platform vault (entry fee)</span><span className="text-primary font-bold">$20.00</span></div>
+              <p className="text-[10px] font-bold text-muted-foreground tracking-wider">WHERE YOUR ${ENTRY_PASS_PRICE_USD} GOES</p>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">DTT platform vault (entry fee)</span><span className="text-primary font-bold">${ENTRY_PASS_PRICE_USD}.00</span></div>
               <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Creators earn from Bit-Token unlocks</span><span className="text-foreground">90% of every token</span></div>
             </div>
 

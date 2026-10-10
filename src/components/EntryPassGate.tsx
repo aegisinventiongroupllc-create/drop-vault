@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BuyTokensModal from "@/components/BuyTokensModal";
+import { ENTRY_PASS_PRICE_USD } from "@/lib/tokenEconomy";
 
 const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -21,7 +22,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
 
         <div className="space-y-2">
           <p className="text-[11px] font-bold tracking-[0.35em] text-gold">VAULT ENTRY PASS</p>
-          <h1 className="font-display text-3xl font-bold tracking-wider">$20 / YEAR</h1>
+          <h1 className="font-display text-3xl font-bold tracking-wider">${ENTRY_PASS_PRICE_USD} / YEAR</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Your annual key to the floor. Browse the full teaser feed, discover every creator, and step into any Vault Hub.
           </p>
@@ -43,12 +44,12 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
           </div>
           <div className="flex justify-between border-t border-border pt-3 text-xs font-bold">
             <span className="text-muted-foreground">Your entry pass</span>
-            <span className="text-primary">$20.00 / year</span>
+            <span className="text-primary">${ENTRY_PASS_PRICE_USD}.00 / year</span>
           </div>
         </div>
 
         <Button variant="neon" className="w-full font-bold tracking-wider" onClick={() => setOpen(true)}>
-          GET MY ENTRY PASS — $20
+          GET MY ENTRY PASS — ${ENTRY_PASS_PRICE_USD}
         </Button>
 
         <a href="/pricing" className="block text-[11px] font-semibold uppercase text-primary underline">
