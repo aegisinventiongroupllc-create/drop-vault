@@ -109,7 +109,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
 
   const handleShare = async () => {
     const url = `${window.location.origin}/?creator=${encodeURIComponent(video.creator)}`;
-    const shareData = { title: `@${video.creator} on DropThatThing`, text: `Check out @${video.creator} on DropThatThing!`, url };
+    const shareData = { title: `DTT — @${video.creator}`, text: `Check out @${video.creator} on DTT!`, url };
     try {
       if (navigator.share) { await navigator.share(shareData); }
       else { await navigator.clipboard.writeText(url); toast({ title: "Link copied!" }); }
@@ -357,7 +357,15 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           videoUrl: pub.publicUrl,
         };
       });
-      if (!cancelled) setLiveVideos(items);
+      // Most-followed creators first (top 20), rest shuffled for discovery
+      const sorted = [...items].sort((a, b) => b.likes - a.likes);
+      const top = sorted.slice(0, 20);
+      const rest = sorted.slice(20);
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+      if (!cancelled) setLiveVideos([...top, ...rest]);
     })();
     return () => { cancelled = true; };
   }, [vault]);
