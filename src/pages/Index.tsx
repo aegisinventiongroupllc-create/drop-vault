@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
-import GlobalPassport from "@/components/GlobalPassport";
+import GlobalPassport, { COUNTRIES } from "@/components/GlobalPassport";
+import GlobePicker from "@/components/GlobePicker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthScreen from "@/components/AuthScreen";
 import { type UserRole } from "@/components/RoleSelection";
@@ -88,6 +89,7 @@ const Index = () => {
   const [showLegal, setShowLegal] = useState(false);
   const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
+  const [showGlobe, setShowGlobe] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
