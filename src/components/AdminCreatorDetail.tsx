@@ -141,18 +141,29 @@ const AdminCreatorDetail = ({ creator, onBack }: AdminCreatorDetailProps) => {
             {/* Payout action */}
             <div className="bg-card border border-border rounded-xl p-4 space-y-3">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Send className="w-4 h-4 text-primary" /> Trigger Payout</h3>
-              <div className="bg-secondary/50 rounded-lg px-3 py-2">
-                <p className="text-[10px] text-muted-foreground">Creator LTC Wallet</p>
-                <p className="text-[11px] text-foreground font-mono break-all">{wallet?.ltc_address || "No LTC address saved"}</p>
+              <div className="bg-secondary/50 rounded-lg px-3 py-2 space-y-0.5">
+                {detail?.payout_method?.method === "ach" ? (
+                  <>
+                    <p className="text-[10px] text-muted-foreground">Creator Bank Transfer (ACH) · {detail.payout_method.account_type}</p>
+                    <p className="text-[11px] text-foreground">{detail.payout_method.account_holder} · {detail.payout_method.bank_name}</p>
+                    <p className="text-[11px] text-foreground font-mono">Routing {detail.payout_method.routing_number}</p>
+                    <p className="text-[11px] text-foreground font-mono">Account {detail.payout_method.account_number}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[10px] text-muted-foreground">Creator LTC Wallet</p>
+                    <p className="text-[11px] text-foreground font-mono break-all">{wallet?.ltc_address || "No payout method saved"}</p>
+                  </>
+                )}
               </div>
               <Input
                 value={txHash}
                 onChange={(e) => setTxHash(e.target.value)}
-                placeholder="LTC transaction ID (optional)"
+                placeholder="Transfer / transaction ID (optional)"
                 className="text-xs"
                 maxLength={200}
               />
-              <Button className="w-full" onClick={triggerPayout} disabled={paying || !(Number(L?.owed) > 0) || !wallet?.ltc_address}>
+              <Button className="w-full" onClick={triggerPayout} disabled={paying || !(Number(L?.owed) > 0) || !(wallet?.ltc_address || detail?.payout_method?.method === "ach")}>
                 {paying ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 TRIGGER PAYOUT {usd(L?.owed)}
               </Button>
