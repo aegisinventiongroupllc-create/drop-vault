@@ -87,12 +87,12 @@ const Index = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
-  const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
   const [authReady, setAuthReady] = useState(false);
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
 
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
