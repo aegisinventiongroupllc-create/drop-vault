@@ -111,9 +111,15 @@ const Index = () => {
       if (chosen) {
         setRole(dbRole);
         if (dbRole === "creator") {
-          setVault("women");
-          setPreference("women");
-          const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: "women", preference: "women" };
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("vault_side")
+            .eq("user_id", userId)
+            .maybeSingle();
+          const side: VaultType = prof?.vault_side === "men" ? "men" : "women";
+          setVault(side);
+          setPreference(side);
+          const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: side, preference: side };
           savePrefs(prefs);
         } else if (preferenceRow?.customer_preference) {
           const customerPreference = preferenceRow.customer_preference;
@@ -296,7 +302,7 @@ const Index = () => {
     return (
       <PostAuthRolePicker
         email={email}
-        onSelect={async (chosenRole) => {
+        onSelect={async (chosenRole, creatorSide) => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
@@ -306,9 +312,17 @@ const Index = () => {
           setRole(chosenRole);
           setRoleChosen(true);
           if (chosenRole === "creator") {
-            setVault("women");
-            setPreference("women");
-            savePrefs({ email, role: "creator", vault: "women", preference: "women" });
+            const side: VaultType = creatorSide === "men" ? "men" : "women";
+            if (authedUserId) {
+              const { error: sideError } = await supabase
+                .from("profiles")
+                .update({ vault_side: side })
+                .eq("user_id", authedUserId);
+              if (sideError) console.error("Failed to save creator side", sideError);
+            }
+            setVault(side);
+            setPreference(side);
+            savePrefs({ email, role: "creator", vault: side, preference: side });
           } else {
             // Reset any stale customer preference so the "what are you looking for" screen shows
             setPreference(null);
