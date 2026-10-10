@@ -31,6 +31,7 @@ import {
 import { useCreatorStats } from "@/hooks/useCreatorStats";
 import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 import { QRCodeCanvas } from "qrcode.react";
+import { useCreatorText } from "@/i18n/creator";
 
 const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
@@ -44,6 +45,7 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: () => void; adminPreview?: boolean }) => {
+  const ct = useCreatorText();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
   const logoTaps = useRef({ count: 0, lastAt: 0 });
   const previewCoinRain = () => {
