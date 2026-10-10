@@ -15,6 +15,7 @@ const FINAL_SALE_TEXT = "I agree that purchasing Bit-Tokens grants an immediate 
 interface BuyTokensModalProps {
   onClose: () => void;
   onPurchase: (tokens: number) => void;
+  mode?: "tokens" | "entry_pass";
 }
 
 interface Checkout {
@@ -23,7 +24,8 @@ interface Checkout {
   order_id: string;
 }
 
-const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
+const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModalProps) => {
+  const isEntryPass = mode === "entry_pass";
   const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
   const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
   const [checkout, setCheckout] = useState<Checkout | null>(null);
@@ -34,6 +36,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [creditedTokens, setCreditedTokens] = useState<number>(0);
   const pollRef = useRef<number | null>(null);
   const [cardEnabled, setCardEnabled] = useState(false);
+  const [rememberCard, setRememberCard] = useState(false);
 
   // Card checkout appears automatically once CCBill account keys are configured on the server.
   useEffect(() => {
@@ -47,7 +50,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     await logConsent();
     setError(null);
     const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
-      body: { package: selectedOption },
+      body: { package: isEntryPass ? "entry_pass" : selectedOption, savecard: rememberCard },
     });
     if (fnError || !data?.checkout_url) {
       setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
@@ -75,9 +78,9 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         .channel(`cc-credit-${uid}`)
         .on(
           "postgres_changes",
-          { event: "INSERT", schema: "public", table: "token_purchases", filter: `user_id=eq.${uid}` },
+          { event: "INSERT", schema: "public", table: isEntryPass ? "entry_passes" : "token_purchases", filter: `user_id=eq.${uid}` },
           (payload: any) => {
-            const credited = payload?.new?.tokens_credited ?? tokens;
+            const credited = isEntryPass ? 0 : (payload?.new?.tokens_credited ?? tokens);
             setCreditedTokens(credited);
             setStep("success");
             onPurchase(credited);
@@ -130,7 +133,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
     setError(null);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: { kind: "token_package", package: selectedOption === "bundle" ? "bundle" : "single" },
+        body: { kind: isEntryPass ? "entry_pass" : "token_package", package: selectedOption === "bundle" ? "bundle" : "single" },
       });
       if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
@@ -152,11 +155,36 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             <ArrowLeft className="h-4 w-4" />
             GO BACK TO DASHBOARD
           </Button>
-          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">BUY COINS</h2>
+          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">{isEntryPass ? "VAULT ENTRY PASS" : "BUY COINS"}</h2>
           <a href="/pricing" className="text-[10px] font-semibold uppercase text-primary underline">Pricing</a>
         </div>
 
-        {step === "select" && (
+        {step === "select" && isEntryPass && (
+          <div className="p-4 space-y-3">
+            <div className="rounded-xl p-4 border-2 border-primary bg-primary/5 neon-glow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">E</span>
+                  <span className="font-semibold text-foreground">Vault Entry Pass — 1 Year</span>
+                </div>
+                <span className="text-lg font-bold text-primary">$20</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1 ml-11">
+                One pass covers the discovery floor for 365 days. Bit-Tokens to unlock creators are bought separately.
+              </p>
+            </div>
+
+            <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
+              <p className="text-[10px] font-bold text-muted-foreground tracking-wider">WHERE YOUR $20 GOES</p>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">DTT platform vault (entry fee)</span><span className="text-primary font-bold">$20.00</span></div>
+              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Creators earn from Bit-Token unlocks</span><span className="text-foreground">90% of every token</span></div>
+            </div>
+
+            <Button variant="neon" className="w-full mt-4" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT</Button>
+          </div>
+        )}
+
+        {step === "select" && !isEntryPass && (
           <div className="p-4 space-y-3">
             <button
               onClick={() => setSelectedOption("single")}
@@ -223,6 +251,20 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
                 <p className="text-sm font-bold text-muted-foreground">CREDIT / DEBIT CARD</p>
                 <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
               </div>
+            )}
+
+            {cardEnabled && (
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberCard}
+                  onChange={(e) => setRememberCard(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-primary shrink-0"
+                />
+                <span className="text-[10px] text-muted-foreground leading-relaxed">
+                  Remember my card for future purchases (optional). Your card is stored securely by our payment processor — never on DTT servers.
+                </span>
+              </label>
             )}
 
             <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
@@ -299,11 +341,19 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-9 h-9 text-primary" />
             </div>
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">PAYMENT RECEIVED!</h3>
+            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">
+              {isEntryPass ? "VAULT ENTRY PASS ACTIVE!" : "PAYMENT RECEIVED!"}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Your <span className="text-primary font-bold">{creditedTokens} Bit-Token{creditedTokens !== 1 ? "s" : ""}</span> have been added to your vault.
+              {isEntryPass
+                ? "Your Vault Entry Pass is active for a full year. Welcome to the floor."
+                : (
+                  <>
+                    Your <span className="text-primary font-bold">{creditedTokens} Bit-Token{creditedTokens !== 1 ? "s" : ""}</span> have been added to your vault.
+                  </>
+                )}
             </p>
-            <Button variant="neon" className="w-full" onClick={onClose}>BACK TO VAULT</Button>
+            <Button variant="neon" className="w-full" onClick={onClose}>{isEntryPass ? "ENTER THE VAULT" : "BACK TO VAULT"}</Button>
           </div>
         )}
       </div>
