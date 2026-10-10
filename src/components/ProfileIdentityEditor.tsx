@@ -14,6 +14,7 @@ import DttColorWheel from "@/components/DttColorWheel";
 import ProfileAvatar, {
   DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
+import { COUNTRIES } from "@/components/GlobalPassport";
 
 const HANDLE_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/;
 
