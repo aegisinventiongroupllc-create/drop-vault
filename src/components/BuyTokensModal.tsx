@@ -240,6 +240,18 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </span>
             </label>
 
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={finalSaleChecked}
+                onChange={(e) => setFinalSaleChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-primary shrink-0"
+              />
+              <span className="text-[10px] text-muted-foreground leading-relaxed">
+                {FINAL_SALE_TEXT}
+              </span>
+            </label>
+
             <Button variant="neon" className="w-full" disabled={!consentChecked} onClick={handleStartCheckout}>GENERATE PAYMENT</Button>
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>

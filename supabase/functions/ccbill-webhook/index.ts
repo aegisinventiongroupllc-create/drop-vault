@@ -25,6 +25,16 @@ Deno.serve(async (req) => {
   if (ct.includes("application/json")) Object.assign(payload, await req.json());
   else for (const [k, v] of (await req.formData()).entries()) payload[k] = String(v);
 
+  if (eventType === "Chargeback") {
+    const txId = payload.transactionId ?? "";
+    if (!txId) return ok({ error: "missing transaction" }, 400);
+    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await sb.rpc("handle_chargeback", { _payment_id: `ccbill-${txId}`, _reason: "chargeback" });
+    if (error) { console.error("handle_chargeback error", error); return ok({ error: "chargeback failed" }, 500); }
+    return ok({ ok: true, locked: data });
+  }
   if (eventType !== "NewSaleSuccess") return ok({ ok: true, ignored: eventType });
 
   const field = (k: string) => payload[k] ?? payload[`X-${k}`] ?? payload[`x-${k}`] ?? "";
