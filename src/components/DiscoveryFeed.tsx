@@ -352,7 +352,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           creatorId: m.creator_id,
           comments: 0,
           color: "from-primary/20 to-background",
-          vault,
+          vault: prof?.side ?? "women",
           country: prof?.country || "GLOBAL",
           videoUrl: pub.publicUrl,
         };
