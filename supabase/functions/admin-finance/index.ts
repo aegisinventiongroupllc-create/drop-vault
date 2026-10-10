@@ -42,14 +42,30 @@ Deno.serve(async (req) => {
     };
 
     if (action === "overview") {
-      const [{ data: txs }, { data: wallets }, { data: batches }] = await Promise.all([
+      const [{ data: txs }, { data: wallets }, { data: batches }, { data: purchases }, { data: passes }, { data: customs }] = await Promise.all([
         supabase.from("transactions").select("amount_usd, creator_share_usd, platform_share_usd, entry_tax, status"),
         supabase.from("creator_wallets").select("user_id, ltc_address, pending_balance, total_earned, total_paid"),
         supabase.from("payout_batches").select("*").order("created_at", { ascending: false }).limit(10),
+        supabase.from("token_purchases").select("platform_fee_collected, status"),
+        supabase.from("entry_passes").select("amount_usd, status"),
+        supabase.from("custom_requests").select("platform_share_usd, status"),
       ]);
 
       const done = (txs || []).filter((t: any) => t.status === "completed");
       const sum = (k: string) => done.reduce((s: number, t: any) => s + (Number(t[k]) || 0), 0);
+
+      // Platform earnings broken down by source so the owner can see each stream
+      // separately from what creators are owed.
+      const purchaseFees = (purchases || [])
+        .filter((p: any) => p.status === "completed")
+        .reduce((s: number, p: any) => s + (Number(p.platform_fee_collected) || 0), 0);
+      const entryPasses = (passes || [])
+        .filter((p: any) => p.status === "active")
+        .reduce((s: number, p: any) => s + (Number(p.amount_usd) || 0), 0);
+      const customFees = (customs || [])
+        .filter((c: any) => c.status === "completed" || c.status === "accepted")
+        .reduce((s: number, c: any) => s + (Number(c.platform_share_usd) || 0), 0);
+      const tokenCuts = sum("platform_share_usd");
 
       const profMap = await loadProfiles((wallets || []).map((w: any) => w.user_id));
 
@@ -57,9 +73,16 @@ Deno.serve(async (req) => {
         totals: {
           gross_volume: sum("amount_usd"),
           creator_share: sum("creator_share_usd"),
-          platform_share: sum("platform_share_usd"),
+          platform_share: tokenCuts,
           entry_tax: sum("entry_tax"),
           transactions: done.length,
+        },
+        platform_earnings: {
+          purchase_fees: purchaseFees,
+          token_cuts: tokenCuts,
+          entry_passes: entryPasses,
+          custom_request_fees: customFees,
+          total: purchaseFees + tokenCuts + entryPasses + customFees,
         },
         wallets: (wallets || []).map((w: any) => ({
           ...w,
