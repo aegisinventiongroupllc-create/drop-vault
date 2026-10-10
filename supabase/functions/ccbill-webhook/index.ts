@@ -102,27 +102,6 @@ Deno.serve(async (req) => {
     return ok({ error: "amount mismatch" }, 400);
   }
 
-  // Card kept on file: store the processor's customer reference (never raw card data)
-  // when the customer asked us to remember the card.
-  const customerRef = payload.customerRef ?? payload.customer_ref ?? "";
-  if (customerRef) {
-    const last4 = typeof payload.creditCardNum === "string" && payload.creditCardNum.length >= 4
-      ? payload.creditCardNum.slice(-4)
-      : null;
-    await supabase
-      .from("saved_payment_methods")
-      .upsert(
-        {
-          user_id: userId,
-          processor: "ccbill",
-          processor_token: String(customerRef),
-          last4,
-          brand: payload.creditCardType ?? null,
-        },
-        { onConflict: "user_id" }
-      );
-  }
-
   const { data, error } = await supabase.rpc("credit_tokens", {
     _user_id: userId,
     _payment_id: `ccbill-${transactionId}`,
