@@ -54,6 +54,27 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  // Card kept on file: store the processor's customer reference (never raw card data)
+  // so returning customers can pay in one click. Applies to pass and token sales alike.
+  const customerRef = payload.customerRef ?? payload.customer_ref ?? "";
+  if (customerRef) {
+    const last4 = typeof payload.creditCardNum === "string" && payload.creditCardNum.length >= 4
+      ? payload.creditCardNum.slice(-4)
+      : null;
+    await supabase
+      .from("saved_payment_methods")
+      .upsert(
+        {
+          user_id: userId,
+          processor: "ccbill",
+          processor_token: String(customerRef),
+          last4,
+          brand: payload.creditCardType ?? null,
+        },
+        { onConflict: "user_id" }
+      );
+  }
+
   // Vault Entry Pass sales: $20 flat, no tokens.
   if (field("dtt_pkg") === "entry_pass") {
     if (!/^[0-9a-f-]{36}$/i.test(userId) || !transactionId) return ok({ error: "invalid sale" }, 400);
