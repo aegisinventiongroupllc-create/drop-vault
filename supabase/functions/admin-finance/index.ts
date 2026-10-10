@@ -163,7 +163,9 @@ Deno.serve(async (req) => {
           .maybeSingle();
         const owed = Math.round((Number(w?.pending_balance) || 0) * 100) / 100;
         if (!w || owed <= 0) return json({ ok: false, message: "This creator has no balance owed." });
-        if (!(w.ltc_address || "").trim()) return json({ ok: false, message: "Creator has no LTC address saved." });
+        const { data: pm } = await supabase.from("creator_payout_methods").select("method").eq("user_id", creatorId).maybeSingle();
+        const isAch = pm?.method === "ach";
+        if (!isAch && !(w.ltc_address || "").trim()) return json({ ok: false, message: "Creator has no payout method saved." });
         const txHash = typeof body?.tx_hash === "string" ? body.tx_hash.trim().slice(0, 200) : null;
         const now = new Date().toISOString();
         // Only the creator's own balance moves; platform fees in transactions are never touched.
