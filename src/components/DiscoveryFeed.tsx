@@ -322,18 +322,19 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config, profile_photo_path")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path, vault_side")
         .in("user_id", creatorIds);
       const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
       const countMap: Record<string, number> = {};
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
-      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null }> = {};
+      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType }> = {};
       profs?.forEach((p) => {
         profMap[p.user_id] = {
           name: p.display_name || "creator",
           country: p.country || "GLOBAL",
           avatar: p.avatar_config,
           photoPath: p.profile_photo_path,
+          side: p.vault_side === "men" ? "men" : "women",
         };
       });
       const items: VideoItem[] = media.map((m) => {
