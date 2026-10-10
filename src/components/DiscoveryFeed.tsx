@@ -356,6 +356,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           color: "from-primary/20 to-background",
           vault: prof?.side ?? "women",
           country: prof?.country || "GLOBAL",
+          tags: prof?.tags ?? [],
           videoUrl: pub.publicUrl,
         };
       });
@@ -378,7 +379,8 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
     if (searchQuery && searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      if (!v.title.toLowerCase().includes(q) && !v.creator.toLowerCase().includes(q) && !v.description.toLowerCase().includes(q)) return false;
+      const tagMatch = (v.tags ?? []).some((tag) => tag.toLowerCase().includes(q));
+      if (!tagMatch && !v.title.toLowerCase().includes(q) && !v.creator.toLowerCase().includes(q) && !v.description.toLowerCase().includes(q)) return false;
     }
     return true;
   });
