@@ -240,6 +240,7 @@ const Index = () => {
                   hasVaultToggle={false}
                   countryFilter={countryFilter}
                   onGlobeOpen={() => setShowGlobe(true)}
+                  topOffset
                 />
               )}
               {activeTab === "trending" && (

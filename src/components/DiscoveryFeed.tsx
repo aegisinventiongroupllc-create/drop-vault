@@ -295,7 +295,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
     </div>
   );
 });
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean }) => {
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
