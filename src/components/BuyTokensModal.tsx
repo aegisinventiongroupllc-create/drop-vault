@@ -10,6 +10,8 @@ import {
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
+const FINAL_SALE_TEXT = "I agree that purchasing Bit-Tokens grants an immediate digital license. All sales are final and non-refundable once tokens are credited to my account.";
+
 interface BuyTokensModalProps {
   onClose: () => void;
   onPurchase: (tokens: number) => void;
@@ -27,6 +29,8 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   const [checkout, setCheckout] = useState<Checkout | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [finalSaleChecked, setFinalSaleChecked] = useState(false);
+  const allAgreed = consentChecked && finalSaleChecked;
   const [creditedTokens, setCreditedTokens] = useState<number>(0);
   const pollRef = useRef<number | null>(null);
   const [cardEnabled, setCardEnabled] = useState(false);
@@ -39,7 +43,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   }, []);
 
   const handleCardCheckout = async () => {
-    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     await logConsent();
     setError(null);
     const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
@@ -101,7 +105,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
         ip_address: ip,
         user_agent: navigator.userAgent,
         terms_version: "2.0",
-        consent_text: "[CHECKOUT] Buy Tokens via LTC — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.",
+        consent_text: `[CHECKOUT] Agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure. ${FINAL_SALE_TEXT}`,
         consent_type: "checkout_consent",
       });
     } catch {}
@@ -120,7 +124,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
   };
 
   const handleStartCheckout = async () => {
-    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
+    if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     await logConsent();
     setStep("processing");
     setError(null);
@@ -211,7 +215,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
             </div>
 
             {cardEnabled ? (
-              <Button variant="outline" className="w-full" disabled={!consentChecked} onClick={handleCardCheckout}>
+              <Button variant="outline" className="w-full" disabled={!allAgreed} onClick={handleCardCheckout}>
                 PAY WITH CARD (CCBILL)
               </Button>
             ) : (
@@ -252,7 +256,7 @@ const BuyTokensModal = ({ onClose, onPurchase }: BuyTokensModalProps) => {
               </span>
             </label>
 
-            <Button variant="neon" className="w-full" disabled={!consentChecked} onClick={handleStartCheckout}>GENERATE PAYMENT</Button>
+            <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleStartCheckout}>GENERATE PAYMENT</Button>
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>
         )}
