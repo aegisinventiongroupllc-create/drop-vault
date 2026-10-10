@@ -928,7 +928,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
                 {uploading === "teasers" ? "UPLOADING TEASER..." : "UPLOAD TEASER"}
               </Button>
               <p className="text-[10px] text-muted-foreground">15-second MP4/WebM with audio. Shows in the Discovery Feed.</p>
-              <p className="text-[10px] text-primary/90 font-medium">Tip: dance-style teasers (twerk, dance, playful movement) pull the most customers into your Vault — keep it energetic and end on a hook that leaves them wanting more.</p>
+              <div className="flex items-start gap-2 bg-primary/10 border border-primary/40 rounded-xl px-3 py-2.5">
+                <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-primary font-bold leading-snug">TIP: Dance-style teasers (twerk, dance, playful movement) pull the most customers into your Vault. Keep it energetic and end on a hook that leaves them wanting more.</p>
+              </div>
             </div>
 
             {/* Step 3: Full Video */}
