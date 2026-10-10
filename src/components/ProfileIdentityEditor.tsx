@@ -110,7 +110,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       avatarToSave = { ...currentAvatar, portraitPath, useDttIcon: undefined };
     }
     const { error } = user
-      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json }).eq("user_id", user.id)
+      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json, country, tags }).eq("user_id", user.id)
       : { error: new Error("Please sign in again.") };
     setSaving(false);
     if (error) {
@@ -270,6 +270,56 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           Your selfie is never saved. It is processed securely and deleted from our systems after your emoji is created.
         </p>
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Get found in search</p>
+        <div>
+          <label htmlFor="identity-country" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your country</label>
+          <select
+            id="identity-country"
+            value={country}
+            onChange={(e) => { dirty.current = true; setCountry(e.target.value); }}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="identity-tags" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your tags (up to 8)</label>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => { dirty.current = true; setTags(tags.filter((t) => t !== tag)); }}
+                className="rounded-full bg-primary/15 border border-primary/40 px-2.5 py-1 text-xs font-bold text-primary active:scale-95 transition-all"
+                aria-label={`Remove tag ${tag}`}
+              >
+                {tag} ✕
+              </button>
+            ))}
+          </div>
+          <Input
+            id="identity-tags"
+            value={tagInput}
+            maxLength={24}
+            placeholder="e.g. petite, curvy, cosplay — press Enter"
+            onChange={(e) => setTagInput(e.target.value.replace(/[^A-Za-z0-9 _-]/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+              e.preventDefault();
+              const clean = tagInput.trim().toLowerCase();
+              if (!clean || tags.includes(clean) || tags.length >= 8) { setTagInput(""); return; }
+              dirty.current = true;
+              setTags([...tags, clean]);
+              setTagInput("");
+            }}
+          />
+          <p className="mt-1 text-[10px] text-muted-foreground">Words customers type to find you. Describe your style and vibe.</p>
+        </div>
       </div>
 
       <Button variant="neon" className="w-full" onClick={() => void save()} disabled={saving || processingPhoto}>
