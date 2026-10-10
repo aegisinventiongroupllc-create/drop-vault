@@ -233,7 +233,7 @@ const Index = () => {
           ) : (
             <>
               {(activeTab === "home" || activeTab === "trending") && (
-                <div className="flex justify-end px-4 pt-2">
+                <div className="relative z-20 flex justify-end px-4 pt-2">
                   <button
                     onClick={() => setShowGlobe(true)}
                     aria-label="Pick a country"
