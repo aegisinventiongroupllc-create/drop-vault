@@ -12,8 +12,9 @@ const YotiAgeCheck = () => {
 
   // Only call the age-check service with a real signed-in session; otherwise it rejects the request.
   const hasSession = async () => {
-    const { data } = await supabase.auth.getSession();
-    return Boolean(data.session?.access_token);
+    // getUser re-validates with the auth server, so stale or admin-only sessions are skipped.
+    const { data, error } = await supabase.auth.getUser();
+    return !error && Boolean(data.user?.id);
   };
 
   const check = async () => {
