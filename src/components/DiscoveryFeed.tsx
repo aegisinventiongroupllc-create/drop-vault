@@ -23,6 +23,7 @@ interface VideoItem {
   color: string;
   vault: VaultType;
   country: string;
+  tags?: string[];
   videoUrl?: string;
   creatorId?: string;
 }
@@ -322,12 +323,12 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config, profile_photo_path, vault_side")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path, vault_side, tags")
         .in("user_id", creatorIds);
       const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
       const countMap: Record<string, number> = {};
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
-      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType }> = {};
+      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType; tags: string[] }> = {};
       profs?.forEach((p) => {
         profMap[p.user_id] = {
           name: p.display_name || "creator",
@@ -335,6 +336,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           avatar: p.avatar_config,
           photoPath: p.profile_photo_path,
           side: p.vault_side === "men" ? "men" : "women",
+          tags: Array.isArray((p as { tags?: string[] }).tags) ? (p as { tags?: string[] }).tags! : [],
         };
       });
       const items: VideoItem[] = media.map((m) => {
