@@ -32,6 +32,9 @@ const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
 
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
+  const [country, setCountry] = useState("GLOBAL");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, useDttIcon: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,9 +51,11 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-      const { data } = await supabase.from("profiles").select("display_name, avatar_config").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("display_name, avatar_config, country, tags").eq("user_id", user.id).maybeSingle();
       if (data) {
         setHandle(data.display_name ?? "");
+        setCountry(data.country || "GLOBAL");
+        setTags(Array.isArray((data as { tags?: string[] }).tags) ? (data as { tags?: string[] }).tags! : []);
         const stored = parseAvatarConfig(data.avatar_config);
         setAvatar(stored.portraitPath ? stored : { ...stored, useDttIcon: true });
       }
