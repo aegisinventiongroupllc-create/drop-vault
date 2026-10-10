@@ -5,6 +5,7 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
+import WORLD_BORDERS from "@/lib/worldBorders";
 
 interface GlobePickerProps {
   selected: string;
@@ -47,47 +48,58 @@ const latLngToVec3 = (lat: number, lng: number, radius: number): [number, number
   ];
 };
 
-// Holographic wireframe sphere: latitude bands + longitude meridians as line loops.
+// Holographic sphere with real world country borders + faint graticule.
 const HoloSphere = () => {
-  const lines = useMemo(() => {
-    const geoms: THREE.BufferGeometry[] = [];
+  const { borders, grid } = useMemo(() => {
+    const borderGeoms: THREE.BufferGeometry[] = [];
+    for (const ring of WORLD_BORDERS) {
+      const pts = ring.map(([lng, lat]) => new THREE.Vector3(...latLngToVec3(lat, lng, R * 1.001)));
+      borderGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
+    }
+    const gridGeoms: THREE.BufferGeometry[] = [];
     const seg = 96;
-    // Latitude bands
-    for (let lat = -60; lat <= 60; lat += 20) {
+    for (let lat = -60; lat <= 60; lat += 30) {
       const pts: THREE.Vector3[] = [];
       for (let i = 0; i <= seg; i++) {
         const lng = (i / seg) * 360 - 180;
         pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
       }
-      geoms.push(new THREE.BufferGeometry().setFromPoints(pts));
+      gridGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
     }
-    // Longitude meridians
-    for (let lng = -180; lng < 180; lng += 20) {
+    for (let lng = -180; lng < 180; lng += 30) {
       const pts: THREE.Vector3[] = [];
       for (let i = 0; i <= seg; i++) {
         const lat = (i / seg) * 180 - 90;
         pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
       }
-      geoms.push(new THREE.BufferGeometry().setFromPoints(pts));
+      gridGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
     }
-    return geoms;
+    return { borders: borderGeoms, grid: gridGeoms };
   }, []);
 
   return (
     <group>
-      {/* Faint inner glow sphere */}
+      {/* Ocean base + inner glow */}
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
         <meshBasicMaterial color="#0a2a55" transparent opacity={0.35} side={THREE.BackSide} />
       </mesh>
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#061a38" transparent opacity={0.55} />
+        <meshBasicMaterial color="#071d3d" transparent opacity={0.75} />
       </mesh>
-      {lines.map((g, i) => (
+      {/* Real country borders */}
+      {borders.map((g, i) => (
         <primitive
-          key={i}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#3fa9ff", transparent: true, opacity: 0.35 }))}
+          key={`b${i}`}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#4db8ff", transparent: true, opacity: 0.85 }))}
+        />
+      ))}
+      {/* Faint graticule */}
+      {grid.map((g, i) => (
+        <primitive
+          key={`g${i}`}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#2a6db3", transparent: true, opacity: 0.12 }))}
         />
       ))}
     </group>
