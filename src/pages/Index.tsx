@@ -471,7 +471,14 @@ const Index = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <GlobalPassport selected={countryFilter} onSelect={setCountryFilter} />
+              <button
+                onClick={() => setShowGlobe(true)}
+                aria-label="Pick a country"
+                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+              >
+                <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                <span className="text-foreground">{countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
+              </button>
               <LanguageToggle />
             </div>
           </div>
