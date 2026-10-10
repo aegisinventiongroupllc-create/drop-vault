@@ -318,7 +318,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">COMPLETE YOUR PAYMENT</h3>
             <p className="text-xs text-muted-foreground">
-              Your secure CryptoCloud checkout opened in a new tab. Pay there and your tokens will credit automatically. You can keep this window open.
+              Your secure CryptoCloud checkout opened in a new tab. Pay there and your {isEntryPass ? "pass will activate" : "tokens will credit"} automatically. You can keep this window open.
             </p>
 
             <a href={checkout.invoice_url} target="_blank" rel="noopener noreferrer" className="block">
