@@ -10,6 +10,7 @@ import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/toke
 import type { VaultType } from "@/lib/tokenEconomy";
 import { toggleHeart } from "@/hooks/useHearts";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import { COUNTRIES } from "@/components/GlobalPassport";
 
 interface VideoItem {
   id: string;
