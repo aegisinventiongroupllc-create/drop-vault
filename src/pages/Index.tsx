@@ -283,6 +283,13 @@ const Index = () => {
           )}
         </div>
         <BottomNav active={activeTab} vault={previewVault} onNavigate={navigateToTab} />
+        {showGlobe && (
+          <GlobePicker
+            selected={countryFilter}
+            onSelect={setCountryFilter}
+            onClose={() => setShowGlobe(false)}
+          />
+        )}
       </div>
     );
   }
