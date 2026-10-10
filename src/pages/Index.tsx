@@ -543,6 +543,13 @@ const Index = () => {
       )}
       <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={navigateToTab} />
       <PWAInstallPrompt />
+      {showGlobe && (
+        <GlobePicker
+          selected={countryFilter}
+          onSelect={setCountryFilter}
+          onClose={() => setShowGlobe(false)}
+        />
+      )}
     </div>
   );
 };
