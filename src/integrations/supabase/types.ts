@@ -726,6 +726,7 @@ export type Database = {
           legal_last_name: string | null
           role: string
           role_chosen: boolean
+          tags: string[]
           updated_at: string
           user_id: string
           vault_side: string
@@ -747,6 +748,7 @@ export type Database = {
           legal_last_name?: string | null
           role?: string
           role_chosen?: boolean
+          tags?: string[]
           updated_at?: string
           user_id: string
           vault_side?: string
@@ -768,6 +770,7 @@ export type Database = {
           legal_last_name?: string | null
           role?: string
           role_chosen?: boolean
+          tags?: string[]
           updated_at?: string
           user_id?: string
           vault_side?: string
@@ -1030,6 +1033,7 @@ export type Database = {
           display_name: string | null
           profile_photo_path: string | null
           role: string | null
+          tags: string[] | null
           user_id: string | null
           vault_side: string | null
         }
@@ -1040,6 +1044,7 @@ export type Database = {
           display_name?: string | null
           profile_photo_path?: never
           role?: string | null
+          tags?: string[] | null
           user_id?: string | null
           vault_side?: string | null
         }
@@ -1050,6 +1055,7 @@ export type Database = {
           display_name?: string | null
           profile_photo_path?: never
           role?: string | null
+          tags?: string[] | null
           user_id?: string | null
           vault_side?: string | null
         }

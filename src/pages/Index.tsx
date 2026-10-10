@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
-import GlobalPassport from "@/components/GlobalPassport";
+import { COUNTRIES } from "@/components/GlobalPassport";
+import GlobePicker from "@/components/GlobePicker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthScreen from "@/components/AuthScreen";
 import { type UserRole } from "@/components/RoleSelection";
@@ -88,6 +89,7 @@ const Index = () => {
   const [showLegal, setShowLegal] = useState(false);
   const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
   const [countryFilter, setCountryFilter] = useState("GLOBAL");
+  const [showGlobe, setShowGlobe] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
@@ -469,7 +471,14 @@ const Index = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <GlobalPassport selected={countryFilter} onSelect={setCountryFilter} />
+              <button
+                onClick={() => setShowGlobe(true)}
+                aria-label="Pick a country"
+                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+              >
+                <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                <span className="text-foreground">{countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
+              </button>
               <LanguageToggle />
             </div>
           </div>
@@ -534,6 +543,13 @@ const Index = () => {
       )}
       <BottomNav active={activeTab} vault={vault ?? undefined} onNavigate={navigateToTab} />
       <PWAInstallPrompt />
+      {showGlobe && (
+        <GlobePicker
+          selected={countryFilter}
+          onSelect={setCountryFilter}
+          onClose={() => setShowGlobe(false)}
+        />
+      )}
     </div>
   );
 };
