@@ -18,6 +18,7 @@ import YotiAgeCheck from "@/components/YotiAgeCheck";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
+import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
@@ -733,50 +734,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
               <CreditCard className="w-5 h-5 text-primary" />
               <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Payout Wallet Address (LTC)</h3>
             </div>
-            <div className="bg-gold/10 border border-gold/30 rounded-lg p-3 mb-4">
-              <p className="text-sm font-bold text-gold text-center tracking-wide">WE PAYOUT VIA LTC ONLY.</p>
-              <p className="text-sm font-bold text-gold text-center tracking-wide">SUBMIT YOUR LITECOIN ADDRESS BELOW.</p>
-              <p className="text-[10px] text-muted-foreground text-center mt-2">All payouts are sent as Litecoin. Settlements take 4–5 business days.</p>
-            </div>
             <div className="bg-secondary/50 rounded-xl p-4 mb-4 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
-              <p className="text-3xl font-bold text-primary">$0.00</p>
-              <p className="text-xs text-muted-foreground mt-1">Min. payout: $50.00</p>
+              <p className="text-xs text-muted-foreground mb-1">Min. payout: $50.00 · Settlements take 4–5 business days</p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">LTC (Litecoin) Wallet Address</label>
-                <button
-                  type="button"
-                  onClick={() => setShowLtcHelp(true)}
-                  className="text-xs font-bold text-primary hover:underline tracking-wider"
-                >
-                  ? HELP
-                </button>
-              </div>
-              <input
-                type="text"
-                value={ltcAddress}
-                onChange={(e) => {
-                  const val = e.target.value.trim();
-                  setLtcAddress(val);
-                  setLtcSaved(false);
-                  setLtcError(validateLtcAddress(val));
-                }}
-                placeholder="e.g. ltc1q... or L... or M..."
-                className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-xs"
-              />
-              {ltcError && <p className="text-xs text-destructive">{ltcError}</p>}
-              {ltcSaved && <p className="text-xs text-green-400 font-bold">✓ Wallet address saved and synced to Admin Panel</p>}
-              <p className="text-[10px] text-muted-foreground">⚠ LTC ONLY — YOU ARE RESPONSIBLE FOR LOCAL TAX REPORTING.</p>
-            </div>
-            <Button variant="neon" className="w-full mt-4" disabled={!ltcAddress || !!ltcError} onClick={() => {
-              setLtcSaved(true);
-              logActivity("ltc_address_saved", "LTC payout address saved", { last4: ltcAddress.slice(-4) });
-            }}>
-              SAVE WALLET ADDRESS
-            </Button>
           </div>
+          <CreatorPayoutMethod />
 
           {/* Revenue Split Info */}
           <div className="bg-card border border-border rounded-xl p-4">
