@@ -190,6 +190,13 @@
       "when": 1791656563961,
       "tag": "0026_entry_pass_and_saved_cards",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1791659924869,
+      "tag": "0027_drop_permissive_saved_cards_policy",
+      "breakpoints": true
     }
   ]
 }
