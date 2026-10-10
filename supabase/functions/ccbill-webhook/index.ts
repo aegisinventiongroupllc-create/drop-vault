@@ -53,6 +53,55 @@ Deno.serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Vault Entry Pass sales: $20 flat, no tokens.
+  if (field("dtt_pkg") === "entry_pass") {
+    if (!/^[0-9a-f-]{36}$/i.test(userId) || !transactionId) return ok({ error: "invalid sale" }, 400);
+    if (Math.abs(billed - 20.00) > 0.01) {
+      console.error("ccbill pass amount mismatch", { transactionId, billed });
+      return ok({ error: "amount mismatch" }, 400);
+    }
+    const { error } = await supabase.rpc("credit_entry_pass", {
+      _user_id: userId,
+      _payment_id: `ccbill-${transactionId}`,
+      _amount_usd: billed,
+      _method: "card",
+    });
+    if (error) {
+      console.error("credit_entry_pass error", error);
+      return ok({ error: "credit failed" }, 500);
+    }
+    return ok({ ok: true, entry_pass: true });
+  }
+
+  const expected = PRICE_FOR_TOKENS[tokens];
+  if (!/^[0-9a-f-]{36}$/i.test(userId) || !expected || !transactionId) return ok({ error: "invalid sale" }, 400);
+  if (Math.abs(billed - expected) > 0.01) {
+    console.error("ccbill amount mismatch", { transactionId, tokens, billed });
+    return ok({ error: "amount mismatch" }, 400);
+  }
+
+  // Card kept on file: store the processor's customer reference (never raw card data)
+  // when the customer asked us to remember the card.
+  const customerRef = payload.customerRef ?? payload.customer_ref ?? "";
+  if (customerRef) {
+    const last4 = typeof payload.creditCardNum === "string" && payload.creditCardNum.length >= 4
+      ? payload.creditCardNum.slice(-4)
+      : null;
+    await supabase
+      .from("saved_payment_methods")
+      .upsert(
+        {
+          user_id: userId,
+          processor: "ccbill",
+          processor_token: String(customerRef),
+          last4,
+          brand: payload.creditCardType ?? null,
+        },
+        { onConflict: "user_id" }
+      );
+  }
+
   const { data, error } = await supabase.rpc("credit_tokens", {
     _user_id: userId,
     _payment_id: `ccbill-${transactionId}`,
