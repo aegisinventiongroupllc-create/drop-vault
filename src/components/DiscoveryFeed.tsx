@@ -294,7 +294,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
     </div>
   );
 });
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void }) => {
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
@@ -390,7 +390,19 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       <div className={`fixed left-0 right-0 z-30 bg-gradient-to-b from-background via-background/80 to-transparent pb-4 ${hasVaultToggle ? "top-10" : "top-0"}`}>
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
           <h1 className="font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
-          <WalletIndicator />
+          <div className="flex items-center gap-2">
+            {onGlobeOpen && (
+              <button
+                onClick={onGlobeOpen}
+                aria-label="Pick a country"
+                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+              >
+                <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                <span className="text-foreground">{!countryFilter || countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
+              </button>
+            )}
+            <WalletIndicator />
+          </div>
         </div>
         <button onClick={onSearch} className="mx-4 w-[calc(100%-2rem)] bg-secondary rounded-xl px-4 py-2.5 text-left text-sm text-muted-foreground hover:bg-secondary/80 active:bg-secondary/60 transition-colors">
           Search creators...
