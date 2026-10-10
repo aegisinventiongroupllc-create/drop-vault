@@ -1,6 +1,10 @@
-import { useMemo, useState } from "react";
-import { Search, X, Globe } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Search, X } from "lucide-react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GlobePickerProps {
   selected: string;
@@ -8,10 +12,187 @@ interface GlobePickerProps {
   onClose: () => void;
 }
 
-// Full-screen spinning-globe country picker. The globe is pure CSS:
-// a shaded sphere with a rotating highlight ring and orbiting flags.
+// Approximate capital-city coordinates for each selectable country.
+const COUNTRY_LATLNG: Record<string, [number, number]> = {
+  US: [38.9, -77.0],
+  GB: [51.5, -0.1],
+  CA: [45.4, -75.7],
+  AU: [-35.3, 149.1],
+  BR: [-15.8, -47.9],
+  MX: [19.4, -99.1],
+  DE: [52.5, 13.4],
+  FR: [48.9, 2.4],
+  ES: [40.4, -3.7],
+  IT: [41.9, 12.5],
+  JP: [35.7, 139.7],
+  KR: [37.6, 127.0],
+  IN: [28.6, 77.2],
+  CO: [4.7, -74.1],
+  AR: [-34.6, -58.4],
+  PH: [14.6, 121.0],
+  ZA: [-25.7, 28.2],
+  NG: [9.1, 7.5],
+  PT: [38.7, -9.1],
+};
+
+const R = 1;
+
+const latLngToVec3 = (lat: number, lng: number, radius: number): [number, number, number] => {
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lng + 180) * (Math.PI / 180);
+  return [
+    -radius * Math.sin(phi) * Math.cos(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta),
+  ];
+};
+
+// Holographic wireframe sphere: latitude bands + longitude meridians as line loops.
+const HoloSphere = () => {
+  const lines = useMemo(() => {
+    const geoms: THREE.BufferGeometry[] = [];
+    const seg = 96;
+    // Latitude bands
+    for (let lat = -60; lat <= 60; lat += 20) {
+      const pts: THREE.Vector3[] = [];
+      for (let i = 0; i <= seg; i++) {
+        const lng = (i / seg) * 360 - 180;
+        pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
+      }
+      geoms.push(new THREE.BufferGeometry().setFromPoints(pts));
+    }
+    // Longitude meridians
+    for (let lng = -180; lng < 180; lng += 20) {
+      const pts: THREE.Vector3[] = [];
+      for (let i = 0; i <= seg; i++) {
+        const lat = (i / seg) * 180 - 90;
+        pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
+      }
+      geoms.push(new THREE.BufferGeometry().setFromPoints(pts));
+    }
+    return geoms;
+  }, []);
+
+  return (
+    <group>
+      {/* Faint inner glow sphere */}
+      <mesh>
+        <sphereGeometry args={[R * 0.985, 48, 48]} />
+        <meshBasicMaterial color="#0a2a55" transparent opacity={0.35} side={THREE.BackSide} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[R * 0.985, 48, 48]} />
+        <meshBasicMaterial color="#061a38" transparent opacity={0.55} />
+      </mesh>
+      {lines.map((g, i) => (
+        <primitive
+          key={i}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#3fa9ff", transparent: true, opacity: 0.35 }))}
+        />
+      ))}
+    </group>
+  );
+};
+
+interface MarkerProps {
+  code: string;
+  count: number;
+  maxCount: number;
+  selected: boolean;
+  onSelect: (code: string) => void;
+}
+
+const CountryMarker = ({ code, count, maxCount, selected, onSelect }: MarkerProps) => {
+  const ref = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  const pos = latLngToVec3(...(COUNTRY_LATLNG[code] ?? [0, 0]), R * 1.01);
+  const intensity = maxCount > 0 ? count / maxCount : 0;
+  const size = 0.035 + intensity * 0.06;
+  const hasCreators = count > 0;
+
+  useFrame(({ clock }) => {
+    const pulse = 1 + Math.sin(clock.elapsedTime * 3) * 0.25;
+    if (glowRef.current) glowRef.current.scale.setScalar(hasCreators ? pulse : 1);
+    if (ref.current && selected) ref.current.scale.setScalar(1.3 + Math.sin(clock.elapsedTime * 5) * 0.15);
+  });
+
+  const color = selected ? "#ffd24d" : hasCreators ? "#5ec2ff" : "#1e4a7a";
+
+  return (
+    <group position={pos}>
+      <mesh
+        ref={ref}
+        onClick={(e) => { e.stopPropagation(); onSelect(code); }}
+        onPointerOver={() => { document.body.style.cursor = "pointer"; }}
+        onPointerOut={() => { document.body.style.cursor = "auto"; }}
+      >
+        <sphereGeometry args={[size, 16, 16]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {hasCreators && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[size * 2.2, 16, 16]} />
+          <meshBasicMaterial color={selected ? "#ffd24d" : "#3fa9ff"} transparent opacity={0.25} />
+        </mesh>
+      )}
+    </group>
+  );
+};
+
+interface GlobeSceneProps {
+  counts: Record<string, number>;
+  selected: string;
+  onSelect: (code: string) => void;
+}
+
+const GlobeScene = ({ counts, selected, onSelect }: GlobeSceneProps) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const maxCount = Math.max(1, ...Object.values(counts));
+
+  useFrame((_, rawDelta) => {
+    const delta = Math.min(rawDelta, 0.05);
+    if (groupRef.current) groupRef.current.rotation.y += delta * 0.15;
+  });
+
+  return (
+    <>
+      <group ref={groupRef}>
+        <HoloSphere />
+        {Object.keys(COUNTRY_LATLNG).map((code) => (
+          <CountryMarker
+            key={code}
+            code={code}
+            count={counts[code] ?? 0}
+            maxCount={maxCount}
+            selected={selected === code}
+            onSelect={onSelect}
+          />
+        ))}
+      </group>
+      <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={0.5} />
+    </>
+  );
+};
+
 const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
   const [query, setQuery] = useState("");
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("public_profiles")
+        .select("country")
+        .eq("role", "creator")
+        .limit(10000);
+      const next: Record<string, number> = {};
+      for (const row of data ?? []) {
+        const c = (row as { country?: string | null }).country;
+        if (c) next[c] = (next[c] ?? 0) + 1;
+      }
+      setCounts(next);
+    })();
+  }, []);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -22,7 +203,7 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
   }, [query]);
 
   const current = COUNTRIES.find((c) => c.code === selected) ?? COUNTRIES[0];
-  const orbitFlags = COUNTRIES.filter((c) => c.code !== "GLOBAL").slice(0, 8);
+  const totalCreators = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
@@ -34,64 +215,30 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
-            autoFocus
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search countries... Mexico, Japan, Russia..."
+            placeholder="Search countries... Mexico, Japan, Brazil..."
             className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
       </div>
 
-      {/* Spinning globe */}
-      <div className="relative flex items-center justify-center py-6 select-none" aria-hidden>
-        <div className="relative w-40 h-40">
-          {/* Sphere */}
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_30%,hsl(var(--primary)/0.55),hsl(var(--primary)/0.15)_45%,transparent_70%)] border border-primary/40 shadow-[0_0_60px_hsl(var(--primary)/0.35)] overflow-hidden">
-            {/* Rotating meridian lines */}
-            <div className="absolute inset-0 animate-[spin_14s_linear_infinite]">
-              {[0, 30, 60, 90, 120, 150].map((deg) => (
-                <div
-                  key={deg}
-                  className="absolute inset-0 rounded-full border border-primary/25"
-                  style={{ transform: `rotateY(${deg}deg)`, transformStyle: "preserve-3d" }}
-                />
-              ))}
-            </div>
-            {/* Horizontal latitude bands */}
-            <div className="absolute left-0 right-0 top-1/4 h-px bg-primary/20" />
-            <div className="absolute left-0 right-0 top-1/2 h-px bg-primary/30" />
-            <div className="absolute left-0 right-0 top-3/4 h-px bg-primary/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Globe className="w-10 h-10 text-primary/70" />
-            </div>
-          </div>
-          {/* Orbiting flags */}
-          <div className="absolute inset-[-28px] animate-[spin_24s_linear_infinite]">
-            {orbitFlags.map((c, i) => {
-              const angle = (i / orbitFlags.length) * 360;
-              return (
-                <span
-                  key={c.code}
-                  className="absolute left-1/2 top-1/2 text-lg"
-                  style={{
-                    transform: `rotate(${angle}deg) translateX(96px) rotate(-${angle}deg)`,
-                    marginLeft: "-9px",
-                    marginTop: "-9px",
-                  }}
-                >
-                  {c.flag}
-                </span>
-              );
-            })}
-          </div>
-        </div>
+      {/* 3D holographic globe */}
+      <div className="relative h-[42vh] min-h-[260px] select-none">
+        <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+          <GlobeScene counts={counts} selected={selected} onSelect={(code) => { onSelect(code); onClose(); }} />
+        </Canvas>
+        <p className="absolute bottom-1 left-0 right-0 text-center text-[10px] font-bold tracking-widest text-muted-foreground pointer-events-none">
+          DRAG TO SPIN · TAP A LIGHT TO PICK A COUNTRY
+        </p>
       </div>
 
       <p className="text-center text-[10px] font-bold tracking-widest text-muted-foreground pb-2">
-        PICK A COUNTRY — SEE ITS CREATORS
-        {current.code !== "GLOBAL" && <span className="text-primary"> · NOW: {current.flag} {current.name.toUpperCase()}</span>}
+        {totalCreators} CREATOR{totalCreators === 1 ? "" : "S"} WORLDWIDE
+        {current.code !== "GLOBAL" && (
+          <span className="text-primary"> · NOW: {current.flag} {current.name.toUpperCase()} ({counts[current.code] ?? 0})</span>
+        )}
       </p>
 
       {/* Country list */}
@@ -99,23 +246,26 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
         {results.length === 0 && (
           <p className="text-center text-sm text-muted-foreground py-8">No country matches "{query}".</p>
         )}
-        {results.map((country) => (
-          <button
-            key={country.code}
-            onClick={() => { onSelect(country.code); onClose(); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all active:scale-[0.98] ${
-              selected === country.code
-                ? "bg-primary/15 border border-primary/50 text-primary"
-                : "bg-card border border-border text-foreground hover:border-primary/40"
-            }`}
-          >
-            <span className="text-xl">{country.flag}</span>
-            <span className="font-semibold text-sm">{country.name}</span>
-            {country.code === "GLOBAL" && (
-              <span className="ml-auto text-[10px] text-muted-foreground tracking-wider">EVERYWHERE</span>
-            )}
-          </button>
-        ))}
+        {results.map((country) => {
+          const n = country.code === "GLOBAL" ? totalCreators : counts[country.code] ?? 0;
+          return (
+            <button
+              key={country.code}
+              onClick={() => { onSelect(country.code); onClose(); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all active:scale-[0.98] ${
+                selected === country.code
+                  ? "bg-primary/15 border border-primary/50 text-primary"
+                  : "bg-card border border-border text-foreground hover:border-primary/40"
+              }`}
+            >
+              <span className="text-xl">{country.flag}</span>
+              <span className="font-semibold text-sm flex-1">{country.name}</span>
+              <span className={`text-[10px] font-bold tracking-wider ${n > 0 ? "text-primary" : "text-muted-foreground"}`}>
+                {country.code === "GLOBAL" ? "EVERYWHERE" : n > 0 ? `${n} CREATOR${n === 1 ? "" : "S"}` : "NONE YET"}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
