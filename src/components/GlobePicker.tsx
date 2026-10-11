@@ -46,41 +46,50 @@ interface MarkerProps {
   maxCount: number;
   selected: boolean;
   onSelect: (code: string) => void;
+  onHover: (code: string | null) => void;
 }
 
-const CountryMarker = ({ code, count, maxCount, selected, onSelect }: MarkerProps) => {
+// Small shimmering bright white light per country; brightness reflects creator count.
+const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: MarkerProps) => {
   const ref = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
+  const glowMat = useRef<THREE.MeshBasicMaterial>(null);
   const pos = latLngToVec3(...(COUNTRY_LATLNG[code] ?? [0, 0]), R * 1.01);
   const intensity = maxCount > 0 ? count / maxCount : 0;
-  const size = 0.035 + intensity * 0.06;
+  const size = 0.016 + intensity * 0.026;
   const hasCreators = count > 0;
+  const phase = useMemo(() => Math.random() * Math.PI * 2, []);
 
   useFrame(({ clock }) => {
-    const pulse = 1 + Math.sin(clock.elapsedTime * 3) * 0.25;
-    if (glowRef.current) glowRef.current.scale.setScalar(hasCreators ? pulse : 1);
-    if (ref.current && selected) ref.current.scale.setScalar(1.3 + Math.sin(clock.elapsedTime * 5) * 0.15);
+    const t = clock.elapsedTime * 2.6 + phase;
+    const shimmer = Math.max(0.12, 0.55 + Math.sin(t) * 0.3 + Math.sin(t * 2.7) * 0.15);
+    if (ref.current) ref.current.scale.setScalar((selected ? 1.7 : 1) * (0.92 + shimmer * 0.18));
+    if (glowRef.current) glowRef.current.scale.setScalar((selected ? 2.6 : hasCreators ? 1.7 + intensity * 0.9 : 1.15) * (0.85 + shimmer * 0.35));
+    if (glowMat.current) glowMat.current.opacity = (selected ? 0.9 : hasCreators ? 0.5 + intensity * 0.3 : 0.16) * shimmer;
   });
-
-  const color = selected ? "#ffd24d" : hasCreators ? "#5ec2ff" : "#1e4a7a";
 
   return (
     <group position={pos}>
+      {/* Bright white light core */}
       <mesh
         ref={ref}
         onClick={(e) => { e.stopPropagation(); onSelect(code); }}
-        onPointerOver={() => { document.body.style.cursor = "pointer"; }}
-        onPointerOut={() => { document.body.style.cursor = "auto"; }}
+        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; onHover(code); }}
+        onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
       >
-        <sphereGeometry args={[size, 16, 16]} />
-        <meshBasicMaterial color={color} />
+        <sphereGeometry args={[size, 12, 12]} />
+        <meshBasicMaterial color="#ffffff" />
       </mesh>
-      {hasCreators && (
-        <mesh ref={glowRef}>
-          <sphereGeometry args={[size * 2.2, 16, 16]} />
-          <meshBasicMaterial color={selected ? "#ffd24d" : "#3fa9ff"} transparent opacity={0.25} />
-        </mesh>
-      )}
+      {/* Shimmering halo */}
+      <mesh
+        ref={glowRef}
+        onClick={(e) => { e.stopPropagation(); onSelect(code); }}
+        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; onHover(code); }}
+        onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
+      >
+        <sphereGeometry args={[size * 2.4, 16, 16]} />
+        <meshBasicMaterial ref={glowMat} color="#ffffff" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
     </group>
   );
 };
@@ -89,9 +98,10 @@ interface GlobeSceneProps {
   counts: Record<string, number>;
   selected: string;
   onSelect: (code: string) => void;
+  onHover: (code: string | null) => void;
 }
 
-const GlobeScene = ({ counts, selected, onSelect }: GlobeSceneProps) => {
+const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const maxCount = Math.max(1, ...Object.values(counts));
 
@@ -112,10 +122,11 @@ const GlobeScene = ({ counts, selected, onSelect }: GlobeSceneProps) => {
             maxCount={maxCount}
             selected={selected === code}
             onSelect={onSelect}
+            onHover={onHover}
           />
         ))}
       </group>
-      <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={0.5} />
+      <OrbitControls enableZoom enablePan={false} rotateSpeed={0.5} minDistance={1.6} maxDistance={4.5} zoomSpeed={0.7} />
     </>
   );
 };
