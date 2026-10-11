@@ -5,7 +5,11 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
-import WORLD_BORDERS from "@/lib/worldBorders";
+import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
+import { isBlockedCountry } from "@/lib/restrictedCountries";
+
+// Only countries where this type of site is allowed appear on the globe.
+const ALLOWED_COUNTRIES = COUNTRIES.filter((c) => c.code === "GLOBAL" || !isBlockedCountry(c.code));
 
 interface GlobePickerProps {
   selected: string;
