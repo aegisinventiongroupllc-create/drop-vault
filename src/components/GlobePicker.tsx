@@ -104,7 +104,7 @@ const GlobeScene = ({ counts, selected, onSelect }: GlobeSceneProps) => {
     <>
       <group ref={groupRef}>
         <HoloSphere />
-        {Object.keys(COUNTRY_LATLNG).map((code) => (
+        {Object.keys(COUNTRY_LATLNG).filter((code) => !isBlockedCountry(code)).map((code) => (
           <CountryMarker
             key={code}
             code={code}
@@ -142,13 +142,13 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return COUNTRIES;
-    return COUNTRIES.filter(
+    if (!q) return ALLOWED_COUNTRIES;
+    return ALLOWED_COUNTRIES.filter(
       (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
     );
   }, [query]);
 
-  const current = COUNTRIES.find((c) => c.code === selected) ?? COUNTRIES[0];
+  const current = ALLOWED_COUNTRIES.find((c) => c.code === selected) ?? ALLOWED_COUNTRIES[0];
   const totalCreators = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
