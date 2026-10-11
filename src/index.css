@@ -152,3 +152,8 @@
     box-shadow: 0 0 12px hsl(43, 96%, 56%, 0.5);
   }
 }
+
+/* Hide the auto-translate widget's own banner and tooltips */
+.goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame, .goog-te-gadget { display: none !important; }
+body { top: 0 !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }

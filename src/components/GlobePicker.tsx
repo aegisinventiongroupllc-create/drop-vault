@@ -5,6 +5,7 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
+import { countryName } from "@/lib/siteTranslate";
 import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 
@@ -137,26 +138,38 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
   const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
+    let alive = true;
+    const load = async () => {
       const { data } = await supabase
         .from("public_profiles")
         .select("country")
         .eq("role", "creator")
         .limit(10000);
+      if (!alive || !data) return;
       const next: Record<string, number> = {};
-      for (const row of data ?? []) {
+      for (const row of data) {
         const c = (row as { country?: string | null }).country;
         if (c) next[c] = (next[c] ?? 0) + 1;
       }
       setCounts(next);
-    })();
+    };
+    load();
+    // Live refresh: new creators light up without reopening the globe.
+    const timer = window.setInterval(load, 15000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return ALLOWED_COUNTRIES;
     return ALLOWED_COUNTRIES.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+      (c) => c.name.toLowerCase().includes(q) || countryName(c.code, c.name).toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
     );
   }, [query]);
 
@@ -192,7 +205,7 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
           <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-card/90 border border-primary/40 backdrop-blur-sm pointer-events-none">
             <span className="text-[11px] font-bold tracking-wider text-foreground">
               {ALLOWED_COUNTRIES.find((c) => c.code === hovered)?.flag}{" "}
-              {ALLOWED_COUNTRIES.find((c) => c.code === hovered)?.name.toUpperCase()}
+              {hovered ? countryName(hovered, ALLOWED_COUNTRIES.find((c) => c.code === hovered)?.name ?? hovered).toUpperCase() : ""}
             </span>
             <span className="ml-2 text-[11px] font-bold tracking-wider text-primary">
               {counts[hovered] ?? 0} CREATOR{(counts[hovered] ?? 0) === 1 ? "" : "S"}
@@ -207,7 +220,7 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
       <p className="text-center text-[10px] font-bold tracking-widest text-muted-foreground pb-2">
         {totalCreators} CREATOR{totalCreators === 1 ? "" : "S"} WORLDWIDE
         {current.code !== "GLOBAL" && (
-          <span className="text-primary"> · NOW: {current.flag} {current.name.toUpperCase()} ({counts[current.code] ?? 0})</span>
+          <span className="text-primary"> · NOW: {current.flag} {countryName(current.code, current.name).toUpperCase()} ({counts[current.code] ?? 0})</span>
         )}
       </p>
 
@@ -229,7 +242,7 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
               }`}
             >
               <span className="text-xl">{country.flag}</span>
-              <span className="font-semibold text-sm flex-1">{country.name}</span>
+              <span className="font-semibold text-sm flex-1">{countryName(country.code, country.name)}</span>
               <span className={`text-[10px] font-bold tracking-wider ${n > 0 ? "text-primary" : "text-muted-foreground"}`}>
                 {country.code === "GLOBAL" ? "EVERYWHERE" : n > 0 ? `${n} CREATOR${n === 1 ? "" : "S"}` : "NONE YET"}
               </span>
