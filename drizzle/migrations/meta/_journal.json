@@ -204,6 +204,13 @@
       "when": 1791660529548,
       "tag": "0028_tighten_entry_pass_and_photo_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791753781746,
+      "tag": "0029_founding_creator_split_per_country",
+      "breakpoints": true
     }
   ]
 }

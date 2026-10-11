@@ -1066,6 +1066,7 @@ export type Database = {
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
+      creator_split_percent: { Args: { _creator_id: string }; Returns: number }
       credit_entry_pass: {
         Args: {
           _amount_usd: number
