@@ -5,7 +5,11 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
-import WORLD_BORDERS from "@/lib/worldBorders";
+import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
+import { isBlockedCountry } from "@/lib/restrictedCountries";
+
+// Only countries where this type of site is allowed appear on the globe.
+const ALLOWED_COUNTRIES = COUNTRIES.filter((c) => c.code === "GLOBAL" || !isBlockedCountry(c.code));
 
 interface GlobePickerProps {
   selected: string;
@@ -34,76 +38,6 @@ const COUNTRY_LATLNG: Record<string, [number, number]> = {
   ZA: [-25.7, 28.2],
   NG: [9.1, 7.5],
   PT: [38.7, -9.1],
-};
-
-const R = 1;
-
-const latLngToVec3 = (lat: number, lng: number, radius: number): [number, number, number] => {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lng + 180) * (Math.PI / 180);
-  return [
-    -radius * Math.sin(phi) * Math.cos(theta),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta),
-  ];
-};
-
-// Holographic sphere with real world country borders + faint graticule.
-const HoloSphere = () => {
-  const { borders, grid } = useMemo(() => {
-    const borderGeoms: THREE.BufferGeometry[] = [];
-    for (const ring of WORLD_BORDERS) {
-      const pts = ring.map(([lng, lat]) => new THREE.Vector3(...latLngToVec3(lat, lng, R * 1.001)));
-      borderGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
-    }
-    const gridGeoms: THREE.BufferGeometry[] = [];
-    const seg = 96;
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const pts: THREE.Vector3[] = [];
-      for (let i = 0; i <= seg; i++) {
-        const lng = (i / seg) * 360 - 180;
-        pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
-      }
-      gridGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
-    }
-    for (let lng = -180; lng < 180; lng += 30) {
-      const pts: THREE.Vector3[] = [];
-      for (let i = 0; i <= seg; i++) {
-        const lat = (i / seg) * 180 - 90;
-        pts.push(new THREE.Vector3(...latLngToVec3(lat, lng, R)));
-      }
-      gridGeoms.push(new THREE.BufferGeometry().setFromPoints(pts));
-    }
-    return { borders: borderGeoms, grid: gridGeoms };
-  }, []);
-
-  return (
-    <group>
-      {/* Ocean base + inner glow */}
-      <mesh>
-        <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#0a2a55" transparent opacity={0.35} side={THREE.BackSide} />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#071d3d" transparent opacity={0.75} />
-      </mesh>
-      {/* Real country borders */}
-      {borders.map((g, i) => (
-        <primitive
-          key={`b${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#4db8ff", transparent: true, opacity: 0.85 }))}
-        />
-      ))}
-      {/* Faint graticule */}
-      {grid.map((g, i) => (
-        <primitive
-          key={`g${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#2a6db3", transparent: true, opacity: 0.12 }))}
-        />
-      ))}
-    </group>
-  );
 };
 
 interface MarkerProps {
@@ -170,7 +104,7 @@ const GlobeScene = ({ counts, selected, onSelect }: GlobeSceneProps) => {
     <>
       <group ref={groupRef}>
         <HoloSphere />
-        {Object.keys(COUNTRY_LATLNG).map((code) => (
+        {Object.keys(COUNTRY_LATLNG).filter((code) => !isBlockedCountry(code)).map((code) => (
           <CountryMarker
             key={code}
             code={code}
@@ -208,13 +142,13 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return COUNTRIES;
-    return COUNTRIES.filter(
+    if (!q) return ALLOWED_COUNTRIES;
+    return ALLOWED_COUNTRIES.filter(
       (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
     );
   }, [query]);
 
-  const current = COUNTRIES.find((c) => c.code === selected) ?? COUNTRIES[0];
+  const current = ALLOWED_COUNTRIES.find((c) => c.code === selected) ?? ALLOWED_COUNTRIES[0];
   const totalCreators = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (

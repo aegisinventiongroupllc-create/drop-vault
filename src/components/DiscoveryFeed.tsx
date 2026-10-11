@@ -10,7 +10,7 @@ import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/toke
 import type { VaultType } from "@/lib/tokenEconomy";
 import { toggleHeart } from "@/hooks/useHearts";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import { COUNTRIES } from "@/components/GlobalPassport";
+import MiniGlobe from "@/components/MiniGlobe";
 
 interface VideoItem {
   id: string;
@@ -396,9 +396,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
               <button
                 onClick={onGlobeOpen}
                 aria-label="Pick a country"
-                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full pl-1.5 pr-3 py-1 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
               >
-                <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                <MiniGlobe size={24} />
                 <span className="text-foreground">{!countryFilter || countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
               </button>
             )}
