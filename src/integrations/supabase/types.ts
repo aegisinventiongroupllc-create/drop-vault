@@ -684,6 +684,9 @@ export type Database = {
           ends_at: string
           id: string
           milestone_followers: number
+          paid_amount_usd: number | null
+          paid_at: string | null
+          paid_note: string | null
           split_creator: number
           split_platform: number
           started_at: string
@@ -695,6 +698,9 @@ export type Database = {
           ends_at: string
           id?: string
           milestone_followers: number
+          paid_amount_usd?: number | null
+          paid_at?: string | null
+          paid_note?: string | null
           split_creator?: number
           split_platform?: number
           started_at?: string
@@ -706,6 +712,9 @@ export type Database = {
           ends_at?: string
           id?: string
           milestone_followers?: number
+          paid_amount_usd?: number | null
+          paid_at?: string | null
+          paid_note?: string | null
           split_creator?: number
           split_platform?: number
           started_at?: string
