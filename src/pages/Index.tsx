@@ -83,6 +83,7 @@ const Index = () => {
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
   const [activeTab, setActiveTab] = useState<Tab>(loadActiveTab);
+  const [creatorFeed, setCreatorFeed] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -385,11 +386,11 @@ const Index = () => {
   }
 
   // --- Creator flow ---
-  if (role === "creator") {
+  if (role === "creator" && !creatorFeed) {
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
     return (
-      <CreatorAnalyticsDashboard onBack={async () => {
+      <CreatorAnalyticsDashboard onFeed={() => setCreatorFeed(true)} onBack={async () => {
         await supabase.auth.signOut();
         localStorage.removeItem(STORAGE_KEY);
         setRole(null);
@@ -458,7 +459,15 @@ const Index = () => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
           <div className="flex items-center justify-between gap-1 py-2 max-w-lg mx-auto px-4">
             <div className="flex items-center gap-1">
-              {preference === "both" && (
+              {role === "creator" && (
+                <button
+                  onClick={() => setCreatorFeed(false)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold tracking-widest bg-secondary text-muted-foreground hover:text-foreground transition-all"
+                >
+                  DASHBOARD
+                </button>
+              )}
+              {(role === "customer" || role === "creator") && (
                 <>
                   <button
                     onClick={() => setVault("women")}

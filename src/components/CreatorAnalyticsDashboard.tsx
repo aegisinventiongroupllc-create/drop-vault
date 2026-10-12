@@ -46,7 +46,7 @@ const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media";
 
-const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: () => void; adminPreview?: boolean }) => {
+const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void }) => {
   const ct = useCreatorText();
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
@@ -477,7 +477,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => (onFeed ? onFeed() : navigate("/"))}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/40 text-primary text-[10px] font-bold tracking-widest hover:bg-primary/25 transition-colors"
             aria-label="Browse the scrollable feed"
           >
