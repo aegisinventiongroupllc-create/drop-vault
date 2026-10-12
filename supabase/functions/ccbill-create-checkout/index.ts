@@ -42,7 +42,10 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
     if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
 
-    const pkg = TOKEN_PACKAGES[String(body?.package ?? "")];
+    const q = Number(body?.quantity);
+    const pkg = String(body?.package ?? "") === "custom"
+      ? (Number.isInteger(q) && q >= 1 && q <= 100 ? { price: (q * 25).toFixed(2), tokens: q } : undefined)
+      : TOKEN_PACKAGES[String(body?.package ?? "")];
     if (!pkg) return json({ error: "Unknown token package" }, 400);
     const isEntryPass = String(body?.package ?? "") === "entry_pass";
 

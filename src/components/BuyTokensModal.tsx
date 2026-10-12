@@ -3,10 +3,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  TOKEN_INVOICE_USD, TOKEN_BASE_VALUE_USD,
-  BUNDLE_TOKENS, BUNDLE_INVOICE_USD, BUNDLE_BASE_USD,
-  PLATFORM_SPLIT_PERCENT, CREATOR_SPLIT_PERCENT,
-  calculateTokenPurchaseSplit, ENTRY_PASS_PRICE_USD,
+  TOKEN_INVOICE_USD, BUNDLE_TOKENS, ENTRY_PASS_PRICE_USD,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,7 +23,9 @@ interface Checkout {
 
 const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModalProps) => {
   const isEntryPass = mode === "entry_pass";
-  const [selectedOption, setSelectedOption] = useState<"single" | "bundle">("bundle");
+  const [quantity, setQuantity] = useState<number>(BUNDLE_TOKENS);
+  const setQty = (n: number) => setQuantity(Math.max(1, Math.min(100, Math.round(n) || 1)));
+  const pkgBody = quantity === 1 ? { package: "single" } : quantity === BUNDLE_TOKENS ? { package: "bundle" } : { package: "custom", quantity };
   const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
   const [checkout, setCheckout] = useState<Checkout | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +49,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     await logConsent();
     setError(null);
     const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
-      body: { package: isEntryPass ? "entry_pass" : selectedOption, savecard: rememberCard },
+      body: { ...(isEntryPass ? { package: "entry_pass" } : pkgBody), savecard: rememberCard },
     });
     if (fnError || !data?.checkout_url) {
       setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
@@ -59,9 +58,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     window.location.href = data.checkout_url;
   };
 
-  const tokens = selectedOption === "bundle" ? BUNDLE_TOKENS : 1;
-  const invoiceAmount = selectedOption === "bundle" ? BUNDLE_INVOICE_USD : TOKEN_INVOICE_USD;
-  const split = calculateTokenPurchaseSplit(invoiceAmount, tokens);
+  const tokens = quantity;
+  const invoiceAmount = quantity * TOKEN_INVOICE_USD;
 
   // Poll the verifier + listen for token_purchases insert as soon as we're awaiting
   useEffect(() => {
@@ -133,7 +131,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     setError(null);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: { kind: isEntryPass ? "entry_pass" : "token_package", package: selectedOption === "bundle" ? "bundle" : "single" },
+        body: isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody },
       });
       if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
@@ -174,56 +172,37 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               </p>
             </div>
 
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
-              <p className="text-[10px] font-bold text-muted-foreground tracking-wider">WHERE YOUR ${ENTRY_PASS_PRICE_USD} GOES</p>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">DTT platform vault (entry fee)</span><span className="text-primary font-bold">${ENTRY_PASS_PRICE_USD}.00</span></div>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Creators earn from Bit-Token unlocks</span><span className="text-foreground">90% of every token</span></div>
-            </div>
-
             <Button variant="neon" className="w-full mt-4" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT</Button>
           </div>
         )}
 
         {step === "select" && !isEntryPass && (
-          <div className="p-4 space-y-3">
-            <button
-              onClick={() => setSelectedOption("single")}
-              className={`w-full text-left rounded-xl p-4 border-2 transition-all ${selectedOption === "single" ? "border-primary bg-primary/5" : "border-border bg-secondary/50"}`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
-                  <span className="font-semibold text-foreground">1 Bit-Token</span>
-                </div>
-                <span className="text-lg font-bold text-primary">${TOKEN_INVOICE_USD}</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-11">$1 platform fee + ${TOKEN_BASE_VALUE_USD} base</p>
-            </button>
-
-            <button
-              onClick={() => setSelectedOption("bundle")}
-              className={`w-full text-left rounded-xl p-4 border-2 transition-all relative overflow-hidden ${selectedOption === "bundle" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
-            >
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">BEST VALUE</div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
-                  <span className="font-semibold text-foreground">{BUNDLE_TOKENS} Bit-Tokens</span>
-                </div>
-                <span className="text-lg font-bold text-primary">${BUNDLE_INVOICE_USD}</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1 ml-11">$1 platform fee + ${BUNDLE_BASE_USD} base</p>
-            </button>
-
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
-              <p className="text-[10px] font-bold text-muted-foreground tracking-wider">REVENUE BREAKDOWN</p>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Admin Fee</span><span className="text-primary font-bold">${split.adminFee.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Platform ({PLATFORM_SPLIT_PERCENT}%)</span><span className="text-foreground">${split.platformShare.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[10px]"><span className="text-muted-foreground">Creator ({CREATOR_SPLIT_PERCENT}%)</span><span className="text-foreground">${split.creatorShare.toFixed(2)}</span></div>
-              <div className="flex justify-between text-[10px] border-t border-border pt-1 font-bold"><span className="text-muted-foreground">Your Total Revenue</span><span className="text-primary">${split.totalPlatformRevenue.toFixed(2)}</span></div>
+          <div className="p-4 space-y-4">
+            <p className="text-center text-xs font-bold tracking-widest text-muted-foreground">FILL YOUR VAULT</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[1, BUNDLE_TOKENS, 10].map((n) => (
+                <button key={n} onClick={() => setQty(n)}
+                  className={`rounded-xl border-2 p-3 text-center transition-all ${quantity === n ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}>
+                  <p className="font-semibold text-foreground">{n} Bit-Token{n !== 1 ? "s" : ""}</p>
+                  <p className="text-sm font-bold text-primary">${n * TOKEN_INVOICE_USD}</p>
+                </button>
+              ))}
             </div>
-
-            <Button variant="neon" className="w-full mt-4" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT</Button>
+            <div className="flex items-center justify-center gap-3">
+              <Button variant="outline" size="icon" aria-label="Fewer tokens" onClick={() => setQty(quantity - 1)}>−</Button>
+              <input type="number" min={1} max={100} value={quantity} aria-label="How many Bit-Tokens"
+                onChange={(e) => setQty(Number(e.target.value))}
+                className="w-20 rounded-lg border border-border bg-background p-2 text-center text-xl font-bold text-foreground" />
+              <Button variant="outline" size="icon" aria-label="More tokens" onClick={() => setQty(quantity + 1)}>+</Button>
+            </div>
+            <div className="rounded-xl border border-border bg-secondary/50 p-4 space-y-2">
+              <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bit-Tokens</span><span className="font-bold text-foreground">{quantity}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Price each</span><span className="text-foreground">${TOKEN_INVOICE_USD}</span></div>
+              <div className="flex justify-between border-t border-border pt-2 text-base font-bold"><span className="text-foreground">Total</span><span className="text-primary">${invoiceAmount}</span></div>
+              <p className="text-[10px] text-muted-foreground">Tokens never expire. Use them any time — each one unlocks a creator for 14 days.</p>
+            </div>
+            <Button variant="neon" className="w-full" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT — ${invoiceAmount}</Button>
           </div>
         )}
 

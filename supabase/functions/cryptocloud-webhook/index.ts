@@ -13,6 +13,7 @@ function expectedAmountsForTokens(tokens: number): number[] {
   if (tokens === 1) return [25];
   if (tokens === 5) return [125];
   const amounts = [(tokens - 1) * 20 + 1];
+  if (tokens >= 1 && tokens <= 100) amounts.push(tokens * 25); // any quantity at $25 each
   if (tokens === 501) amounts.push(10002); // "Legendary" $10,001 tier + $1 admin fee
   return amounts;
 }

@@ -4,7 +4,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 // (2) re-check the billed amount against our own price catalog, and
 // (3) credit idempotently by CCBill transaction id.
 const CCBILL_RANGES = ["64.38.212.", "64.38.215.", "64.38.240.", "64.38.241."];
-const PRICE_FOR_TOKENS: Record<number, number> = { 1: 25, 5: 125 };
+const PRICE_FOR_TOKENS: Record<number, number> = Object.fromEntries(
+  Array.from({ length: 100 }, (_, i) => [i + 1, (i + 1) * 25]),
+);
 
 const ok = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });

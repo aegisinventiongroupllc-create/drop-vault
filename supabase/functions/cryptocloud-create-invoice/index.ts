@@ -32,6 +32,11 @@ function priceRequest(body: any): { amount_usd: number; tokens: number } | { err
   const kind = typeof body?.kind === "string" ? body.kind : "token_package";
 
   if (kind === "token_package") {
+    if (String(body?.package ?? "") === "custom") {
+      const q = Number(body?.quantity);
+      if (!Number.isInteger(q) || q < 1 || q > 100) return { error: "Choose between 1 and 100 Bit-Tokens" };
+      return { amount_usd: q * 25, tokens: q };
+    }
     const pkg = TOKEN_PACKAGES[String(body?.package ?? "")];
     if (!pkg) return { error: "Unknown token package" };
     return pkg;
