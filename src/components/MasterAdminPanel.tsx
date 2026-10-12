@@ -830,6 +830,17 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <Mail className="w-3 h-3" /> DTT Support: dropthatthingmedia@gmail.com
         </a>
       </div>
+
+      {/* Creator country globe pop-up (country only, never exact location) */}
+      {globeCreator?.country && (
+        <GlobePicker
+          selected={globeCreator.country}
+          focusCountry={globeCreator.country}
+          focusName={globeCreator.display_name ?? "creator"}
+          onSelect={() => {}}
+          onClose={() => setGlobeCreator(null)}
+        />
+      )}
     </div>
   );
 };
