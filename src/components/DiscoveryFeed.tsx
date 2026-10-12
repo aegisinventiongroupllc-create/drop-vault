@@ -23,6 +23,7 @@ interface VideoItem {
   description: string;
   likes: number;
   comments: number;
+  views?: number;
   color: string;
   vault: VaultType;
   country: string;
@@ -377,7 +378,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     (async () => {
       const { data: media } = await supabase
         .from("creator_media")
-        .select("id, creator_id, storage_path, title")
+        .select("id, creator_id, storage_path, title, views")
         .eq("bucket", "teasers")
         .order("created_at", { ascending: false })
         .limit(50);
@@ -419,6 +420,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           likes: countMap[m.creator_id] ?? 0,
           creatorId: m.creator_id,
           comments: 0,
+          views: m.views ?? 0,
           color: "from-primary/20 to-background",
           vault: prof?.side ?? "women",
           country: prof?.country || "GLOBAL",
