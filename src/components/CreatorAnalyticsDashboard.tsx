@@ -47,6 +47,7 @@ type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: () => void; adminPreview?: boolean }) => {
   const ct = useCreatorText();
+  const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
   const logoTaps = useRef({ count: 0, lastAt: 0 });
   const previewCoinRain = () => {
