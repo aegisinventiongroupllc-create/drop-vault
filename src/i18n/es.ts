@@ -46,7 +46,7 @@ const es: Translations = {
   tos_section4_title: "4. Política de No Reembolso",
   tos_section4_text: "Todas las compras de Bit-Tokens y Solicitudes Personalizadas son finales. No se emitirán reembolsos por compras de tokens digitales, períodos de acceso expirados o solicitudes personalizadas rechazadas.",
   tos_section5_title: "5. División de Ingresos",
-  tos_section5_text: "La Plataforma opera con una división de ingresos del 90% Creador / 10% Plataforma. Una división de incentivo temporal de 95/5 está disponible para Creadores que alcancen 500,000 seguidores, con una duración exacta de 7 días calendario antes de revertir.",
+  tos_section5_text: "La Plataforma opera con una división de ingresos del 90% Creador / 10% Plataforma. Una división de incentivo temporal de 95/5 está disponible para Creadores que alcancen 100,000 seguidores, con una duración exacta de 7 días calendario antes de revertir.",
   tos_section6_title: "6. Cláusula de Exoneración",
   tos_section6_text: "Usted acepta exonerar a DROPTHATTHING, sus propietarios, operadores y afiliados de cualquier reclamo, daño o pérdida derivada del contenido generado por usuarios, interacciones con terceros o uso de la Plataforma.",
   tos_section7_title: "7. Responsabilidad del Contenido",

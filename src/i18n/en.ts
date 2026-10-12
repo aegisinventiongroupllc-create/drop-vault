@@ -50,7 +50,7 @@ const en: Translations = {
   tos_section6_title: "6. Bit-Token Economy",
   tos_section6_text: "Bit-Tokens are digital access tokens valued at $20 USD each, granting 14 calendar days of access to a single Creator's profile. Tokens are non-refundable; access automatically expires after 14 days.",
   tos_section7_title: "7. Revenue Split",
-  tos_section7_text: "The Platform operates on a 90% Creator / 10% Platform revenue split. A temporary 95/5 incentive split is available for Creators reaching 500,000 followers, lasting exactly 7 calendar days before reverting.",
+  tos_section7_text: "The Platform operates on a 90% Creator / 10% Platform revenue split. A temporary 95/5 incentive split is available for Creators each time they reach another 100,000 followers, lasting exactly 7 calendar days before reverting.",
   tos_section8_title: "8. Account Termination",
   tos_section8_text: "The Platform reserves the right to suspend or terminate accounts that violate these Terms at any time without prior notice.",
   tos_section9_title: "9. Contact",
