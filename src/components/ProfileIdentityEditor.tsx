@@ -287,6 +287,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
               <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
             ))}
           </select>
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+            🔒 The globe only shows the country you live in — never your exact location. We care about your safety.
+          </p>
         </div>
         <div>
           <label htmlFor="identity-tags" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your tags (up to 8)</label>
