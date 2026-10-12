@@ -11,15 +11,8 @@ import {
 } from "@/lib/tokenEconomy";
 
 const plans = [
-  { name: "1 Bit-Token", price: TOKEN_INVOICE_USD, note: "Unlock one creator vault for 14 days." },
-  { name: `${BUNDLE_TOKENS} Bit-Tokens`, price: BUNDLE_INVOICE_USD, note: `Unlock up to ${BUNDLE_TOKENS} vaults for 14 days each.`, best: true },
-];
-
-const faqs = [
-  ["What does a coin do?", "One Bit-Token unlocks a creator's full vault for 14 days. Access locks after 14 days unless you renew."],
-  ["How do I pay?", "Checkout is in crypto (Litecoin and other coins) through our secure payment partner. Credit and debit cards are coming soon."],
-  ["When do coins show up?", "As soon as your payment confirms on the network, coins appear in your vault on your dashboard."],
-  ["Where does my money go?", `${CREATOR_SPLIT_PERCENT}% goes directly to the creator you support.`],
+  { name: "1 Bit-Token", price: TOKEN_INVOICE_USD },
+  { name: `${BUNDLE_TOKENS} Bit-Tokens`, price: BUNDLE_INVOICE_USD, best: true },
 ];
 
 const Pricing = () => (
