@@ -5,7 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 // (3) credit idempotently by CCBill transaction id.
 const CCBILL_RANGES = ["64.38.212.", "64.38.215.", "64.38.240.", "64.38.241."];
 const PRICE_FOR_TOKENS: Record<number, number> = Object.fromEntries(
-  Array.from({ length: 100 }, (_, i) => [i + 1, (i + 1) * 25]),
+  Array.from({ length: 100 }, (_, i) => [i + 1, (i + 1) * 25 + 1]),
 );
 
 const ok = (body: unknown, status = 200) =>

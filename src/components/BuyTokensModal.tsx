@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, BUNDLE_TOKENS, ENTRY_PASS_PRICE_USD,
+  TRANSACTION_FEE_USD, tokenInvoiceTotal,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,7 +60,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   };
 
   const tokens = quantity;
-  const invoiceAmount = quantity * TOKEN_INVOICE_USD;
+  const invoiceAmount = tokenInvoiceTotal(quantity);
 
   // Poll the verifier + listen for token_purchases insert as soon as we're awaiting
   useEffect(() => {
@@ -199,6 +200,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bit-Tokens</span><span className="font-bold text-foreground">{quantity}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Price each</span><span className="text-foreground">${TOKEN_INVOICE_USD}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Transaction fee</span><span className="text-foreground">${TRANSACTION_FEE_USD}</span></div>
               <div className="flex justify-between border-t border-border pt-2 text-base font-bold"><span className="text-foreground">Total</span><span className="text-primary">${invoiceAmount}</span></div>
               <p className="text-[10px] text-muted-foreground">Tokens never expire. Use them any time — each one unlocks a creator for 14 days.</p>
             </div>

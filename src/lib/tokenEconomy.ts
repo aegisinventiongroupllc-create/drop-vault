@@ -5,7 +5,9 @@
 
 export const ADMIN_FEE_USD = 1; // Flat $1 goes to Admin_Profit_Vault
 export const TOKEN_BASE_VALUE_USD = 20; // Base value per token (after admin fee)
-export const TOKEN_INVOICE_USD = 25; // What the customer pays for 1 token
+export const TOKEN_INVOICE_USD = 25; // Price per token before the transaction fee
+export const TRANSACTION_FEE_USD = 1; // Flat $1 per token purchase, on top of the token total
+export const tokenInvoiceTotal = (quantity: number) => quantity * TOKEN_INVOICE_USD + TRANSACTION_FEE_USD;
 export const BUNDLE_TOKENS = 5;
 export const BUNDLE_BASE_USD = 100; // 5 × $20
 export const BUNDLE_INVOICE_USD = 125; // $100 + $1 admin fee + $24 processing allowance
