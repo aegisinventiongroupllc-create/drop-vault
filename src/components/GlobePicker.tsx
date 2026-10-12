@@ -178,7 +178,7 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
     );
   }, [query]);
 
-  const current = ALLOWED_COUNTRIES.find((c) => c.code === selected) ?? ALLOWED_COUNTRIES[0];
+  const current = ALLOWED_COUNTRIES.find((c) => c.code === effectiveSelected) ?? ALLOWED_COUNTRIES[0];
   const totalCreators = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
@@ -228,6 +228,19 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
         </p>
       </div>
 
+      {viewOnly ? (
+        <div className="flex-1 px-4 pb-8 flex flex-col items-center justify-center gap-3">
+          <span className="text-5xl">{current.flag}</span>
+          <p className="text-lg font-bold text-foreground">{countryName(current.code, current.name)}</p>
+          <p className="text-[11px] font-bold tracking-widest text-primary">
+            {counts[current.code] ?? 0} CREATOR{(counts[current.code] ?? 0) === 1 ? "" : "S"} IN THIS COUNTRY
+          </p>
+          <p className="text-[10px] text-muted-foreground text-center max-w-[260px]">
+            Country only — a creator's exact location is never shown.
+          </p>
+        </div>
+      ) : (
+      <>
       <p className="text-center text-[10px] font-bold tracking-widest text-muted-foreground pb-2">
         {totalCreators} CREATOR{totalCreators === 1 ? "" : "S"} WORLDWIDE
         {current.code !== "GLOBAL" && (
