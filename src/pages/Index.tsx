@@ -459,6 +459,14 @@ const Index = () => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
           <div className="flex items-center justify-between gap-1 py-2 max-w-lg mx-auto px-4">
             <div className="flex items-center gap-1">
+              {role === "creator" && (
+                <button
+                  onClick={() => setCreatorFeed(false)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold tracking-widest bg-secondary text-muted-foreground hover:text-foreground transition-all"
+                >
+                  DASHBOARD
+                </button>
+              )}
               {(role === "customer" || role === "creator") && (
                 <>
                   <button
