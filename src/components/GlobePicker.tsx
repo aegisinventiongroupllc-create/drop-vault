@@ -16,6 +16,9 @@ interface GlobePickerProps {
   selected: string;
   onSelect: (code: string) => void;
   onClose: () => void;
+  /** View-only mode: highlight one creator's country. Exact location is never shown. */
+  focusCountry?: string;
+  focusName?: string;
 }
 
 // Approximate capital-city coordinates for each selectable country.
@@ -132,10 +135,12 @@ const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) =>
   );
 };
 
-const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
+const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: GlobePickerProps) => {
   const [query, setQuery] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
+  const viewOnly = !!focusCountry;
+  const effectiveSelected = focusCountry ?? selected;
 
   useEffect(() => {
     let alive = true;
