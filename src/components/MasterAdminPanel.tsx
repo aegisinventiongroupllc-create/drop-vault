@@ -439,6 +439,16 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                       : c.role === "admin" ? "bg-gold/10 text-gold border border-gold/30"
                       : "bg-secondary text-muted-foreground border border-border"
                     }`}>{c.role.toUpperCase()}</span>
+                    {c.country && (
+                      <span
+                        role="button"
+                        aria-label={`Show ${c.display_name || "creator"}'s country on the globe`}
+                        onClick={(e) => { e.stopPropagation(); setGlobeCreator(c); }}
+                        className="p-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:scale-95 transition-all"
+                      >
+                        <Globe className="w-3.5 h-3.5" />
+                      </span>
+                    )}
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                 ))}
