@@ -13,10 +13,10 @@ describe("Power Week split", () => {
   it("goes back to 90/10 after the 7 days end", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-    const started = getCreatorSplitState("c1", 500_000);
+    const started = getCreatorSplitState("c1", 100_000);
     expect(started.currentSplit).toEqual({ creator: 95, platform: 5 });
     vi.setSystemTime(new Date("2026-01-08T00:00:01Z"));
-    const after = getCreatorSplitState("c1", 500_000, started);
+    const after = getCreatorSplitState("c1", 100_000, started);
     expect(after.currentSplit).toEqual(DEFAULT_SPLIT);
     expect(DEFAULT_SPLIT).toEqual({ creator: 90, platform: 10 });
   });

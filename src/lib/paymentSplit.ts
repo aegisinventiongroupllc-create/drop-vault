@@ -1,5 +1,5 @@
 // Payment split engine for DROPTHATTHING platform
-// Handles 90/10 default split and recurring 95/5 Power Week every 500K followers
+// Handles 90/10 default split and recurring 95/5 Power Week every 100K followers
 
 export interface CreatorSplitState {
   creatorId: string;
@@ -20,7 +20,7 @@ export interface PayoutState {
 
 const INCENTIVE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 168 hours
 const PAYOUT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-const FOLLOWER_MILESTONE = 500_000;
+const FOLLOWER_MILESTONE = 100_000;
 
 const DEFAULT_SPLIT = { creator: 90, platform: 10 };
 const INCENTIVE_SPLIT = { creator: 95, platform: 5 };
