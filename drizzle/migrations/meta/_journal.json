@@ -218,6 +218,13 @@
       "when": 1791802988089,
       "tag": "0030_power_week_95_5_and_records",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791803427161,
+      "tag": "0031_teaser_feed_requires_entry_pass",
+      "breakpoints": true
     }
   ]
 }

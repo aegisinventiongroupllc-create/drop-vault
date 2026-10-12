@@ -1118,6 +1118,7 @@ export type Database = {
         Args: { _payment_id: string; _reason: string }
         Returns: boolean
       }
+      has_active_entry_pass: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
