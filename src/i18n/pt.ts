@@ -69,7 +69,7 @@ const pt: Translations = {
   privacy_section6_title: "6. Contato",
   privacy_section6_text: "Para consultas de privacidade, contate: dropthatthingmedia@gmail.com",
 
-  token_single: "1 Bit-Token — $21",
+  token_single: "1 Bit-Token — $25",
   token_bundle: "6 Bit-Tokens — $101",
   pay_with_card: "PAGAR COM CARTÃO",
   pay_with_crypto: "PAGAR COM CRIPTO",

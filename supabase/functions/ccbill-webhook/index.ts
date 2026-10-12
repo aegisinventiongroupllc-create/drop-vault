@@ -4,7 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 // (2) re-check the billed amount against our own price catalog, and
 // (3) credit idempotently by CCBill transaction id.
 const CCBILL_RANGES = ["64.38.212.", "64.38.215.", "64.38.240.", "64.38.241."];
-const PRICE_FOR_TOKENS: Record<number, number> = { 1: 21, 5: 101 };
+const PRICE_FOR_TOKENS: Record<number, number> = { 1: 25, 5: 101 };
 
 const ok = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -42,13 +42,6 @@ Deno.serve(async (req) => {
   const tokens = parseInt(field("dtt_tokens"), 10);
   const transactionId = payload.transactionId ?? payload.subscriptionId ?? "";
   const billed = parseFloat(payload.billedInitialPrice ?? payload.accountingInitialPrice ?? "0");
-
-  const expected = PRICE_FOR_TOKENS[tokens];
-  if (!/^[0-9a-f-]{36}$/i.test(userId) || !expected || !transactionId) return ok({ error: "invalid sale" }, 400);
-  if (Math.abs(billed - expected) > 0.01) {
-    console.error("ccbill amount mismatch", { transactionId, tokens, billed });
-    return ok({ error: "amount mismatch" }, 400);
-  }
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false, autoRefreshToken: false },

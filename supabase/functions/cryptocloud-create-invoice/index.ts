@@ -18,7 +18,7 @@ const CUSTOM_TIER_PRICES = [500, 1000, 2500, 5000, 10001];
 const MAX_CUSTOM_TOKENS = 500;
 
 const TOKEN_PACKAGES: Record<string, { amount_usd: number; tokens: number }> = {
-  single: { amount_usd: 21, tokens: 1 },
+  single: { amount_usd: 25, tokens: 1 },
   bundle: { amount_usd: 101, tokens: 5 },
 };
 
