@@ -526,7 +526,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
         </div>
         {splitState.incentiveActive && countdown && (
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
-            <p className="text-xs font-bold text-primary tracking-wider">⚡ 97/3 POWER WEEK ACTIVE</p>
+            <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
             <p className="text-[10px] text-muted-foreground">Fee reverts to 10% when timer hits zero</p>
           </div>
@@ -544,7 +544,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              Next Power Week available at 500,000 followers — recurs every additional 500K (7-day 97/3 split)
+              Next Power Week available at 500,000 followers — recurs every additional 500K (7-day 95/5 split)
             </p>
           </div>
         )}

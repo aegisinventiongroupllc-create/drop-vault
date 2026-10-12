@@ -46,7 +46,7 @@ const fr: Translations = {
   tos_section4_title: "4. Politique de Non-Remboursement",
   tos_section4_text: "Tous les achats de Bit-Tokens et de Demandes Personnalisées sont définitifs. Aucun remboursement ne sera émis pour les achats de tokens numériques, les périodes d'accès expirées ou les demandes personnalisées refusées.",
   tos_section5_title: "5. Partage des Revenus",
-  tos_section5_text: "La Plateforme fonctionne avec un partage des revenus de 90% Créateur / 10% Plateforme. Un partage incitatif temporaire de 97/3 est disponible pour les Créateurs atteignant 500 000 abonnés, d'une durée exacte de 7 jours avant de revenir à la normale.",
+  tos_section5_text: "La Plateforme fonctionne avec un partage des revenus de 90% Créateur / 10% Plateforme. Un partage incitatif temporaire de 95/5 est disponible pour les Créateurs atteignant 500 000 abonnés, d'une durée exacte de 7 jours avant de revenir à la normale.",
   tos_section6_title: "6. Clause de Non-Responsabilité",
   tos_section6_text: "Vous acceptez de dégager DROPTHATTHING, ses propriétaires, opérateurs et affiliés de toute réclamation, dommage ou perte découlant du contenu généré par les utilisateurs, des interactions avec des tiers ou de l'utilisation de la Plateforme.",
   tos_section7_title: "7. Responsabilité du Contenu",
