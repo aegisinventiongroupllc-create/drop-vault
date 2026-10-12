@@ -15,7 +15,7 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "Drop Vault"
+const SITE_NAME = "DTT"
 const SENDER_DOMAIN = "notify.dropthatthing.com"
 const ROOT_DOMAIN = "dropthatthing.com"
 const FROM_DOMAIN = "dropthatthing.com"
