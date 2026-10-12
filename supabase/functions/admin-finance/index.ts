@@ -298,6 +298,56 @@ Deno.serve(async (req) => {
       return json({ ok: true, women: top("women"), men: top("men") });
     }
 
+    if (action === "power_weeks") {
+      const { data: weeks, error } = await supabase
+        .from("power_weeks").select("*").order("started_at", { ascending: false }).limit(500);
+      if (error) return json({ error: error.message }, 500);
+      const ids = [...new Set((weeks || []).map((w: any) => w.creator_id))];
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("user_id, display_name, vault_side").in("user_id", ids)
+        : { data: [] as any[] };
+      const pMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
+      const now = Date.now();
+      const rows = await Promise.all((weeks || []).map(async (w: any) => {
+        const { data: txs } = await supabase.from("transactions")
+          .select("amount_usd, creator_share_usd, platform_share_usd")
+          .eq("creator_id", w.creator_id).eq("status", "completed")
+          .gte("created_at", w.started_at).lt("created_at", w.ends_at);
+        const s = (k: string) => (txs || []).reduce((a: number, t: any) => a + (Number(t[k]) || 0), 0);
+        const ended = new Date(w.ends_at).getTime() <= now;
+        return {
+          id: w.id, creator_id: w.creator_id,
+          display_name: pMap.get(w.creator_id)?.display_name ?? null,
+          side: pMap.get(w.creator_id)?.vault_side === "men" ? "men" : "women",
+          started_at: w.started_at, ends_at: w.ends_at, milestone_followers: w.milestone_followers,
+          status: w.paid_at ? "paid" : ended ? "ended" : "active",
+          unlocks: (txs || []).length, gross: s("amount_usd"),
+          creator_share: s("creator_share_usd"), platform_share: s("platform_share_usd"),
+          paid_at: w.paid_at, paid_amount_usd: w.paid_amount_usd, paid_note: w.paid_note,
+        };
+      }));
+      return json({ ok: true, weeks: rows });
+    }
+
+    if (action === "power_week_mark_paid") {
+      const id = String(body?.id ?? "");
+      const note = typeof body?.note === "string" ? body.note.slice(0, 300) : null;
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: "Invalid id" }, 400);
+      const { data: w } = await supabase.from("power_weeks").select("*").eq("id", id).maybeSingle();
+      if (!w) return json({ error: "Power Week not found" }, 404);
+      if (w.paid_at) return json({ error: "Already filed as paid" }, 409);
+      if (new Date(w.ends_at).getTime() > Date.now()) return json({ error: "This Power Week is still running" }, 409);
+      const { data: txs } = await supabase.from("transactions").select("creator_share_usd")
+        .eq("creator_id", w.creator_id).eq("status", "completed")
+        .gte("created_at", w.started_at).lt("created_at", w.ends_at);
+      const amount = (txs || []).reduce((a: number, t: any) => a + (Number(t.creator_share_usd) || 0), 0);
+      const { error } = await supabase.from("power_weeks")
+        .update({ paid_at: new Date().toISOString(), paid_amount_usd: amount, paid_note: note, active: false })
+        .eq("id", id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true, amount });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
