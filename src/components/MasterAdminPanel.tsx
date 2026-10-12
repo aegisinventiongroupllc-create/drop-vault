@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 import AdminVerifications from "@/components/AdminVerifications";
 import AdminPowerWeeks from "@/components/AdminPowerWeeks";
+import AdminFlowPreview from "@/components/AdminFlowPreview";
 import {
   canExecutePayout, formatPayoutCooldown, getMilestoneProgress, FOLLOWER_MILESTONE,
   type PayoutState,
@@ -50,7 +51,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "health" | "demand" | "powerweek";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "health" | "demand" | "powerweek" | "flow";
 
 interface FinanceWallet {
   user_id: string;
@@ -274,6 +275,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   }
 
   const sections: { id: Section; label: string }[] = [
+    { id: "flow", label: "HOW IT WORKS" },
     { id: "verification", label: "VERIFY" },
     { id: "analytics", label: "ANALYTICS" },
     { id: "creators", label: "CREATORS" },
@@ -654,6 +656,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       )}
 
       {activeSection === "powerweek" && <AdminPowerWeeks callFinance={callFinance} />}
+      {activeSection === "flow" && <AdminFlowPreview />}
 
       {/* Market Demand */}
       {activeSection === "demand" && (
