@@ -188,22 +188,28 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all" aria-label="Close">
           <X className="w-5 h-5" />
         </button>
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search countries... Mexico, Japan, Brazil..."
-            className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
+        {viewOnly ? (
+          <p className="flex-1 text-center text-xs font-bold tracking-widest text-foreground">
+            @{focusName ?? "CREATOR"}'S COUNTRY
+          </p>
+        ) : (
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search countries... Mexico, Japan, Brazil..."
+              className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        )}
       </div>
 
       {/* 3D holographic globe */}
       <div className="relative h-[42vh] min-h-[260px] select-none">
         <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <GlobeScene counts={counts} selected={selected} onSelect={(code) => { onSelect(code); onClose(); }} onHover={setHovered} />
+          <GlobeScene counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
         </Canvas>
         {/* Country + creator count readout for the light being touched */}
         {hovered && (
