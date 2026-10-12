@@ -5,7 +5,7 @@ import { encodeHex } from "jsr:@std/encoding@1/hex";
 
 // Server-side price catalog. The browser may only pick a package, never a price.
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
-  single: { price: "21.00", tokens: 1 },
+  single: { price: "25.00", tokens: 1 },
   bundle: { price: "101.00", tokens: 5 },
   entry_pass: { price: "20.00", tokens: 0 },
 };

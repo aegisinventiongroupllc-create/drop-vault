@@ -1,11 +1,11 @@
 // Token Economy Engine for DROPTHATTHING
 // Dual-Bucket Revenue: "Tax then Split" model
-// 1 Bit-Token = $21 USD invoice ($1 Admin Fee + $20 base)
+// 1 Bit-Token = $25 USD invoice ($1 Admin Fee + $20 base + $4 card-processing allowance)
 // 5 Bit-Tokens = $101 USD invoice ($1 Admin Fee + $100 base)
 
 export const ADMIN_FEE_USD = 1; // Flat $1 goes to Admin_Profit_Vault
 export const TOKEN_BASE_VALUE_USD = 20; // Base value per token (after admin fee)
-export const TOKEN_INVOICE_USD = 21; // What the customer pays for 1 token
+export const TOKEN_INVOICE_USD = 25; // What the customer pays for 1 token
 export const BUNDLE_TOKENS = 5;
 export const BUNDLE_BASE_USD = 100; // 5 × $20
 export const BUNDLE_INVOICE_USD = 101; // $100 + $1 admin fee
@@ -72,7 +72,8 @@ export function dollarsToBitTokens(usd: number): number {
  */
 export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: number) {
   const adminFee = ADMIN_FEE_USD;
-  const base = invoiceAmount - adminFee;
+  const base = tokenCount * TOKEN_BASE_VALUE_USD;
+  const processingAllowance = Math.max(0, invoiceAmount - adminFee - base);
   const platformShare = base * (PLATFORM_SPLIT_PERCENT / 100);
   const creatorShare = base * (CREATOR_SPLIT_PERCENT / 100);
   return {
@@ -81,6 +82,7 @@ export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: n
     base,
     platformShare,
     creatorShare,
+    processingAllowance,
     totalPlatformRevenue: adminFee + platformShare,
   };
 }
