@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
   CheckCircle, AlertCircle, Clock, FileText, DollarSign, Image, Video, Trash2, Mail,
-  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift, LogOut,
+  Lightbulb, Lock, Globe, Camera, Download, Crown, Loader2, Search, Gift, LogOut, Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -46,6 +47,7 @@ type Section = "overview" | "verification" | "requests" | "media";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: () => void; adminPreview?: boolean }) => {
   const ct = useCreatorText();
+  const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
   const logoTaps = useRef({ count: 0, lastAt: 0 });
   const previewCoinRain = () => {
@@ -463,6 +465,14 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/40 text-primary text-[10px] font-bold tracking-widest hover:bg-primary/25 transition-colors"
+            aria-label="Browse the scrollable feed"
+          >
+            <Play className="w-3.5 h-3.5" />
+            FEED
+          </button>
           <WalletIndicator />
           <button
             onClick={handleLogout}
