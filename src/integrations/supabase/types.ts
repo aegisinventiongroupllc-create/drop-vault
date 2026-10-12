@@ -1126,6 +1126,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_media_view: { Args: { _media_id: string }; Returns: undefined }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {

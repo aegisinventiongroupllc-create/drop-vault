@@ -232,6 +232,13 @@
       "when": 1791803867607,
       "tag": "0032_lock_teaser_files_and_auto_power_week",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791812929809,
+      "tag": "0033_count_media_views",
+      "breakpoints": true
     }
   ]
 }
