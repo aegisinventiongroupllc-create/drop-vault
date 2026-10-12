@@ -7,7 +7,6 @@ import {
   TOKEN_INVOICE_USD,
   BUNDLE_TOKENS,
   BUNDLE_INVOICE_USD,
-  CREATOR_SPLIT_PERCENT,
 } from "@/lib/tokenEconomy";
 
 const plans = [
