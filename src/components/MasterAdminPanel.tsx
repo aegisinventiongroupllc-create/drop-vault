@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight, Globe,
 } from "lucide-react";
+import GlobePicker from "@/components/GlobePicker";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
@@ -27,6 +28,7 @@ interface CreatorRow {
   email: string | null;
   role: string;
   created_at: string;
+  country: string | null;
 }
 
 // Clean-slate mock data — all stats start at 0 for production launch
@@ -146,12 +148,13 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
   const [creatorsLoading, setCreatorsLoading] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<CreatorRow | null>(null);
+  const [globeCreator, setGlobeCreator] = useState<CreatorRow | null>(null);
 
   const fetchLiveCreators = async () => {
     setCreatorsLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("user_id, display_name, email, role, created_at")
+      .select("user_id, display_name, email, role, created_at, country")
       .order("created_at", { ascending: false });
     if (!error && data) setLiveCreators(data as CreatorRow[]);
     setCreatorsLoading(false);
