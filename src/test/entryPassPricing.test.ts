@@ -6,6 +6,8 @@ import {
   ENTRY_PASS_PRICE_USD,
   ENTRY_PASS_DAYS,
   ADMIN_FEE_USD,
+  TRANSACTION_FEE_USD,
+  tokenInvoiceTotal,
   calculateTokenPurchaseSplit,
 } from "@/lib/tokenEconomy";
 
@@ -56,5 +58,25 @@ describe("Bit-Token pricing", () => {
     expect(split.creatorShare).toBe(90);
     expect(split.platformShare).toBe(10);
     expect(split.totalPlatformRevenue).toBe(11);
+  });
+});
+
+// Every token purchase adds a flat $1 transaction fee on top of the token total.
+// The fee is platform revenue and is charged once per purchase, not per token.
+describe("Transaction fee", () => {
+  it("is exactly $1 per purchase", () => {
+    expect(TRANSACTION_FEE_USD).toBe(1);
+  });
+
+  it("adds $1 to a single token: $25 + $1 = $26", () => {
+    expect(tokenInvoiceTotal(1)).toBe(26);
+  });
+
+  it("adds $1 to the bundle: $125 + $1 = $126", () => {
+    expect(tokenInvoiceTotal(5)).toBe(126);
+  });
+
+  it("adds $1 to any quantity: 40 tokens = $1,000 + $1 = $1,001", () => {
+    expect(tokenInvoiceTotal(40)).toBe(1001);
   });
 });
