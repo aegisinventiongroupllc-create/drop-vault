@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,15 +79,36 @@ Deno.serve(async (req) => {
       if (!id || !["approved", "rejected"].includes(status)) {
         return json({ error: "Invalid request" }, 400);
       }
-      const { error } = await supabase
+      const { data: row, error } = await supabase
         .from("creator_verifications")
         .update({
           status,
           reviewer_notes: notes,
           reviewed_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq("id", id)
+        .select("user_id")
+        .single();
       if (error) return json({ error: error.message }, 500);
+
+      // Let the creator know by email when they're approved.
+      if (status === "approved" && row?.user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("email, display_name")
+          .eq("user_id", row.user_id)
+          .maybeSingle();
+        if (prof?.email) {
+          try {
+            await sendTemplateEmail("creator-approved", prof.email, {
+              templateData: { name: prof.display_name ?? undefined },
+              idempotencyKey: `creator-approved-${id}`,
+            });
+          } catch (e) {
+            console.error("Approval email failed", e);
+          }
+        }
+      }
       return json({ ok: true });
     }
 
