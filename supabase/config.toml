@@ -5,3 +5,6 @@ project_id = "qptebakrgbjoxdlatloa"
     verify_jwt = false
   [functions.cryptocloud-webhook]
     verify_jwt = false
+
+  [functions.preview-transactional-email]
+    verify_jwt = false
