@@ -252,11 +252,11 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background/70 backdrop-blur-xl px-6 text-center">
           <ProfileAvatar config={video.creatorAvatar} creatorPhotoPath={video.creatorPhotoPath} label={video.creator} />
           <h3 className="font-display text-2xl font-bold tracking-wider text-foreground">
-            {video.vault === "men" ? "MAKE HIM YOUR GUY" : "MAKE HER YOUR GIRL"}
+            DROP THAT THING IN YOUR LIBRARY
           </h3>
-          <p className="text-sm text-muted-foreground">Spend 1 Bit-Token to add @{video.creator} to your library, finish this teaser and watch the full vault for 14 days.</p>
+          <p className="text-sm text-muted-foreground">1 Bit-Token adds @{video.creator} to your library, finishes this teaser and opens their full vault for 14 days.</p>
           <Button variant="neon" size="lg" className="text-base px-8" disabled={unlocking} onClick={handleMakeMine}>
-            {unlocking ? "UNLOCKING..." : "UNLOCK — 1 BIT-TOKEN"}
+            {unlocking ? "UNLOCKING..." : `UNLOCK @${video.creator.toUpperCase()} CONTENT`}
           </Button>
           <button className="text-xs text-muted-foreground underline" onClick={() => setGateOpen(false)}>Not now</button>
         </div>
