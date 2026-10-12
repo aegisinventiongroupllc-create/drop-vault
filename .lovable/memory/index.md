@@ -4,7 +4,7 @@
 - Visuals: Dark Luxury theme. Women's Vault (Pink/Black), Men's Vault (Blue/Silver/Black). Bold uppercase nav ONLY, zero icons.
 - Stack: Supabase (Auth, DB, Storage, Edge Functions), Docker, Nginx, NOWPayments (LTC).
 - Economy: 1 Bit-Token sells for $25 ($1 fee + $20 token value [$18 creator/$2 platform] + $4 card-fee cushion); 5-pack $101; Entry Pass $20/yr. 14-days access. Auto-locks at 14 days. Payouts are LTC-exclusive.
-- Revenue: Dual-Bucket: $1 entry tax + 90/10 split on base. 97/3 'Power Week' at 500K follower milestones.
+- Revenue: Dual-Bucket: $1 entry tax + 90/10 split on base. 95/5 'Power Week' for 7 days, then auto back to 90/10.
 - Compliance: Mandatory 18+ legal waiver splash screen. Support: dropthatthingmedia@gmail.com.
 - DB: transactions table has entry_tax and platform_commission columns — never lump them together.
 
