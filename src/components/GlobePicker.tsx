@@ -16,6 +16,9 @@ interface GlobePickerProps {
   selected: string;
   onSelect: (code: string) => void;
   onClose: () => void;
+  /** View-only mode: highlight one creator's country. Exact location is never shown. */
+  focusCountry?: string;
+  focusName?: string;
 }
 
 // Approximate capital-city coordinates for each selectable country.
@@ -132,10 +135,12 @@ const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) =>
   );
 };
 
-const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
+const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: GlobePickerProps) => {
   const [query, setQuery] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
+  const viewOnly = !!focusCountry;
+  const effectiveSelected = focusCountry ?? selected;
 
   useEffect(() => {
     let alive = true;
@@ -173,7 +178,7 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
     );
   }, [query]);
 
-  const current = ALLOWED_COUNTRIES.find((c) => c.code === selected) ?? ALLOWED_COUNTRIES[0];
+  const current = ALLOWED_COUNTRIES.find((c) => c.code === effectiveSelected) ?? ALLOWED_COUNTRIES[0];
   const totalCreators = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
@@ -183,22 +188,28 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all" aria-label="Close">
           <X className="w-5 h-5" />
         </button>
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search countries... Mexico, Japan, Brazil..."
-            className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
+        {viewOnly ? (
+          <p className="flex-1 text-center text-xs font-bold tracking-widest text-foreground">
+            @{focusName ?? "CREATOR"}'S COUNTRY
+          </p>
+        ) : (
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search countries... Mexico, Japan, Brazil..."
+              className="w-full bg-secondary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        )}
       </div>
 
       {/* 3D holographic globe */}
       <div className="relative h-[42vh] min-h-[260px] select-none">
         <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <GlobeScene counts={counts} selected={selected} onSelect={(code) => { onSelect(code); onClose(); }} onHover={setHovered} />
+          <GlobeScene counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
         </Canvas>
         {/* Country + creator count readout for the light being touched */}
         {hovered && (
@@ -217,6 +228,19 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
         </p>
       </div>
 
+      {viewOnly ? (
+        <div className="flex-1 px-4 pb-8 flex flex-col items-center justify-center gap-3">
+          <span className="text-5xl">{current.flag}</span>
+          <p className="text-lg font-bold text-foreground">{countryName(current.code, current.name)}</p>
+          <p className="text-[11px] font-bold tracking-widest text-primary">
+            {counts[current.code] ?? 0} CREATOR{(counts[current.code] ?? 0) === 1 ? "" : "S"} IN THIS COUNTRY
+          </p>
+          <p className="text-[10px] text-muted-foreground text-center max-w-[260px]">
+            Country only — a creator's exact location is never shown.
+          </p>
+        </div>
+      ) : (
+      <>
       <p className="text-center text-[10px] font-bold tracking-widest text-muted-foreground pb-2">
         {totalCreators} CREATOR{totalCreators === 1 ? "" : "S"} WORLDWIDE
         {current.code !== "GLOBAL" && (
@@ -250,6 +274,8 @@ const GlobePicker = ({ selected, onSelect, onClose }: GlobePickerProps) => {
           );
         })}
       </div>
+      </>
+      )}
     </div>
   );
 };

@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
   CheckCircle, XCircle, Clock, TrendingUp, Percent, Mail, Camera, FileText,
-  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight,
+  Activity, Cpu, HardDrive, Lightbulb, Zap, Target, ChevronRight, Globe,
 } from "lucide-react";
+import GlobePicker from "@/components/GlobePicker";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
@@ -27,6 +28,7 @@ interface CreatorRow {
   email: string | null;
   role: string;
   created_at: string;
+  country: string | null;
 }
 
 // Clean-slate mock data — all stats start at 0 for production launch
@@ -146,12 +148,13 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [liveCreators, setLiveCreators] = useState<CreatorRow[]>([]);
   const [creatorsLoading, setCreatorsLoading] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<CreatorRow | null>(null);
+  const [globeCreator, setGlobeCreator] = useState<CreatorRow | null>(null);
 
   const fetchLiveCreators = async () => {
     setCreatorsLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("user_id, display_name, email, role, created_at")
+      .select("user_id, display_name, email, role, created_at, country")
       .order("created_at", { ascending: false });
     if (!error && data) setLiveCreators(data as CreatorRow[]);
     setCreatorsLoading(false);
@@ -436,6 +439,16 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                       : c.role === "admin" ? "bg-gold/10 text-gold border border-gold/30"
                       : "bg-secondary text-muted-foreground border border-border"
                     }`}>{c.role.toUpperCase()}</span>
+                    {c.country && (
+                      <span
+                        role="button"
+                        aria-label={`Show ${c.display_name || "creator"}'s country on the globe`}
+                        onClick={(e) => { e.stopPropagation(); setGlobeCreator(c); }}
+                        className="p-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:scale-95 transition-all"
+                      >
+                        <Globe className="w-3.5 h-3.5" />
+                      </span>
+                    )}
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                 ))}
@@ -817,6 +830,17 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <Mail className="w-3 h-3" /> DTT Support: dropthatthingmedia@gmail.com
         </a>
       </div>
+
+      {/* Creator country globe pop-up (country only, never exact location) */}
+      {globeCreator?.country && (
+        <GlobePicker
+          selected={globeCreator.country}
+          focusCountry={globeCreator.country}
+          focusName={globeCreator.display_name ?? "creator"}
+          onSelect={() => {}}
+          onClose={() => setGlobeCreator(null)}
+        />
+      )}
     </div>
   );
 };
