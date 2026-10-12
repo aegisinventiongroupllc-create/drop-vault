@@ -9,7 +9,7 @@
 - DB: transactions table has entry_tax and platform_commission columns — never lump them together.
 
 ## Memories
-- [Revenue Model](mem://business/revenue-model) — Creator payout splits and 97% Power Week rules
+- [Revenue Model](mem://business/revenue-model) — 90/10 base, 95/5 Power Week for 7 days, admin Men/Women records
 - [Dual-Bucket Revenue](mem://economy/dual-bucket-revenue) — Tax-then-split formula with separate entry_tax and platform_commission
 - [Age Verification](mem://constraints/age-verification) — Mandatory 18+ splash screen and legal waiver
 - [Creator Profiles](mem://features/creator-profiles) — Profile structure, trailers, and Vault Hub layout

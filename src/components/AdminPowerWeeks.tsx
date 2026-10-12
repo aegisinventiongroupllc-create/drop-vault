@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { POWER_WEEK_SPLIT } from "@/lib/paymentSplit";
 
@@ -42,13 +42,16 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
   const [message, setMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  const callRef = useRef(callFinance);
+  callRef.current = callFinance;
+
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await callFinance({ action: "power_weeks" });
+    const data = await callRef.current({ action: "power_weeks" });
     if (data?.error) setMessage(data.error);
     setRows(Array.isArray(data?.weeks) ? data.weeks : []);
     setLoading(false);
-  }, [callFinance]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -59,7 +62,7 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
   const markPaid = async (row: PowerWeekRow) => {
     if (!confirm(`Send ${money(row.creator_share)} to ${row.display_name ?? "this creator"} first. Mark this Power Week as PAID and move it to records?`)) return;
     setBusyId(row.id);
-    const data = await callFinance({ action: "power_week_mark_paid", id: row.id });
+    const data = await callRef.current({ action: "power_week_mark_paid", id: row.id });
     setMessage(data?.error ?? `Filed ${money(data.amount)} to records.`);
     setBusyId(null);
     load();
