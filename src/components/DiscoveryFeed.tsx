@@ -396,9 +396,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
               <button
                 onClick={onGlobeOpen}
                 aria-label="Pick a country"
-                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full pl-1.5 pr-3 py-1 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
+                className="flex items-center gap-2 bg-secondary/80 border border-border rounded-full pl-2 pr-3.5 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
               >
-                <MiniGlobe size={24} />
+                <MiniGlobe size={36} />
                 <span className="text-foreground">{!countryFilter || countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
               </button>
             )}
