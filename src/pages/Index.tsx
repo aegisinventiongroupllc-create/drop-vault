@@ -83,6 +83,7 @@ const Index = () => {
   const [showKnowYourCoins, setShowKnowYourCoins] = useState(false);
   const [hasSeenCoins, setHasSeenCoins] = useState(!!savedPrefs);
   const [activeTab, setActiveTab] = useState<Tab>(loadActiveTab);
+  const [creatorFeed, setCreatorFeed] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -385,11 +386,11 @@ const Index = () => {
   }
 
   // --- Creator flow ---
-  if (role === "creator") {
+  if (role === "creator" && !creatorFeed) {
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
     return (
-      <CreatorAnalyticsDashboard onBack={async () => {
+      <CreatorAnalyticsDashboard onFeed={() => setCreatorFeed(true)} onBack={async () => {
         await supabase.auth.signOut();
         localStorage.removeItem(STORAGE_KEY);
         setRole(null);
