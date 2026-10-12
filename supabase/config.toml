@@ -1,4 +1,7 @@
 project_id = "qptebakrgbjoxdlatloa"
 
-[functions.cryptocloud-webhook]
-verify_jwt = false
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.cryptocloud-webhook]
+    verify_jwt = false
