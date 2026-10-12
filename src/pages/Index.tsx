@@ -458,7 +458,7 @@ const Index = () => {
         <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
           <div className="flex items-center justify-between gap-1 py-2 max-w-lg mx-auto px-4">
             <div className="flex items-center gap-1">
-              {role === "customer" && (
+              {(role === "customer" || role === "creator") && (
                 <>
                   <button
                     onClick={() => setVault("women")}
