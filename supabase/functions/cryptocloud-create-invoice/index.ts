@@ -19,7 +19,7 @@ const MAX_CUSTOM_TOKENS = 500;
 
 const TOKEN_PACKAGES: Record<string, { amount_usd: number; tokens: number }> = {
   single: { amount_usd: 25, tokens: 1 },
-  bundle: { amount_usd: 101, tokens: 5 },
+  bundle: { amount_usd: 125, tokens: 5 },
 };
 
 const json = (body: unknown, status = 200) =>

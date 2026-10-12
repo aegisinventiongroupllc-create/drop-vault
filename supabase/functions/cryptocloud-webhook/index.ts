@@ -11,7 +11,7 @@ const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY")!;
 const MAX_TOKENS = 501;
 function expectedAmountsForTokens(tokens: number): number[] {
   if (tokens === 1) return [25];
-  if (tokens === 5) return [101];
+  if (tokens === 5) return [125];
   const amounts = [(tokens - 1) * 20 + 1];
   if (tokens === 501) amounts.push(10002); // "Legendary" $10,001 tier + $1 admin fee
   return amounts;
