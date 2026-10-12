@@ -274,6 +274,8 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
           );
         })}
       </div>
+      </>
+      )}
     </div>
   );
 };
