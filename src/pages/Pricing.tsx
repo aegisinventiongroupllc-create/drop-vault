@@ -43,9 +43,8 @@ const Pricing = () => (
         {plans.map((p) => (
           <div key={p.name} className={`relative rounded-2xl border-2 p-5 bg-card ${p.best ? "border-primary neon-glow-sm" : "border-border"}`}>
             {p.best && <span className="absolute top-0 right-0 rounded-bl-lg bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">BEST VALUE</span>}
-            <p className="font-semibold">{p.name}</p>
+        <p className="font-semibold">{p.name}</p>
             <p className="mt-2 text-3xl font-bold text-primary">${p.price}</p>
-            <p className="mt-2 text-xs text-muted-foreground">{p.note}</p>
           </div>
         ))}
       </div>
@@ -53,15 +52,6 @@ const Pricing = () => (
       <Button asChild className="w-full font-bold tracking-wider">
         <Link to="/" onClick={() => { sessionStorage.setItem("dtt_active_tab", "vaults"); sessionStorage.setItem("dtt_open_buy", "1"); }}>FILL YOUR VAULT</Link>
       </Button>
-
-      <section className="space-y-4">
-        {faqs.map(([q, a]) => (
-          <div key={q}>
-            <h2 className="text-sm font-bold">{q}</h2>
-            <p className="text-sm text-muted-foreground">{a}</p>
-          </div>
-        ))}
-      </section>
     </div>
     <LegalFooter />
   </div>
