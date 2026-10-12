@@ -49,6 +49,15 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   const [following, setFollowing] = useState(false);
   const [liked, setLiked] = useState(initiallyLiked);
   const [likeCount, setLikeCount] = useState(video.likes);
+  const [viewCount, setViewCount] = useState(video.views ?? 0);
+  const viewCounted = useRef(false);
+  useEffect(() => {
+    // Count one view per card mount, only for real uploaded media.
+    if (viewCounted.current || !video.id || !viewerId) return;
+    viewCounted.current = true;
+    setViewCount((v) => v + 1);
+    supabase.rpc("increment_media_view", { _media_id: video.id }).then(() => {});
+  }, [video.id, viewerId]);
   const [heartBusy, setHeartBusy] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -277,6 +286,10 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
           <Heart className="w-7 h-7" fill={liked ? "currentColor" : "none"} />
           <span className="text-xs">{formatCount(likeCount)}</span>
         </button>
+        <div className="flex flex-col items-center gap-1 text-foreground" aria-label={`${viewCount} views`}>
+          <Eye className="w-6 h-6" />
+          <span className="text-xs">{formatCount(viewCount)}</span>
+        </div>
         <button onClick={() => setShowComments(true)} className="flex flex-col items-center gap-1 text-foreground hover:text-primary active:scale-90 transition-all">
           <MessageCircle className="w-7 h-7" />
           <span className="text-[10px] font-bold">{isOwner ? "INBOX" : "DM"}</span>
