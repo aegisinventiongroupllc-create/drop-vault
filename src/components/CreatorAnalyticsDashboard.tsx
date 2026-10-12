@@ -11,6 +11,7 @@ import SuggestionBox from "@/components/SuggestionBox";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
+import { readVideoDuration, isTeaserTooLong, MAX_TEASER_SECONDS } from "@/lib/teaserGate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
@@ -357,6 +358,16 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
   const handleTeaserUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.type.startsWith("video/")) {
+      try {
+        const len = await readVideoDuration(file);
+        if (isTeaserTooLong(len)) {
+          toast.error(`Teasers can be up to ${MAX_TEASER_SECONDS} seconds. This one is ${Math.round(len)} seconds.`);
+          e.target.value = "";
+          return;
+        }
+      } catch { /* length unreadable — continue */ }
+    }
     const title = requireTitle();
     if (!title) { e.target.value = ""; return; }
     if (!authUserId) {
@@ -534,7 +545,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
         {!splitState.incentiveActive && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>Progress to next 500K milestone</span>
+              <span>Progress to next 100K milestone</span>
               <span>{splitState.followerCount.toLocaleString()} / {splitState.nextMilestone.toLocaleString()}</span>
             </div>
             <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
@@ -544,7 +555,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              Next Power Week available at 500,000 followers — recurs every additional 500K (7-day 95/5 split)
+              Next Power Week starts at 100,000 followers — repeats every additional 100K (7-day 95/5 split)
             </p>
           </div>
         )}
@@ -557,7 +568,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
             <Lightbulb className="w-4 h-4 text-gold" />
             <h4 className="text-xs font-bold text-foreground">Strategy Tip</h4>
           </div>
-          <p className="text-[10px] text-muted-foreground">Upload a 15-sec teaser with audio, lock your full content behind a paywall.</p>
+          <p className="text-[10px] text-muted-foreground">Upload a teaser up to 1 minute. Customers watch the first half free, then unlock you with 1 Bit-Token to see the rest.</p>
         </div>
       </div>
 
@@ -1046,7 +1057,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false }: { onBack: (
                   </div>
                   <div className="space-y-2">
                     {teasers.length === 0
-                      ? <p className="text-xs text-muted-foreground text-center py-4">No teasers yet. Add a title and upload your first 15-sec teaser above.</p>
+                      ? <p className="text-xs text-muted-foreground text-center py-4">No teasers yet. Add a title and upload your first teaser (up to 1 minute) above.</p>
                       : teasers.map((m) => renderRow(m, "text-primary"))}
                   </div>
                 </div>

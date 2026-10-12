@@ -11,6 +11,8 @@ import type { VaultType } from "@/lib/tokenEconomy";
 import { toggleHeart } from "@/hooks/useHearts";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import MiniGlobe from "@/components/MiniGlobe";
+import BuyTokensModal from "@/components/BuyTokensModal";
+import { teaserGateTime } from "@/lib/teaserGate";
 
 interface VideoItem {
   id: string;
@@ -38,7 +40,7 @@ const MOCK_VIDEOS: VideoItem[] = [];
 export { MOCK_VIDEOS };
 export type { VideoItem };
 
-const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { video: VideoItem; onCreatorClick: (name: string) => void; initiallyLiked: boolean; viewerId: string | null }) => {
+const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initiallyUnlocked, onUnlocked }: { video: VideoItem; onCreatorClick: (name: string) => void; initiallyLiked: boolean; viewerId: string | null; initiallyUnlocked: boolean; onUnlocked: (creatorId: string) => void }) => {
   const { toast } = useToast();
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState(false);
@@ -57,6 +59,41 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isRealTeaser = !!video.videoUrl;
+  const [unlocked, setUnlocked] = useState(initiallyUnlocked);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [showBuy, setShowBuy] = useState(false);
+  const gateFree = unlocked || isOwner;
+  useEffect(() => { setUnlocked(initiallyUnlocked); }, [initiallyUnlocked]);
+
+  const handleTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v || gateFree || gateOpen) return;
+    const stopAt = teaserGateTime(v.duration);
+    if (stopAt !== null && v.currentTime >= stopAt) {
+      v.pause();
+      setGateOpen(true);
+    }
+  };
+
+  const handleMakeMine = async () => {
+    if (!video.creatorId || unlocking) return;
+    if (!viewerId) { toast({ title: "Sign in to unlock", variant: "destructive" }); return; }
+    setUnlocking(true);
+    const { error } = await supabase.rpc("unlock_creator", { _creator_id: video.creatorId });
+    setUnlocking(false);
+    if (error) {
+      if (error.message?.includes("INSUFFICIENT_TOKENS")) { setShowBuy(true); return; }
+      if (error.message?.includes("ACCOUNT_LOCKED")) { toast({ title: "Account locked", variant: "destructive" }); return; }
+      toast({ title: "Unlock failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setUnlocked(true);
+    setGateOpen(false);
+    onUnlocked(video.creatorId);
+    toast({ title: `@${video.creator} added to your library`, description: "14 days of full access. Enjoy the rest of the teaser." });
+    videoRef.current?.play().catch(() => {});
+  };
 
   useEffect(() => { setLiked(initiallyLiked); }, [initiallyLiked]);
   useEffect(() => { setLikeCount(video.likes); }, [video.likes]);
@@ -86,8 +123,8 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (isVisible) { v.play().catch(() => {}); } else { v.pause(); }
-  }, [isVisible]);
+    if (isVisible && !gateOpen) { v.play().catch(() => {}); } else { v.pause(); }
+  }, [isVisible, gateOpen]);
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted;
@@ -168,8 +205,10 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
           ref={videoRef}
           src={video.videoUrl}
           className="absolute inset-0 w-full h-full object-cover"
-          loop
+          loop={gateFree}
           playsInline
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={() => { if (!gateFree) { setGateOpen(true); } }}
           muted={muted}
           preload="metadata"
         />
@@ -207,6 +246,23 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId }: { v
             Direct LTC payments · All sales final · Crypto irreversible
           </p>
         </div>
+      )}
+
+      {gateOpen && !gateFree && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background/70 backdrop-blur-xl px-6 text-center">
+          <ProfileAvatar config={video.creatorAvatar} creatorPhotoPath={video.creatorPhotoPath} label={video.creator} />
+          <h3 className="font-display text-2xl font-bold tracking-wider text-foreground">
+            {video.vault === "men" ? "MAKE HIM YOUR GUY" : "MAKE HER YOUR GIRL"}
+          </h3>
+          <p className="text-sm text-muted-foreground">Spend 1 Bit-Token to add @{video.creator} to your library, finish this teaser and watch the full vault for 14 days.</p>
+          <Button variant="neon" size="lg" className="text-base px-8" disabled={unlocking} onClick={handleMakeMine}>
+            {unlocking ? "UNLOCKING..." : "UNLOCK — 1 BIT-TOKEN"}
+          </Button>
+          <button className="text-xs text-muted-foreground underline" onClick={() => setGateOpen(false)}>Not now</button>
+        </div>
+      )}
+      {showBuy && (
+        <BuyTokensModal onClose={() => setShowBuy(false)} onPurchase={() => setShowBuy(false)} />
       )}
 
       <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-5">
@@ -299,6 +355,8 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
+  const [myUnlocks, setMyUnlocks] = useState<Set<string>>(new Set());
+  const addUnlock = useCallback((id: string) => setMyUnlocks((prev) => new Set(prev).add(id)), []);
 
   useEffect(() => {
     (async () => {
@@ -308,6 +366,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (!uid) return;
       const { data } = await supabase.from("creator_hearts").select("creator_id").eq("user_id", uid);
       setMyHearts(new Set((data ?? []).map((r) => r.creator_id)));
+      const { data: subs } = await supabase.from("subscriptions").select("creator_id")
+        .eq("customer_id", uid).gt("expires_at", new Date().toISOString());
+      setMyUnlocks(new Set((subs ?? []).map((r) => r.creator_id)));
     })();
   }, []);
 
@@ -340,8 +401,12 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           tags: Array.isArray((p as { tags?: string[] }).tags) ? (p as { tags?: string[] }).tags! : [],
         };
       });
-      const items: VideoItem[] = media.map((m) => {
-        const { data: pub } = supabase.storage.from("teasers").getPublicUrl(m.storage_path);
+      // Teaser files are private: only pass holders, creators and admins get short-lived links.
+      const { data: signed } = await supabase.storage.from("teasers")
+        .createSignedUrls(media.map((m) => m.storage_path), 60 * 60);
+      const urlMap: Record<string, string> = {};
+      (signed ?? []).forEach((s) => { if (s.path && s.signedUrl) urlMap[s.path] = s.signedUrl; });
+      const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path]).map((m) => {
         const prof = profMap[m.creator_id];
         const name = prof?.name || "creator";
         return {
@@ -358,7 +423,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           vault: prof?.side ?? "women",
           country: prof?.country || "GLOBAL",
           tags: prof?.tags ?? [],
-          videoUrl: pub.publicUrl,
+          videoUrl: urlMap[m.storage_path],
         };
       });
       // Most-followed creators first (top 20), rest shuffled for discovery
@@ -413,7 +478,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       <div className={`h-[100dvh] snap-y snap-mandatory overflow-y-auto bottom-nav-scroll-area ${hasVaultToggle ? "pt-[9rem]" : "pt-[7rem]"}`}>
         {filteredVideos.length > 0 ? (
           filteredVideos.map((video) => (
-            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} initiallyLiked={!!video.creatorId && myHearts.has(video.creatorId)} viewerId={viewerId} />
+            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} initiallyLiked={!!video.creatorId && myHearts.has(video.creatorId)} viewerId={viewerId} initiallyUnlocked={!!video.creatorId && myUnlocks.has(video.creatorId)} onUnlocked={addUnlock} />
           ))
         ) : (
           countryFilter && countryFilter !== "GLOBAL" ? (

@@ -225,6 +225,13 @@
       "when": 1791803427161,
       "tag": "0031_teaser_feed_requires_entry_pass",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791803867607,
+      "tag": "0032_lock_teaser_files_and_auto_power_week",
+      "breakpoints": true
     }
   ]
 }

@@ -177,6 +177,12 @@ const AdminPortal = () => {
         profileMap = Object.fromEntries((profs ?? []).map((p) => [p.user_id, { display_name: p.display_name, email: p.email }]));
       }
 
+      const teaserNames = (teaserList.data ?? []).filter((f) => f.name && !f.name.startsWith(".")).map((f) => f.name);
+      const { data: teaserSigned } = teaserNames.length
+        ? await supabase.storage.from("teasers").createSignedUrls(teaserNames, 60 * 60)
+        : { data: [] as { path: string | null; signedUrl: string }[] };
+      const teaserUrl: Record<string, string> = {};
+      (teaserSigned ?? []).forEach((t) => { if (t.path) teaserUrl[t.path] = t.signedUrl; });
       const media: MediaItem[] = [
         ...(vaultList.data ?? []).filter((f) => f.name && !f.name.startsWith(".")).map((f) => ({
           bucket: "vault" as const,
@@ -185,13 +191,12 @@ const AdminPortal = () => {
           created_at: f.created_at ?? "",
         })),
         ...(teaserList.data ?? []).filter((f) => f.name && !f.name.startsWith(".")).map((f) => {
-          const { data: pub } = supabase.storage.from("teasers").getPublicUrl(f.name);
           return {
             bucket: "teasers" as const,
             name: f.name,
             size: (f.metadata as { size?: number })?.size ?? 0,
             created_at: f.created_at ?? "",
-            publicUrl: pub.publicUrl,
+            publicUrl: teaserUrl[f.name],
           };
         }),
       ].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
