@@ -1,14 +1,14 @@
 // Token Economy Engine for DROPTHATTHING
 // Dual-Bucket Revenue: "Tax then Split" model
 // 1 Bit-Token = $25 USD invoice ($1 Admin Fee + $20 base + $4 card-processing allowance)
-// 5 Bit-Tokens = $101 USD invoice ($1 Admin Fee + $100 base)
+// 5 Bit-Tokens = $125 USD invoice ($1 Admin Fee + $100 base + $24 card-processing allowance)
 
 export const ADMIN_FEE_USD = 1; // Flat $1 goes to Admin_Profit_Vault
 export const TOKEN_BASE_VALUE_USD = 20; // Base value per token (after admin fee)
 export const TOKEN_INVOICE_USD = 25; // What the customer pays for 1 token
 export const BUNDLE_TOKENS = 5;
 export const BUNDLE_BASE_USD = 100; // 5 × $20
-export const BUNDLE_INVOICE_USD = 101; // $100 + $1 admin fee
+export const BUNDLE_INVOICE_USD = 125; // $100 + $1 admin fee + $24 processing allowance
 export const ENTRY_PASS_PRICE_USD = 20; // $20/year Vault Entry Pass (goes to the platform vault)
 export const ENTRY_PASS_DAYS = 365;
 export const PLATFORM_SPLIT_PERCENT = 10; // 10% of base goes to platform
