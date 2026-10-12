@@ -32,6 +32,11 @@ export default function CreatorEarningsBreakdown({ creatorId }: { creatorId: str
   const usd = (value: number) => Number(value).toLocaleString("en-US", { style: "currency", currency: "USD" });
   return <section className="border-t border-border py-5" aria-label="Detailed earnings">
     <h3 className="mb-4 text-base font-semibold text-foreground">Earnings breakdown</h3>
+    <div className="mb-4 rounded-lg border border-border bg-card p-4 text-xs leading-relaxed text-muted-foreground">
+      <p className="mb-2 font-semibold text-foreground">How the money works</p>
+      <p>Every Bit-Token a customer spends on you is worth <span className="font-semibold text-foreground">$20</span>. You keep <span className="font-semibold text-gold">90% — $18 per token</span>. The platform keeps $2 (10%), plus a separate $1 fee the customer pays at checkout — that fee never comes out of your share.</p>
+      <p className="mt-2">Customers pay $25 per token at checkout; the extra $4 covers card-processing costs, so your $18 stays whole. Founding creators (first 10 per country) earn <span className="font-semibold text-gold">92% — $18.40 per token</span> for their first year, and a Power Week pays 97%.</p>
+    </div>
     {loading ? <p className="text-sm text-muted-foreground" role="status">Loading earnings…</p>
       : failed ? <div><p className="text-sm text-destructive">Earnings couldn’t load.</p><Button variant="ghost" onClick={() => setRetry((value) => value + 1)}>Try again</Button></div>
       : rows.length === 0 ? <p className="text-sm text-muted-foreground">No completed earnings yet.</p>

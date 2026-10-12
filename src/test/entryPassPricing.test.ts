@@ -26,8 +26,8 @@ describe("Vault Entry Pass economy", () => {
   });
 });
 
-// Bundle pricing: $1 fee is charged once across the bundle, keeping the 5-token
-// pack the best deal (5 × $25 would be $125, not $101).
+// Bundle pricing: 5 × $25 = $125, with the $1 fee charged once and a $4/token
+// card-processing allowance built in.
 describe("Bit-Token pricing", () => {
   it("charges $25 for a single Bit-Token", () => {
     expect(TOKEN_INVOICE_USD).toBe(25);
@@ -40,9 +40,14 @@ describe("Bit-Token pricing", () => {
     expect(split.processingAllowance).toBe(4);
   });
 
-  it("keeps the 5-token bundle at $101 with one fee", () => {
+  it("prices the 5-token bundle at $125 with one fee", () => {
     expect(BUNDLE_TOKENS).toBe(5);
-    expect(BUNDLE_INVOICE_USD).toBe(101);
+    expect(BUNDLE_INVOICE_USD).toBe(125);
+  });
+
+  it("builds a $24 card-fee allowance into the bundle", () => {
+    const split = calculateTokenPurchaseSplit(BUNDLE_INVOICE_USD, BUNDLE_TOKENS);
+    expect(split.processingAllowance).toBe(24);
   });
 
   it("splits every $20 token base 90/10 with a $1 fee", () => {
