@@ -53,7 +53,7 @@ interface MarkerProps {
   onHover: (code: string | null) => void;
 }
 
-// Small shimmering bright white light per country; brightness reflects creator count.
+// Warm golden "city lights" per country, like Earth at night; brightness reflects creator count.
 const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: MarkerProps) => {
   const ref = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
@@ -63,6 +63,15 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
   const size = 0.016 + intensity * 0.026;
   const hasCreators = count > 0;
   const phase = useMemo(() => Math.random() * Math.PI * 2, []);
+  // Cluster of small satellite lights around the main one, like a city sprawl.
+  const satellites = useMemo(() => {
+    const n = hasCreators ? 3 + Math.round(intensity * 4) : 2;
+    return Array.from({ length: n }, (_, i) => {
+      const a = (i / n) * Math.PI * 2 + phase;
+      const d = size * (2.2 + (i % 3) * 1.4);
+      return { x: Math.cos(a) * d, y: Math.sin(a) * d, s: size * (0.35 + ((i * 7) % 5) * 0.12) };
+    });
+  }, [hasCreators, intensity, size, phase]);
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime * 2.6 + phase;
@@ -74,7 +83,7 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
 
   return (
     <group position={pos}>
-      {/* Bright white light core */}
+      {/* Glowing golden core */}
       <mesh
         ref={ref}
         onClick={(e) => { e.stopPropagation(); onSelect(code); }}
@@ -82,9 +91,16 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
         onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
       >
         <sphereGeometry args={[size, 12, 12]} />
-        <meshBasicMaterial color="#ffffff" />
+        <meshBasicMaterial color="#ffd27a" />
       </mesh>
-      {/* Shimmering halo */}
+      {/* Satellite city lights */}
+      {satellites.map((s, i) => (
+        <mesh key={i} position={[s.x, s.y, 0]}>
+          <sphereGeometry args={[s.s, 8, 8]} />
+          <meshBasicMaterial color="#ffb54d" transparent opacity={0.9} blending={THREE.AdditiveBlending} depthWrite={false} />
+        </mesh>
+      ))}
+      {/* Warm shimmering halo */}
       <mesh
         ref={glowRef}
         onClick={(e) => { e.stopPropagation(); onSelect(code); }}
@@ -92,7 +108,7 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
         onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
       >
         <sphereGeometry args={[size * 2.4, 16, 16]} />
-        <meshBasicMaterial ref={glowMat} color="#ffffff" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial ref={glowMat} color="#ff9d3c" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
     </group>
   );
