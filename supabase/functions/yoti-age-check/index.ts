@@ -9,7 +9,7 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const sdkId = Deno.env.get("YOTI_SDK_ID") ?? "";
-const pem = (Deno.env.get("YOTI_PEM_KEY") ?? "").replace(/\\n/g, "\n");
+const pem = (Deno.env.get("YOTI_PRIVATE_KEY") ?? Deno.env.get("YOTI_PEM_KEY") ?? "").replace(/\\n/g, "\n");
 const sandbox = (Deno.env.get("YOTI_ENV") ?? "sandbox") !== "live";
 const BASE = sandbox ? "https://api.yoti.com/sandbox/idverify/v1" : "https://api.yoti.com/idverify/v1";
 
