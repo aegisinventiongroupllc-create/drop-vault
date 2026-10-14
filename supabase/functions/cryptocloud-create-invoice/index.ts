@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
         order_id: orderId,
         add_fields: {
           time_to_pay: { hours: 2, minutes: 0 },
-          available_currencies: ["LTC", "BTC", "ETH", "USDT_TRC20", "USDT_ERC20"],
+          available_currencies: ["LTC", "USDT_TRC20"],
           cryptocurrency: "LTC",
         },
       }),
