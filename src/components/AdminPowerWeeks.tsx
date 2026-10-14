@@ -47,9 +47,13 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await callRef.current({ action: "power_weeks" });
-    if (data?.error) setMessage(data.error);
-    setRows(Array.isArray(data?.weeks) ? data.weeks : []);
+    try {
+      const data = await callRef.current({ action: "power_weeks" });
+      if (data?.error) setMessage(data.error);
+      setRows(Array.isArray(data?.weeks) ? data.weeks : []);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Couldn't load Power Weeks.");
+    }
     setLoading(false);
   }, []);
 
@@ -62,8 +66,12 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
   const markPaid = async (row: PowerWeekRow) => {
     if (!confirm(`Send ${money(row.creator_share)} to ${row.display_name ?? "this creator"} first. Mark this Power Week as PAID and move it to records?`)) return;
     setBusyId(row.id);
-    const data = await callRef.current({ action: "power_week_mark_paid", id: row.id });
-    setMessage(data?.error ?? `Filed ${money(data.amount)} to records.`);
+    try {
+      const data = await callRef.current({ action: "power_week_mark_paid", id: row.id });
+      setMessage(data?.error ?? `Filed ${money(data.amount)} to records.`);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Couldn't file this Power Week.");
+    }
     setBusyId(null);
     load();
   };
