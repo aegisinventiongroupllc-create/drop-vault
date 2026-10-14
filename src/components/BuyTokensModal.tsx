@@ -219,7 +219,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
 
             <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
               <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYMENT METHOD</p>
-              <p className="text-2xl font-bold text-primary">LTC · BTC · ETH · USDT</p>
+              <p className="text-2xl font-bold text-primary">LTC · USDT</p>
               <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
             </div>
 
