@@ -211,48 +211,104 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
 
         {step === "payment" && (
           <div className="p-4 space-y-4">
-            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">PAY WITH CRYPTO</h3>
+            <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">CHOOSE HOW TO PAY</h3>
+
+            {/* Payment method chooser */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setPayMethod("crypto")}
+                className={`rounded-xl border-2 p-3 text-center transition-all ${payMethod === "crypto" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
+              >
+                <p className="text-sm font-bold text-foreground">CRYPTO</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">LTC · USDT</p>
+              </button>
+              <button
+                onClick={() => setPayMethod("card")}
+                className={`rounded-xl border-2 p-3 text-center transition-all ${payMethod === "card" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
+              >
+                <p className="text-sm font-bold text-foreground">DEBIT / CREDIT CARD</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Visa · Mastercard · Discover · JCB</p>
+              </button>
+            </div>
+
+            {/* Order summary — shown for both methods */}
+            <div className="rounded-xl border border-border bg-secondary/50 p-3 space-y-1">
+              <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""} @ $${TOKEN_INVOICE_USD}`}</span>
+                <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : quantity * TOKEN_INVOICE_USD}</span>
+              </div>
+              {!isEntryPass && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Transaction fee</span>
+                  <span className="text-foreground">${TRANSACTION_FEE_USD}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-border pt-1 text-sm font-bold">
+                <span className="text-foreground">Total charged today</span>
+                <span className="text-primary">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
+              </div>
+              {!isEntryPass && <p className="text-[10px] text-muted-foreground">One-time charge. No subscription, no recurring billing.</p>}
+            </div>
+
             {error && (
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-destructive">{error}</p>
               </div>
             )}
 
-            <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYMENT METHOD</p>
-              <p className="text-2xl font-bold text-primary">LTC · USDT</p>
-              <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
-            </div>
-
-            {cardEnabled ? (
-              <Button variant="outline" className="w-full" disabled={!allAgreed} onClick={handleCardCheckout}>
-                PAY WITH CARD (CCBILL)
-              </Button>
-            ) : (
-              <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center opacity-70">
-                <p className="text-sm font-bold text-muted-foreground">CREDIT / DEBIT CARD</p>
-                <p className="text-[10px] text-gold font-bold tracking-wider">COMING SOON</p>
-              </div>
+            {payMethod === "crypto" && (
+              <>
+                <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
+                  <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYING WITH</p>
+                  <p className="text-2xl font-bold text-primary">LTC · USDT</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
+                </div>
+                <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
+                  <p className="text-[10px] text-muted-foreground">You'll be redirected to CryptoCloud's secure checkout to complete payment.</p>
+                  <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final.</p>
+                </div>
+              </>
             )}
 
-            {cardEnabled && (
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberCard}
-                  onChange={(e) => setRememberCard(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-primary shrink-0"
-                />
-                <span className="text-[10px] text-muted-foreground leading-relaxed">
-                  Remember my card for future purchases (optional). Your card is stored securely by our payment processor — never on DTT servers.
-                </span>
-              </label>
-            )}
+            {payMethod === "card" && (
+              <>
+                <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 space-y-2 neon-glow-sm">
+                  <p className="text-[10px] font-bold tracking-wider text-center text-muted-foreground">CARD PAYMENTS — PROCESSED BY CCBILL</p>
+                  <ul className="space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
+                    <li>• Your card is charged <span className="text-foreground font-semibold">once</span> for the total above. No subscription, no recurring billing, and you are not enrolled in any trial.</li>
+                    <li>• The charge appears on your card statement as <span className="text-foreground font-semibold">"CCBill.com *DropThatThing"</span> — discreet, with no mention of content type.</li>
+                    <li>• Payments are processed over an encrypted connection by <span className="text-foreground font-semibold">CCBill</span>, our authorized sales agent. Your card details are handled by CCBill and are never stored on DTT servers.</li>
+                    <li>• This purchase is for <span className="text-foreground font-semibold">digital goods delivered immediately</span>: {isEntryPass ? "your Vault Entry Pass activates" : "Bit-Tokens credit"} as soon as payment is confirmed. <span className="text-foreground font-semibold">All sales are final and non-refundable</span> once credit is delivered.</li>
+                    <li>• Strictly 18+. You confirm the card is yours and the funds are lawful.</li>
+                    <li>• Disputed or unauthorized charges (chargebacks) can result in permanent account suspension.</li>
+                    <li>• Questions before you buy? Contact <span className="text-foreground font-semibold">dropthatthingmedia@gmail.com</span> — we answer before and after purchase.</li>
+                  </ul>
+                </div>
 
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-              <p className="text-[10px] text-muted-foreground">You'll be redirected to CryptoCloud's secure checkout to complete payment.</p>
-              <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final.</p>
-            </div>
+                {cardEnabled ? (
+                  <>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rememberCard}
+                        onChange={(e) => setRememberCard(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 accent-primary shrink-0"
+                      />
+                      <span className="text-[10px] text-muted-foreground leading-relaxed">
+                        Remember my card for future purchases (optional). Your card is stored securely by CCBill — never on DTT servers.
+                      </span>
+                    </label>
+                    <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleCardCheckout}>PAY WITH CARD — ${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</Button>
+                  </>
+                ) : (
+                  <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center">
+                    <p className="text-sm font-bold text-muted-foreground">CARD CHECKOUT ACTIVATING</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">Card payments unlock as soon as our card processor finishes account approval. Crypto payment works right now.</p>
+                  </div>
+                )}
+              </>
+            )}
 
             <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
               <input
@@ -264,7 +320,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <span className="text-[10px] text-muted-foreground leading-relaxed">
                 I confirm I am 18+, the funds are mine and lawful, and I accept the
                 <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
-                I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span>.
+                {payMethod === "crypto" ? <> I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span>.</> : <> I understand card charges are <span className="text-foreground font-semibold">one-time and all sales are final</span> once digital goods are delivered.</>}
               </span>
             </label>
 
@@ -280,7 +336,9 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               </span>
             </label>
 
-            <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleStartCheckout}>GENERATE PAYMENT</Button>
+            {payMethod === "crypto" && (
+              <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleStartCheckout}>GENERATE PAYMENT — ${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</Button>
+            )}
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>
         )}
