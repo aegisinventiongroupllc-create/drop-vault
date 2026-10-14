@@ -151,8 +151,12 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const deleteConsent = async (id: string) => {
     if (!confirm("Delete this consent record permanently?")) return;
     setDeletingConsentId(id);
-    const data = await callFinance({ action: "delete_consent", id });
-    if (!data?.error) setLegalLogs((prev) => prev.filter((l: any) => l.id !== id));
+    try {
+      const data = await callFinance({ action: "delete_consent", id });
+      if (!data?.error) setLegalLogs((prev) => prev.filter((l: any) => l.id !== id));
+    } catch {
+      // Keep the panel usable if the delete fails.
+    }
     setDeletingConsentId(null);
   };
 
