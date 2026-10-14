@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Loader2, CreditCard, Coins, MessageSquare, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { calculateRequestTokens, TOKEN_VALUE_USD, ADMIN_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
+import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
 const TIERS = [
@@ -53,6 +53,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     ? (bidTokens ?? 0) * TOKEN_BASE_VALUE_USD
     : (tier?.price ?? 0);
   const tokenCalc = calculateRequestTokens(activePrice);
+  const split = calculateCustomRequestSplit(activePrice);
+  const totalDue = split.invoiceTotal;
 
   // Edge functions that return a non-2xx status give a generic message — dig out the real one.
   const readFunctionError = async (fnError: any): Promise<string> => {
