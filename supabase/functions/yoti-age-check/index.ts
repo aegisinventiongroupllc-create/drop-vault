@@ -9,13 +9,21 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const sdkId = Deno.env.get("YOTI_SDK_ID") ?? "";
-const pem = (Deno.env.get("YOTI_PRIVATE_KEY") ?? Deno.env.get("YOTI_PEM_KEY") ?? "").replace(/\\n/g, "\n");
+// Rebuild the PEM so keys pasted on one line (spaces instead of line breaks) still parse.
+const normalizePem = (raw: string) => {
+  const s = raw.replace(/\\n/g, "\n").trim();
+  const m = s.match(/-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/);
+  if (!m) return s;
+  const body = m[2].replace(/\s+/g, "");
+  return `-----BEGIN ${m[1]}-----\n${body.match(/.{1,64}/g)!.join("\n")}\n-----END ${m[1]}-----\n`;
+};
+const pem = normalizePem(Deno.env.get("YOTI_PRIVATE_KEY") || Deno.env.get("YOTI_PEM_KEY") || "");
 const sandbox = (Deno.env.get("YOTI_ENV") ?? "sandbox") !== "live";
 const BASE = sandbox ? "https://api.yoti.com/sandbox/idverify/v1" : "https://api.yoti.com/idverify/v1";
 
 async function yoti(method: "GET" | "POST", path: string, body?: unknown, raw = false) {
   const sep = path.includes("?") ? "&" : "?";
-  const endpoint = `${path}${sep}sdkId=${sdkId}&nonce=${crypto.randomUUID()}&timestamp=${Math.floor(Date.now() / 1000)}`;
+  const endpoint = `${path}${sep}sdkId=${sdkId}&nonce=${crypto.randomUUID()}&timestamp=${Date.now()}`;
   const payload = body ? JSON.stringify(body) : "";
   let msg = `${method}&${endpoint}`;
   if (payload) msg += `&${Buffer.from(payload).toString("base64")}`;
@@ -103,7 +111,7 @@ Deno.serve(async (req) => {
 
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
-    console.error(e);
+    console.error("yoti error", (e as Error)?.message);
     return json({ error: "Age check failed." }, 500);
   }
 });
