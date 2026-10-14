@@ -112,15 +112,23 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
   const fetchFinance = async () => {
     setFinanceLoading(true);
-    const data = await callFinance({ action: "overview" });
-    if (!data?.error) setFinance(data as FinanceOverview);
+    try {
+      const data = await callFinance({ action: "overview" });
+      if (!data?.error) setFinance(data as FinanceOverview);
+    } catch {
+      // Keep the panel usable if the finance call fails.
+    }
     setFinanceLoading(false);
   };
 
   const fetchRequests = async () => {
     setRequestsLoading(true);
-    const data = await callFinance({ action: "list_requests" });
-    setRequests(Array.isArray(data?.requests) ? data.requests : []);
+    try {
+      const data = await callFinance({ action: "list_requests" });
+      setRequests(Array.isArray(data?.requests) ? data.requests : []);
+    } catch {
+      setRequests([]);
+    }
     setRequestsLoading(false);
   };
 
@@ -128,10 +136,14 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     if (!confirm("Mark all pending creator balances as PAID? Send the LTC from your wallet first — this records the payout and resets pending balances.")) return;
     setPayAllBusy(true);
     setPayAllMessage(null);
-    const data = await callFinance({ action: "pay_all" });
-    if (data?.error) setPayAllMessage(data.error);
-    else if (data?.ok === false) setPayAllMessage(data.message);
-    else setPayAllMessage(`Recorded ${money(data.total)} paid to ${data.details?.length ?? 0} creator(s).`);
+    try {
+      const data = await callFinance({ action: "pay_all" });
+      if (data?.error) setPayAllMessage(data.error);
+      else if (data?.ok === false) setPayAllMessage(data.message);
+      else setPayAllMessage(`Recorded ${money(data.total)} paid to ${data.details?.length ?? 0} creator(s).`);
+    } catch (e) {
+      setPayAllMessage(e instanceof Error ? e.message : "Payout recording failed.");
+    }
     setPayAllBusy(false);
     fetchFinance();
   };
