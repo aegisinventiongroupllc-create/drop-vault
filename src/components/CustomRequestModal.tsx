@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Loader2, CreditCard, Coins, MessageSquare, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { calculateRequestTokens, TOKEN_VALUE_USD, ADMIN_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
+import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
 const TIERS = [
@@ -53,6 +53,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     ? (bidTokens ?? 0) * TOKEN_BASE_VALUE_USD
     : (tier?.price ?? 0);
   const tokenCalc = calculateRequestTokens(activePrice);
+  const split = calculateCustomRequestSplit(activePrice);
+  const totalDue = split.invoiceTotal;
 
   // Edge functions that return a non-2xx status give a generic message — dig out the real one.
   const readFunctionError = async (fnError: any): Promise<string> => {
@@ -72,7 +74,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     setStep("processing");
     setError(null);
     try {
-      const invoiceTotal = activePrice + ADMIN_FEE_USD;
+      const invoiceTotal = totalDue;
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: useCustomBid
           ? { kind: "custom_request", bid_tokens: bidTokens }
@@ -98,8 +100,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             description,
             amount_usd: data?.amount_usd ?? invoiceTotal,
             tokens: data?.tokens ?? tokenCalc.total,
-            creator_share_usd: Math.round(activePrice * 0.9 * 100) / 100,
-            platform_share_usd: Math.round((activePrice * 0.1 + ADMIN_FEE_USD) * 100) / 100,
+            creator_share_usd: Math.round(split.creatorShare * 100) / 100,
+            platform_share_usd: Math.round(split.totalPlatformRevenue * 100) / 100,
             status: "pending",
             payment_id: data?.invoice_id ?? null,
           });
@@ -191,7 +193,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               {customBidTokens && Number(customBidTokens) > 0 && (
                 <p className="text-[10px] text-gold mt-1">
-                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee
+                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
                 </p>
               )}
             </div>
@@ -283,9 +285,13 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-muted-foreground">DTT Flat Fee</span>
                 <span className="text-gold font-medium">+${ADMIN_FEE_USD}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Card processing cover</span>
+                <span className="text-gold font-medium">+${CUSTOM_REQUEST_PROCESSING_FEE_USD}</span>
+              </div>
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="text-foreground font-semibold">Total</span>
-                <span className="text-primary font-bold text-lg">${activePrice + ADMIN_FEE_USD}</span>
+                <span className="text-primary font-bold text-lg">${totalDue}</span>
               </div>
             </div>
 
@@ -329,7 +335,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-lg font-bold text-primary">{counterOffer.tokens} BT</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                = ${counterOffer.tokens * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee
+                = ${counterOffer.tokens * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
               </p>
             </div>
 
@@ -349,8 +355,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
 
             <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">TOTAL DUE</p>
-              <p className="text-2xl font-bold text-primary">${activePrice + ADMIN_FEE_USD}</p>
-              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} DTT Fee</p>
+              <p className="text-2xl font-bold text-primary">${totalDue}</p>
+              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} DTT Fee + ${CUSTOM_REQUEST_PROCESSING_FEE_USD} processing cover</p>
             </div>
 
             {error && (
@@ -370,7 +376,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                   <CreditCard className="w-5 h-5 text-primary" />
                   <p className="text-sm font-bold text-foreground">CREDIT / DEBIT CARD</p>
                 </div>
-                <p className="text-xs text-primary font-semibold">Pay ${activePrice + ADMIN_FEE_USD}</p>
+                <p className="text-xs text-primary font-semibold">Pay ${totalDue}</p>
                 <p className="text-[10px] text-muted-foreground mt-1">Visa / MC / Apple Pay · KYC may be required</p>
               </button>
             </div>

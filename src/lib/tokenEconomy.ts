@@ -19,6 +19,9 @@ export const UNLOCK_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days (336 hour
 export const PLATFORM_CONVENIENCE_FEE_TOKENS = 1; // +1 BT surcharge on custom requests
 export const LOYALTY_TOKENS_MONTHLY = 5;
 export const CUSTOM_REQUEST_ADMIN_FEE_USD = 1; // Flat $1 on custom requests too
+export const CUSTOM_REQUEST_PROCESSING_FEE_USD = 4; // Card-processing cover, paid by the customer
+export const CUSTOM_REQUEST_CREATOR_PERCENT = 85; // Custom requests split 85/15
+export const CUSTOM_REQUEST_PLATFORM_PERCENT = 15;
 
 // Legacy exports for backward compat
 export const TOKEN_VALUE_USD = TOKEN_INVOICE_USD;
@@ -91,20 +94,23 @@ export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: n
 
 /**
  * Custom Request split ($500–$10,001):
- * Flat $1 admin fee added to invoice, then 10% of base amount to platform
+ * Customer pays base + $1 DTT fee + $4 card-processing cover.
+ * The base splits 85% creator / 15% platform; fees never touch the creator share.
  */
 export function calculateCustomRequestSplit(baseAmount: number) {
   const adminFee = CUSTOM_REQUEST_ADMIN_FEE_USD;
-  const invoiceTotal = baseAmount + adminFee;
-  const platformShare = baseAmount * (PLATFORM_SPLIT_PERCENT / 100);
-  const creatorShare = baseAmount * (CREATOR_SPLIT_PERCENT / 100);
+  const processingFee = CUSTOM_REQUEST_PROCESSING_FEE_USD;
+  const invoiceTotal = baseAmount + adminFee + processingFee;
+  const platformShare = baseAmount * (CUSTOM_REQUEST_PLATFORM_PERCENT / 100);
+  const creatorShare = baseAmount * (CUSTOM_REQUEST_CREATOR_PERCENT / 100);
   return {
     invoiceTotal,
     adminFee,
+    processingFee,
     baseAmount,
     platformShare,
     creatorShare,
-    totalPlatformRevenue: adminFee + platformShare,
+    totalPlatformRevenue: adminFee + processingFee + platformShare,
   };
 }
 
