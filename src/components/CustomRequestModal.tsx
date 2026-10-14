@@ -74,7 +74,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     setStep("processing");
     setError(null);
     try {
-      const invoiceTotal = activePrice + ADMIN_FEE_USD;
+      const invoiceTotal = totalDue;
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: useCustomBid
           ? { kind: "custom_request", bid_tokens: bidTokens }
@@ -100,8 +100,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             description,
             amount_usd: data?.amount_usd ?? invoiceTotal,
             tokens: data?.tokens ?? tokenCalc.total,
-            creator_share_usd: Math.round(activePrice * 0.9 * 100) / 100,
-            platform_share_usd: Math.round((activePrice * 0.1 + ADMIN_FEE_USD) * 100) / 100,
+            creator_share_usd: Math.round(split.creatorShare * 100) / 100,
+            platform_share_usd: Math.round(split.totalPlatformRevenue * 100) / 100,
             status: "pending",
             payment_id: data?.invoice_id ?? null,
           });
