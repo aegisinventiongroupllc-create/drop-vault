@@ -193,7 +193,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               {customBidTokens && Number(customBidTokens) > 0 && (
                 <p className="text-[10px] text-gold mt-1">
-                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee
+                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
                 </p>
               )}
             </div>
@@ -335,7 +335,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-lg font-bold text-primary">{counterOffer.tokens} BT</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                = ${counterOffer.tokens * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee
+                = ${counterOffer.tokens * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
               </p>
             </div>
 

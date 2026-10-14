@@ -12,6 +12,7 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // ---- Server-side price catalog. The browser may only pick an item, never a price. ----
 const ADMIN_FEE_USD = 1;
+const CUSTOM_REQUEST_PROCESSING_FEE_USD = 4; // card-processing cover, paid by the customer
 const TOKEN_BASE_VALUE_USD = 20;
 const CONVENIENCE_FEE_TOKENS = 1;
 const CUSTOM_TIER_PRICES = [500, 1000, 2500, 5000, 10001];
@@ -65,7 +66,7 @@ function priceRequest(body: any): { amount_usd: number; tokens: number } | { err
     if (base === null) return { error: "Missing request price" };
 
     return {
-      amount_usd: base + ADMIN_FEE_USD,
+      amount_usd: base + ADMIN_FEE_USD + CUSTOM_REQUEST_PROCESSING_FEE_USD,
       tokens: Math.round(base / TOKEN_BASE_VALUE_USD) + CONVENIENCE_FEE_TOKENS,
     };
   }
