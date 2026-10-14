@@ -285,9 +285,13 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-muted-foreground">DTT Flat Fee</span>
                 <span className="text-gold font-medium">+${ADMIN_FEE_USD}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Card processing cover</span>
+                <span className="text-gold font-medium">+${CUSTOM_REQUEST_PROCESSING_FEE_USD}</span>
+              </div>
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="text-foreground font-semibold">Total</span>
-                <span className="text-primary font-bold text-lg">${activePrice + ADMIN_FEE_USD}</span>
+                <span className="text-primary font-bold text-lg">${totalDue}</span>
               </div>
             </div>
 
@@ -351,8 +355,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
 
             <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">TOTAL DUE</p>
-              <p className="text-2xl font-bold text-primary">${activePrice + ADMIN_FEE_USD}</p>
-              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} DTT Fee</p>
+              <p className="text-2xl font-bold text-primary">${totalDue}</p>
+              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} DTT Fee + ${CUSTOM_REQUEST_PROCESSING_FEE_USD} processing cover</p>
             </div>
 
             {error && (
@@ -372,7 +376,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                   <CreditCard className="w-5 h-5 text-primary" />
                   <p className="text-sm font-bold text-foreground">CREDIT / DEBIT CARD</p>
                 </div>
-                <p className="text-xs text-primary font-semibold">Pay ${activePrice + ADMIN_FEE_USD}</p>
+                <p className="text-xs text-primary font-semibold">Pay ${totalDue}</p>
                 <p className="text-[10px] text-muted-foreground mt-1">Visa / MC / Apple Pay · KYC may be required</p>
               </button>
             </div>
