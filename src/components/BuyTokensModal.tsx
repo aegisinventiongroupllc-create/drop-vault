@@ -8,7 +8,7 @@ import {
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
-const FINAL_SALE_TEXT = "I agree that purchasing Bit-Tokens grants an immediate digital license. All sales are final and non-refundable once tokens are credited to my account.";
+const FINAL_SALE_TEXT = "I agree that purchasing Bit-Tokens grants an immediate digital license. All sales are final and non-refundable once tokens are credited to my account. Checking this box creates a timestamped record of this agreement — stored with my purchase details, IP address, and device information — which is attached to this purchase and may be provided to CCBill as proof of consent.";
 
 interface BuyTokensModalProps {
   onClose: () => void;
