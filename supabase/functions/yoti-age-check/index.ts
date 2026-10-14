@@ -23,7 +23,7 @@ const BASE = sandbox ? "https://api.yoti.com/sandbox/idverify/v1" : "https://api
 
 async function yoti(method: "GET" | "POST", path: string, body?: unknown, raw = false) {
   const sep = path.includes("?") ? "&" : "?";
-  const endpoint = `${path}${sep}sdkId=${sdkId}&nonce=${crypto.randomUUID()}&timestamp=${Date.now()}`;
+  const endpoint = `${path}${sep}sdkId=${sdkId}&nonce=${crypto.randomUUID()}&timestamp=${Math.floor(Date.now() / 1000)}`;
   const payload = body ? JSON.stringify(body) : "";
   let msg = `${method}&${endpoint}`;
   if (payload) msg += `&${Buffer.from(payload).toString("base64")}`;
