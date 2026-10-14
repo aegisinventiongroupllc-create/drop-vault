@@ -277,7 +277,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                   <p className="text-[10px] font-bold tracking-wider text-center text-muted-foreground">CARD PAYMENTS — PROCESSED BY CCBILL</p>
                   <ul className="space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
                     <li>• Your card is charged <span className="text-foreground font-semibold">once</span> for the total above. No subscription, no recurring billing, and you are not enrolled in any trial.</li>
-                    <li>• The charge appears on your card statement as <span className="text-foreground font-semibold">"CCBill.com *DropThatThing"</span> — discreet, with no mention of content type.</li>
+                    <li>• The charge appears on your card statement as <span className="text-foreground font-semibold">"CCBill.com *DTT"</span> — discreet, with no mention of content type.</li>
                     <li>• Payments are processed over an encrypted connection by <span className="text-foreground font-semibold">CCBill</span>, our authorized sales agent. Your card details are handled by CCBill and are never stored on DTT servers.</li>
                     <li>• This purchase is for <span className="text-foreground font-semibold">digital goods delivered immediately</span>: {isEntryPass ? "your Vault Entry Pass activates" : "Bit-Tokens credit"} as soon as payment is confirmed. <span className="text-foreground font-semibold">All sales are final and non-refundable</span> once credit is delivered.</li>
                     <li>• Strictly 18+. You confirm the card is yours and the funds are lawful.</li>
