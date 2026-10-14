@@ -37,6 +37,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   const pollRef = useRef<number | null>(null);
   const [cardEnabled, setCardEnabled] = useState(false);
   const [rememberCard, setRememberCard] = useState(false);
+  const [payMethod, setPayMethod] = useState<"crypto" | "card">("crypto");
 
   // Card checkout appears automatically once CCBill account keys are configured on the server.
   useEffect(() => {
