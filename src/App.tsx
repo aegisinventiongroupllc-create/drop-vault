@@ -41,7 +41,8 @@ const App = () => (
                 <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/pricing" element={<Pricing />} />
+<Route path="/pricing" element={<Pricing />} />
+                <Route path="/entry-pass-preview" element={<EntryPassGate onPurchased={() => {}} />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
