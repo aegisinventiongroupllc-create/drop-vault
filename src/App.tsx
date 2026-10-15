@@ -13,6 +13,7 @@ import SecretAdmin from "./pages/SecretAdmin.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import EntryPassGate from "./components/EntryPassGate.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
