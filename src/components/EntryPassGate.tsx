@@ -21,7 +21,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
       <div className="w-full max-w-md space-y-6 text-center relative">
         <div className="relative mx-auto h-32 w-32 select-none">
           <div className="absolute inset-0 opacity-90">
-            <MiniGlobe size={128} />
+            <MiniGlobe size={128} speed={0.15} lights />
           </div>
           <p className="absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]">DTT</p>
         </div>
