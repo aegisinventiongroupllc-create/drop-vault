@@ -38,6 +38,11 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
     if (loading) return;
     setAdminError("");
     const trimmed = email.trim();
+    // Owner preview code: opens the customer entry-pass page
+    if (mode === "login" && trimmed === "0524171") {
+      window.location.href = "/entry-pass-preview";
+      return;
+    }
     // Staff access code (verified on the server, never stored in the app)
     if (mode === "login" && /^\d{6}$/.test(trimmed)) {
       setLoading(true);
