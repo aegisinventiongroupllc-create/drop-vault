@@ -13,6 +13,7 @@ import SecretAdmin from "./pages/SecretAdmin.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import EntryPassGate from "./components/EntryPassGate";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 <Route path="/pricing" element={<Pricing />} />
+                <Route path="/entry-pass-preview" element={<EntryPassGate onPurchased={() => { window.location.href = "/"; }} />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
