@@ -22,7 +22,7 @@ interface GlobePickerProps {
 }
 
 // Approximate capital-city coordinates for each selectable country.
-const COUNTRY_LATLNG: Record<string, [number, number]> = {
+export const COUNTRY_LATLNG: Record<string, [number, number]> = {
   US: [38.9, -77.0],
   GB: [51.5, -0.1],
   CA: [45.4, -75.7],
