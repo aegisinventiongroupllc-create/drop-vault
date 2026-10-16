@@ -43,6 +43,6 @@
 - [ ] CCBill application: DTT Media LLC legal name (becomes the card-statement descriptor), EIN letter or Articles of Incorporation, one US government photo ID for the principal, a business bank account in the LLC's name with a real statement/voided check (app screenshots rejected), dropthatthingmedia@gmail.com as contact, apply as high risk for adult digital products, realistic estimated annual sales. Then approval brings the four dashboard values: account number, subaccount, FlexForm ID, salt. Confirm the per-transaction ticket cap before selling the $101 five-token package.
 - [ ] Switch GoDaddy Email Privacy forwarding from the other business's Gmail to dropthatthingmedia@gmail.com.
 
-- [ ] Full button-by-button test signed in as a creator and a customer
+- [x] Full button-by-button test signed in as a creator and a customer (customer dashboard behind unpaid entry pass)
 - [ ] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
 - [ ] Globe: pick a country for the day → that country's own scrollable teaser feed, split Women/Men
