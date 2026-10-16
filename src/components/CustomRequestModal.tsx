@@ -158,7 +158,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
         {step === "select" && (
           <div className="p-4 space-y-3">
             <p className="text-sm text-muted-foreground">
-              Select a tier or enter a custom bid for <span className="text-foreground font-medium">@{creatorName}</span>
+              Make your offer to <span className="text-foreground font-medium">@{creatorName}</span>
             </p>
 
             {/* Custom Bid Section */}
@@ -197,34 +197,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 </p>
               )}
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] text-muted-foreground font-bold tracking-wider">OR SELECT A TIER</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            {TIERS.map((t, i) => {
-              const calc = calculateRequestTokens(t.price);
-              return (
-                <button
-                  key={t.label}
-                  onClick={() => { setSelectedTier(i); setUseCustomBid(false); setStep("details"); }}
-                  className={`w-full text-left bg-secondary/50 border rounded-xl p-4 transition-all hover:border-primary/50 ${
-                    selectedTier === i ? "border-primary" : "border-border"
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-foreground">{t.label}</span>
-                    <div className="text-right">
-                      <span className="text-primary font-bold">${t.price}</span>
-                      <p className="text-[10px] text-muted-foreground">{calc.total} Request-Tokens</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
-                </button>
-              );
-            })}
           </div>
         )}
 
