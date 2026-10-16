@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { aiText } from "../_shared/aiText.ts";
 
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -7,29 +8,13 @@ const json = (b: unknown, s = 200) =>
 const MAX_TEXTS = 80;
 const MAX_LEN = 600;
 
-export async function aiTranslate(texts: string[], lang: string): Promise<string[]> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
-  if (!key) throw new Error("no ai key");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      messages: [
-        {
-          role: "system",
-          content:
-            `Translate each string in the JSON array into the language with code "${lang}". ` +
-            `This is UI text for an adult creator platform called DTT. Keep brand names (DTT, Bit-Token, Vault, CCBill, LTC, USDT), numbers, prices, emails and URLs unchanged. ` +
-            `Keep the same capitalization style (ALL CAPS stays ALL CAPS). Return ONLY a JSON array of the same length, same order.`,
-        },
-        { role: "user", content: JSON.stringify(texts) },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`ai ${res.status}`);
-  const data = await res.json();
-  let content: string = data?.choices?.[0]?.message?.content ?? "[]";
+async function aiTranslate(texts: string[], lang: string): Promise<string[]> {
+  let content = await aiText(
+    `Translate each string in the JSON array into the language with code "${lang}". ` +
+      `This is UI text for an adult creator platform called DTT. Keep brand names (DTT, Bit-Token, Vault, CCBill, LTC, USDT), numbers, prices, emails and URLs unchanged. ` +
+      `Keep the same capitalization style (ALL CAPS stays ALL CAPS). Return ONLY a JSON array of the same length, same order.`,
+    JSON.stringify(texts),
+  );
   content = content.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
   const arr = JSON.parse(content);
   if (!Array.isArray(arr) || arr.length !== texts.length) throw new Error("bad shape");

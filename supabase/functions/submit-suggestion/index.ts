@@ -1,26 +1,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { aiText } from "../_shared/aiText.ts";
 
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 async function toEnglish(text: string): Promise<string | null> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
-  if (!key) return null;
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      messages: [
-        { role: "system", content: "Translate the user's message into English. If it is already English, return it unchanged. Return only the translation." },
-        { role: "user", content: text },
-      ],
-    }),
-  });
-  if (!res.ok) return null;
-  const d = await res.json();
-  return d?.choices?.[0]?.message?.content?.trim() ?? null;
+  const r = await aiText("Translate the user's message into English. If it is already English, return it unchanged. Return only the translation.", text);
+  return r || null;
 }
 
 Deno.serve(async (req) => {
