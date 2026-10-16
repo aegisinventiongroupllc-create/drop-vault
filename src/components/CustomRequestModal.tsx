@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
-const TIERS = [
-  { label: "Standard", price: 500, delivery: "7 days", description: "Basic custom media piece" },
-  { label: "Premium", price: 1000, delivery: "5 days", description: "High-quality custom content with revisions" },
-  { label: "Exclusive", price: 2500, delivery: "3 days", description: "Priority production with unlimited revisions" },
-  { label: "Ultra VIP", price: 5000, delivery: "48 hours", description: "Top-tier bespoke commission with direct collaboration" },
-  { label: "Legendary", price: 10001, delivery: "24 hours", description: "Ultimate bespoke experience with direct 1-on-1 session" },
-];
 
 const MAX_TOKENS = 500; // 500 BT = $10,001 ceiling
 const MIN_CUSTOM_BID_TOKENS = 1;
