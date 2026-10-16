@@ -5,7 +5,7 @@ import { toggleHeart, useHeartTotal, useMyHearts } from "@/hooks/useHearts";
 import { toast } from "@/hooks/use-toast";
 
 export default function CreatorHeartButton({ creatorId }: { creatorId: string }) {
-  const { hearts } = useMyHearts();
+  const { hearts, refresh } = useMyHearts();
   const count = useHeartTotal(creatorId);
   const saved = hearts.some((heart) => heart.creator_id === creatorId);
   const [optimistic, setOptimistic] = useState<boolean | null>(null);
@@ -15,6 +15,7 @@ export default function CreatorHeartButton({ creatorId }: { creatorId: string })
     event.stopPropagation();
     setBusy(true); setOptimistic(!saved);
     const next = await toggleHeart(creatorId, saved);
+    if (next !== null) await refresh();
     setOptimistic(null); setBusy(false);
     if (next === null) toast({ title: "Couldn't save creator", description: "Please sign in and try again.", variant: "destructive" });
   }}>
