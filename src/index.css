@@ -169,3 +169,25 @@ body { top: 0 !important; }
 @keyframes vip-drift { 0% { transform: translate(-20%, -10%) scale(.8); } 50% { transform: translate(15%, 10%) scale(1.1); } 100% { transform: translate(-5%, 20%) scale(.9); } }
 @keyframes vip-flicker { 0%, 100% { opacity: 1; } 45% { opacity: .85; } 50% { opacity: .35; } 53% { opacity: 1; } 75% { opacity: .7; } }
 @media (prefers-reduced-motion: reduce) { .vip-neon, .vip-fog { animation: none; } }
+
+/* Fog machine: smoke drifting across the whole screen */
+.vip-fog-machine { z-index: 40; }
+.vip-smoke { position: absolute; bottom: -40vh; width: 70vmax; height: 50vmax; border-radius: 50%; filter: blur(40px); opacity: 0;
+  background: radial-gradient(closest-side, hsl(var(--foreground) / .22), hsl(var(--primary) / .12) 55%, transparent 75%);
+  animation: vip-smoke-rise 22s linear infinite; }
+.vip-smoke-0 { left: -20%; animation-delay: 0s; }
+.vip-smoke-1 { left: 30%; animation-delay: -3s; animation-duration: 26s; }
+.vip-smoke-2 { left: 60%; animation-delay: -6s; }
+.vip-smoke-3 { left: 5%; animation-delay: -9s; animation-duration: 28s; }
+.vip-smoke-4 { left: 45%; animation-delay: -12s; }
+.vip-smoke-5 { left: 75%; animation-delay: -15s; animation-duration: 25s; }
+.vip-smoke-6 { left: -10%; animation-delay: -18s; }
+.vip-smoke-7 { left: 50%; animation-delay: -20s; animation-duration: 30s; }
+@keyframes vip-smoke-rise {
+  0% { transform: translate(0, 0) scale(.6); opacity: 0; }
+  15% { opacity: .7; }
+  50% { transform: translate(12vw, -70vh) scale(1.1); opacity: .55; }
+  85% { opacity: .35; }
+  100% { transform: translate(-8vw, -150vh) scale(1.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .vip-smoke { animation: none; opacity: .25; bottom: 10vh; } }
