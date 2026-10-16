@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/i18n/I18nContext";
 import { HelmetProvider } from "react-helmet-async";
 import GeoGate from "@/components/GeoGate";
+import { VipFogMachine } from "@/components/VipBackdrop";
 import AppUpdateWatcher from "@/components/AppUpdateWatcher";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -37,6 +38,7 @@ const App = () => (
           <BrowserRouter>
             <AppUpdateWatcher />
             <AutoTranslator />
+            <VipFogMachine />
             <GeoGate>
               <Routes>
                 <Route path="/" element={<Index />} />
