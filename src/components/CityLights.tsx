@@ -38,8 +38,8 @@ const frag = `
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
-    vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core);
-    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
+    vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core * core);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.55);
   }
 `;
 
@@ -52,7 +52,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
       const r = rand(ci * 7919 + 17);
       // Every country glows a little; each person adds more lights (capped).
       const n = Math.round((60 + Math.min(900, Math.sqrt(c.people) * 60)) * density);
-      const spread = 3.2 + Math.min(5, Math.log2(1 + c.people));
+      const spread = 5 + Math.min(5, Math.log2(1 + c.people));
       // A few "city" hubs per country so lights cluster like real cities.
       const hubs = Array.from({ length: 4 }, () => [c.lat + (r() - 0.5) * spread * 1.4, c.lng + (r() - 0.5) * spread * 1.8]);
       for (let i = 0; i < n; i++) {
