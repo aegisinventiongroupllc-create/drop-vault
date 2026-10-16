@@ -319,7 +319,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
             <>
               {savedLocked.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">SAVED — LOCKED</h3>
+                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY WISHLIST — TAP TO UNLOCK</h3>
                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                     {savedLocked.map((c) => (
                       <button key={c.id} onClick={() => onCreatorClick?.(c.name)} className="flex flex-col items-center gap-1 flex-shrink-0 w-20">
