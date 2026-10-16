@@ -293,41 +293,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           </div>
         )}
 
-        {/* ─── Counter-Offer from Creator ─── */}
-        {step === "counter" && counterOffer && (
-          <div className="p-4 space-y-4 text-center">
-            <div className="w-14 h-14 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center mx-auto">
-              <MessageSquare className="w-7 h-7 text-gold" />
-            </div>
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">COUNTER-OFFER</h3>
-            <p className="text-sm text-muted-foreground">
-              <span className="text-foreground font-medium">@{creatorName}</span> sent a counter-offer:
-            </p>
-
-            <div className="bg-gold/10 border border-gold/30 rounded-xl p-4 space-y-3">
-              <p className="text-sm text-foreground italic">"{counterOffer.message}"</p>
-              <div className="flex justify-between items-center bg-secondary/50 rounded-lg p-3">
-                <span className="text-sm text-muted-foreground">Your bid:</span>
-                <span className="text-sm text-muted-foreground line-through">{bidTokens || tokenCalc.baseTokens} BT</span>
-              </div>
-              <div className="flex justify-between items-center bg-primary/10 rounded-lg p-3">
-                <span className="text-sm font-bold text-foreground">Counter price:</span>
-                <span className="text-lg font-bold text-primary">{counterOffer.tokens} BT</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                = ${counterOffer.tokens * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep("select")}>DECLINE</Button>
-              <Button variant="neon" className="flex-1" onClick={acceptCounter}>
-                ACCEPT & PAY
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* ─── STEP 4: Buy Request-Tokens ─── */}
         {step === "buy" && (
           <div className="p-4 space-y-4">
