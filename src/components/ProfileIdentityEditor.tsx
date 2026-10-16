@@ -59,6 +59,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       if (data) {
         setHandle(data.display_name ?? "");
         setCountry(data.country || "GLOBAL");
+        setIsCreator((data as { role?: string }).role === "creator");
         setTags(Array.isArray((data as { tags?: string[] }).tags) ? (data as { tags?: string[] }).tags! : []);
         const stored = parseAvatarConfig(data.avatar_config);
         setAvatar(stored.portraitPath ? stored : { ...stored, useDttIcon: true });
