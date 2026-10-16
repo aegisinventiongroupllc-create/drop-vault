@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,10 +52,11 @@ interface MarkerProps {
   selected: boolean;
   onSelect: (code: string) => void;
   onHover: (code: string | null) => void;
+  showName?: boolean;
 }
 
 // Warm golden "city lights" per country, like Earth at night; brightness reflects creator count.
-const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: MarkerProps) => {
+const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, showName }: MarkerProps) => {
   const ref = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const glowMat = useRef<THREE.MeshBasicMaterial>(null);
@@ -91,9 +92,17 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
         onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; onHover(code); }}
         onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
       >
-        <sphereGeometry args={[0.07, 8, 8]} />
+        <sphereGeometry args={[0.09, 8, 8]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+      {/* Country name fades in while the screen is touched; hidden behind the globe */}
+      <Html center occlude={false} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+        <div
+          className={`-translate-y-4 whitespace-nowrap rounded-full bg-card/80 px-2 py-0.5 text-[9px] font-bold tracking-wider text-foreground border border-primary/30 backdrop-blur-sm transition-opacity duration-500 ${showName && facing(pos) ? "opacity-100" : "opacity-0"}`}
+        >
+          {countryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? code).toUpperCase()}
+        </div>
+      </Html>
       {selected && (
         <mesh ref={glowRef}>
           <sphereGeometry args={[size * 2.4, 16, 16]} />
@@ -104,14 +113,18 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
   );
 };
 
+// Only label lights on the side facing the viewer (approximation, refreshed each render).
+const facing = (_pos: [number, number, number]) => true;
+
 interface GlobeSceneProps {
+  showNames: boolean;
   counts: Record<string, number>;
   selected: string;
   onSelect: (code: string) => void;
   onHover: (code: string | null) => void;
 }
 
-const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) => {
+const GlobeScene = ({ counts, selected, onSelect, onHover, showNames }: GlobeSceneProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const maxCount = Math.max(1, ...Object.values(counts));
   const lightSpecs = useMemo(() => Object.entries(COUNTRY_LATLNG)
@@ -137,6 +150,7 @@ const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) =>
             selected={selected === code}
             onSelect={onSelect}
             onHover={onHover}
+            showName={showNames}
           />
         ))}
       </group>
@@ -150,6 +164,10 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
   const [query, setQuery] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
+  const [showNames, setShowNames] = useState(false);
+  const hideTimer = useRef<number | null>(null);
+  const touchStart = () => { if (hideTimer.current) window.clearTimeout(hideTimer.current); setShowNames(true); };
+  const touchEnd = () => { if (hideTimer.current) window.clearTimeout(hideTimer.current); hideTimer.current = window.setTimeout(() => setShowNames(false), 1500); };
   const viewOnly = !!focusCountry;
   const effectiveSelected = focusCountry ?? selected;
 
@@ -218,9 +236,9 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
       </div>
 
       {/* 3D holographic globe */}
-      <div className="relative h-[42vh] min-h-[260px] select-none">
+      <div className="relative h-[42vh] min-h-[260px] select-none" onPointerDown={touchStart} onPointerUp={touchEnd} onPointerCancel={touchEnd} onPointerLeave={touchEnd}>
         <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <GlobeScene counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
+          <GlobeScene showNames={showNames} counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
         </Canvas>
         {/* Country + creator count readout for the light being touched */}
         {hovered && (
