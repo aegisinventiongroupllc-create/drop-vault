@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { latLngToVec3, R } from "@/components/HoloGlobe";
 
@@ -44,6 +44,7 @@ const frag = `
 
 const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryLightSpec[]; density?: number; scale?: number }) => {
   const mat = useRef<THREE.ShaderMaterial>(null);
+  const dpr = useThree((st) => st.viewport.dpr);
   const geom = useMemo(() => {
     const pos: number[] = [], phase: number[] = [], size: number[] = [];
     countries.forEach((c, ci) => {
@@ -77,7 +78,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.6 * scale } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.6 * scale * dpr } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}

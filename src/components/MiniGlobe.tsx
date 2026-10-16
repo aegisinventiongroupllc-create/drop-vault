@@ -27,7 +27,7 @@ const SpinningGlobe = ({ speed, lights, size }: { speed: number; lights: boolean
 // Small spinning blue globe; optional slow spin and white country lights.
 const MiniGlobe = ({ size = 22, speed = 0.6, lights = false }: { size?: number; speed?: number; lights?: boolean }) => (
   <span className="inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
-    <Canvas camera={{ position: [0, 0, 2.6], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+    <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
       <SpinningGlobe speed={speed} lights={lights} size={size} />
       <Atmosphere />
     </Canvas>
