@@ -82,7 +82,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   const [profilePhotoPath, setProfilePhotoPath] = useState<string | undefined>();
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
-  const [requestActions, setRequestActions] = useState<Record<string, { action: "accepted" | "declined"; tokenPrice?: number; reason?: string }>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadMsg, setUploadMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -156,9 +155,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   const TOP_FANS = liveStats.topFans;
 
   // Request response state
-  const [respondingTo, setRespondingTo] = useState<string | null>(null);
-  const [responseTokenPrice, setResponseTokenPrice] = useState("");
-  const [responseDeclineReason, setResponseDeclineReason] = useState("");
 
   // Upload page state
   const [uploadTitle, setUploadTitle] = useState("");
@@ -276,12 +272,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
     }
   };
 
-  const handleRequestAction = (id: string, action: "accepted" | "declined", tokenPrice?: number, reason?: string) => {
-    setRequestActions(prev => ({ ...prev, [id]: { action, tokenPrice, reason } }));
-    setRespondingTo(null);
-    setResponseTokenPrice("");
-    setResponseDeclineReason("");
-  };
 
   const runProgress = () => {
     setUploadProgress(0);
