@@ -119,23 +119,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     setError("Card payments are coming soon. Please use LTC for now.");
   };
 
-  // Simulate receiving a counter-offer from creator
-  const simulateCounterOffer = () => {
-    setCounterOffer({
-      tokens: Math.ceil((bidTokens ?? tokenCalc.baseTokens) * 1.3),
-      message: "I'd love to do this! However, this type of content requires more production time. Here's my counter.",
-    });
-    setStep("counter");
-  };
-
-  const acceptCounter = () => {
-    if (counterOffer) {
-      setCustomBidTokens(String(counterOffer.tokens));
-      setUseCustomBid(true);
-      setStep("buy");
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center">
       <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
