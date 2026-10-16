@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import CreatorFanInsights from "@/components/CreatorFanInsights";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BarChart3, Users, Eye, TrendingUp, Upload, Shield, CreditCard,
