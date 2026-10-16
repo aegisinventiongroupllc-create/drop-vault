@@ -253,6 +253,13 @@
       "when": 1792143530591,
       "tag": "0035_top_fans_leaderboard_and_messaging",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792153472116,
+      "tag": "0036_custom_request_negotiation_columns",
+      "breakpoints": true
     }
   ]
 }
