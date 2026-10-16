@@ -535,6 +535,30 @@ export type Database = {
         }
         Relationships: []
       }
+      fan_messages: {
+        Row: {
+          body: string
+          created_at: string
+          creator_id: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           consent_text: string
@@ -1114,6 +1138,16 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_top_fans: {
+        Args: { _creator_id: string }
+        Returns: {
+          avatar_config: Json
+          display_name: string
+          fan_id: string
+          rank: number
+          total_spent: number
+        }[]
+      }
       handle_chargeback: {
         Args: { _payment_id: string; _reason: string }
         Returns: boolean
@@ -1127,6 +1161,10 @@ export type Database = {
         Returns: boolean
       }
       increment_media_view: { Args: { _media_id: string }; Returns: undefined }
+      is_top_fan: {
+        Args: { _creator_id: string; _user_id: string }
+        Returns: boolean
+      }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {
