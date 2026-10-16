@@ -44,6 +44,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [portraitBlob, setPortraitBlob] = useState<Blob>();
   const [photoStage, setPhotoStage] = useState("");
   const [letterIndex, setLetterIndex] = useState(0);
+  const [wheelOpen, setWheelOpen] = useState(true);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [photoError, setPhotoError] = useState("");
   const dirty = useRef(false);
