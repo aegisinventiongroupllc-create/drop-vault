@@ -320,6 +320,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         )}
       </div>
 
+      {/* Top 10 Fans leaderboard + gated messaging */}
+      {creatorId && <TopFansSection creatorId={creatorId} creatorName={creatorName} />}
+
       <LegalFooter />
 
       {/* Custom Request Modal */}
