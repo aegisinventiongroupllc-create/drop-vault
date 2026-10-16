@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import HexColorWheel from "@/components/HexColorWheel";
+import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
 import { THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
@@ -7,6 +9,8 @@ const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f
 const DashboardColorPicker = () => {
   const [theme, setTheme] = useState<UserTheme>(loadTheme);
   const [open, setOpen] = useState(false);
+  const [wheelFor, setWheelFor] = useState<ThemeKey | null>("primary");
+  const vip = useVipGlow();
   const timer = useRef<number>();
   useEffect(() => {
     const h = () => setTheme(loadTheme());
@@ -38,8 +42,10 @@ const DashboardColorPicker = () => {
             <div key={p.key}>
               <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-xs font-bold text-foreground">{p.label}</span>
-                <input type="color" aria-label={`Pick ${p.label} color`} value={theme[p.key] ?? "#ff0080"}
-                  onChange={(e) => set(p.key, e.target.value)} className="h-7 w-10 cursor-pointer rounded border border-border bg-transparent" />
+                <button type="button" aria-label={`Open color wheel for ${p.label}`} onClick={() => setWheelFor(wheelFor === p.key ? null : p.key)}
+                  className="h-7 w-10 overflow-hidden rounded border border-border">
+                  <svg viewBox="0 0 10 10" className="h-full w-full"><rect width="10" height="10" fill={theme[p.key] ?? "#ff0080"} /></svg>
+                </button>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {SWATCHES.map((hex) => (
@@ -49,8 +55,13 @@ const DashboardColorPicker = () => {
                   </button>
                 ))}
               </div>
+              {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
             </div>
           ))}
+          <label className="flex items-center justify-between rounded-md border border-border p-2 text-xs font-bold text-foreground">
+            <span>VIP room glow — neon lights and fog in your highlight color</span>
+            <input type="checkbox" checked={vip} onChange={(e) => setVipGlow(e.target.checked)} className="h-4 w-4 accent-primary" />
+          </label>
           <button type="button" onClick={reset} className="w-full rounded-md border border-border py-2 text-xs font-bold tracking-widest text-muted-foreground">
             RESET TO DTT COLORS
           </button>
