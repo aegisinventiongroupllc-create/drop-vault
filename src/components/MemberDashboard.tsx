@@ -18,6 +18,8 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { useMyHearts } from "@/hooks/useHearts";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import { useCustomRequests, acceptCounterOffer, declineCounter, type CustomRequestRow } from "@/hooks/useCustomRequests";
+import { Loader2, DollarSign, Clock } from "lucide-react";
 
 const RENEWAL_WARNING_MS = 24 * 60 * 60 * 1000;
 const AUTORENEW_KEY = "dtt_autorenew";
