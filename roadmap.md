@@ -1,13 +1,14 @@
 # Roadmap
 
 ## Current request
-- [ ] Synchronize profile/card hearts and creator analytics.
-- [ ] Replace vault coins and site icons with official gold DTT art.
-- [ ] Add six-second language transition overlay.
-- [ ] Enforce explicit Both preference for gender choices.
-- [ ] Add teaser carousel, previews, active day/month selection and decorative frames.
-- [ ] Group requests by origin country with ranked counts and expandable lists.
-- [ ] Verify changed rules and available real-account flows.
+- [x] Synchronize profile/card/search hearts and creator analytics using public aggregate-only realtime totals; heart persistence tests pass.
+- [x] Replace vault coins and favicon/Apple/PWA icons with official gold DTT art.
+- [ ] Explicit gold Open Graph image: waiting for an absolute published gold-image URL; hosting continues supplying its social preview.
+- [x] Add six-second language transition overlay; signed-in countdown and German legal footer translation verified.
+- [x] Enforce explicit Both preference for gender choices across feed, search and library; three rule tests pass.
+- [x] Add paged uncapped teaser collection, carousel, previews, active day/month selection and decorative frames; real temporary photo upload, preview, deletion, day activation and frame save/reopen verified.
+- [x] Group requests by origin country with ranked counts and expandable lists; real request expanded; legacy request without country remains honestly labeled not recorded.
+- [x] Verify changed rules and available real-account flows: 13 tests pass, build OK, no browser errors. Existing video cannot decode in test Chromium; preview now shows a clear error instead of endless loading. Customer cross-account realtime and month-expiry behavior not end-to-end verified with the available creator session.
 
 - [x] Add creator welcome-back gold DTT token cascade with actual away earnings, optional coin sound, and detailed analytics navigation; four math tests and browser checks with mocked earnings pass for login, return after 30 seconds away, sound, reduced motion, and dismissal.
 
