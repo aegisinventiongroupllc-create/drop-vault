@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const KEY = "dtt_vip_glow";
-export const getVipGlow = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } };
+export const getVipGlow = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
 export const setVipGlow = (on: boolean) => {
   try { localStorage.setItem(KEY, on ? "1" : "0"); } catch { /* ok */ }
   window.dispatchEvent(new Event("dtt-vip-glow"));
@@ -33,7 +34,13 @@ export default function VipBackdrop() {
 /** Full-screen "fog machine": smoke puffs drifting across the whole dashboard. */
 export function VipFogMachine() {
   const on = useVipGlow();
-  if (!on) return null;
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSignedIn(!!s));
+    return () => data.subscription.unsubscribe();
+  }, []);
+  if (!on || !signedIn) return null;
   return (
     <div aria-hidden="true" className="vip-fog-machine pointer-events-none fixed inset-0 overflow-hidden">
       {Array.from({ length: 8 }, (_, i) => <span key={i} className={`vip-smoke vip-smoke-${i}`} />)}

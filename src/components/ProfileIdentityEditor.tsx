@@ -1,4 +1,4 @@
-import VipBackdrop, { VipFogMachine } from "@/components/VipBackdrop";
+import VipBackdrop from "@/components/VipBackdrop";
 import DashboardColorPicker from "@/components/DashboardColorPicker";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Loader2 } from "lucide-react";
@@ -192,7 +192,6 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
 
   return (
     <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
-      <VipFogMachine />
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <VipBackdrop />
         <div className="relative z-10 shrink-0 p-1">
