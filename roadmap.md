@@ -42,7 +42,12 @@
 - [ ] Register the DMCA agent ($6) using the agent's address, then send it over so the site's DMCA page matches the registration exactly.
 - [ ] CCBill application: DTT Media LLC legal name (becomes the card-statement descriptor), EIN letter or Articles of Incorporation, one US government photo ID for the principal, a business bank account in the LLC's name with a real statement/voided check (app screenshots rejected), dropthatthingmedia@gmail.com as contact, apply as high risk for adult digital products, realistic estimated annual sales. Then approval brings the four dashboard values: account number, subaccount, FlexForm ID, salt. Confirm the per-transaction ticket cap before selling the $101 five-token package.
 - [ ] Switch GoDaddy Email Privacy forwarding from the other business's Gmail to dropthatthingmedia@gmail.com.
+- [ ] NOWPayments: written yes on adult content from support, 2FA on, IPN key and API key created, then hand the keys over through the secure form so the crypto checkout can be switched from Trybit.
+- [ ] Trybit: do not submit the live-mode request; leave the saved payment-notice address as it is.
+- [ ] Yoti: switch the age check to live mode so creator uploads unlock.
+- [ ] Virtual mailbox address for DTT Media LLC, then put it on the DMCA, Contact and records pages, the $6 Copyright Office listing and the CCBill application.
 
 - [x] Full button-by-button test signed in as a creator and a customer (customer dashboard behind unpaid entry pass)
 - [x] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
 - [x] Globe: pick a country for the day → that country's own scrollable teaser feed, split Women/Men
+- [x] Globe: owner switch between the DTT brand look and the real-Earth look, saved for everyone; both skins photographed in the running app, saved choice confirmed to drive which one shows, anyone can read it, signed-out visitors cannot change it (the admin GLOBE tab itself still needs the owner's own tap)

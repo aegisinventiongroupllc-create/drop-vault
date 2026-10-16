@@ -39,7 +39,7 @@ const frag = `
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
     vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core * core);
-    gl_FragColor = vec4(col, core * core * vGlow * 0.55);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
   }
 `;
 
@@ -74,7 +74,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
   useFrame(({ clock }) => { if (mat.current) mat.current.uniforms.uTime.value = clock.elapsedTime; });
 
   return (
-    <points geometry={geom}>
+    <points geometry={geom} renderOrder={10}>
       <shaderMaterial
         ref={mat}
         vertexShader={vert}
