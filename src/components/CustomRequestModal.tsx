@@ -11,7 +11,7 @@ const MIN_CUSTOM_BID_TOKENS = 1;
 const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onClose: () => void }) => {
   const [customBidTokens, setCustomBidTokens] = useState("");
   const [description, setDescription] = useState("");
-  const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success" | "counter" | "counter-accept">("select");
+  const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success">("select");
   const [error, setError] = useState<string | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<{ pay_address?: string; pay_amount?: number; pay_currency?: string; payment_id?: string; invoice_url?: string } | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
