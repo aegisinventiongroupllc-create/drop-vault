@@ -278,8 +278,40 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setStep("details")}>BACK</Button>
-              <Button variant="neon" className="flex-1" onClick={() => setStep("buy")}>
-                BUY TOKENS & SUBMIT
+              <Button variant="neon" className="flex-1" onClick={async () => {
+                setError(null);
+                try {
+                  const { data: u } = await supabase.auth.getUser();
+                  if (!u.user) { setError("Please sign in first."); return; }
+                  const { data: creatorProfile } = await supabase
+                    .from("public_profiles")
+                    .select("user_id")
+                    .eq("display_name", creatorName)
+                    .maybeSingle();
+                  const { error: insertErr } = await supabase.from("custom_requests").insert({
+                    customer_id: u.user.id,
+                    creator_id: creatorProfile?.user_id ?? null,
+                    creator_name: creatorName,
+                    description,
+                    amount_usd: activePrice,
+                    tokens: tokenCalc.total,
+                    creator_share_usd: Math.round(split.creatorShare * 100) / 100,
+                    platform_share_usd: Math.round(split.totalPlatformRevenue * 100) / 100,
+                    status: "pending",
+                    expires_at: new Date(Date.now() + 14 * 86400000).toISOString(),
+                  });
+                  if (insertErr) { setError(insertErr.message); return; }
+                  import("@/lib/activityLog").then(({ logActivity }) =>
+                    logActivity("custom_request_sent", `Request to ${creatorName}`, {
+                      creator: creatorName, amount_usd: activePrice, tokens: tokenCalc.total,
+                    })
+                  );
+                  setStep("success");
+                } catch (err: any) {
+                  setError(err.message || "Failed to submit request.");
+                }
+              }}>
+                SUBMIT REQUEST
               </Button>
             </div>
           </div>
