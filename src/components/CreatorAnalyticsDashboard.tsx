@@ -480,7 +480,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
       }} />
       {mediaUploadInput}
       {/* Header */}
-      <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+      <div className="px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center gap-3">
           <button onClick={handleLogout} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-foreground" aria-label="Log out">
             <ArrowLeft className="w-5 h-5" />
