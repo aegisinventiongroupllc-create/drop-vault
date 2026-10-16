@@ -1,3 +1,4 @@
+import DashboardColorPicker from "@/components/DashboardColorPicker";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
 const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [country, setCountry] = useState("GLOBAL");
+  const [isCreator, setIsCreator] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, useDttIcon: true });
@@ -53,7 +55,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-      const { data } = await supabase.from("profiles").select("display_name, avatar_config, country, tags").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("display_name, avatar_config, country, tags, role").eq("user_id", user.id).maybeSingle();
       if (data) {
         setHandle(data.display_name ?? "");
         setCountry(data.country || "GLOBAL");
@@ -279,6 +281,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         </p>
       </div>
 
+      <DashboardColorPicker />
+
+      {isCreator && (
       <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Get found in search</p>
         <div>
@@ -331,6 +336,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
           <p className="mt-1 text-[10px] text-muted-foreground">Words customers type to find you. Describe your style and vibe.</p>
         </div>
       </div>
+      )}
 
       <Button variant="neon" className="w-full" onClick={() => void save()} disabled={saving || processingPhoto}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}

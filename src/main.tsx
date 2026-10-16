@@ -1,3 +1,5 @@
+import { applyTheme } from "./lib/userTheme";
+applyTheme();
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
