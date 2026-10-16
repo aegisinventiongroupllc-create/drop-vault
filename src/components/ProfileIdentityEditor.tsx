@@ -192,9 +192,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
 
   return (
     <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
+      <VipFogMachine />
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <VipBackdrop />
-        <VipFogMachine />
         <div className="relative z-10 shrink-0 p-1">
           <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>
