@@ -157,3 +157,15 @@
 .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame, .goog-te-gadget { display: none !important; }
 body { top: 0 !important; }
 .goog-text-highlight { background: none !important; box-shadow: none !important; }
+
+/* VIP room backdrop: neon light bars + moving fog in the user's highlight color */
+.vip-backdrop { z-index: 0; }
+.vip-neon { position: absolute; left: -10%; right: -10%; height: 2px; background: hsl(var(--primary)); box-shadow: 0 0 12px 3px hsl(var(--primary) / .8), 0 0 40px 10px hsl(var(--primary) / .45); animation: vip-flicker 4s ease-in-out infinite; }
+.vip-neon-a { top: 10%; transform: rotate(-4deg); }
+.vip-neon-b { bottom: 12%; transform: rotate(3deg); animation-delay: -1.7s; }
+.vip-fog { position: absolute; width: 160%; height: 160%; top: -30%; left: -30%; border-radius: 50%; filter: blur(30px); opacity: .55;
+  background: radial-gradient(closest-side, hsl(var(--primary) / .45), transparent 70%); animation: vip-drift 14s ease-in-out infinite alternate; }
+.vip-fog-b { animation-duration: 19s; animation-direction: alternate-reverse; background: radial-gradient(closest-side, hsl(var(--foreground) / .12), transparent 70%); }
+@keyframes vip-drift { 0% { transform: translate(-20%, -10%) scale(.8); } 50% { transform: translate(15%, 10%) scale(1.1); } 100% { transform: translate(-5%, 20%) scale(.9); } }
+@keyframes vip-flicker { 0%, 100% { opacity: 1; } 45% { opacity: .85; } 50% { opacity: .35; } 53% { opacity: 1; } 75% { opacity: .7; } }
+@media (prefers-reduced-motion: reduce) { .vip-neon, .vip-fog { animation: none; } }
