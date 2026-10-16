@@ -74,7 +74,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
   useFrame(({ clock }) => { if (mat.current) mat.current.uniforms.uTime.value = clock.elapsedTime; });
 
   return (
-    <points geometry={geom}>
+    <points geometry={geom} renderOrder={10}>
       <shaderMaterial
         ref={mat}
         vertexShader={vert}
