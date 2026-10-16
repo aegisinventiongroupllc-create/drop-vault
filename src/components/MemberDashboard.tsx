@@ -10,7 +10,7 @@ import {
   isUnlockActive, getUnlockTimeRemaining, formatUnlockCountdown,
   UNLOCK_DURATION_MS, TOKEN_INVOICE_USD,
   SUPPORT_TIP_TOKENS, SUPPORT_TIP_USD, calculateSupportTipSplit,
-  type CreatorUnlock, type CustomRequest,
+  type CreatorUnlock,
 } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
