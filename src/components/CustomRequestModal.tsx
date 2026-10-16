@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Loader2, CreditCard, Coins, MessageSquare, ArrowLeftRight } from "lucide-react";
+import { X, Loader2, CreditCard, Coins, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
