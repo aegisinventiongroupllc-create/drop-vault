@@ -65,6 +65,9 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, sho
   const size = 0.016 + intensity * 0.026;
   const hasCreators = count > 0;
   const phase = useMemo(() => Math.random() * Math.PI * 2, []);
+  const labelRef = useRef<HTMLDivElement>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const tmp = useMemo(() => new THREE.Vector3(), []);
   // Cluster of small satellite lights around the main one, like a city sprawl.
   const satellites = useMemo(() => {
     const n = hasCreators ? 3 + Math.round(intensity * 4) : 2;
@@ -75,7 +78,13 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, sho
     });
   }, [hasCreators, intensity, size, phase]);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
+    // Hide names on the far side of the spinning globe.
+    if (groupRef.current && labelRef.current) {
+      groupRef.current.getWorldPosition(tmp);
+      const front = tmp.dot(camera.position) > 0.25;
+      labelRef.current.style.visibility = front ? "visible" : "hidden";
+    }
     const t = clock.elapsedTime * 2.6 + phase;
     const shimmer = Math.max(0.12, 0.55 + Math.sin(t) * 0.3 + Math.sin(t * 2.7) * 0.15);
     if (ref.current) ref.current.scale.setScalar((selected ? 1.7 : 1) * (0.92 + shimmer * 0.18));
@@ -84,7 +93,7 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, sho
   });
 
   return (
-    <group position={pos}>
+    <group ref={groupRef} position={pos}>
       {/* Invisible tap target; the visible glow comes from CityLights */}
       <mesh
         ref={ref}
@@ -96,9 +105,9 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, sho
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {/* Country name fades in while the screen is touched; hidden behind the globe */}
-      <Html center occlude={false} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+      <Html ref={labelRef} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
         <div
-          className={`-translate-y-4 whitespace-nowrap rounded-full bg-card/80 px-2 py-0.5 text-[9px] font-bold tracking-wider text-foreground border border-primary/30 backdrop-blur-sm transition-opacity duration-500 ${showName && facing(pos) ? "opacity-100" : "opacity-0"}`}
+          className={`-translate-y-4 whitespace-nowrap rounded-full bg-card/80 px-2 py-0.5 text-[9px] font-bold tracking-wider text-foreground border border-primary/30 backdrop-blur-sm transition-opacity duration-500 ${showName ? "opacity-100" : "opacity-0"}`}
         >
           {countryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? code).toUpperCase()}
         </div>
@@ -112,9 +121,6 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover, sho
     </group>
   );
 };
-
-// Only label lights on the side facing the viewer (approximation, refreshed each render).
-const facing = (_pos: [number, number, number]) => true;
 
 interface GlobeSceneProps {
   showNames: boolean;
