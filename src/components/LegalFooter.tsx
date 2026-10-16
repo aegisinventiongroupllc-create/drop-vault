@@ -114,7 +114,7 @@ const TermsOfService = () => (
     <p><strong className="text-foreground">7. No Refunds.</strong> All sales are final (see Refund Policy).</p>
     <p><strong className="text-foreground">8. Account Security.</strong> You are responsible for safeguarding your credentials. Notify us immediately of unauthorized access.</p>
     <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT's total liability is limited to fees paid in the 30 days preceding a claim.</p>
-    <p><strong className="text-foreground">10. Governing Law.</strong> These terms are governed by the laws of the State of Delaware, USA. Disputes are resolved by binding arbitration.</p>
+    <p><strong className="text-foreground">10. Governing Law.</strong> These terms are governed by the laws of the Commonwealth of Pennsylvania, USA. Disputes are resolved by binding arbitration.</p>
     <p><strong className="text-foreground">11. Changes.</strong> We may amend these terms; continued use constitutes acceptance.</p>
   </SectionShell>
 );
