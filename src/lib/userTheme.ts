@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 // Personal dashboard colors, saved on this device. Display-only.
 export type ThemeKey = "primary" | "background" | "card" | "foreground";
 export type UserTheme = Partial<Record<ThemeKey, string>>;
@@ -50,4 +51,29 @@ export function applyTheme(theme: UserTheme = loadTheme()) {
 export function saveTheme(theme: UserTheme) {
   localStorage.setItem(KEY, JSON.stringify(theme));
   applyTheme(theme);
+}
+
+// ---- Account sync: colors follow the person to every device ----
+
+export async function saveThemeToAccount(theme: UserTheme) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("profiles").update({ ui_theme: theme as never }).eq("user_id", user.id);
+}
+
+export function startThemeSync() {
+  const pull = async (uid: string | undefined) => {
+    if (!uid) return;
+    const { data } = await supabase.from("profiles").select("ui_theme").eq("user_id", uid).maybeSingle();
+    const t = (data as { ui_theme?: UserTheme } | null)?.ui_theme;
+    if (t && typeof t === "object") {
+      localStorage.setItem(KEY, JSON.stringify(t));
+      applyTheme(loadTheme());
+      window.dispatchEvent(new Event("dtt-theme"));
+    }
+  };
+  supabase.auth.onAuthStateChange((evt, session) => {
+    if (evt === "SIGNED_IN" || evt === "INITIAL_SESSION") void pull(session?.user?.id);
+    if (evt === "SIGNED_OUT") { localStorage.removeItem(KEY); applyTheme({}); }
+  });
 }

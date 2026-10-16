@@ -288,6 +288,13 @@
       "when": 1792162205805,
       "tag": "0040_private_top_fan_threads",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792163227748,
+      "tag": "0041_profile_ui_theme",
+      "breakpoints": true
     }
   ]
 }
