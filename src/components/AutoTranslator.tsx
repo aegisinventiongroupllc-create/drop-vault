@@ -20,6 +20,7 @@ export function getTargetLang(): string {
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE", "TEXTAREA", "SVG", "INPUT"]);
 const HAS_LETTERS = /\p{L}{2,}/u;
+const BRAND_ONLY = /^(DROP|THAT|THING|DTT|DROPTHATTHING|DROP THAT THING)$/i;
 const ATTRS = ["placeholder", "aria-label", "title"] as const;
 
 const AutoTranslator = () => {
@@ -45,7 +46,7 @@ const AutoTranslator = () => {
 
     const want = (s: string) => {
       const t = s.trim();
-      return t.length > 1 && t.length <= 600 && HAS_LETTERS.test(t) && !translatedOut.has(t) && !/^[\w.+-]+@[\w.-]+$/.test(t) && !/^https?:/.test(t);
+      return !BRAND_ONLY.test(t) && t.length > 1 && t.length <= 600 && HAS_LETTERS.test(t) && !translatedOut.has(t) && !/^[\w.+-]+@[\w.-]+$/.test(t) && !/^https?:/.test(t);
     };
 
     const applyText = (node: Text) => {

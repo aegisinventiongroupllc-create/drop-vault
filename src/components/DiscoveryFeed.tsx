@@ -470,7 +470,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     <div className="min-h-[100dvh]">
       <div className={`fixed left-0 right-0 z-30 bg-gradient-to-b from-background via-background/80 to-transparent pb-4 ${hasVaultToggle ? "top-10" : topOffset ? "top-9" : "top-0"}`}>
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <h1 className="font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
+          <h1 translate="no" className="notranslate font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
           <div className="flex items-center gap-2">
             {onGlobeOpen && (
               <button
