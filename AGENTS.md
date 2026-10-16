@@ -17,3 +17,4 @@
 - Creator age checks use Yoti's hosted Age Verification started and resolved server-side; results are stored per account in yoti_age_checks (owner read-only) and requests are signed server-side with the Yoti key stored only in backend secrets.
 
 - Chargeback lockouts are applied only by the server-side CCBill webhook via handle_chargeback; bans live in account_bans (not profiles) so users cannot clear them, and admins lift them with admin_lift_ban. Why: user-editable rows must never control bans.
+- Translate UI at runtime with the global AutoTranslator (visitor language → translate-text function, cached in translation_cache and locally); mark owner-only or code-like areas notranslate. Why: hand-written locale files can't cover every language worldwide.

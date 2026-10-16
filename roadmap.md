@@ -44,5 +44,5 @@
 - [ ] Switch GoDaddy Email Privacy forwarding from the other business's Gmail to dropthatthingmedia@gmail.com.
 
 - [x] Full button-by-button test signed in as a creator and a customer (customer dashboard behind unpaid entry pass)
-- [ ] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
+- [x] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
 - [ ] Globe: pick a country for the day → that country's own scrollable teaser feed, split Women/Men
