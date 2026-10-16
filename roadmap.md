@@ -1,5 +1,14 @@
 # Roadmap
 
+## Current request
+- [ ] Synchronize profile/card hearts and creator analytics.
+- [ ] Replace vault coins and site icons with official gold DTT art.
+- [ ] Add six-second language transition overlay.
+- [ ] Enforce explicit Both preference for gender choices.
+- [ ] Add teaser carousel, previews, active day/month selection and decorative frames.
+- [ ] Group requests by origin country with ranked counts and expandable lists.
+- [ ] Verify changed rules and available real-account flows.
+
 - [x] Add creator welcome-back gold DTT token cascade with actual away earnings, optional coin sound, and detailed analytics navigation; four math tests and browser checks with mocked earnings pass for login, return after 30 seconds away, sound, reduced motion, and dismissal.
 
 - [x] Burn DTT branding into new creator videos and photos, with the second T pink; browser-exported photo and video visibly verified and video audio retained.
