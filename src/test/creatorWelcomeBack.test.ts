@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarizeCreatorEarnings, earnedTokenCount, type CreatorEarning } from "@/lib/creatorWelcomeBack";
+import { AWAY_MINIMUM_MS, summarizeCreatorEarnings, earnedTokenCount, type CreatorEarning } from "@/lib/creatorWelcomeBack";
 const row: CreatorEarning = { id: "1", created_at: "2026-10-05", amount_usd: 20, creator_share_usd: 18, platform_share_usd: 2, payment_id: "unlock-1", purchase_id: "purchase-1" };
 describe("creator welcome-back earnings", () => {
   it("shows actual net revenue and actual spent tokens", () => {
@@ -15,4 +15,5 @@ describe("creator welcome-back earnings", () => {
   it("has a truthful empty first-visit summary", () => {
     expect(summarizeCreatorEarnings([])).toEqual({ usd: 0, tokens: 0 });
   });
+  it("waits for 30 minutes of inactivity", () => { expect(AWAY_MINIMUM_MS).toBe(1_800_000); });
 });
