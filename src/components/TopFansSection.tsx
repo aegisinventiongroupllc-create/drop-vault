@@ -30,6 +30,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [activeFan, setActiveFan] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const loadFans = useCallback(async () => {
@@ -56,17 +57,20 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
   const isCreator = myId === creatorId;
   const myRank = fans.find((f) => f.fan_id === myId)?.rank ?? null;
   const canChat = isCreator || myRank !== null;
+  // Each thread is private: one fan + the creator.
+  const threadFan = isCreator ? activeFan : myId;
 
   const loadMessages = useCallback(async () => {
-    if (!canChat) return;
+    if (!canChat || !threadFan) { setMessages([]); return; }
     const { data } = await supabase
       .from("fan_messages")
       .select("id, sender_id, body, created_at")
       .eq("creator_id", creatorId)
+      .eq("fan_id", threadFan)
       .order("created_at", { ascending: true })
       .limit(100);
     if (data) setMessages(data as FanMessage[]);
-  }, [creatorId, canChat]);
+  }, [creatorId, canChat, threadFan]);
 
   useEffect(() => { loadMessages(); }, [loadMessages]);
 
@@ -74,8 +78,8 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
   useEffect(() => {
     if (!canChat) return;
     const channel = supabase
-      .channel(`fan-msgs-${creatorId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "fan_messages" }, loadMessages)
+      .channel(`fan-msgs-${creatorId}-${threadFan}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "fan_messages", filter: `creator_id=eq.${creatorId}` }, loadMessages)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [creatorId, canChat, loadMessages]);
@@ -86,12 +90,12 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
 
   const sendMessage = async () => {
     const body = draft.trim();
-    if (!body || !myId) return;
+    if (!body || !myId || !threadFan) return;
     setSending(true);
-    const { error } = await supabase.from("fan_messages").insert({ creator_id: creatorId, sender_id: myId, body });
+    const { error } = await supabase.from("fan_messages").insert({ creator_id: creatorId, sender_id: myId, fan_id: threadFan, body });
     setSending(false);
     if (error) {
-      toast({ title: "Message not sent", description: "Only the creator and their top 10 fans can chat here.", variant: "destructive" });
+      toast({ title: "Message not sent", description: "Private chats are only open while this fan is in the top 10.", variant: "destructive" });
       return;
     }
     setDraft("");
@@ -141,18 +145,29 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
           <>
             <Button variant="neon" className="w-full gap-2" onClick={() => setChatOpen((o) => !o)}>
               <MessageCircle className="w-4 h-4" />
-              {chatOpen ? "HIDE MESSAGES" : isCreator ? "MESSAGE YOUR TOP FANS" : `MESSAGE @${creatorName.toUpperCase()}`}
+              {chatOpen ? "HIDE MESSAGES" : isCreator ? "PRIVATE CHATS WITH YOUR TOP FANS" : `PRIVATE CHAT WITH @${creatorName.toUpperCase()}`}
             </Button>
             {myRank !== null && !isCreator && (
               <p className="text-center text-[11px] text-gold font-bold mt-1.5">
                 You're fan #{myRank} — messaging unlocked
               </p>
             )}
-            {chatOpen && (
+            {chatOpen && isCreator && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {fans.map((f) => (
+                  <button key={f.fan_id} onClick={() => setActiveFan(f.fan_id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold ${activeFan === f.fan_id ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
+                    #{f.rank} {f.display_name}
+                  </button>
+                ))}
+                {fans.length === 0 && <p className="text-xs text-muted-foreground">No top fans yet.</p>}
+              </div>
+            )}
+            {chatOpen && threadFan && (
               <div className="mt-3 bg-card border border-border rounded-xl overflow-hidden">
                 <div className="max-h-64 overflow-y-auto p-3 space-y-2">
                   {messages.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-4">No messages yet. Say hello.</p>
+                    <p className="text-xs text-muted-foreground text-center py-4">Private chat — only you two can see this. Say hello.</p>
                   ) : messages.map((m) => (
                     <div key={m.id} className={`flex ${m.sender_id === myId ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[80%] rounded-xl px-3 py-2 ${m.sender_id === myId ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
