@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       ? `dttpass-${Date.now()}-${userId}`
       : `dtt-${Date.now()}-${tokens}-${userId}`;
 
-    const ccRes = await fetch("https://api.cryptocloud.plus/v2/invoice/create", {
+    const ccRes = await fetch("https://api.trybit.com/v2/invoice/create", {
       method: "POST",
       headers: {
         "Authorization": `Token ${API_KEY}`,
