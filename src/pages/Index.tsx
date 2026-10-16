@@ -1,3 +1,4 @@
+import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -505,7 +506,7 @@ const Index = () => {
                 aria-label="Pick a country"
                 className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
               >
-                <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>
+                {countryFilter === "GLOBAL" ? <MiniGlobe size={26} speed={0.4} lights /> : <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>}
                 <span className="text-foreground">{countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
               </button>
               <LanguageToggle />

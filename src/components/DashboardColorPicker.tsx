@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { THEME_PARTS, loadTheme, saveTheme, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { useEffect, useRef, useState } from "react";
+import { THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -7,13 +7,22 @@ const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f
 const DashboardColorPicker = () => {
   const [theme, setTheme] = useState<UserTheme>(loadTheme);
   const [open, setOpen] = useState(false);
+  const timer = useRef<number>();
+  useEffect(() => {
+    const h = () => setTheme(loadTheme());
+    window.addEventListener("dtt-theme", h);
+    return () => window.removeEventListener("dtt-theme", h);
+  }, []);
+  // Save to the account shortly after the last change (color wheel drags fire fast).
+  const persist = (t: UserTheme) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => void saveThemeToAccount(t), 600); };
 
   const set = (key: ThemeKey, hex: string) => {
     const next = { ...theme, [key]: hex };
     setTheme(next);
     saveTheme(next);
+    persist(next);
   };
-  const reset = () => { setTheme({}); saveTheme({}); };
+  const reset = () => { setTheme({}); saveTheme({}); persist({}); };
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">

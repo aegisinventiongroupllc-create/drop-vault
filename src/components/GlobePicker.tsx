@@ -7,6 +7,7 @@ import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
 import { countryName } from "@/lib/siteTranslate";
 import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
+import CityLights, { Atmosphere } from "@/components/CityLights";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 
 // Only countries where this type of site is allowed appear on the globe.
@@ -83,33 +84,22 @@ const CountryMarker = ({ code, count, maxCount, selected, onSelect, onHover }: M
 
   return (
     <group position={pos}>
-      {/* Glowing golden core */}
+      {/* Invisible tap target; the visible glow comes from CityLights */}
       <mesh
         ref={ref}
         onClick={(e) => { e.stopPropagation(); onSelect(code); }}
         onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; onHover(code); }}
         onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
       >
-        <sphereGeometry args={[size, 12, 12]} />
-        <meshBasicMaterial color="#ffd27a" />
+        <sphereGeometry args={[0.07, 8, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {/* Satellite city lights */}
-      {satellites.map((s, i) => (
-        <mesh key={i} position={[s.x, s.y, 0]}>
-          <sphereGeometry args={[s.s, 8, 8]} />
-          <meshBasicMaterial color="#ffb54d" transparent opacity={0.9} blending={THREE.AdditiveBlending} depthWrite={false} />
+      {selected && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[size * 2.4, 16, 16]} />
+          <meshBasicMaterial ref={glowMat} color="#ffd27a" transparent opacity={0.5} blending={THREE.AdditiveBlending} depthWrite={false} />
         </mesh>
-      ))}
-      {/* Warm shimmering halo */}
-      <mesh
-        ref={glowRef}
-        onClick={(e) => { e.stopPropagation(); onSelect(code); }}
-        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; onHover(code); }}
-        onPointerOut={() => { document.body.style.cursor = "auto"; onHover(null); }}
-      >
-        <sphereGeometry args={[size * 2.4, 16, 16]} />
-        <meshBasicMaterial ref={glowMat} color="#ff9d3c" transparent opacity={0.4} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
+      )}
     </group>
   );
 };
@@ -124,6 +114,9 @@ interface GlobeSceneProps {
 const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const maxCount = Math.max(1, ...Object.values(counts));
+  const lightSpecs = useMemo(() => Object.entries(COUNTRY_LATLNG)
+    .filter(([code]) => !isBlockedCountry(code))
+    .map(([code, [lat, lng]]) => ({ lat, lng, people: counts[code] ?? 0 })), [counts]);
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
@@ -133,7 +126,8 @@ const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) =>
   return (
     <>
       <group ref={groupRef}>
-        <HoloSphere />
+        <HoloSphere borderOpacity={0.35} />
+        <CityLights countries={lightSpecs} />
         {Object.keys(COUNTRY_LATLNG).filter((code) => !isBlockedCountry(code)).map((code) => (
           <CountryMarker
             key={code}
@@ -146,6 +140,7 @@ const GlobeScene = ({ counts, selected, onSelect, onHover }: GlobeSceneProps) =>
           />
         ))}
       </group>
+      <Atmosphere />
       <OrbitControls enableZoom enablePan={false} rotateSpeed={0.5} minDistance={1.6} maxDistance={4.5} zoomSpeed={0.7} />
     </>
   );
@@ -164,8 +159,8 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
       const { data } = await supabase
         .from("public_profiles")
         .select("country")
-        .eq("role", "creator")
-        .limit(10000);
+        .not("country", "is", null)
+        .limit(50000);
       if (!alive || !data) return;
       const next: Record<string, number> = {};
       for (const row of data) {
@@ -175,7 +170,7 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
       setCounts(next);
     };
     load();
-    // Live refresh: new creators light up without reopening the globe.
+    // Live refresh: new creators and customers light up without reopening the globe.
     const timer = window.setInterval(load, 15000);
     const onFocus = () => load();
     window.addEventListener("focus", onFocus);
