@@ -260,6 +260,13 @@
       "when": 1792153472116,
       "tag": "0036_custom_request_negotiation_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792159438658,
+      "tag": "0037_users_read_own_consents",
+      "breakpoints": true
     }
   ]
 }
