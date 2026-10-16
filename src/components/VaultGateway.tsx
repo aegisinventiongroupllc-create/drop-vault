@@ -7,7 +7,7 @@ const VaultGateway = ({ onSelect }: { onSelect: (vault: VaultType) => void }) =>
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background">
       <div className="text-center mb-10 px-6">
-        <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-2">
+        <h1 translate="no" className="notranslate font-display text-2xl font-bold tracking-wider text-foreground mb-2">
           DROP<span className="text-primary">THAT</span>THING
         </h1>
         <p className="text-sm text-muted-foreground">Select Your Experience</p>
