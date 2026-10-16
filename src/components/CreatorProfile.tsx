@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import dttCoin from "@/assets/dtt-reward-coin.png";
 import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
@@ -57,6 +58,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     })();
     return () => { cancel = true; };
   }, [creatorName]);
+  const [coinDrop, setCoinDrop] = useState(false);
 
   // Public vault count (so locked users still see how many videos are inside)
   useEffect(() => {
@@ -123,6 +125,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       }
       return;
     }
+    setCoinDrop(true);
+    window.setTimeout(() => setCoinDrop(false), 1800);
     await Promise.all([refreshBalance(), refreshSubs()]);
     toast({ title: `Unlocked @${creatorName} ✓`, description: "14 days of full library access added." });
   };
@@ -305,13 +309,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         ) : (
           <>
             <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">
-              <Lock className="w-8 h-8 text-primary mx-auto mb-2" />
-              <p className="text-sm font-bold text-foreground">Pay 1 Bit-Token to unlock</p>
+              <img src={dttCoin} alt="DTT Bit-Token" width={80} height={80} className="w-20 h-20 mx-auto mb-2 object-contain animate-pulse" />
+              <p className="text-sm font-bold text-foreground">Drop 1 DTT Bit-Token to unlock</p>
               <p className="text-xs text-muted-foreground mt-1">14 days of full access to every long-form video from @{creatorName}.</p>
             </div>
             <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={handleUnlock} disabled={unlocking || !creatorId}>
-              {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-              UNLOCK FULL LIBRARY — 1 BIT-TOKEN
+              {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <img src={dttCoin} alt="" className="w-6 h-6 object-contain" />}
+              DROP 1 BIT-TOKEN — UNLOCK 14 DAYS
             </Button>
             <p className="text-center text-xs text-muted-foreground mt-2">
               Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"} • 1 = 14 days
