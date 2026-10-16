@@ -9,9 +9,7 @@ const MAX_TOKENS = 500; // 500 BT = $10,001 ceiling
 const MIN_CUSTOM_BID_TOKENS = 1;
 
 const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onClose: () => void }) => {
-  const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [customBidTokens, setCustomBidTokens] = useState("");
-  const [useCustomBid, setUseCustomBid] = useState(false);
   const [description, setDescription] = useState("");
   const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success" | "counter" | "counter-accept">("select");
   const [error, setError] = useState<string | null>(null);
