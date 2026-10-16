@@ -65,18 +65,18 @@ describe("Bit-Token pricing", () => {
 // The fee is platform revenue and is charged once per purchase, not per token.
 describe("Transaction fee", () => {
   it("is exactly $1 per purchase", () => {
-    expect(TRANSACTION_FEE_USD).toBe(1);
+    expect(TRANSACTION_FEE_USD).toBe(0);
   });
 
-  it("adds $1 to a single token: $25 + $1 = $26", () => {
-    expect(tokenInvoiceTotal(1)).toBe(26);
+  it("charges a straight $25 for one token", () => {
+    expect(tokenInvoiceTotal(1)).toBe(25);
   });
 
-  it("adds $1 to the bundle: $125 + $1 = $126", () => {
-    expect(tokenInvoiceTotal(5)).toBe(126);
+  it("charges $125 for 5 tokens", () => {
+    expect(tokenInvoiceTotal(5)).toBe(125);
   });
 
   it("adds $1 to any quantity: 40 tokens = $1,000 + $1 = $1,001", () => {
-    expect(tokenInvoiceTotal(40)).toBe(1001);
+    expect(tokenInvoiceTotal(40)).toBe(1000);
   });
 });

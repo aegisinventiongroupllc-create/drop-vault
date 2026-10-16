@@ -19,8 +19,8 @@ const CUSTOM_TIER_PRICES = [500, 1000, 2500, 5000, 10001];
 const MAX_CUSTOM_TOKENS = 500;
 
 const TOKEN_PACKAGES: Record<string, { amount_usd: number; tokens: number }> = {
-  single: { amount_usd: 26, tokens: 1 },
-  bundle: { amount_usd: 126, tokens: 5 },
+  single: { amount_usd: 25, tokens: 1 },
+  bundle: { amount_usd: 125, tokens: 5 },
 };
 
 const json = (body: unknown, status = 200) =>
@@ -36,7 +36,7 @@ function priceRequest(body: any): { amount_usd: number; tokens: number } | { err
     if (String(body?.package ?? "") === "custom") {
       const q = Number(body?.quantity);
       if (!Number.isInteger(q) || q < 1 || q > 100) return { error: "Choose between 1 and 100 Bit-Tokens" };
-      return { amount_usd: q * 25 + 1, tokens: q };
+      return { amount_usd: q * 25, tokens: q };
     }
     const pkg = TOKEN_PACKAGES[String(body?.package ?? "")];
     if (!pkg) return { error: "Unknown token package" };
