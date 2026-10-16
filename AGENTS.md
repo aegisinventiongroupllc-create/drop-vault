@@ -1,5 +1,7 @@
 # Project architecture rules
 
+- Read creator monthly revenue history from account-scoped completed transaction ledger rows with UTC month boundaries and original split percentages; aggregate full-month totals server-side and paginate details so history is accurate beyond client row limits without changing balances.
+
 - Keep creator welcome-back summaries read-only and account-scoped to completed transaction ledger rows; track last activity locally for display only, count tokens from allocation records rather than net revenue, and never alter balances for celebrations. Admin replay uses explicitly labeled sample earnings and never writes to the ledger.
 
 - Send customer authentication callbacks to `https://dropthatthing.com` so production recovery and confirmation never route through an editor preview domain.
