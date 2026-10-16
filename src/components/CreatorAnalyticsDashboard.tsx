@@ -83,6 +83,20 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   const [profilePhotoPath, setProfilePhotoPath] = useState<string | undefined>();
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
+  const [safetyChecked, setSafetyChecked] = useState(false);
+  useEffect(() => {
+    let off = false;
+    supabase.auth.getUser().then(async ({ data }) => {
+      const uid = data.user?.id;
+      if (!uid) { if (!off) setSafetyChecked(true); return; }
+      const { data: rows } = await supabase.from("legal_consents")
+        .select("id").eq("user_id", uid).eq("consent_type", "creator_safety").limit(1);
+      if (off) return;
+      if (rows && rows.length) { setSafetyAgreed(true); setShowSafetyModal(false); }
+      setSafetyChecked(true);
+    });
+    return () => { off = true; };
+  }, []);
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadMsg, setUploadMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -435,7 +449,19 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   );
 
   if (showSafetyModal && !safetyAgreed) {
-    return <CreatorSafetyModal onAgree={() => { setSafetyAgreed(true); setShowSafetyModal(false); }} />;
+    if (!safetyChecked) return null;
+    return <CreatorSafetyModal onAgree={() => {
+      setSafetyAgreed(true); setShowSafetyModal(false);
+      if (authUserId) {
+        supabase.from("legal_consents").insert({
+          user_id: authUserId,
+          consent_type: "creator_safety",
+          consent_text: "Agreed to the Safety & Integrity Protocol and Terms of Service.",
+          terms_version: "2.0",
+          user_agent: navigator.userAgent,
+        }).then(() => {});
+      }
+    }} />;
   }
 
   const mediaUploadInput = (
