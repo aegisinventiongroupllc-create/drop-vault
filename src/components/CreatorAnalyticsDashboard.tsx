@@ -36,7 +36,6 @@ import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 import { QRCodeCanvas } from "qrcode.react";
 import { useCreatorText } from "@/i18n/creator";
 
-const CUSTOM_REQUESTS: { id: string; fan: string; description: string; amount: number; status: "pending" | "accepted" | "declined" | "completed"; tokenPrice: number; declineReason: string }[] = [];
 
 const PUBLIC_TEASERS: { id: string; type: "video"; title: string; views: number; date: string; visibility: "public" }[] = [];
 
