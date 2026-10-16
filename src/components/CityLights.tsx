@@ -28,7 +28,7 @@ const vert = `
     // Fade lights on the far side of the globe.
     vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
     vec3 wn = normalize(mat3(modelMatrix) * position);
-    vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
+    vGlow *= 1.0; // DEBUG: fade disabled
     gl_PointSize = aSize * uScale * (0.75 + tw * 0.5) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
