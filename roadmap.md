@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Add private monthly creator revenue history with original splits, full-month totals, and paginated records; verify tests and signed-in access.
 - [x] Synchronize profile/card/search hearts and creator analytics using public aggregate-only realtime totals; heart persistence tests pass.
 - [x] Replace vault coins and favicon/Apple/PWA icons with official gold DTT art.
 - [ ] Explicit gold Open Graph image: waiting for an absolute published gold-image URL; hosting continues supplying its social preview.
