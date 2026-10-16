@@ -1271,6 +1271,18 @@ export type Database = {
           hearts: number
         }[]
       }
+      get_my_monthly_revenue: {
+        Args: never
+        Returns: {
+          base_usd: number
+          commission_usd: number
+          creator_usd: number
+          entry_fee_usd: number
+          month: string
+          platform_usd: number
+          transaction_count: number
+        }[]
+      }
       get_my_payout_method: {
         Args: never
         Returns: {
