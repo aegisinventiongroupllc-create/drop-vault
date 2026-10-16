@@ -61,7 +61,12 @@ export function useCreatorWelcomeBack(userId: string | null, enabled: boolean) {
       if (since !== null && Date.now() - since >= AWAY_MINIMUM_MS) void welcome(since);
     };
     const visibility = () => document.hidden ? leave() : returnToTab();
-    if (!document.hidden) void welcome(read());
+    if (!document.hidden) {
+      const last = read();
+      // Only celebrate after 30+ minutes of no creator activity; otherwise just mark active.
+      if (last !== null && Date.now() - last >= AWAY_MINIMUM_MS) void welcome(last);
+      else save();
+    }
     const heartbeat = window.setInterval(() => {
       if (!document.hidden && awayAt === null && !busy) save();
     }, 15_000);

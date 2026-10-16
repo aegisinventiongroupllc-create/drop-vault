@@ -23,4 +23,4 @@ export function summarizeCreatorEarnings(rows: CreatorEarning[]) {
 }
 
 export const EARNING_FIELDS = "id, created_at, amount_usd, creator_share_usd, platform_share_usd, payment_id, purchase_id";
-export const AWAY_MINIMUM_MS = 30_000;
+export const AWAY_MINIMUM_MS = 30 * 60_000;
