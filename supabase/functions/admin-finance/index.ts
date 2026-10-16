@@ -41,6 +41,44 @@ Deno.serve(async (req) => {
       return map;
     };
 
+    if (action === "country_stats") {
+      // Paged reads so this keeps working with very large creator counts.
+      const all: any[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data } = await supabase.from("profiles")
+          .select("user_id, display_name, email, country, vault_side, verification_status, created_at, role")
+          .eq("role", "creator").range(from, from + 999);
+        all.push(...(data || []));
+        if (!data || data.length < 1000) break;
+      }
+      const country = typeof body?.country === "string" ? body.country : null;
+      if (!country) {
+        const map: Record<string, { country: string; women: number; men: number }> = {};
+        for (const p of all) {
+          const c = p.country || "GLOBAL";
+          map[c] ??= { country: c, women: 0, men: 0 };
+          if (p.vault_side === "men") map[c].men++; else map[c].women++;
+        }
+        return json({ countries: Object.values(map).sort((a, b) => (b.women + b.men) - (a.women + a.men)) });
+      }
+      const list = all.filter((p) => (p.country || "GLOBAL") === country);
+      const ids = list.map((p) => p.user_id);
+      const stats: Record<string, { hearts: number; views: number; earned: number; unlocks: number; videos: number }> = {};
+      ids.forEach((id) => (stats[id] = { hearts: 0, views: 0, earned: 0, unlocks: 0, videos: 0 }));
+      for (let i = 0; i < ids.length; i += 200) {
+        const chunk = ids.slice(i, i + 200);
+        const [{ data: hearts }, { data: media }, { data: txs }] = await Promise.all([
+          supabase.rpc("get_heart_counts", { _creator_ids: chunk }),
+          supabase.from("creator_media").select("creator_id, views").in("creator_id", chunk),
+          supabase.from("transactions").select("creator_id, creator_share_usd, status").in("creator_id", chunk).eq("status", "completed"),
+        ]);
+        for (const h of hearts || []) stats[h.creator_id].hearts = Number(h.hearts) || 0;
+        for (const m of media || []) { stats[m.creator_id].views += Number(m.views) || 0; stats[m.creator_id].videos++; }
+        for (const t of txs || []) { stats[t.creator_id].earned += Number(t.creator_share_usd) || 0; stats[t.creator_id].unlocks++; }
+      }
+      return json({ creators: list.map((p) => ({ ...p, ...stats[p.user_id] })) });
+    }
+
     if (action === "suggestions") {
       const { data } = await supabase.from("platform_suggestions").select("*").order("created_at", { ascending: false }).limit(200);
       return json({ suggestions: data || [] });
