@@ -40,13 +40,13 @@ const LegalFooter = () => {
           ))}
         </div>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-          © {new Date().getFullYear()} DTT. All Rights Reserved. Must be 18+ to enter.
+          © {new Date().getFullYear()} DTT Media LLC. All Rights Reserved. Must be 18+ to enter.
         </p>
         <p className="text-[10px] text-muted-foreground/70 leading-relaxed mt-1">
           Crypto payments settle directly in LTC (Litecoin) to our secure platform wallet. Card payments coming soon.
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
-          DTT · Registered in the United States · DTT Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
+          DropThatThing is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
         </p>
       </footer>
 
@@ -96,20 +96,21 @@ const SectionShell = ({ title, children }: { title: string; children: React.Reac
 const Statement2257 = () => (
   <SectionShell title="18 U.S.C. § 2257 Record Keeping Compliance Statement">
     <p>All models, actors, and other persons appearing in visual depictions of actual or simulated sexually explicit conduct on this website were at least 18 years of age at the time the visual depictions were created.</p>
-    <p><strong className="text-foreground">DTT</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
+    <p><strong className="text-foreground">DTT Media LLC</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
     <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Yoti).</p>
+    <p><strong className="text-foreground">Custodian of Records</strong><br/>DTT Media LLC — Custodian of Records<br/>Business mailing address: being finalized; available on request at the email below.</p>
     <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: dropthatthingmedia@gmail.com</p>
   </SectionShell>
 );
 
 const TermsOfService = () => (
   <SectionShell title="Terms of Service">
-    <p><strong className="text-foreground">1. The Platform.</strong> DropThatThing (operated by DTT) is a technology platform facilitating social interaction and marketplace transactions between Customers and Independent Creators.</p>
+    <p><strong className="text-foreground">1. The Platform.</strong> DropThatThing (operated by DTT Media LLC, "DTT") is a technology platform facilitating social interaction and marketplace transactions between Customers and Independent Creators.</p>
     <p><strong className="text-foreground">2. Age Requirement.</strong> You must be at least 18 years of age (or the legal age of majority in your jurisdiction). Access by minors is strictly prohibited and will result in account termination and reporting to authorities.</p>
     <p><strong className="text-foreground">3. Independent Contractors.</strong> Creators are independent contractors and not employees, partners, or agents of DTT. Creators are solely responsible for their content, taxes, and legal compliance in their jurisdiction.</p>
     <p><strong className="text-foreground">4. Prohibited Use.</strong> You may not use the platform for: illegal content, content involving minors, non-consensual material, fraud, money laundering, terrorism financing, sanctions evasion, or any activity violating applicable law. Violations result in immediate account termination, fund seizure, and reporting to law enforcement.</p>
     <p><strong className="text-foreground">5. Geographic Restrictions.</strong> The platform is not available to residents of jurisdictions where adult content or crypto-related services are prohibited, including but not limited to: OFAC-sanctioned countries (Iran, North Korea, Syria, Cuba, Crimea), and any region listed in our Ghost Country list. It is your responsibility to ensure local legality.</p>
-    <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens are digital access credits (1 token = $20 USD value, 14-day access). A $1 platform fee applies per transaction. Payments are made directly in LTC (Litecoin) to our secure platform wallet. Exchange rates and network fees are disclosed at checkout. Card payments coming soon.</p>
+    <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens are digital access credits ($25 USD per token, 14-day access). No extra transaction fee is added. Payments are accepted in cryptocurrency (LTC) and, where available, by card. Exchange rates and network fees are disclosed at checkout. Card payments coming soon.</p>
     <p><strong className="text-foreground">7. No Refunds.</strong> All sales are final (see Refund Policy).</p>
     <p><strong className="text-foreground">8. Account Security.</strong> You are responsible for safeguarding your credentials. Notify us immediately of unauthorized access.</p>
     <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT's total liability is limited to fees paid in the 30 days preceding a claim.</p>
@@ -177,8 +178,8 @@ const Complaints = () => (
 
 const ContactInfo = () => (
   <SectionShell title="Contact Us">
-    <p><strong className="text-foreground">DTT</strong></p>
-    <p>Operator of DropThatThing. For all inquiries — support, compliance, partnerships, refunds, complaints, and legal — please contact our team at the email below.</p>
+    <p><strong className="text-foreground">DTT Media LLC</strong></p>
+    <p>Operator of DropThatThing. Business mailing address: being finalized; available on request. For all inquiries — support, compliance, partnerships, refunds, complaints, and legal — please contact our team at the email below.</p>
     <p><strong className="text-foreground">Support email:</strong> <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
     <p><strong className="text-foreground">Response time:</strong> within 2 business days.</p>
     <p className="text-muted-foreground/60 text-[10px]">Payments: direct LTC (Litecoin) settlement.</p>
@@ -265,7 +266,7 @@ const DmcaTakedown = () => {
       <div className="space-y-2">
         <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
         <p><strong className="text-foreground">Designated DMCA Agent</strong></p>
-        <p>DTT — DMCA Agent<br/>Email: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a><br/>Backup: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
+        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a><br/>Backup: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
         <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
       </div>
 
