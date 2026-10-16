@@ -19,6 +19,6 @@ export default function CreatorHeartButton({ creatorId }: { creatorId: string })
     if (next === null) toast({ title: "Couldn't save creator", description: "Please sign in and try again.", variant: "destructive" });
   }}>
     <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
-    <span className="tabular-nums">{Math.max(0, count + (optimistic !== null && optimistic !== saved ? optimistic ? 1 : -1 : 0)).toLocaleString()}</span>
+    <span className="tabular-nums">{count.toLocaleString()}</span>
   </Button>;
 }

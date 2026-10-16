@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Globe } from "lucide-react";
 import { useI18n } from "@/i18n/I18nContext";
 import type { Locale } from "@/i18n/types";
-import { EXTRA_LANGUAGES, getAutoLang, setAutoLang } from "@/lib/siteTranslate";
+import { EXTRA_LANGUAGES, setAutoLang } from "@/lib/siteTranslate";
 import { getTargetLang } from "@/components/AutoTranslator";
 
 const LanguageToggle = () => {

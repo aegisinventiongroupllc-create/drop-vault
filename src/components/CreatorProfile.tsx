@@ -17,6 +17,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import TopFansSection from "@/components/TopFansSection";
 import CreatorHeartButton from "@/components/CreatorHeartButton";
 import DttToken from "@/components/DttToken";
+import { useHeartTotal } from "@/hooks/useHearts";
 
 interface Vault {
   name: string;
@@ -77,17 +78,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     return () => { cancel = true; };
   }, [creatorId]);
 
-  const [heartCount, setHeartCount] = useState(0);
-  useEffect(() => {
-    if (!creatorId) return;
-    const load = async () => {
-      const { data } = await supabase.rpc("get_heart_counts", { _creator_ids: [creatorId] });
-      setHeartCount(Number((data as any)?.[0]?.hearts ?? 0));
-    };
-    load();
-    window.addEventListener("dtt-hearts-changed", load);
-    return () => window.removeEventListener("dtt-hearts-changed", load);
-  }, [creatorId]);
+  const heartCount = useHeartTotal(creatorId);
 
   const activeSub = creatorId
     ? subs.find((s) => s.creator_id === creatorId && s.status === "active" && new Date(s.expires_at) > new Date())

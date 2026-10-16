@@ -51,8 +51,6 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   const [locked, setLocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const [following, setFollowing] = useState(false);
-  const [liked, setLiked] = useState(initiallyLiked);
-  const [likeCount, setLikeCount] = useState(video.likes);
   const [viewCount, setViewCount] = useState(video.views ?? 0);
   const viewCounted = useRef(false);
   useEffect(() => {
@@ -62,7 +60,6 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     setViewCount((v) => v + 1);
     supabase.rpc("increment_media_view", { _media_id: video.id }).then(() => {});
   }, [video.id, viewerId]);
-  const [heartBusy, setHeartBusy] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<CommentRow[]>([]);
@@ -109,7 +106,6 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     videoRef.current?.play().catch(() => {});
   };
 
-  useEffect(() => { setLiked(initiallyLiked); }, [initiallyLiked]);
   useEffect(() => { setLikeCount(video.likes); }, [video.likes]);
 
   useEffect(() => {
