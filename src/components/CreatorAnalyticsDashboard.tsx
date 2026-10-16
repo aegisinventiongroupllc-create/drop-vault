@@ -565,6 +565,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
       {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
+          <CreatorFanInsights creatorId={authUserId} />
           <CreatorEarningsBreakdown creatorId={authUserId} />
           <div className="grid grid-cols-2 gap-3">
             {STATS.map((stat) => (
