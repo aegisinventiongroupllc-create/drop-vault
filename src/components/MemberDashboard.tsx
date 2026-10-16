@@ -397,44 +397,88 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         </div>
       )}
 
-      {/* My Requests */}
+      {/* My Requests — real data */}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">
           <p className="text-xs text-muted-foreground mb-2">Only you can see your requests.</p>
-          {MY_REQUESTS.map((req) => (
-            <div key={req.id} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">@{req.creatorName}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{req.description}</p>
+          {reqLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : myRequests.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No requests yet. Send one from a creator's page.</p>
+          ) : (
+            myRequests.map((req) => {
+              const expired = req.expires_at && new Date(req.expires_at) < new Date();
+              const expiresIn = req.expires_at ? (() => {
+                const ms = new Date(req.expires_at).getTime() - Date.now();
+                if (ms <= 0) return "Expired";
+                const d = Math.floor(ms / 86400000);
+                const h = Math.floor((ms % 86400000) / 3600000);
+                return d > 0 ? `${d}d ${h}h` : `${h}h`;
+              })() : null;
+
+              return (
+                <div key={req.id} className="bg-card border border-border rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">@{req.creator_name || "Creator"}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{req.description}</p>
+                    </div>
+                    <span className="text-sm font-bold text-primary">${req.amount_usd}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
+                      req.status === "pending" ? "bg-gold/10 text-gold border-gold/30" :
+                      req.status === "accepted" ? "bg-primary/10 text-primary border-primary/30" :
+                      req.status === "countered" ? "bg-amber-400/10 text-amber-400 border-amber-400/30" :
+                      req.status === "paid" ? "bg-blue-400/10 text-blue-400 border-blue-400/30" :
+                      req.status === "completed" ? "bg-green-400/10 text-green-400 border-green-400/30" :
+                      "bg-destructive/10 text-destructive border-destructive/30"
+                    }`}>
+                      {req.status === "pending" ? "Pending" :
+                       req.status === "accepted" ? "Accepted — Pay Now" :
+                       req.status === "countered" ? "Counter-Offer" :
+                       req.status === "paid" ? "Paid — In Progress" :
+                       req.status === "completed" ? "Completed" : "Declined"}
+                    </span>
+                    {!expired && expiresIn && req.status === "pending" && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{expiresIn}</span>
+                    )}
+                  </div>
+
+                  {/* Counter-offer from creator */}
+                  {req.status === "countered" && req.counter_offer_usd && (
+                    <div className="mt-3 bg-amber-400/10 border border-amber-400/30 rounded-lg p-3 space-y-2">
+                      <p className="text-xs text-foreground">Creator's counter: <span className="text-amber-400 font-bold">${req.counter_offer_usd}</span></p>
+                      {req.counter_message && <p className="text-[10px] text-muted-foreground italic">"{req.counter_message}"</p>}
+                      <div className="flex gap-2">
+                        <Button variant="neon" size="sm" className="flex-1" disabled={reqBusy} onClick={async () => {
+                          setReqBusy(true);
+                          await acceptCounterOffer(req.id, req.counter_offer_usd!);
+                          setReqBusy(false);
+                          refreshReqs();
+                          toast({ title: "Counter accepted", description: "You can now pay for the request." });
+                        }}>
+                          ACCEPT ${req.counter_offer_usd}
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive border-destructive/30" disabled={reqBusy} onClick={async () => {
+                          setReqBusy(true);
+                          await declineCounter(req.id);
+                          setReqBusy(false);
+                          refreshReqs();
+                        }}>
+                          DECLINE
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {req.status === "declined" && (
+                    <span className="text-[10px] text-muted-foreground italic mt-2 block">Creator passed on this request</span>
+                  )}
                 </div>
-                <span className="text-sm font-bold text-primary">${req.amountUsd}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  req.status === "pending" ? "bg-gold/10 text-gold border border-gold/30" :
-                  req.status === "accepted" ? "bg-primary/10 text-primary border border-primary/30" :
-                  req.status === "declined" ? "bg-destructive/10 text-destructive border border-destructive/30" :
-                  "bg-green-400/10 text-green-400 border border-green-400/30"
-                }`}>
-                  {req.status === "pending" ? "Pending" : req.status === "accepted" ? "Accepted" : req.status === "declined" ? "Declined" : "Completed"}
-                </span>
-                {req.status === "declined" && (
-                  <span className="text-[10px] text-muted-foreground italic">Creator passed on this request</span>
-                )}
-              </div>
-              {req.status === "accepted" && balance < req.totalTokens && (
-                <div className="mt-3 bg-gold/10 border border-gold/30 rounded-lg p-3">
-                  <p className="text-[10px] text-muted-foreground mb-2">
-                    You need <span className="text-primary font-bold">{Math.ceil(req.totalTokens - balance)} more tokens</span> to fulfill this request.
-                  </p>
-                  <Button variant="neon" size="sm" className="w-full text-xs" onClick={() => setShowBuyModal(true)}>
-                    BUY {Math.ceil(req.totalTokens - balance)} BIT-TOKENS — ${Math.ceil(req.totalTokens - balance) * TOKEN_INVOICE_USD}
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       )}
 
