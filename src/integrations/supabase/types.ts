@@ -715,6 +715,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_suggestions: {
+        Row: {
+          anonymous: boolean
+          created_at: string
+          english_text: string | null
+          id: string
+          original_text: string
+          role: string | null
+          source_lang: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anonymous?: boolean
+          created_at?: string
+          english_text?: string | null
+          id?: string
+          original_text: string
+          role?: string | null
+          source_lang?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anonymous?: boolean
+          created_at?: string
+          english_text?: string | null
+          id?: string
+          original_text?: string
+          role?: string | null
+          source_lang?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       power_weeks: {
         Row: {
           active: boolean
@@ -1019,6 +1052,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      translation_cache: {
+        Row: {
+          created_at: string
+          lang: string
+          source: string
+          translated: string
+        }
+        Insert: {
+          created_at?: string
+          lang: string
+          source: string
+          translated: string
+        }
+        Update: {
+          created_at?: string
+          lang?: string
+          source?: string
+          translated?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
