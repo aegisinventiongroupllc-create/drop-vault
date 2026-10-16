@@ -811,6 +811,7 @@ export type Database = {
           role: string
           role_chosen: boolean
           tags: string[]
+          ui_theme: Json
           updated_at: string
           user_id: string
           vault_side: string
@@ -833,6 +834,7 @@ export type Database = {
           role?: string
           role_chosen?: boolean
           tags?: string[]
+          ui_theme?: Json
           updated_at?: string
           user_id: string
           vault_side?: string
@@ -855,6 +857,7 @@ export type Database = {
           role?: string
           role_chosen?: boolean
           tags?: string[]
+          ui_theme?: Json
           updated_at?: string
           user_id?: string
           vault_side?: string
