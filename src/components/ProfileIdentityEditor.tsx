@@ -1,3 +1,4 @@
+import VipBackdrop from "@/components/VipBackdrop";
 import DashboardColorPicker from "@/components/DashboardColorPicker";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Loader2 } from "lucide-react";
@@ -192,11 +193,12 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   return (
     <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
-        <div className="relative shrink-0 p-1">
+        <VipBackdrop />
+        <div className="relative z-10 shrink-0 p-1">
           <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>
         </div>
-        <div className="min-w-0 flex-1 text-left">
+        <div className="relative z-10 min-w-0 flex-1 text-left">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Private identity</p>
           <p className="truncate text-lg font-bold text-foreground">@{handle || "your_handle"}</p>
           <p className="text-xs text-muted-foreground">Your email always stays private.</p>
