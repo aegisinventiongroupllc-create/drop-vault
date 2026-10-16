@@ -5,8 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SHOP_ID = Deno.env.get("CRYPTOCLOUD_SHOP_ID")!;
-const API_KEY = Deno.env.get("CRYPTOCLOUD_API_KEY")!;
+const SHOP_ID = (Deno.env.get("CRYPTOCLOUD_SHOP_ID") ?? "").trim();
+const API_KEY = (Deno.env.get("CRYPTOCLOUD_API_KEY") ?? "").trim().replace(/^Token\s+/i, "");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       ? `dttpass-${Date.now()}-${userId}`
       : `dtt-${Date.now()}-${tokens}-${userId}`;
 
-    const ccRes = await fetch("https://api.cryptocloud.plus/v2/invoice/create", {
+    const ccRes = await fetch("https://api.trybit.com/v2/invoice/create", {
       method: "POST",
       headers: {
         "Authorization": `Token ${API_KEY}`,
