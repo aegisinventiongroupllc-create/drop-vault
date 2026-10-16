@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Users, Star, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
@@ -215,6 +216,30 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
                 ? "CREATE ACCOUNT"
                 : "SEND RESET LINK"}
         </Button>
+
+        {mode !== "forgot" && (
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full text-base font-semibold"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true);
+              const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+              if (result.error) {
+                toast({ title: "Google sign-in failed", description: result.error.message ?? "Try again.", variant: "destructive" });
+                setLoading(false);
+                return;
+              }
+              if (result.redirected) return;
+              await logActivity("login", "Google");
+              setLoading(false);
+            }}
+          >
+            CONTINUE WITH GOOGLE
+          </Button>
+        )}
+
 
 
         <div className="flex flex-col items-center gap-1.5 mt-1">
