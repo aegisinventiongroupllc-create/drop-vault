@@ -246,6 +246,13 @@
       "when": 1792141333081,
       "tag": "0034_safe_signup_display_name",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792143530591,
+      "tag": "0035_top_fans_leaderboard_and_messaging",
+      "breakpoints": true
     }
   ]
 }

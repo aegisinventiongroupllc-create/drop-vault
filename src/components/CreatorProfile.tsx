@@ -13,6 +13,7 @@ import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import TopFansSection from "@/components/TopFansSection";
 
 interface Vault {
   name: string;
@@ -318,6 +319,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           </>
         )}
       </div>
+
+      {/* Top 10 Fans leaderboard + gated messaging */}
+      {creatorId && <TopFansSection creatorId={creatorId} creatorName={creatorName} />}
 
       <LegalFooter />
 
