@@ -340,7 +340,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
-      toast.error(`Upload failed: ${result.error}`, { id: uploadToastId });
+      toast.error(`Upload failed: ${result.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
     } else {
       const dbResult = await insertMedia({
         bucket,
@@ -349,10 +349,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         media_type: file.type.startsWith("image/") ? "photo" : "video",
       });
       if ("error" in dbResult) {
-        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId });
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
       } else {
         setUploadMsg(`✓ "${title}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
-        toast.success(`"${title}" uploaded`, { id: uploadToastId });
+        toast.success(`"${title}" uploaded`, { id: uploadToastId, description: undefined, duration: 4000 });
       }
       setUploadTitle("");
     }
@@ -399,7 +399,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
     setUploadProgress(100);
     if ("error" in result) {
       setUploadMsg(`Upload failed: ${result.error}`);
-      toast.error(`Teaser upload failed: ${result.error}`, { id: uploadToastId });
+      toast.error(`Teaser upload failed: ${result.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
     } else {
       const dbResult = await insertMedia({
         bucket: "teasers",
@@ -408,10 +408,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         media_type: "video",
       });
       if ("error" in dbResult) {
-        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId });
+        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
       } else {
         setUploadMsg(`✓ "${title}" teaser uploaded.`);
-        toast.success("Teaser uploaded", { id: uploadToastId });
+        toast.success("Teaser uploaded", { id: uploadToastId, description: undefined, duration: 4000 });
       }
       setUploadTitle("");
     }
