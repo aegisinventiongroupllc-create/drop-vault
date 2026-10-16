@@ -33,16 +33,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     } catch {}
   };
 
-  // Counter-offer state
-  const [counterOffer, setCounterOffer] = useState<{ tokens: number; message: string } | null>(null);
-
-  const tier = selectedTier !== null ? TIERS[selectedTier] : null;
-
-  // Calculate price based on custom bid or tier
-  const bidTokens = useCustomBid ? Math.min(Number(customBidTokens) || 0, MAX_TOKENS) : null;
-  const activePrice = useCustomBid
-    ? (bidTokens ?? 0) * TOKEN_BASE_VALUE_USD
-    : (tier?.price ?? 0);
+  // Calculate price based on custom bid
+  const bidTokens = Math.min(Number(customBidTokens) || 0, MAX_TOKENS);
+  const activePrice = bidTokens * TOKEN_BASE_VALUE_USD;
   const tokenCalc = calculateRequestTokens(activePrice);
   const split = calculateCustomRequestSplit(activePrice);
   const totalDue = split.invoiceTotal;
