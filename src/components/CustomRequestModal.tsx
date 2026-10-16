@@ -60,9 +60,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     try {
       const invoiceTotal = totalDue;
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: useCustomBid
-          ? { kind: "custom_request", bid_tokens: bidTokens }
-          : { kind: "custom_request", tier_price: tier?.price },
+        body: { kind: "custom_request", bid_tokens: bidTokens },
       });
       if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
@@ -172,10 +170,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           <div className="p-4 space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 flex justify-between items-center">
               <div>
-                <p className="font-semibold text-foreground">{useCustomBid ? "Custom Bid" : tier?.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {useCustomBid ? `${bidTokens} Bit-Tokens` : `Delivery: ${tier?.delivery}`}
-                </p>
+                <p className="font-semibold text-foreground">Custom Bid</p>
+                <p className="text-xs text-muted-foreground">{bidTokens} Bit-Tokens</p>
               </div>
               <div className="text-right">
                 <span className="text-primary font-bold text-lg">${activePrice}</span>
@@ -213,8 +209,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-foreground font-medium">@{creatorName}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{useCustomBid ? "Custom Bid" : "Tier"}</span>
-                <span className="text-foreground font-medium">{useCustomBid ? `${bidTokens} BT` : tier?.label}</span>
+                <span className="text-muted-foreground">Custom Bid</span>
+                <span className="text-foreground font-medium">{bidTokens} BT</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Base Cost</span>
