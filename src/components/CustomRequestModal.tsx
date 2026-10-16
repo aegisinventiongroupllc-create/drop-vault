@@ -448,27 +448,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">REQUEST SUBMITTED</h3>
             <p className="text-sm text-muted-foreground">
-              Your request has been sent to @{creatorName}. They can accept, decline, or counter-offer.
+              Your request has been sent to <span className="text-foreground font-medium">@{creatorName}</span>. They can accept, decline, or send a counter-offer. You'll see updates in your dashboard under MY REQUESTS.
             </p>
-
-            {paymentInfo?.pay_address && (
-              <div className="bg-secondary/50 border border-border rounded-lg p-3 space-y-1">
-                <p className="text-[10px] text-muted-foreground">
-                  Send <span className="text-primary font-bold">{paymentInfo.pay_amount} {paymentInfo.pay_currency?.toUpperCase()}</span> to:
-                </p>
-                <p className="text-[10px] text-foreground font-mono break-all">{paymentInfo.pay_address}</p>
-              </div>
-            )}
-
-            {paymentInfo?.invoice_url && (
-              <div className="bg-secondary/50 border border-border rounded-lg p-3">
-                <p className="text-[10px] text-muted-foreground mb-2">Complete your card payment in the window that opened.</p>
-                <a href={paymentInfo.invoice_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">
-                  Open payment page again
-                </a>
-              </div>
-            )}
-
+            <p className="text-[10px] text-muted-foreground">Requests expire in 14 days if the creator doesn't respond.</p>
             <Button variant="neon" className="w-full" onClick={onClose}>DONE</Button>
           </div>
         )}
