@@ -89,7 +89,18 @@ const Index = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
-  const [countryFilter, setCountryFilter] = useState("GLOBAL");
+  const [countryFilter, setCountryFilterState] = useState(() => {
+    // The globe pick lasts for the day, then resets to GLOBAL.
+    try {
+      const saved = JSON.parse(localStorage.getItem("dtt_country_day") || "null");
+      if (saved?.day === new Date().toDateString() && typeof saved.code === "string") return saved.code as string;
+    } catch { /* ignore */ }
+    return "GLOBAL";
+  });
+  const setCountryFilter = (code: string) => {
+    setCountryFilterState(code);
+    try { localStorage.setItem("dtt_country_day", JSON.stringify({ code, day: new Date().toDateString() })); } catch { /* ignore */ }
+  };
   const [showGlobe, setShowGlobe] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [roleHydrated, setRoleHydrated] = useState(false);
