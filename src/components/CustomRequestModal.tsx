@@ -141,8 +141,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                   value={customBidTokens}
                   onChange={(e) => {
                     setCustomBidTokens(e.target.value);
-                    setUseCustomBid(true);
-                    setSelectedTier(null);
                   }}
                   placeholder="e.g. 50"
                   className="flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
@@ -151,7 +149,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                   variant="gold"
                   size="sm"
                   disabled={!customBidTokens || Number(customBidTokens) < MIN_CUSTOM_BID_TOKENS}
-                  onClick={() => { setUseCustomBid(true); setStep("details"); }}
+                  onClick={() => setStep("details")}
                 >
                   BID
                 </Button>
