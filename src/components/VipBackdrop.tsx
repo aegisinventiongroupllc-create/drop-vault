@@ -29,3 +29,14 @@ export default function VipBackdrop() {
     </div>
   );
 }
+
+/** Full-screen "fog machine": smoke puffs drifting across the whole dashboard. */
+export function VipFogMachine() {
+  const on = useVipGlow();
+  if (!on) return null;
+  return (
+    <div aria-hidden="true" className="vip-fog-machine pointer-events-none fixed inset-0 overflow-hidden">
+      {Array.from({ length: 8 }, (_, i) => <span key={i} className={`vip-smoke vip-smoke-${i}`} />)}
+    </div>
+  );
+}
