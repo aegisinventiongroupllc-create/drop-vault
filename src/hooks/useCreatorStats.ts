@@ -192,6 +192,7 @@ export function useCreatorStats(): CreatorLiveStats {
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "creator_wallets" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "creator_heart_totals" }, () => load())
       .subscribe();
 
     return () => {

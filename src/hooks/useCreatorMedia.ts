@@ -10,6 +10,9 @@ export interface CreatorMediaItem {
   media_type: "video" | "photo";
   views: number;
   created_at: string;
+  teaser_frame: "none" | "seasonal" | "sexy" | "gothic" | "glamour";
+  active_from: string | null;
+  active_until: string | null;
 }
 
 export function useCreatorMedia(creatorId: string | null) {
@@ -19,12 +22,19 @@ export function useCreatorMedia(creatorId: string | null) {
   const refresh = useCallback(async () => {
     if (!creatorId) return;
     setLoading(true);
+    const rows: CreatorMediaItem[] = [];
+    for (let offset = 0; ; offset += 500) {
     const { data, error } = await supabase
       .from("creator_media")
       .select("*")
       .eq("creator_id", creatorId)
-      .order("created_at", { ascending: false });
-    if (!error && data) setItems(data as CreatorMediaItem[]);
+      .order("created_at", { ascending: false })
+      .range(offset, offset + 499);
+    if (error || !data) break;
+    rows.push(...(data as CreatorMediaItem[]));
+    if (data.length < 500) break;
+    }
+    setItems(rows);
     setLoading(false);
   }, [creatorId]);
 
