@@ -75,11 +75,11 @@ export async function counterRequest(id: string, counterUsd: number, message: st
     .eq("id", id);
 }
 
-/** Customer accepts a counter-offer — moves to accepted. */
-export async function acceptCounter(id: string) {
+/** Customer accepts a counter-offer — updates amount to the counter price and moves to accepted. */
+export async function acceptCounterOffer(id: string, counterUsd: number) {
   return supabase
     .from("custom_requests")
-    .update({ status: "accepted", amount_usd: undefined })
+    .update({ status: "accepted", amount_usd: counterUsd })
     .eq("id", id);
 }
 
