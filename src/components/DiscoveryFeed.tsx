@@ -106,7 +106,6 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     videoRef.current?.play().catch(() => {});
   };
 
-  useEffect(() => { setLikeCount(video.likes); }, [video.likes]);
 
   useEffect(() => {
     const el = cardRef.current;
