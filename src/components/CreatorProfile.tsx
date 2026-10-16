@@ -15,6 +15,9 @@ import { formatUnlockCountdown } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import TopFansSection from "@/components/TopFansSection";
+import CreatorHeartButton from "@/components/CreatorHeartButton";
+import DttToken from "@/components/DttToken";
+import { useHeartTotal } from "@/hooks/useHearts";
 
 interface Vault {
   name: string;
@@ -75,17 +78,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     return () => { cancel = true; };
   }, [creatorId]);
 
-  const [heartCount, setHeartCount] = useState(0);
-  useEffect(() => {
-    if (!creatorId) return;
-    const load = async () => {
-      const { data } = await supabase.rpc("get_heart_counts", { _creator_ids: [creatorId] });
-      setHeartCount(Number((data as any)?.[0]?.hearts ?? 0));
-    };
-    load();
-    window.addEventListener("dtt-hearts-changed", load);
-    return () => window.removeEventListener("dtt-hearts-changed", load);
-  }, [creatorId]);
+  const heartCount = useHeartTotal(creatorId);
 
   const activeSub = creatorId
     ? subs.find((s) => s.creator_id === creatorId && s.status === "active" && new Date(s.expires_at) > new Date())
@@ -172,6 +165,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <BadgeCheck className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
+        {creatorId && <CreatorHeartButton creatorId={creatorId} />}
 
         {/* King of the Vault — empty until first top supporter */}
         <div className="mt-4 mx-auto max-w-xs bg-secondary/50 border border-gold/30 rounded-lg px-4 py-3 gold-glow">
@@ -315,7 +309,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         ) : (
           <>
             <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">
-              <img src={dttCoin} alt="DTT Bit-Token" width={80} height={80} className="w-20 h-20 mx-auto mb-2 object-contain animate-pulse" />
+              <DttToken className="w-20 h-20 mx-auto mb-2" />
               <p className="text-sm font-bold text-foreground">Drop 1 DTT Bit-Token to unlock</p>
               <p className="text-xs text-muted-foreground mt-1">14 days of full access to every long-form video from @{creatorName}.</p>
             </div>

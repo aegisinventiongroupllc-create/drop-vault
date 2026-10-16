@@ -1,5 +1,5 @@
 // Whole-site automatic translation for any language beyond the hand-written ones.
-// Uses the browser translation engine via a hidden widget; its branding is hidden in CSS.
+import { beginLanguageTransition } from "@/lib/languageTransition";
 export const EXTRA_LANGUAGES: Record<string, string> = {
   de: "Deutsch", it: "Italiano", nl: "Nederlands", pl: "Polski", ru: "Русский",
   uk: "Українська", tr: "Türkçe", ar: "العربية", he: "עברית", hi: "हिन्दी",
@@ -20,7 +20,8 @@ export const setAutoLang = (lang: string | null) => {
   else localStorage.removeItem(KEY);
   // Clear any leftover cookie from the old third-party widget.
   document.cookie = "googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  window.location.reload();
+  beginLanguageTransition();
+  window.setTimeout(() => window.location.reload(), 100);
 };
 
 /** Kept as a no-op for older imports; translation runs in AutoTranslator. */

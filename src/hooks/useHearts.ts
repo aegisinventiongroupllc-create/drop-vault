@@ -41,6 +41,26 @@ export async function fetchHeartCounts(ids: string[]): Promise<Record<string, nu
   return map;
 }
 
+/** Only aggregate totals are public; fan identities remain private. */
+export function useHeartTotal(creatorId: string | null) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!creatorId) return;
+    let cancelled = false;
+    const load = async () => {
+      const totals = await fetchHeartCounts([creatorId]);
+      if (!cancelled) setCount(totals[creatorId] ?? 0);
+    };
+    void load();
+    const channel = supabase.channel(`heart-total-${creatorId}-${crypto.randomUUID()}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "creator_heart_totals", filter: `creator_id=eq.${creatorId}` }, () => { void load(); }).subscribe();
+    const onLocal = () => { void load(); };
+    window.addEventListener("dtt-hearts-changed", onLocal);
+    return () => { cancelled = true; void supabase.removeChannel(channel); window.removeEventListener("dtt-hearts-changed", onLocal); };
+  }, [creatorId]);
+  return count;
+}
+
 /** Returns new liked state, or null if the user isn't signed in / it failed. */
 export async function toggleHeart(creatorId: string, currentlyLiked: boolean): Promise<boolean | null> {
   const { data: u } = await supabase.auth.getUser();

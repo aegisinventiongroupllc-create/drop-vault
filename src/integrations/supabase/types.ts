@@ -157,6 +157,21 @@ export type Database = {
           },
         ]
       }
+      creator_heart_totals: {
+        Row: {
+          creator_id: string
+          hearts: number
+        }
+        Insert: {
+          creator_id: string
+          hearts?: number
+        }
+        Update: {
+          creator_id?: string
+          hearts?: number
+        }
+        Relationships: []
+      }
       creator_hearts: {
         Row: {
           created_at: string
@@ -180,34 +195,43 @@ export type Database = {
       }
       creator_media: {
         Row: {
+          active_from: string | null
+          active_until: string | null
           bucket: string
           created_at: string
           creator_id: string
           id: string
           media_type: string
           storage_path: string
+          teaser_frame: string
           title: string
           updated_at: string
           views: number
         }
         Insert: {
+          active_from?: string | null
+          active_until?: string | null
           bucket: string
           created_at?: string
           creator_id: string
           id?: string
           media_type?: string
           storage_path: string
+          teaser_frame?: string
           title?: string
           updated_at?: string
           views?: number
         }
         Update: {
+          active_from?: string | null
+          active_until?: string | null
           bucket?: string
           created_at?: string
           creator_id?: string
           id?: string
           media_type?: string
           storage_path?: string
+          teaser_frame?: string
           title?: string
           updated_at?: string
           views?: number
@@ -421,6 +445,7 @@ export type Database = {
           fulfilled_at: string | null
           fulfillment_deadline: string | null
           id: string
+          origin_country: string | null
           payment_id: string | null
           platform_share_usd: number
           status: string
@@ -441,6 +466,7 @@ export type Database = {
           fulfilled_at?: string | null
           fulfillment_deadline?: string | null
           id?: string
+          origin_country?: string | null
           payment_id?: string | null
           platform_share_usd?: number
           status?: string
@@ -461,6 +487,7 @@ export type Database = {
           fulfilled_at?: string | null
           fulfillment_deadline?: string | null
           id?: string
+          origin_country?: string | null
           payment_id?: string | null
           platform_share_usd?: number
           status?: string
@@ -1214,6 +1241,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_active_teasers: {
+        Args: never
+        Returns: {
+          active_from: string | null
+          active_until: string | null
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          media_type: string
+          storage_path: string
+          teaser_frame: string
+          title: string
+          updated_at: string
+          views: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "creator_media"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_heart_counts: {
         Args: { _creator_ids: string[] }
         Returns: {
@@ -1294,6 +1344,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_my_active_teaser: {
+        Args: { _media_id: string; _period: string }
+        Returns: undefined
       }
       set_my_payout_method: {
         Args: {

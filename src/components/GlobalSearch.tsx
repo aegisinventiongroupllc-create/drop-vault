@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import CreatorHeartButton from "@/components/CreatorHeartButton";
+import type { VaultType } from "@/lib/tokenEconomy";
 import { COUNTRIES } from "@/components/GlobalPassport";
 
 interface CreatorRow {
   user_id: string;
+  vault_side: VaultType;
   display_name: string | null;
   country: string | null;
   avatar_config: unknown;
@@ -18,7 +21,7 @@ interface CreatorRow {
 const countryFlag = (code: string | null) =>
   COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
 
-const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: string) => void; onClose: () => void }) => {
+const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; onCreatorClick: (name: string) => void; onClose: () => void }) => {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [demandSent, setDemandSent] = useState(false);
@@ -29,18 +32,19 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config, profile_photo_path, tags")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path, tags, vault_side")
         .eq("role", "creator")
         .limit(500);
       setCreators((data ?? []) as unknown as CreatorRow[]);
     })();
-  }, []);
+  }, [vault]);
 
   const q = query.trim().toLowerCase();
 
   // Search creators by handle, tag, or country
   const creatorResults = q
     ? creators.filter((c) => {
+        if (vault && c.vault_side !== vault) return false;
         const name = (c.display_name ?? "").toLowerCase();
         const tags = (c.tags ?? []).map((tag) => tag.toLowerCase());
         const country = (COUNTRIES.find((x) => x.code === c.country)?.name ?? "").toLowerCase();
@@ -83,9 +87,8 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
       <div className="px-4 mt-2 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
         {/* Creator results */}
         {creatorResults.map((creator) => (
-          <button
+          <div
             key={creator.user_id}
-            onClick={() => { if (creator.display_name) { onCreatorClick(creator.display_name); onClose(); } }}
             className="w-full flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:border-primary/50 active:bg-card/80 transition-all"
           >
             <ProfileAvatar config={creator.avatar_config} creatorPhotoPath={creator.profile_photo_path} label={creator.display_name || "creator"} className="h-12 w-12" />
@@ -101,10 +104,11 @@ const GlobalSearch = ({ onCreatorClick, onClose }: { onCreatorClick: (name: stri
                 </div>
               )}
             </div>
-            <Button variant="neon" size="sm" className="text-[10px] shrink-0">
+            <CreatorHeartButton creatorId={creator.user_id} />
+            <Button variant="neon" size="sm" className="text-[10px] shrink-0" onClick={() => { if (creator.display_name) { onCreatorClick(creator.display_name); onClose(); } }}>
               {t.unlock}
             </Button>
-          </button>
+          </div>
         ))}
 
         {noResults && (

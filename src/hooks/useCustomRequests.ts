@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomRequestRow {
+  origin_country: string | null;
   id: string;
   customer_id: string;
   creator_id: string | null;
@@ -32,13 +33,19 @@ export function useCustomRequests(role: "customer" | "creator") {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) { setLoading(false); return; }
     const col = role === "customer" ? "customer_id" : "creator_id";
-    const { data } = await supabase
+    const rows: CustomRequestRow[] = [];
+    for (let offset = 0; ; offset += 500) {
+    const { data, error } = await supabase
       .from("custom_requests")
       .select("*")
       .eq(col, u.user.id)
       .order("created_at", { ascending: false })
-      .limit(50);
-    setRequests((data as unknown as CustomRequestRow[]) ?? []);
+      .range(offset, offset + 499);
+    if (error || !data) break;
+    rows.push(...(data as unknown as CustomRequestRow[]));
+    if (data.length < 500) break;
+    }
+    setRequests(rows);
     setLoading(false);
   }, [role]);
 

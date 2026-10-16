@@ -302,6 +302,13 @@
       "when": 1792180401139,
       "tag": "0042_create_app_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1792193647777,
+      "tag": "0043_creator_teaser_selection_request_countries_heart_totals",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,5 @@
+import DttToken from "@/components/DttToken";
+import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
 import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
 import { Bell, RefreshCw, Compass, Heart, Vault } from "lucide-react";
@@ -37,11 +39,13 @@ interface MemberDashboardProps {
   balance: number;
   onBuyTokens: (n: number) => void;
   vault?: VaultType;
+  preference?: CustomerPreference;
   onNavigateHome?: () => void;
   onCreatorClick?: (name: string) => void;
 }
 
-const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
+const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
+  const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "requests">("library");
@@ -157,11 +161,11 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
   const savedLocked = hearts
     .filter((h) => !unlockedIds.has(h.creator_id))
     .map((h) => ({ id: h.creator_id, name: savedNames[h.creator_id] || "creator", side: genderMap[h.creator_id] ?? "women" }))
-    .filter((c) => !vault || c.side === vault);
+    .filter((c) => visibleVaults.includes(c.side));
   const hasUnlocks = activeUnlocks.length > 0 || savedLocked.length > 0;
 
   // Dynamic header based on vault preference
-  const libraryTitle = vault === "men" ? "MY GUYS" : vault === "women" ? "MY GIRLS" : "MY LIBRARY";
+  const libraryTitle = visibleVaults.length === 2 ? "MY LIBRARY" : visibleVaults[0] === "men" ? "MY GUYS" : "MY GIRLS";
 
   const expiringCreators = activeUnlocks.filter(u => {
     const remaining = getUnlockTimeRemaining(u);
@@ -268,7 +272,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
         </div>
         <p className="text-xs text-muted-foreground mb-1">Coins in your vault</p>
         <div className="flex items-center justify-center gap-2">
-          <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
+          <DttToken />
           <span className="text-3xl font-bold text-foreground">{balance}</span>
           <span className="text-sm text-muted-foreground">Bit-Tokens</span>
         </div>
@@ -334,7 +338,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
               )}
 
               {/* My Girls */}
-              {(vault !== "men") && (
+              {visibleVaults.includes("women") && (
                 <div>
                   <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
                   {myGirls.length > 0 ? (
@@ -348,7 +352,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
               )}
 
               {/* My Guys */}
-              {(vault !== "women") && (
+              {visibleVaults.includes("men") && (
                 <div>
                   <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
                   {myGuys.length > 0 ? (
@@ -361,31 +365,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
                 </div>
               )}
 
-              {/* Show both if "both" preference */}
-              {vault === undefined && (
-                <>
-                  <div>
-                    <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
-                    {myGirls.length > 0 ? (
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {myGirls.map(renderCreatorCircle)}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
-                    {myGuys.length > 0 ? (
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {myGuys.map(renderCreatorCircle)}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-                    )}
-                  </div>
-                </>
-              )}
+
 
               <div className="bg-secondary/50 border border-border rounded-xl p-3">
                 <p className="text-[10px] text-muted-foreground text-center">
