@@ -239,6 +239,13 @@
       "when": 1791812929809,
       "tag": "0033_count_media_views",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792141333081,
+      "tag": "0034_safe_signup_display_name",
+      "breakpoints": true
     }
   ]
 }
