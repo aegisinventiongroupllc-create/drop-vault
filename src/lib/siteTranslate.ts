@@ -14,43 +14,17 @@ const KEY = "dtt_auto_lang";
 
 export const getAutoLang = (): string | null => localStorage.getItem(KEY);
 
-const setCookie = (val: string) => {
-  const host = window.location.hostname;
-  document.cookie = `googtrans=${val};path=/`;
-  document.cookie = `googtrans=${val};path=/;domain=${host}`;
-  const root = host.split(".").slice(-2).join(".");
-  document.cookie = `googtrans=${val};path=/;domain=.${root}`;
-};
-
+// Picking a language stores it; the in-app AutoTranslator applies it on reload.
 export const setAutoLang = (lang: string | null) => {
-  if (lang) {
-    localStorage.setItem(KEY, lang);
-    setCookie(`/auto/${lang}`);
-  } else {
-    localStorage.removeItem(KEY);
-    setCookie("");
-    document.cookie = "googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  }
+  if (lang) localStorage.setItem(KEY, lang);
+  else localStorage.removeItem(KEY);
+  // Clear any leftover cookie from the old third-party widget.
+  document.cookie = "googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
   window.location.reload();
 };
 
-export const initAutoTranslate = () => {
-  const lang = getAutoLang();
-  if (!lang || document.getElementById("dtt-tx-script")) return;
-  setCookie(`/auto/${lang}`);
-  const host = document.createElement("div");
-  host.id = "google_translate_element";
-  host.style.display = "none";
-  document.body.appendChild(host);
-  (window as unknown as Record<string, unknown>).dttTxInit = () => {
-    const g = (window as unknown as { google?: any }).google;
-    if (g?.translate) new g.translate.TranslateElement({ pageLanguage: "en", autoDisplay: false }, "google_translate_element");
-  };
-  const s = document.createElement("script");
-  s.id = "dtt-tx-script";
-  s.src = "https://translate.google.com/translate_a/element.js?cb=dttTxInit";
-  document.body.appendChild(s);
-};
+/** Kept as a no-op for older imports; translation runs in AutoTranslator. */
+export const initAutoTranslate = () => {};
 
 /** Country name in the visitor's language. */
 export const countryName = (code: string, fallback: string): string => {
