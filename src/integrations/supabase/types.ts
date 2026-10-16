@@ -555,6 +555,7 @@ export type Database = {
           body: string
           created_at: string
           creator_id: string
+          fan_id: string | null
           id: string
           sender_id: string
         }
@@ -562,6 +563,7 @@ export type Database = {
           body: string
           created_at?: string
           creator_id: string
+          fan_id?: string | null
           id?: string
           sender_id: string
         }
@@ -569,6 +571,7 @@ export type Database = {
           body?: string
           created_at?: string
           creator_id?: string
+          fan_id?: string | null
           id?: string
           sender_id?: string
         }

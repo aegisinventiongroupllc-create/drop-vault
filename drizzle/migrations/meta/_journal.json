@@ -281,6 +281,13 @@
       "when": 1792161890467,
       "tag": "0039_scale_indexes_country_creators",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792162205805,
+      "tag": "0040_private_top_fan_threads",
+      "breakpoints": true
     }
   ]
 }
