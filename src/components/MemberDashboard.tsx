@@ -55,6 +55,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
 
   const [autorenew, setAutorenew] = useState<Record<string, boolean>>(() => loadAutorenew());
   const { toast } = useToast();
+  const { requests: myRequests, loading: reqLoading, refresh: refreshReqs } = useCustomRequests("customer");
+  const [reqBusy, setReqBusy] = useState(false);
   const { subs } = useSubscriptions();
   const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
   const { hearts } = useMyHearts();
