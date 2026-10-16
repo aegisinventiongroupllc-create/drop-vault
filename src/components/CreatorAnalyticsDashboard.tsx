@@ -23,6 +23,7 @@ import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery"
 import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
+import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
 
 import {
