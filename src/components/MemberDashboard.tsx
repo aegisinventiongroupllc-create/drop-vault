@@ -31,11 +31,6 @@ function saveAutorenew(map: Record<string, boolean>) {
   localStorage.setItem(AUTORENEW_KEY, JSON.stringify(map));
 }
 
-const MY_REQUESTS: CustomRequest[] = [
-  { id: "r1", creatorName: "LunaCosplay", description: "Custom cosplay photoshoot", amountUsd: 500, totalTokens: 26, status: "accepted", createdAt: Date.now() - 86400000 },
-  { id: "r2", creatorName: "FitJessie", description: "Exclusive workout video", amountUsd: 250, totalTokens: 13.5, status: "pending", createdAt: Date.now() - 43200000 },
-  { id: "r3", creatorName: "BlondieVibes", description: "Behind the scenes content", amountUsd: 100, totalTokens: 6, status: "declined", createdAt: Date.now() - 172800000 },
-];
 
 interface MemberDashboardProps {
   balance: number;
