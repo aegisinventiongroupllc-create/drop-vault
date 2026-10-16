@@ -213,7 +213,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bit-Tokens</span><span className="font-bold text-foreground">{quantity}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Price each</span><span className="text-foreground">${TOKEN_INVOICE_USD}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Transaction fee</span><span className="text-foreground">${TRANSACTION_FEE_USD}</span></div>
+              {TRANSACTION_FEE_USD > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Transaction fee</span><span className="text-foreground">${TRANSACTION_FEE_USD}</span></div>}
               <div className="flex justify-between border-t border-border pt-2 text-base font-bold"><span className="text-foreground">Total</span><span className="text-primary">${invoiceAmount}</span></div>
               <p className="text-[10px] text-muted-foreground">Tokens never expire. Use them any time — each one unlocks a creator for 14 days.</p>
             </div>
@@ -250,7 +250,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <span className="text-muted-foreground">{isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""} @ $${TOKEN_INVOICE_USD}`}</span>
                 <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : quantity * TOKEN_INVOICE_USD}</span>
               </div>
-              {!isEntryPass && (
+              {!isEntryPass && TRANSACTION_FEE_USD > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Transaction fee</span>
                   <span className="text-foreground">${TRANSACTION_FEE_USD}</span>
