@@ -46,18 +46,29 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       .catch(() => setCardEnabled(false));
   }, []);
 
+  const requireSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) { setError("Please sign in to your account before paying."); return false; }
+    return true;
+  };
+
   const handleCardCheckout = async () => {
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
-    await logConsent();
-    setError(null);
-    const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
-      body: { ...(isEntryPass ? { package: "entry_pass" } : pkgBody), savecard: rememberCard },
-    });
-    if (fnError || !data?.checkout_url) {
-      setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
-      return;
+    try {
+      if (!(await requireSession())) return;
+      await logConsent();
+      setError(null);
+      const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
+        body: { ...(isEntryPass ? { package: "entry_pass" } : pkgBody), savecard: rememberCard },
+      });
+      if (fnError || !data?.checkout_url) {
+        setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
+        return;
+      }
+      window.location.href = data.checkout_url;
+    } catch (err: any) {
+      setError(err?.message || "Card checkout failed. Please try again.");
     }
-    window.location.href = data.checkout_url;
   };
 
   const tokens = quantity;
@@ -128,6 +139,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
 
   const handleStartCheckout = async () => {
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
+    if (!(await requireSession())) return;
     await logConsent();
     setStep("processing");
     setError(null);
