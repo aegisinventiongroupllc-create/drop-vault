@@ -206,17 +206,22 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
 
       <div className="space-y-4 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
         {avatar.useDttIcon && <div className="space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your DTT colors</p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your DTT colors</p>
+            <button type="button" onClick={() => setWheelOpen((open) => !open)} aria-expanded={wheelOpen} className="text-[10px] font-black uppercase tracking-widest text-primary">
+              {wheelOpen ? "HIDE COLORS" : "SHOW COLORS"}
+            </button>
+          </div>
           <div className="grid grid-cols-3 gap-2" role="group" aria-label="Select DTT letter">
             {(["D", "First T", "Second T"] as const).map((letter, index) => (
-              <Button key={letter} type="button" variant={letterIndex === index ? "default" : "outline"} aria-pressed={letterIndex === index} onClick={() => setLetterIndex(index)}>{letter}</Button>
+              <Button key={letter} type="button" variant={letterIndex === index ? "default" : "outline"} aria-pressed={letterIndex === index} onClick={() => { setLetterIndex(index); setWheelOpen(true); }}>{letter}</Button>
             ))}
           </div>
-          <DttColorWheel letter={["D", "first T", "second T"][letterIndex]} color={parseDttColors(avatar.dttLetterColors)[letterIndex]} onChange={(color) => updateAvatar((current) => {
+          {wheelOpen && <DttColorWheel letter={["D", "first T", "second T"][letterIndex]} color={parseDttColors(avatar.dttLetterColors)[letterIndex]} onChange={(color) => updateAvatar((current) => {
                 const colors = parseDttColors(current.dttLetterColors);
                 colors[letterIndex] = color;
                 return { ...current, dttLetterColors: colors, useDttIcon: true };
-              })} />
+              })} />}
         </div>}
         {!avatar.useDttIcon && <div>
           <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Choose your emoji style</p>
