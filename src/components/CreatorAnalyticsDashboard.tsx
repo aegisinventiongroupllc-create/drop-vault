@@ -33,6 +33,7 @@ import {
   type CreatorSplitState,
 } from "@/lib/paymentSplit";
 import { useCreatorStats } from "@/hooks/useCreatorStats";
+import TeaserCarousel from "@/components/TeaserCarousel";
 import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 import { QRCodeCanvas } from "qrcode.react";
 import { useCreatorText } from "@/i18n/creator";
@@ -155,7 +156,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
 
   const liveStats = useCreatorStats();
   const welcomeBack = useCreatorWelcomeBack(authUserId, safetyAgreed);
-  const { items: mediaItems, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
+  const { items: mediaItems, refresh: refreshMedia, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -405,7 +406,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         bucket: "teasers",
         storage_path: result.path,
         title,
-        media_type: "video",
+        media_type: file.type.startsWith("image/") ? "photo" : "video",
       });
       if ("error" in dbResult) {
         toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
@@ -467,7 +468,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   const mediaUploadInput = (
     <>
       <input ref={mediaInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
-      <input ref={teaserInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={handleTeaserUpload} />
+      <input ref={teaserInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" className="hidden" onChange={handleTeaserUpload} />
     </>
   );
 
@@ -948,17 +949,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
 
             return (
               <>
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Globe className="w-4 h-4 text-primary" />
-                    <h3 className="text-base font-semibold text-foreground">Your Teasers ({teasers.length})</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {teasers.length === 0
-                      ? <p className="text-xs text-muted-foreground text-center py-4">No teasers yet. Add a title and upload your first teaser (up to 1 minute) above.</p>
-                      : teasers.map((m) => renderRow(m, "text-primary"))}
-                  </div>
-                </div>
+                <TeaserCarousel items={teasers} onRefresh={refreshMedia} onDelete={removeMediaItem} />
 
                 <div>
                   <div className="flex items-center gap-2 mb-3">

@@ -1,3 +1,6 @@
+import { groupRequestsByCountry } from "@/lib/requestCountries";
+import { countryName } from "@/lib/siteTranslate";
+import { COUNTRIES } from "@/components/GlobalPassport";
 import { useState } from "react";
 import { FileText, DollarSign, Clock, Loader2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,7 @@ function statusLabel(status: string) {
 
 const CreatorRequestsPanel = () => {
   const { requests, loading, refresh } = useCustomRequests("creator");
+  const groups = groupRequestsByCountry(requests);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [counterPrice, setCounterPrice] = useState("");
   const [counterMsg, setCounterMsg] = useState("");
@@ -100,7 +104,10 @@ const CreatorRequestsPanel = () => {
           <p className="text-sm text-muted-foreground text-center py-6">No requests yet. They'll appear here when fans send them.</p>
         ) : (
           <div className="space-y-3">
-            {requests.map((req) => {
+            {groups.map((group) => <details key={group.country} className="border-b border-border">
+              <summary className="cursor-pointer py-3 text-sm font-bold text-foreground">{group.country === "UNKNOWN" ? "Country not recorded" : countryName(group.country, COUNTRIES.find((country) => country.code === group.country)?.name || group.country)} ({group.count})</summary>
+              <div className="space-y-3 max-h-[65dvh] overflow-y-auto pb-3">
+            {group.items.map((req) => {
               const expired = req.expires_at && new Date(req.expires_at) < new Date();
               const fulfillmentLeft = req.fulfillment_deadline ? timeLeft(req.fulfillment_deadline) : null;
 
@@ -194,6 +201,8 @@ const CreatorRequestsPanel = () => {
                 </div>
               );
             })}
+              </div>
+            </details>)}
           </div>
         )}
       </div>

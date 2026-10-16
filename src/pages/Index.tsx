@@ -1,3 +1,5 @@
+import { allowedVaults } from "@/lib/customerPreference";
+import { Button } from "@/components/ui/button";
 import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
@@ -238,6 +240,7 @@ const Index = () => {
         <div className="pt-9">
           {showSearch ? (
             <GlobalSearch
+              vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : undefined}
               onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
               onClose={() => setShowSearch(false)}
             />
@@ -420,6 +423,7 @@ const Index = () => {
   if (showSearch) {
     return (
       <GlobalSearch
+              vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : undefined}
         onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
         onClose={() => setShowSearch(false)}
       />
@@ -479,26 +483,11 @@ const Index = () => {
                   DASHBOARD
                 </button>
               )}
-              {(role === "customer" || role === "creator") && (
-                <>
-                  <button
-                    onClick={() => setVault("women")}
-                    className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                      vault === "women" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-                    }`}
-                  >
-                    {t.women}
-                  </button>
-                  <button
-                    onClick={() => setVault("men")}
-                    className={`px-5 py-1.5 rounded-full text-xs font-bold tracking-widest transition-all ${
-                      vault === "men" ? "bg-primary text-primary-foreground neon-glow-sm" : "bg-secondary text-muted-foreground"
-                    }`}
-                  >
-                    {t.men}
-                  </button>
-                </>
-              )}
+              {(role === "creator" ? ["women", "men"] as VaultType[] : allowedVaults(preference)).map((side) => (
+                <Button key={side} size="sm" variant={vault === side ? "neon" : "secondary"} onClick={() => setVault(side)} className="text-xs font-bold">
+                  {side === "women" ? t.women : t.men}
+                </Button>
+              ))}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -518,7 +507,7 @@ const Index = () => {
       {activeTab === "home" && (
         <DiscoveryFeed
           onCreatorClick={handleCreatorClick}
-          vault={vault!}
+          vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : vault ?? "women"}
           onSearch={() => setShowSearch(true)}
           hasVaultToggle={true}
           countryFilter={countryFilter}
@@ -527,7 +516,7 @@ const Index = () => {
       {activeTab === "trending" && (
         <TrendingPage
           onCreatorClick={handleCreatorClick}
-          vault={vault!}
+          vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : vault ?? "women"}
           hasVaultToggle={true}
           countryFilter={countryFilter}
         />
@@ -537,6 +526,7 @@ const Index = () => {
           balance={tokenBalance}
           onBuyTokens={handleBuyTokens}
           vault={vault ?? undefined}
+          preference={preference ?? undefined}
           onNavigateHome={() => navigateToTab("home")}
           onCreatorClick={handleCreatorClick}
         />

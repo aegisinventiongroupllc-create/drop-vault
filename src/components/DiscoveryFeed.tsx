@@ -8,7 +8,9 @@ import LegalFooter from "@/components/LegalFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { TOKEN_INVOICE_USD, BUNDLE_INVOICE_USD, BUNDLE_TOKENS } from "@/lib/tokenEconomy";
 import type { VaultType } from "@/lib/tokenEconomy";
-import { toggleHeart } from "@/hooks/useHearts";
+import CreatorHeartButton from "@/components/CreatorHeartButton";
+import dttCoin from "@/assets/dtt-reward-coin.png";
+import type { TeaserFrame } from "@/components/TeaserViewport";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import MiniGlobe from "@/components/MiniGlobe";
 import BuyTokensModal from "@/components/BuyTokensModal";
@@ -29,6 +31,8 @@ interface VideoItem {
   country: string;
   tags?: string[];
   videoUrl?: string;
+  mediaType?: "photo" | "video";
+  frame?: TeaserFrame;
   creatorId?: string;
 }
 
@@ -142,20 +146,6 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
 
   const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
 
-  const handleLike = async () => {
-    if (!video.creatorId || heartBusy) return;
-    if (isOwner) { toast({ title: "That's you!", description: "You can't heart your own profile." }); return; }
-    setHeartBusy(true);
-    const next = await toggleHeart(video.creatorId, liked);
-    setHeartBusy(false);
-    if (next === null) { toast({ title: "Sign in to save creators", variant: "destructive" }); return; }
-    setLiked(next);
-    setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
-    toast(next
-      ? { title: "Saved to your library", description: `@${video.creator} added. Spend 1 Bit-Token on their profile to unlock 14 days.` }
-      : { title: "Removed from your library", description: `@${video.creator} removed` });
-  };
-
   const handleShare = async () => {
     const url = `${window.location.origin}/?creator=${encodeURIComponent(video.creator)}`;
     const shareData = { title: `DTT — @${video.creator}`, text: `Check out @${video.creator} on DTT!`, url };
@@ -210,7 +200,8 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   return (
     <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
-      {isRealTeaser && (
+      {isRealTeaser && video.mediaType === "photo" && <img src={video.videoUrl} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />}
+      {isRealTeaser && video.mediaType !== "photo" && (
         <video
           ref={videoRef}
           src={video.videoUrl}
@@ -223,6 +214,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
           preload="metadata"
         />
       )}
+      {isRealTeaser && <div aria-hidden="true" className={`absolute inset-0 pointer-events-none teaser-viewport teaser-frame-${video.frame || "none"}`}><div className="teaser-decoration absolute inset-0" /><img src={dttCoin} alt="" className="absolute top-4 left-1/2 -translate-x-1/2 h-10 w-10 object-contain opacity-20" /></div>}
       {isVisible && !isRealTeaser && (
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -282,10 +274,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
         <button onClick={() => setFollowing(!following)} className={`text-xs font-bold px-2 py-1 rounded-full transition-all active:scale-95 ${following ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}>
           {following ? "FOLLOWING" : "FOLLOW"}
         </button>
-        <button onClick={handleLike} disabled={heartBusy} aria-label={liked ? "Remove from library" : "Save to library"} className={`flex flex-col items-center gap-1 active:scale-90 transition-all ${liked ? "text-red-500" : "text-foreground hover:text-primary"}`}>
-          <Heart className="w-7 h-7" fill={liked ? "currentColor" : "none"} />
-          <span className="text-xs">{formatCount(likeCount)}</span>
-        </button>
+        {video.creatorId && <CreatorHeartButton creatorId={video.creatorId} />}
         <div className="flex flex-col items-center gap-1 text-foreground" aria-label={`${viewCount} views`}>
           <Eye className="w-6 h-6" />
           <span className="text-xs">{formatCount(viewCount)}</span>
@@ -389,12 +378,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: media } = await supabase
-        .from("creator_media")
-        .select("id, creator_id, storage_path, title, views")
-        .eq("bucket", "teasers")
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data: media } = await supabase.rpc("get_active_teasers").limit(500);
       if (!media || cancelled) return;
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
@@ -412,7 +396,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           avatar: p.avatar_config,
           photoPath: p.profile_photo_path,
           side: p.vault_side === "men" ? "men" : "women",
-          tags: Array.isArray((p as { tags?: string[] }).tags) ? (p as { tags?: string[] }).tags! : [],
+          tags: Array.isArray(p.tags) ? p.tags : [],
         };
       });
       // Teaser files are private: only pass holders, creators and admins get short-lived links.
@@ -425,6 +409,8 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         const name = prof?.name || "creator";
         return {
           id: m.id,
+          mediaType: m.media_type as "photo" | "video",
+          frame: m.teaser_frame as TeaserFrame,
           creator: name,
           creatorAvatar: prof?.avatar,
           creatorPhotoPath: prof?.photoPath,
