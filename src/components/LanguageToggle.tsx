@@ -6,10 +6,9 @@ import { EXTRA_LANGUAGES, getAutoLang, setAutoLang } from "@/lib/siteTranslate";
 import { getTargetLang } from "@/components/AutoTranslator";
 
 const LanguageToggle = () => {
-  const { locale, setLocale, locales } = useI18n();
+  const { setLocale, locales } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const auto = getAutoLang();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -43,8 +42,7 @@ const LanguageToggle = () => {
               onClick={() => {
                 setLocale(l);
                 setOpen(false);
-                if (auto) setAutoLang(null);
-                else window.location.reload();
+                setAutoLang(null);
               }}
               className={itemCls(getTargetLang() === l)}
             >
@@ -57,6 +55,7 @@ const LanguageToggle = () => {
               key={code}
               onClick={() => {
                 setLocale("en");
+                setOpen(false);
                 setAutoLang(code);
               }}
               className={itemCls(getTargetLang() === code.toLowerCase())}

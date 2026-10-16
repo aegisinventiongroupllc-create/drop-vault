@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -76,6 +75,7 @@
 }
 
 .welcome-reward { box-shadow: var(--reward-shadow); }
+.dtt-token-glow { filter: drop-shadow(0 0 8px hsl(var(--gold) / .55)); }
 .welcome-reward-content { background: var(--reward-content); }
 .reward-coin-shine::after {
   content: "";
