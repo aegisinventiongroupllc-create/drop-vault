@@ -26,8 +26,9 @@ const vert = `
     vGlow = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     // Fade lights on the far side of the globe.
-    vec3 n = normalize(normalMatrix * normalize(position));
-    vGlow *= smoothstep(-0.05, 0.35, n.z) * 0.0 + 1.0;
+    vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
+    vec3 wn = normalize(mat3(modelMatrix) * position);
+    vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
     gl_PointSize = aSize * uScale * (0.75 + tw * 0.5) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
@@ -38,7 +39,7 @@ const frag = `
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
     vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core);
-    gl_FragColor = vec4(col, core * core * vGlow);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
   }
 `;
 
@@ -50,7 +51,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     countries.forEach((c, ci) => {
       const r = rand(ci * 7919 + 17);
       // Every country glows a little; each person adds more lights (capped).
-      const n = Math.round((24 + Math.min(600, Math.sqrt(c.people) * 40)) * density);
+      const n = Math.round((60 + Math.min(900, Math.sqrt(c.people) * 60)) * density);
       const spread = 3.2 + Math.min(5, Math.log2(1 + c.people));
       // A few "city" hubs per country so lights cluster like real cities.
       const hubs = Array.from({ length: 4 }, () => [c.lat + (r() - 0.5) * spread * 1.4, c.lng + (r() - 0.5) * spread * 1.8]);
@@ -60,7 +61,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         const [x, y, z] = latLngToVec3(h[0] + g(), h[1] + g(), R * 1.004);
         pos.push(x, y, z);
         phase.push(r() * Math.PI * 2);
-        size.push(i % 9 === 0 ? 34 : 10 + r() * 14);
+        size.push(i % 11 === 0 ? 14 : 4 + r() * 5);
       }
     });
     const g = new THREE.BufferGeometry();
