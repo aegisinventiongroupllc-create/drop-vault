@@ -13,7 +13,7 @@ export function getTargetLang(): string {
   const raw = (picked || navigator.language || "en").toLowerCase();
   const base = raw.split("-")[0];
   // Keep regional variants only where they matter.
-  if (raw.startsWith("zh")) return raw.includes("tw") || raw.includes("hk") ? "zh-tw" : "zh";
+  if (raw.startsWith("zh")) return raw.includes("tw") || raw.includes("hk") ? "zh-tw" : "zh-cn";
   if (raw === "pt-br") return "pt-br";
   return base;
 }

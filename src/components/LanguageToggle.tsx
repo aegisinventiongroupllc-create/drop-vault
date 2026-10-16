@@ -3,6 +3,7 @@ import { Globe } from "lucide-react";
 import { useI18n } from "@/i18n/I18nContext";
 import type { Locale } from "@/i18n/types";
 import { EXTRA_LANGUAGES, getAutoLang, setAutoLang } from "@/lib/siteTranslate";
+import { getTargetLang } from "@/components/AutoTranslator";
 
 const LanguageToggle = () => {
   const { locale, setLocale, locales } = useI18n();
@@ -31,7 +32,7 @@ const LanguageToggle = () => {
         aria-label="Change language"
       >
         <Globe className="w-3.5 h-3.5 text-primary" />
-        <span className="uppercase">{auto ?? locale}</span>
+        <span className="uppercase">{getTargetLang()}</span>
       </button>
 
       {open && (
@@ -43,8 +44,9 @@ const LanguageToggle = () => {
                 setLocale(l);
                 setOpen(false);
                 if (auto) setAutoLang(null);
+                else window.location.reload();
               }}
-              className={itemCls(!auto && locale === l)}
+              className={itemCls(getTargetLang() === l)}
             >
               {locales[l]}
             </button>
@@ -57,7 +59,7 @@ const LanguageToggle = () => {
                 setLocale("en");
                 setAutoLang(code);
               }}
-              className={itemCls(auto === code)}
+              className={itemCls(getTargetLang() === code.toLowerCase())}
             >
               {label}
             </button>
