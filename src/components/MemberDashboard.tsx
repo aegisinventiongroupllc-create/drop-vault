@@ -1,3 +1,4 @@
+import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
 import { Bell, RefreshCw, Compass, Heart, Vault } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -481,6 +482,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, onNavigateHome, onCreato
           )}
         </div>
       )}
+
+      <div className="px-4 py-4"><SuggestionBox role="customer" /></div>
 
       <LegalFooter />
 

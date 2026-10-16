@@ -1,3 +1,4 @@
+import AdminSuggestions from "@/components/AdminSuggestions";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
@@ -53,7 +54,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "health" | "demand" | "powerweek" | "flow";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "health" | "demand" | "powerweek" | "flow";
 
 interface FinanceWallet {
   user_id: string;
@@ -301,6 +302,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "revenue", label: "REVENUE" },
     { id: "payouts", label: "PAYOUTS" },
     { id: "requests", label: "REQUESTS" },
+    { id: "suggestions", label: "SUGGESTIONS" },
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
@@ -640,6 +642,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           )}
         </div>
       )}
+
+      {activeSection === "suggestions" && <AdminSuggestions />}
 
       {/* Customer → Creator dollar requests */}
       {activeSection === "requests" && (

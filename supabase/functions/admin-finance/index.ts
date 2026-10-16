@@ -41,6 +41,11 @@ Deno.serve(async (req) => {
       return map;
     };
 
+    if (action === "suggestions") {
+      const { data } = await supabase.from("platform_suggestions").select("*").order("created_at", { ascending: false }).limit(200);
+      return json({ suggestions: data || [] });
+    }
+
     if (action === "overview") {
       const [{ data: txs }, { data: wallets }, { data: batches }, { data: purchases }, { data: passes }, { data: customs }] = await Promise.all([
         supabase.from("transactions").select("amount_usd, creator_share_usd, platform_share_usd, entry_tax, status"),
