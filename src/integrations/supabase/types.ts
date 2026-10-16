@@ -388,12 +388,17 @@ export type Database = {
       custom_requests: {
         Row: {
           amount_usd: number
+          counter_message: string | null
+          counter_offer_usd: number | null
           created_at: string
           creator_id: string | null
           creator_name: string | null
           creator_share_usd: number
           customer_id: string
           description: string
+          expires_at: string | null
+          fulfilled_at: string | null
+          fulfillment_deadline: string | null
           id: string
           payment_id: string | null
           platform_share_usd: number
@@ -403,12 +408,17 @@ export type Database = {
         }
         Insert: {
           amount_usd?: number
+          counter_message?: string | null
+          counter_offer_usd?: number | null
           created_at?: string
           creator_id?: string | null
           creator_name?: string | null
           creator_share_usd?: number
           customer_id: string
           description?: string
+          expires_at?: string | null
+          fulfilled_at?: string | null
+          fulfillment_deadline?: string | null
           id?: string
           payment_id?: string | null
           platform_share_usd?: number
@@ -418,12 +428,17 @@ export type Database = {
         }
         Update: {
           amount_usd?: number
+          counter_message?: string | null
+          counter_offer_usd?: number | null
           created_at?: string
           creator_id?: string | null
           creator_name?: string | null
           creator_share_usd?: number
           customer_id?: string
           description?: string
+          expires_at?: string | null
+          fulfilled_at?: string | null
+          fulfillment_deadline?: string | null
           id?: string
           payment_id?: string | null
           platform_share_usd?: number

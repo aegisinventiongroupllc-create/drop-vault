@@ -17,7 +17,7 @@
 - [Teaser Feed](mem://features/teaser-feed) — Vertical scrolling discovery feed for 15s trailers
 - [Bit-Tokens](mem://economy/bit-tokens) — Token pricing, durations, and access rules
 - [Payouts & Settlement](mem://economy/payout-and-settlement) — NOWPayments integration and LTC-exclusive payouts
-- [Custom Requests](mem://features/custom-requests) — Custom media requests, token fees, and creator escrow
+- [Custom Requests](mem://features/custom-requests) — Offer→counter→accept flow, 42h delivery, 14-day expiry, 85/15 split, private per dashboard
 - [Legal Compliance](mem://legal/compliance) — Safety protocol agreements and Terms of Service clauses
 - [Loyalty & Engagement](mem://features/loyalty-and-engagement) — Gifting loyalty bits to followers
 - [Member Dashboard](mem://features/member-dashboard) — Customer private dashboard and navigation UI
