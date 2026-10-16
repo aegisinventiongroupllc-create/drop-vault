@@ -32,6 +32,10 @@
 
 - [x] Yoti age check: use uploaded sandbox key file (signed requests)
 
+- [x] Custom request workflow: real database-backed offers, creator accept/decline/counter, customer counter-offer response, 14-day expiry, 42-hour fulfillment deadline, private per dashboard, creator reuse video tip
+- [ ] Tips: add $4 card processing fee and wire to real payment (crypto invoice or CCBill when live)
+- [ ] Custom request payment step: wire accepted requests to crypto/card checkout after creator accepts
+
 ## Waiting on the user (off-site)
 
 - [ ] Hire a Pennsylvania registered agent (CROP) and file Change of Registered Office so the public LLC record stops showing the home address. Deferred by user.
