@@ -1,3 +1,4 @@
+import AdminCountries from "@/components/AdminCountries";
 import AdminSuggestions from "@/components/AdminSuggestions";
 import { useState, useEffect } from "react";
 import {
@@ -54,7 +55,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "health" | "demand" | "powerweek" | "flow";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "flow";
 
 interface FinanceWallet {
   user_id: string;
@@ -303,6 +304,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "payouts", label: "PAYOUTS" },
     { id: "requests", label: "REQUESTS" },
     { id: "suggestions", label: "SUGGESTIONS" },
+    { id: "countries", label: "COUNTRIES" },
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
@@ -644,6 +646,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       )}
 
       {activeSection === "suggestions" && <AdminSuggestions />}
+      {activeSection === "countries" && <AdminCountries onOpenCreator={(c) => setSelectedCreator(c as any)} />}
 
       {/* Customer → Creator dollar requests */}
       {activeSection === "requests" && (
