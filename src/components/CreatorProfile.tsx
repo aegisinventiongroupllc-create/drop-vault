@@ -143,6 +143,12 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
   return (
     <div className="mobile-scroll-shell">
+      {coinDrop && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center pointer-events-none bg-background/60 backdrop-blur-sm" aria-hidden="true">
+          <img src={dttCoin} alt="" className="w-40 h-40 object-contain animate-[coin-drop_1.6s_ease-out_forwards]" />
+        </div>
+      )}
+      <style>{`@keyframes coin-drop{0%{transform:translateY(-60vh) rotateY(0) scale(.6);opacity:0}40%{opacity:1}70%{transform:translateY(0) rotateY(720deg) scale(1.1)}100%{transform:translateY(0) rotateY(720deg) scale(1);opacity:0}}`}</style>
       {/* Header */}
       <div className="relative">
         <div className="h-40 bg-gradient-to-br from-primary/20 via-card to-card" />
