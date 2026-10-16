@@ -27,7 +27,7 @@ const vert = `
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     // Fade lights on the far side of the globe.
     vec3 n = normalize(normalMatrix * normalize(position));
-    vGlow *= smoothstep(-0.05, 0.35, n.z);
+    vGlow *= smoothstep(-0.05, 0.35, n.z) * 0.0 + 1.0;
     gl_PointSize = aSize * uScale * (0.75 + tw * 0.5) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
