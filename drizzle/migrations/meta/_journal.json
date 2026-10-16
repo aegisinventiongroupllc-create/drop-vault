@@ -295,6 +295,13 @@
       "when": 1792163227748,
       "tag": "0041_profile_ui_theme",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792180401139,
+      "tag": "0042_create_app_settings",
+      "breakpoints": true
     }
   ]
 }

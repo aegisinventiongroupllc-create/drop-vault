@@ -9,6 +9,7 @@ import { countryName } from "@/lib/siteTranslate";
 import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
 import CityLights, { Atmosphere } from "@/components/CityLights";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
+import { useGlobeStyle, type GlobeStyle } from "@/lib/globeStyle";
 
 // Only countries where this type of site is allowed appear on the globe.
 const ALLOWED_COUNTRIES = COUNTRIES.filter((c) => c.code === "GLOBAL" || !isBlockedCountry(c.code));
@@ -17,6 +18,8 @@ interface GlobePickerProps {
   selected: string;
   onSelect: (code: string) => void;
   onClose: () => void;
+  /** Admin preview only: force a look instead of the platform-wide choice. */
+  styleOverride?: GlobeStyle;
   /** View-only mode: highlight one creator's country. Exact location is never shown. */
   focusCountry?: string;
   focusName?: string;
@@ -128,9 +131,10 @@ interface GlobeSceneProps {
   selected: string;
   onSelect: (code: string) => void;
   onHover: (code: string | null) => void;
+  style: GlobeStyle;
 }
 
-const GlobeScene = ({ counts, selected, onSelect, onHover, showNames }: GlobeSceneProps) => {
+const GlobeScene = ({ counts, selected, onSelect, onHover, showNames, style }: GlobeSceneProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const maxCount = Math.max(1, ...Object.values(counts));
   const lightSpecs = useMemo(() => Object.entries(COUNTRY_LATLNG)
@@ -145,7 +149,7 @@ const GlobeScene = ({ counts, selected, onSelect, onHover, showNames }: GlobeSce
   return (
     <>
       <group ref={groupRef}>
-        <HoloSphere borderOpacity={0.35} />
+        <HoloSphere style={style} />
         <CityLights countries={lightSpecs} />
         {Object.keys(COUNTRY_LATLNG).filter((code) => !isBlockedCountry(code)).map((code) => (
           <CountryMarker
@@ -166,7 +170,9 @@ const GlobeScene = ({ counts, selected, onSelect, onHover, showNames }: GlobeSce
   );
 };
 
-const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: GlobePickerProps) => {
+const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName, styleOverride }: GlobePickerProps) => {
+  const autoStyle = useGlobeStyle();
+  const style = styleOverride ?? autoStyle;
   const [query, setQuery] = useState("");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
@@ -244,7 +250,7 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName }: G
       {/* 3D holographic globe */}
       <div className="relative h-[42vh] min-h-[260px] select-none" onPointerDown={touchStart} onPointerUp={touchEnd} onPointerCancel={touchEnd} onPointerLeave={touchEnd}>
         <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <GlobeScene showNames={showNames} counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
+          <GlobeScene style={style} showNames={showNames} counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
         </Canvas>
         {/* Country + creator count readout for the light being touched */}
         {hovered && (

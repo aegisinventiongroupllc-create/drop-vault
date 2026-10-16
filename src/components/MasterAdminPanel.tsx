@@ -1,5 +1,6 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminSuggestions from "@/components/AdminSuggestions";
+import AdminGlobeStyle from "@/components/AdminGlobeStyle";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Shield, BarChart3, Users, DollarSign, Search,
@@ -55,7 +56,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "flow";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "flow" | "globe";
 
 interface FinanceWallet {
   user_id: string;
@@ -305,6 +306,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "requests", label: "REQUESTS" },
     { id: "suggestions", label: "SUGGESTIONS" },
     { id: "countries", label: "COUNTRIES" },
+    { id: "globe", label: "GLOBE" },
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
@@ -647,6 +649,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
       {activeSection === "suggestions" && <AdminSuggestions />}
       {activeSection === "countries" && <AdminCountries onOpenCreator={(c) => setSelectedCreator(c as any)} />}
+      {activeSection === "globe" && <AdminGlobeStyle />}
 
       {/* Customer → Creator dollar requests */}
       {activeSection === "requests" && (

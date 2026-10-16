@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import WORLD_BORDERS from "@/lib/worldBorders";
+import type { GlobeStyle } from "@/lib/globeStyle";
 
 export const R = 1;
 
@@ -14,8 +15,13 @@ export const latLngToVec3 = (lat: number, lng: number, radius: number): [number,
   ];
 };
 
-// Holographic sphere with real world country borders + faint graticule.
-export const HoloSphere = ({ borderOpacity = 0.85 }: { borderOpacity?: number }) => {
+/**
+ * The DTT globe surface.
+ *  - "brand": dark navy sphere, cyan country borders, faint grid — straight to the point.
+ *  - "earth": satellite day map with city lights glowing on the night side.
+ * Both keep the same size and position, so switching is only a change of skin.
+ */
+export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
   const { borders, grid } = useMemo(() => {
     const borderGeoms: THREE.BufferGeometry[] = [];
     for (const ring of WORLD_BORDERS) {
@@ -43,7 +49,7 @@ export const HoloSphere = ({ borderOpacity = 0.85 }: { borderOpacity?: number })
     return { borders: borderGeoms, grid: gridGeoms };
   }, []);
 
-  const material = useMemo(() => {
+  const earthMaterial = useMemo(() => {
     const loader = new THREE.TextureLoader();
     const day = loader.load("/textures/earth_atmos_2048.jpg");
     const night = loader.load("/textures/earth_lights_2048.png");
@@ -81,20 +87,42 @@ export const HoloSphere = ({ borderOpacity = 0.85 }: { borderOpacity?: number })
     });
   }, []);
 
+  if (style === "earth") {
+    return (
+      <group>
+        {/* Photo-real Earth: satellite day map + city-lights night map */}
+        <mesh material={earthMaterial}>
+          <sphereGeometry args={[R * 0.995, 96, 96]} />
+        </mesh>
+      </group>
+    );
+  }
+
   return (
     <group>
-      {/* Photo-real Earth: satellite day map + city-lights night map */}
-      <mesh material={material}>
-        <sphereGeometry args={[R * 0.995, 96, 96]} />
+      {/* Ocean base + inner glow */}
+      <mesh>
+        <sphereGeometry args={[R * 0.985, 48, 48]} />
+        <meshBasicMaterial color="#0a2a55" transparent opacity={0.35} side={THREE.BackSide} />
       </mesh>
-      {/* Very faint borders only on request */}
-      {borderOpacity > 0.5 && borders.map((g, i) => (
+      <mesh>
+        <sphereGeometry args={[R * 0.985, 48, 48]} />
+        <meshBasicMaterial color="#071d3d" transparent opacity={0.75} />
+      </mesh>
+      {/* Real country borders */}
+      {borders.map((g, i) => (
         <primitive
           key={`b${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#4db8ff", transparent: true, opacity: 0.15 }))}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#4db8ff", transparent: true, opacity: 0.8 }))}
         />
       ))}
-      {void grid}
+      {/* Faint graticule */}
+      {grid.map((g, i) => (
+        <primitive
+          key={`g${i}`}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#2a6db3", transparent: true, opacity: 0.12 }))}
+        />
+      ))}
     </group>
   );
 };
