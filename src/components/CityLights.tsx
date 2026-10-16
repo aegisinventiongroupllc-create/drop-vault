@@ -28,7 +28,7 @@ const vert = `
     // Fade lights on the far side of the globe.
     vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
     vec3 wn = normalize(mat3(modelMatrix) * position);
-    vGlow *= 1.0; // DEBUG: fade disabled
+    vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
     gl_PointSize = aSize * uScale * (0.75 + tw * 0.5) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
@@ -38,8 +38,8 @@ const frag = `
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
-    vec3 col = vec3(0.1, 1.0, 0.2);
-    gl_FragColor = vec4(col, core * core * vGlow * 1.0);
+    vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core * core);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
   }
 `;
 
