@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useRef } from "react";
-import { usePersonalGlobe } from "@/lib/userTheme";
+import { usePersonalGlobe, type StarStyle } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
+import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
+import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
+import clusterImg from "@/assets/brb/stars-cluster.jpg";
 
 /**
  * Shared realistic star-field backdrop that drifts slowly left-to-right and
- * loops forever, replacing the galaxy photo reel. Three parallax layers of
- * stars with realistic color temperature, twinkle and a faint tinted haze.
- * Tinted with the viewer's chosen backdrop color when they picked one.
- */
+ * loops forever. Either living canvas stars or a real astrophotography
+ * panorama chosen by the viewer, panned slowly like a reel. Tinted with the
+ * viewer's chosen backdrop color when they picked one (living stars only).
+  */
+
+const PHOTO_BACKDROPS: Record<Exclude<StarStyle, "living">, string> = {
+  deepfield: deepFieldImg,
+  milkyway: milkyWayImg,
+  cluster: clusterImg,
+};
 
 interface Star {
   x: number; // 0..1 of field width
@@ -64,11 +73,12 @@ const buildStars = (count: number): Star[] => {
 };
 
 const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?: number }) => {
-  const { galaxyTone, reduced } = usePersonalGlobe();
+  const { galaxyTone, starStyle, reduced } = usePersonalGlobe();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(() => buildStars(1050), []);
   const toneRef = useRef<string | null>(galaxyTone ?? null);
   toneRef.current = galaxyTone ?? null;
+  const photoSrc = starStyle && starStyle !== "living" ? PHOTO_BACKDROPS[starStyle] : null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -124,6 +134,23 @@ const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?
     };
   }, [reduced, seconds, stars]);
 
+  if (photoSrc) {
+    return (
+      <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
+        <style>{`@keyframes dtt-star-pan { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+        <div
+          className="flex h-full w-[400%]"
+          style={reduced ? undefined : { animation: `dtt-star-pan ${seconds * 2}s linear infinite` }}
+        >
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
       <canvas ref={canvasRef} className="h-full w-full" />
@@ -140,6 +167,7 @@ const drawStars = (
   h: number,
   layerSpeed: number[],
 ) => {
+  if (!(w > 0) || !(h > 0)) return; // Zero-size canvas (e.g. mid-style-switch) would make positions NaN.
   // Faint deep-space haze behind everything, tinted by the chosen color.
   const haze = tone ?? "#1a1440";
   const [hr, hg, hb] = hexToRgb(haze);

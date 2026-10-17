@@ -2,7 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
 export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
-export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean };
+export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster";
+export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean; starStyle?: StarStyle };
+
+export const STAR_STYLES: { id: StarStyle; label: string }[] = [
+  { id: "living", label: "Living stars" },
+  { id: "deepfield", label: "Deep field" },
+  { id: "milkyway", label: "Milky Way" },
+  { id: "cluster", label: "Star cluster" },
+];
 
 const KEY = "dtt_user_theme";
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -45,6 +53,7 @@ export function validateTheme(t: unknown): UserTheme {
   }
   if (typeof values.globeNeon === "boolean") out.globeNeon = values.globeNeon;
   if (typeof values.globeBorderNeon === "boolean") out.globeBorderNeon = values.globeBorderNeon;
+  if (typeof values.starStyle === "string" && STAR_STYLES.some((s) => s.id === values.starStyle)) out.starStyle = values.starStyle as StarStyle;
   return out;
 }
 
@@ -85,7 +94,7 @@ export function usePersonalGlobe() {
     media.addEventListener("change", motion);
     return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
   }, []);
-  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, reduced };
+  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? "living", reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----

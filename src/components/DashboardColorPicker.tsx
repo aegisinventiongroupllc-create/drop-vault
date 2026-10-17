@@ -4,7 +4,16 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
-import { THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { STAR_STYLES, THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
+import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
+import clusterImg from "@/assets/brb/stars-cluster.jpg";
+
+const STAR_THUMBS: Record<Exclude<StarStyle, "living">, string> = {
+  deepfield: deepFieldImg,
+  milkyway: milkyWayImg,
+  cluster: clusterImg,
+};
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -39,6 +48,10 @@ const DashboardColorPicker = () => {
     const next = { ...theme, globeBorderNeon };
     setTheme(next); saveTheme(next); persist(next);
   };
+  const setStarStyle = (starStyle: StarStyle) => {
+    const next = { ...theme, starStyle };
+    setTheme(next); saveTheme(next); persist(next);
+  };
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
@@ -70,6 +83,25 @@ const DashboardColorPicker = () => {
               {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
             </div>
           ))}
+          <div>
+            <span className="text-xs font-bold text-foreground">Star backdrop style</span>
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+              {STAR_STYLES.map((s) => {
+                const active = theme.starStyle === s.id || (s.id === "living" && !theme.starStyle);
+                return (
+                  <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
+                    className={`overflow-hidden rounded-md border-2 text-left ${active ? "border-primary" : "border-border"}`}>
+                    {s.id === "living" ? (
+                      <div className="flex h-10 w-full items-center justify-center bg-[#050510] text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
+                    ) : (
+                      <img src={STAR_THUMBS[s.id]} alt="" className="h-10 w-full object-cover" loading="lazy" />
+                    )}
+                    <span className="block px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">{s.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
           <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
