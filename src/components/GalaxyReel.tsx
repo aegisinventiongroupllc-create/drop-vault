@@ -9,7 +9,7 @@ import clusterImg from "@/assets/brb/stars-cluster.jpg";
  * Shared realistic star-field backdrop that drifts slowly left-to-right and
  * loops forever. Either living canvas stars or a real astrophotography
  * panorama chosen by the viewer, panned slowly like a reel. Tinted with the
- * viewer's chosen backdrop color when they picked one (living stars only).
+   * viewer's chosen backdrop color while retaining bright stellar highlights.
   */
 
 const PHOTO_BACKDROPS: Record<Exclude<StarStyle, "living">, string> = {
@@ -132,21 +132,21 @@ const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [reduced, seconds, stars]);
+  }, [reduced, seconds, stars, photoSrc]);
 
   if (photoSrc) {
     return (
-      <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
-        <style>{`@keyframes dtt-star-pan { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+      <div className={cn("pointer-events-none absolute inset-0 isolate overflow-hidden bg-background", className)} aria-hidden>
         <div
-          className="flex h-full w-[400%]"
-          style={reduced ? undefined : { animation: `dtt-star-pan ${seconds * 2}s linear infinite` }}
+          className="galaxy-reel-track flex h-full w-[400%]"
+          style={{ animationDuration: `${seconds * 2}s` }}
         >
           <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
           <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
           <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
           <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
         </div>
+        {galaxyTone && <div className="galaxy-photo-tint absolute inset-0" />}
       </div>
     );
   }

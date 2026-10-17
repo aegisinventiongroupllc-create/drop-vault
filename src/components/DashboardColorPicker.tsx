@@ -4,7 +4,7 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
-import { STAR_STYLES, THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
 import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
 import clusterImg from "@/assets/brb/stars-cluster.jpg";
@@ -87,7 +87,7 @@ const DashboardColorPicker = () => {
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
               {STAR_STYLES.map((s) => {
-                const active = theme.starStyle === s.id || (s.id === "living" && !theme.starStyle);
+                const active = (theme.starStyle ?? DEFAULT_STAR_STYLE) === s.id;
                 return (
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
                     className={`overflow-hidden rounded-md border-2 text-left ${active ? "border-primary" : "border-border"}`}>
