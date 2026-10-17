@@ -395,8 +395,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         };
       });
       // Teaser files are private: only pass holders, creators and admins get short-lived links.
-      const { data: signed } = await supabase.storage.from("teasers")
-        .createSignedUrls(media.map((m) => m.storage_path), 60 * 60);
+      const { data: signed } = media.length
+        ? await supabase.storage.from("teasers").createSignedUrls(media.map((m) => m.storage_path), 60 * 60)
+        : { data: [] as { path: string | null; signedUrl: string }[] };
       const urlMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => { if (s.path && s.signedUrl) urlMap[s.path] = s.signedUrl; });
       const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path]).map((m) => {

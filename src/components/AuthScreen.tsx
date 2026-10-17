@@ -40,7 +40,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
     setAdminError("");
     const trimmed = email.trim();
     // Owner preview code: opens the customer entry-pass page
-    if (mode === "login" && trimmed === "0524171") {
+    if (trimmed === "0524171") {
       window.location.href = "/entry-pass-preview";
       return;
     }
