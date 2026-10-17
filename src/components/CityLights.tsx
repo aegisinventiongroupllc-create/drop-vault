@@ -15,26 +15,26 @@ export interface CountryLightSpec { lat: number; lng: number; people: number }
  * alive with creators everywhere, even before real counts roll in.
  */
 export const US_GLOW_HUBS: CountryLightSpec[] = [
-  { lat: 40.7, lng: -74.0, people: 90 },   // New York
-  { lat: 34.0, lng: -118.2, people: 90 },  // Los Angeles
-  { lat: 41.9, lng: -87.6, people: 60 },   // Chicago
-  { lat: 29.8, lng: -95.4, people: 60 },   // Houston
-  { lat: 33.7, lng: -84.4, people: 50 },   // Atlanta
-  { lat: 25.8, lng: -80.2, people: 50 },   // Miami
-  { lat: 32.8, lng: -96.8, people: 50 },   // Dallas
-  { lat: 47.6, lng: -122.3, people: 40 },  // Seattle
-  { lat: 39.7, lng: -104.9, people: 40 },  // Denver
-  { lat: 36.2, lng: -115.1, people: 60 },  // Las Vegas
-  { lat: 42.4, lng: -71.1, people: 40 },   // Boston
-  { lat: 37.8, lng: -122.4, people: 50 },  // San Francisco
-  { lat: 39.9, lng: -75.2, people: 40 },   // Philadelphia
-  { lat: 33.4, lng: -112.1, people: 40 },  // Phoenix
-  { lat: 44.9, lng: -93.3, people: 35 },   // Minneapolis
-  { lat: 30.3, lng: -97.7, people: 40 },   // Austin
-  { lat: 38.9, lng: -77.0, people: 45 },   // Washington DC
-  { lat: 45.5, lng: -122.7, people: 35 },  // Portland
-  { lat: 36.2, lng: -86.8, people: 35 },   // Nashville
-  { lat: 35.2, lng: -80.8, people: 35 },   // Charlotte
+  { lat: 40.7, lng: -74.0, people: 55 },   // New York
+  { lat: 34.0, lng: -118.2, people: 55 },  // Los Angeles
+  { lat: 41.9, lng: -87.6, people: 26 },   // Chicago
+  { lat: 29.8, lng: -95.4, people: 26 },   // Houston
+  { lat: 33.7, lng: -84.4, people: 32 },   // Atlanta
+  { lat: 25.8, lng: -80.2, people: 32 },   // Miami
+  { lat: 32.8, lng: -96.8, people: 32 },   // Dallas
+  { lat: 47.6, lng: -122.3, people: 26 },  // Seattle
+  { lat: 39.7, lng: -104.9, people: 26 },  // Denver
+  { lat: 36.2, lng: -115.1, people: 26 },  // Las Vegas
+  { lat: 42.4, lng: -71.1, people: 26 },   // Boston
+  { lat: 37.8, lng: -122.4, people: 32 },  // San Francisco
+  { lat: 39.9, lng: -75.2, people: 26 },   // Philadelphia
+  { lat: 33.4, lng: -112.1, people: 26 },  // Phoenix
+  { lat: 44.9, lng: -93.3, people: 22 },   // Minneapolis
+  { lat: 30.3, lng: -97.7, people: 26 },   // Austin
+  { lat: 38.9, lng: -77.0, people: 30 },   // Washington DC
+  { lat: 45.5, lng: -122.7, people: 22 },  // Portland
+  { lat: 36.2, lng: -86.8, people: 22 },   // Nashville
+  { lat: 35.2, lng: -80.8, people: 22 },   // Charlotte
 ];
 
 const rand = (seed: number) => {
@@ -49,7 +49,7 @@ const vert = `
   uniform float uScale;
   varying float vGlow;
   void main() {
-    float tw = 0.55 + 0.3 * sin(uTime * 2.2 + aPhase) + 0.15 * sin(uTime * 5.3 + aPhase * 1.7);
+    float tw = 0.7 + 0.18 * sin(uTime * 2.2 + aPhase) + 0.08 * sin(uTime * 5.3 + aPhase * 1.7);
     vGlow = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     // Fade lights on the far side of the globe.
@@ -66,7 +66,7 @@ const frag = `
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
     vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core * core);
-    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.45);
   }
 `;
 
@@ -78,8 +78,8 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     countries.forEach((c, ci) => {
       const r = rand(ci * 7919 + 17);
       // Every country glows a little; each person adds more lights (capped).
-      const n = Math.round((60 + Math.min(900, Math.sqrt(c.people) * 60)) * density);
-      const spread = 5 + Math.min(5, Math.log2(1 + c.people));
+      const n = Math.round((24 + Math.min(420, Math.sqrt(c.people) * 26)) * density);
+      const spread = 2.5 + Math.min(3, Math.log2(1 + c.people) * 0.6);
       // A few "city" hubs per country so lights cluster like real cities.
       const hubs = Array.from({ length: 4 }, () => [c.lat + (r() - 0.5) * spread * 1.4, c.lng + (r() - 0.5) * spread * 1.8]);
       for (let i = 0; i < n; i++) {
@@ -88,7 +88,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         const [x, y, z] = latLngToVec3(h[0] + g(), h[1] + g(), R * 1.004);
         pos.push(x, y, z);
         phase.push(r() * Math.PI * 2);
-        size.push(i % 11 === 0 ? 14 : 4 + r() * 5);
+        size.push(i % 13 === 0 ? 6 : 2 + r() * 2.2);
       }
     });
     const g = new THREE.BufferGeometry();
@@ -106,7 +106,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.6 * scale * dpr } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.15 * scale * dpr } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
