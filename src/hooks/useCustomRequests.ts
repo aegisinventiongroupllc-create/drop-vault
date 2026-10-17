@@ -2,6 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomRequestRow {
+  delivery_path: string | null;
+  delivery_uploaded_at: string | null;
+  delivery_access_until: string | null;
+  creator_archived_at: string | null;
   origin_country: string | null;
   id: string;
   customer_id: string;
@@ -45,7 +49,7 @@ export function useCustomRequests(role: "customer" | "creator") {
     rows.push(...(data as unknown as CustomRequestRow[]));
     if (data.length < 500) break;
     }
-    setRequests(rows);
+    setRequests(role === "creator" ? rows.filter((row) => !row.creator_archived_at) : rows);
     setLoading(false);
   }, [role]);
 

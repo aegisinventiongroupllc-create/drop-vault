@@ -1,0 +1,2 @@
+DROP POLICY "Request participants read retained delivery" ON storage.objects;
+CREATE POLICY "Creators read their retained request delivery" ON storage.objects FOR SELECT TO authenticated USING(bucket_id='request-deliveries' AND EXISTS(SELECT 1 FROM public.custom_requests r WHERE r.delivery_path=name AND r.creator_id=auth.uid()));

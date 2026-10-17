@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getFogIntensity } from "@/lib/vipFog";
 
 const KEY = "dtt_vip_glow";
 export const getVipGlow = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
@@ -10,7 +11,11 @@ export const setVipGlow = (on: boolean) => {
 export function useVipGlow() {
   const [on, setOn] = useState(getVipGlow);
   useEffect(() => {
-    const h = () => setOn(getVipGlow());
+    const h = () => {
+      setOn(getVipGlow());
+      document.documentElement.style.setProperty("--vip-fog-intensity", String(getFogIntensity() / 100));
+    };
+    h();
     window.addEventListener("dtt-vip-glow", h);
     return () => window.removeEventListener("dtt-vip-glow", h);
   }, []);

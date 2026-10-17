@@ -436,10 +436,14 @@ export type Database = {
           counter_message: string | null
           counter_offer_usd: number | null
           created_at: string
+          creator_archived_at: string | null
           creator_id: string | null
           creator_name: string | null
           creator_share_usd: number
           customer_id: string
+          delivery_access_until: string | null
+          delivery_path: string | null
+          delivery_uploaded_at: string | null
           description: string
           expires_at: string | null
           fulfilled_at: string | null
@@ -457,10 +461,14 @@ export type Database = {
           counter_message?: string | null
           counter_offer_usd?: number | null
           created_at?: string
+          creator_archived_at?: string | null
           creator_id?: string | null
           creator_name?: string | null
           creator_share_usd?: number
           customer_id: string
+          delivery_access_until?: string | null
+          delivery_path?: string | null
+          delivery_uploaded_at?: string | null
           description?: string
           expires_at?: string | null
           fulfilled_at?: string | null
@@ -478,10 +486,14 @@ export type Database = {
           counter_message?: string | null
           counter_offer_usd?: number | null
           created_at?: string
+          creator_archived_at?: string | null
           creator_id?: string | null
           creator_name?: string | null
           creator_share_usd?: number
           customer_id?: string
+          delivery_access_until?: string | null
+          delivery_path?: string | null
+          delivery_uploaded_at?: string | null
           description?: string
           expires_at?: string | null
           fulfilled_at?: string | null
@@ -1220,6 +1232,15 @@ export type Database = {
     }
     Functions: {
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
+      archive_request_delivery: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
+      attach_request_delivery: {
+        Args: { _path: string; _request_id: string }
+        Returns: undefined
+      }
+      can_upload_request_delivery: { Args: { _name: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       creator_split_percent: { Args: { _creator_id: string }; Returns: number }
@@ -1323,6 +1344,7 @@ export type Database = {
         Args: { _creator_id: string; _user_id: string }
         Returns: boolean
       }
+      renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {

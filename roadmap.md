@@ -1,6 +1,10 @@
 # Roadmap
 
 ## Current request
+- [x] Add private staged request upload, server-managed 14-day paid delivery access, token renewal after expiry, and creator workspace archive without deleting customer videos, shared by both genders. Request payment checkout remains blocked pending approved provider integration below.
+- [x] Add adjustable 0–100% VIP fog intensity to creator and customer dashboard controls, saved on this device.
+- [x] Run 15 delivery/fog/pricing/watermark tests; build OK and media authorization function deployed. Restored real customer session, accepted legal waiver, and reached unpaid entry-pass gate without browser errors.
+- [ ] Verify real paid request upload, customer playback, renewal and creator cleanup end-to-end: blocked by unfinished approved-provider request checkout and available customer session's unpaid entry pass.
 - [x] Add private monthly creator revenue history with original splits, full-month totals, and paginated records; eight tests pass and build OK. Signed-in creator can open Analytics and select the current month; account has no completed earnings, so historical populated-month navigation remains unverified.
 - [x] Synchronize profile/card/search hearts and creator analytics using public aggregate-only realtime totals; heart persistence tests pass.
 - [x] Replace vault coins and favicon/Apple/PWA icons with official gold DTT art.
