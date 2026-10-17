@@ -1,4 +1,4 @@
-import reel from "@/assets/brb/galaxy-reel.jpg";
+import reel from "@/assets/brb/galaxy-reel-sexy.jpg";
 import { usePersonalGlobe } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
 
