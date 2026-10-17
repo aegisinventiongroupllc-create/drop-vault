@@ -330,6 +330,13 @@
       "when": 1792196328978,
       "tag": "0046_restrict_request_video_link_issuance",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1792227869440,
+      "tag": "0047_harden_personal_data_and_creator_photo_policies",
+      "breakpoints": true
     }
   ]
 }
