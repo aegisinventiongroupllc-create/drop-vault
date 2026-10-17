@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { HoloSphere } from "@/components/HoloGlobe";
-import CityLights, { Atmosphere, US_GLOW_HUBS } from "@/components/CityLights";
+import CityLights, { Atmosphere, ShootingStars, US_GLOW_HUBS, WORLD_GLOW_HUBS } from "@/components/CityLights";
 import { useGlobeStyle, type GlobeStyle } from "@/lib/globeStyle";
 import { COUNTRY_LATLNG } from "@/components/GlobePicker";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
@@ -10,7 +10,7 @@ import { isBlockedCountry } from "@/lib/restrictedCountries";
 const SPECS = Object.entries(COUNTRY_LATLNG)
   .filter(([code]) => !isBlockedCountry(code))
   .map(([, [lat, lng]]) => ({ lat, lng, people: 4 }))
-  .concat(US_GLOW_HUBS);
+  .concat(US_GLOW_HUBS).concat(WORLD_GLOW_HUBS);
 
 const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: boolean; size: number; style: GlobeStyle }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -22,6 +22,7 @@ const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: 
     <group ref={groupRef} rotation={[0.3, 0, 0]}>
       <HoloSphere style={style} />
       {lights && <CityLights countries={SPECS} density={0.6} scale={size / 140} />}
+      {lights && <ShootingStars />}
     </group>
   );
 };
