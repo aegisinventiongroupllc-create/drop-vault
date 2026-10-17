@@ -35,6 +35,10 @@ const DashboardColorPicker = () => {
     const next = { ...theme, globeNeon };
     setTheme(next); saveTheme(next); persist(next);
   };
+  const setBorderNeon = (globeBorderNeon: boolean) => {
+    const next = { ...theme, globeBorderNeon };
+    setTheme(next); saveTheme(next); persist(next);
+  };
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
@@ -70,6 +74,10 @@ const DashboardColorPicker = () => {
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
             <input type="checkbox" aria-label="Multicolor neon globe sparkles" checked={theme.globeNeon === true} onChange={(e) => setNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />
+          </label>
+          <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
+            <span>Multicolor country outlines</span>
+            <input type="checkbox" aria-label="Multicolor country outlines" checked={theme.globeBorderNeon === true} onChange={(e) => setBorderNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />
           </label>
           <label className="flex items-center justify-between rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>VIP room glow — neon lights and fog in your highlight color</span>
