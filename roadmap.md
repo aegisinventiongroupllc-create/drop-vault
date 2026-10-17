@@ -1,6 +1,9 @@
 # Roadmap
 
 ## Current request
+- [ ] Add private request upload/delivery, 14-day customer access and renewal, and safe creator workspace cleanup for both genders.
+- [ ] Add adjustable VIP fog intensity to creator and customer dashboard controls.
+- [ ] Test delivery/access rules and verify available signed-in flows.
 - [x] Add private monthly creator revenue history with original splits, full-month totals, and paginated records; eight tests pass and build OK. Signed-in creator can open Analytics and select the current month; account has no completed earnings, so historical populated-month navigation remains unverified.
 - [x] Synchronize profile/card/search hearts and creator analytics using public aggregate-only realtime totals; heart persistence tests pass.
 - [x] Replace vault coins and favicon/Apple/PWA icons with official gold DTT art.
