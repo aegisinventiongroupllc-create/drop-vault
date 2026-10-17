@@ -243,28 +243,11 @@ const AdminPortal = () => {
   const loadActivity = async () => {
     setActivityLoading(true);
     try {
-      let q = (supabase.from("activity_logs") as any)
-        .select("id, user_id, user_role, action_type, action_detail, metadata, activity_date, created_at")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (activityRoleFilter !== "all") q = q.eq("user_role", activityRoleFilter);
-      if (activityDateFilter) q = q.eq("activity_date", activityDateFilter);
-      const { data: rows, error } = await q;
-      if (error) throw error;
-      const list = (rows ?? []) as ActivityRow[];
-
-      const ids = Array.from(new Set(list.map((r) => r.user_id)));
-      let pmap: Record<string, { email: string | null; display_name: string | null }> = {};
-      if (ids.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("user_id, email, display_name")
-          .in("user_id", ids);
-        pmap = Object.fromEntries((profs ?? []).map((p) => [p.user_id, { email: p.email, display_name: p.display_name }]));
-      }
-      setActivity(list.map((r) => ({ ...r, email: pmap[r.user_id]?.email ?? null, display_name: pmap[r.user_id]?.display_name ?? null })));
+      // Activity is private: read it through the passcode-checked admin function.
+      const data = await callFinance("activity", { role: activityRoleFilter, date: activityDateFilter });
+      setActivity((data?.rows ?? []) as any);
     } catch (err) {
-      toast({ title: "Failed to load activity", description: String(err), variant: "destructive" });
+      toast({ title: "Failed to load activity", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
     } finally {
       setActivityLoading(false);
     }

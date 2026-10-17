@@ -41,6 +41,23 @@ Deno.serve(async (req) => {
       return map;
     };
 
+    if (action === "activity") {
+      const role = typeof body?.role === "string" ? body.role : "all";
+      const date = typeof body?.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : "";
+      let q = supabase
+        .from("activity_logs")
+        .select("id, user_id, user_role, action_type, action_detail, metadata, activity_date, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (role === "creator" || role === "customer") q = q.eq("user_role", role);
+      if (date) q = q.eq("activity_date", date);
+      const { data, error } = await q;
+      if (error) return json({ error: error.message }, 500);
+      const rows = data || [];
+      const pmap = await loadProfiles(Array.from(new Set(rows.map((r) => r.user_id))));
+      return json({ rows: rows.map((r) => ({ ...r, email: pmap[r.user_id]?.email ?? null, display_name: pmap[r.user_id]?.display_name ?? null })) });
+    }
+
     if (action === "country_stats") {
       // Paged reads so this keeps working with very large creator counts.
       const all: any[] = [];
