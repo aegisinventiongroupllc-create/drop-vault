@@ -41,6 +41,7 @@
     --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
 
+    --globe-tone: #4db8ff;
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
     --dtt-pink: 330 100% 60%;

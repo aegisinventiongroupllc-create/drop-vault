@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import HexColorWheel from "@/components/HexColorWheel";
+import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
@@ -30,6 +31,10 @@ const DashboardColorPicker = () => {
     persist(next);
   };
   const reset = () => { setTheme({}); saveTheme({}); persist({}); };
+  const setNeon = (globeNeon: boolean) => {
+    const next = { ...theme, globeNeon };
+    setTheme(next); saveTheme(next); persist(next);
+  };
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
@@ -61,6 +66,11 @@ const DashboardColorPicker = () => {
               {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
             </div>
           ))}
+          <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
+          <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
+            <span>Multicolor neon globe sparkles</span>
+            <input type="checkbox" aria-label="Multicolor neon globe sparkles" checked={theme.globeNeon === true} onChange={(e) => setNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />
+          </label>
           <label className="flex items-center justify-between rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>VIP room glow — neon lights and fog in your highlight color</span>
             <input type="checkbox" checked={vip} onChange={(e) => setVipGlow(e.target.checked)} className="h-4 w-4 accent-primary" />

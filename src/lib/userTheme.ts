@@ -1,16 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
-export type ThemeKey = "primary" | "background" | "card" | "foreground";
-export type UserTheme = Partial<Record<ThemeKey, string>>;
+export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe";
+export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean };
 
 const KEY = "dtt_user_theme";
 const HEX = /^#[0-9a-f]{6}$/i;
+let revision = 0;
+let saving = 0;
+let syncedUser: string | undefined;
 
 export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "primary", label: "Buttons & highlights", vars: ["--primary", "--accent", "--ring"] },
   { key: "background", label: "Background", vars: ["--background"] },
   { key: "card", label: "Boxes & cards", vars: ["--card", "--popover"] },
   { key: "foreground", label: "Text", vars: ["--foreground", "--card-foreground"] },
+  { key: "globe", label: "Globe tone", vars: ["--globe-personal-tone"] },
 ];
 
 export function hexToHsl(hex: string): string {
@@ -28,12 +33,22 @@ export function hexToHsl(hex: string): string {
   return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
+export function validateTheme(t: unknown): UserTheme {
+  if (!t || typeof t !== "object") return {};
+  const values = t as Record<string, unknown>;
+  const out: UserTheme = {};
+  for (const p of THEME_PARTS) {
+    const value = values[p.key];
+    if (typeof value === "string" && HEX.test(value)) out[p.key] = value;
+  }
+  if (typeof values.globeNeon === "boolean") out.globeNeon = values.globeNeon;
+  return out;
+}
+
 export function loadTheme(): UserTheme {
   try {
     const t = JSON.parse(localStorage.getItem(KEY) || "{}");
-    const out: UserTheme = {};
-    for (const p of THEME_PARTS) if (typeof t[p.key] === "string" && HEX.test(t[p.key])) out[p.key] = t[p.key];
-    return out;
+    return validateTheme(t);
   } catch { return {}; }
 }
 
@@ -49,23 +64,55 @@ export function applyTheme(theme: UserTheme = loadTheme()) {
 }
 
 export function saveTheme(theme: UserTheme) {
-  localStorage.setItem(KEY, JSON.stringify(theme));
-  applyTheme(theme);
+  revision += 1;
+  const safe = validateTheme(theme);
+  localStorage.setItem(KEY, JSON.stringify(safe));
+  applyTheme(safe);
+  window.dispatchEvent(new Event("dtt-theme"));
+}
+
+export function usePersonalGlobe() {
+  const [theme, setTheme] = useState(loadTheme);
+  const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => {
+    const update = () => setTheme(loadTheme());
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const motion = () => setReduced(media.matches);
+    window.addEventListener("dtt-theme", update);
+    media.addEventListener("change", motion);
+    return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
+  }, []);
+  return { tone: theme.globe, neon: theme.globeNeon === true, reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----
 
 export async function saveThemeToAccount(theme: UserTheme) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from("profiles").update({ ui_theme: theme as never }).eq("user_id", user.id);
+  saving += 1;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const safe = validateTheme(theme);
+    const pendingKey = `${KEY}_pending_${user.id}`;
+    localStorage.setItem(pendingKey, JSON.stringify(safe));
+    const { error } = await supabase.from("profiles").update({ ui_theme: safe as never }).eq("user_id", user.id);
+    if (!error) localStorage.removeItem(pendingKey);
+  } finally { saving -= 1; }
 }
 
 export function startThemeSync() {
   const pull = async (uid: string | undefined) => {
-    if (!uid) return;
+    if (!uid || saving || syncedUser === uid) return;
+    syncedUser = uid;
+    const pending = localStorage.getItem(`${KEY}_pending_${uid}`);
+    if (pending) {
+      try { saveTheme(validateTheme(JSON.parse(pending))); } catch {}
+      return;
+    }
+    const before = revision;
     const { data } = await supabase.from("profiles").select("ui_theme").eq("user_id", uid).maybeSingle();
     const t = (data as { ui_theme?: UserTheme } | null)?.ui_theme;
+    if (before !== revision || saving) return;
     if (t && typeof t === "object") {
       localStorage.setItem(KEY, JSON.stringify(t));
       applyTheme(loadTheme());
@@ -74,6 +121,6 @@ export function startThemeSync() {
   };
   supabase.auth.onAuthStateChange((evt, session) => {
     if (evt === "SIGNED_IN" || evt === "INITIAL_SESSION") void pull(session?.user?.id);
-    if (evt === "SIGNED_OUT") { localStorage.removeItem(KEY); applyTheme({}); }
+    if (evt === "SIGNED_OUT") { syncedUser = undefined; localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
   });
 }

@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { latLngToVec3, R } from "@/components/HoloGlobe";
+import { usePersonalGlobe } from "@/lib/userTheme";
 
 /**
  * Night-Earth city lights: thousands of tiny warm points per country that
@@ -95,7 +96,9 @@ const vert = `
   uniform float uScale;
   varying float vGlow;
   varying float vFlash;
+  varying float vPhase;
   void main() {
+    vPhase = aPhase;
     // Slow swell: each dot builds brighter and brighter.
     float s = 0.5 + 0.5 * sin(uTime * 0.9 + aPhase);
     float tw = 0.4 + 0.6 * s * s * s;
@@ -114,6 +117,15 @@ const vert = `
 const frag = `
   varying float vGlow;
   varying float vFlash;
+  varying float vPhase;
+  uniform float uTime;
+  uniform float uNeon;
+  uniform float uTint;
+  uniform vec3 uTone;
+  vec3 neonColor(float h) {
+    vec3 p = abs(fract(vec3(h) + vec3(0.0, 0.6667, 0.3333)) * 6.0 - 3.0);
+    return mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), 0.8);
+  }
   void main() {
     vec2 p = gl_PointCoord - 0.5;
     float d = length(p);
@@ -126,11 +138,15 @@ const frag = `
     float diag = (exp(-r2.x * 90.0) * exp(-r2.y * 9.0) + exp(-r2.y * 90.0) * exp(-r2.x * 9.0)) * 0.45;
     float spark = (rays + diag) * (0.25 + vFlash * 1.6);
     vec3 col = mix(vec3(1.0, 0.85, 0.55), vec3(0.95, 0.98, 1.0), clamp(core + vFlash, 0.0, 1.0));
+    col = mix(col, mix(uTone, vec3(1.0), core * 0.6 + vFlash * 0.35), uTint);
+    col = mix(col, mix(neonColor(vPhase * 0.159 + uTime * 0.055), vec3(1.0), core * 0.5), uNeon);
     gl_FragColor = vec4(col, (core + halo + spark) * vGlow);
   }
 `;
 
 const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryLightSpec[]; density?: number; scale?: number }) => {
+  const { tone, neon, reduced } = usePersonalGlobe();
+  const tint = useMemo(() => new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim()), [tone]);
   const mat = useRef<THREE.ShaderMaterial>(null);
   const dpr = useThree((st) => st.viewport.dpr);
   const geom = useMemo(() => {
@@ -153,15 +169,22 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     return g;
   }, [countries, density]);
 
-  useFrame(({ clock }) => { if (mat.current) mat.current.uniforms.uTime.value = clock.elapsedTime; });
+  useFrame(({ clock }) => {
+    if (!mat.current) return;
+    mat.current.uniforms.uTime.value = reduced ? 0 : clock.elapsedTime;
+    mat.current.uniforms.uNeon.value = neon ? 1 : 0;
+    mat.current.uniforms.uTint.value = tone ? 1 : 0;
+    mat.current.uniforms.uTone.value.copy(tint);
+  });
 
   return (
     <points geometry={geom} renderOrder={10}>
       <shaderMaterial
+        key={`${tone ?? "default"}-${neon}`}
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dpr } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dpr }, uNeon: { value: neon ? 1 : 0 }, uTint: { value: tone ? 1 : 0 }, uTone: { value: tint } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -171,19 +194,25 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
 };
 
 /** Soft blue atmosphere rim, like Earth seen from orbit. */
-export const Atmosphere = () => (
+export const Atmosphere = () => {
+  const { tone } = usePersonalGlobe();
+  const tint = useMemo(() => new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim()), [tone]);
+  return (
   <mesh scale={1.12}>
     <sphereGeometry args={[R, 48, 48]} />
     <shaderMaterial
+      key={tone ?? "default"}
       transparent
       depthWrite={false}
       side={THREE.BackSide}
       blending={THREE.AdditiveBlending}
       vertexShader={`varying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`}
-      fragmentShader={`varying vec3 vN; void main(){ float i = pow(0.72 - dot(vN, vec3(0,0,1.0)), 3.0); gl_FragColor = vec4(0.3,0.65,1.0,1.0)*i*1.6; }`}
+      uniforms={{ uTone: { value: tint } }}
+      fragmentShader={`uniform vec3 uTone; varying vec3 vN; void main(){ float i = pow(0.72 - dot(vN, vec3(0,0,1.0)), 3.0); gl_FragColor = vec4(uTone,1.0)*i*1.6; }`}
     />
   </mesh>
-);
+  );
+};
 
 /**
  * A glowing shooting star every `intervalSec` seconds (default 15 minutes):
