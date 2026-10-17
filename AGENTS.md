@@ -3,7 +3,7 @@
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
-- Read creator monthly revenue history from account-scoped completed transaction ledger rows with UTC month boundaries and original split percentages; aggregate full-month totals server-side and paginate details so history is accurate beyond client row limits without changing balances.
+- Monthly revenue uses account-scoped completed ledger rows, UTC months and original splits; aggregate full months server-side and paginate details for accurate history without changing balances.
 
 - Welcome-back summaries read only account-scoped completed transactions and token allocations; local activity is display-only. Admin samples never write the ledger.
 
@@ -29,4 +29,6 @@
 - Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
 - Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
 
-- Dashboard chats reuse TopFansSection; customer inbox reads only account-scoped fan_messages and public_profiles. Why: keep threads private.
+- Dashboard chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
+
+- Personal globe colors use validated ui_theme and shared globe renderers, not platform settings, to isolate each account’s choice.

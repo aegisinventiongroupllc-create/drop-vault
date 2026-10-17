@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import WORLD_BORDERS from "@/lib/worldBorders";
 import type { GlobeStyle } from "@/lib/globeStyle";
+import { usePersonalGlobe } from "@/lib/userTheme";
 
 export const R = 1;
 
@@ -22,6 +23,11 @@ export const latLngToVec3 = (lat: number, lng: number, radius: number): [number,
  * Both keep the same size and position, so switching is only a change of skin.
  */
 export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
+  const { tone } = usePersonalGlobe();
+  const colors = useMemo(() => {
+    const base = new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim());
+    return { border: base, inner: base.clone().multiplyScalar(0.28), ocean: base.clone().multiplyScalar(0.13), grid: base.clone().multiplyScalar(0.6) };
+  }, [tone]);
   const { borders, grid } = useMemo(() => {
     const borderGeoms: THREE.BufferGeometry[] = [];
     for (const ring of WORLD_BORDERS) {
@@ -57,7 +63,7 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
     night.colorSpace = THREE.SRGBColorSpace;
     day.anisotropy = night.anisotropy = 4;
     return new THREE.ShaderMaterial({
-      uniforms: { dayMap: { value: day }, nightMap: { value: night } },
+      uniforms: { dayMap: { value: day }, nightMap: { value: night }, personalTone: { value: new THREE.Color() }, toneAmount: { value: 0 } },
       vertexShader: `
         varying vec2 vUv; varying vec3 vN; varying vec3 vView;
         void main(){
@@ -69,6 +75,7 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
         }`,
       fragmentShader: `
         uniform sampler2D dayMap; uniform sampler2D nightMap;
+        uniform vec3 personalTone; uniform float toneAmount;
         varying vec2 vUv; varying vec3 vN; varying vec3 vView;
         void main(){
           vec3 day = texture2D(dayMap, vUv).rgb;
@@ -81,11 +88,15 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
           col += lights * vec3(1.6, 1.05, 0.55) * (0.55 + 1.2 * dark);
           float fres = pow(1.0 - max(dot(vN, vView), 0.0), 3.0);
           col += vec3(0.25, 0.55, 1.0) * fres * 0.9;
+          col = mix(col, col * personalTone * 1.6, toneAmount);
           gl_FragColor = vec4(col, 1.0);
           #include <colorspace_fragment>
         }`,
     });
   }, []);
+
+  earthMaterial.uniforms.personalTone.value.copy(colors.border);
+  earthMaterial.uniforms.toneAmount.value = tone ? 0.65 : 0;
 
   if (style === "earth") {
     return (
@@ -103,24 +114,24 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
       {/* Ocean base + inner glow */}
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#0a2a55" transparent opacity={0.35} side={THREE.BackSide} />
+        <meshBasicMaterial color={colors.inner} transparent opacity={0.35} side={THREE.BackSide} />
       </mesh>
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#071d3d" transparent opacity={0.75} />
+        <meshBasicMaterial color={colors.ocean} transparent opacity={0.75} />
       </mesh>
       {/* Real country borders */}
       {borders.map((g, i) => (
         <primitive
           key={`b${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#4db8ff", transparent: true, opacity: 0.8 }))}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: colors.border, transparent: true, opacity: 0.8 }))}
         />
       ))}
       {/* Faint graticule */}
       {grid.map((g, i) => (
         <primitive
           key={`g${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: "#2a6db3", transparent: true, opacity: 0.12 }))}
+          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: colors.grid, transparent: true, opacity: 0.12 }))}
         />
       ))}
     </group>
