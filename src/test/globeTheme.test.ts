@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_STAR_STYLE, loadTheme, saveTheme, validateTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, loadTheme, previewTheme, saveTheme, validateTheme } from "@/lib/userTheme";
 
 describe("personal globe preferences", () => {
   it("uses the third photograph, Star cluster, as the default", () => {
@@ -12,6 +12,13 @@ describe("personal globe preferences", () => {
     expect(validateTheme({ galaxy: "url(unsafe)" }).galaxy).toBeUndefined();
     saveTheme({});
     expect(document.documentElement.style.getPropertyValue("--galaxy-tone")).toBe("");
+  });
+  it("shows a galaxy color example on screen without saving it", () => {
+    saveTheme({});
+    previewTheme({ galaxy: "#ef4444" });
+    expect(document.documentElement.style.getPropertyValue("--galaxy-tone")).toBe("0 84% 60%");
+    expect(loadTheme()).toEqual({});
+    saveTheme({});
   });
   it("retains a chosen six-digit globe tone and rejects invalid input", () => {
     expect(validateTheme({ globe: "#22c55e" }).globe).toBe("#22c55e");
