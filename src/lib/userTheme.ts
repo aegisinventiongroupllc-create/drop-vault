@@ -17,7 +17,7 @@ export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "foreground", label: "Text", vars: ["--foreground", "--card-foreground"] },
   { key: "globe", label: "Globe tone", vars: ["--globe-personal-tone"] },
   { key: "globeBorder", label: "Country outlines", vars: ["--globe-border-tone"] },
-  { key: "galaxy", label: "Galaxy backdrop", vars: ["--galaxy-tone"] },
+  { key: "galaxy", label: "Star backdrop", vars: ["--galaxy-tone"] },
 ];
 
 export function hexToHsl(hex: string): string {
