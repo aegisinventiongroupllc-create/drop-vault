@@ -206,15 +206,15 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
       s.start = t;
       // Streak across the face of the globe on a plane just above the
       // surface, so the whole path stays inside the view.
-      const z = R * 1.06;
-      const y0 = (Math.random() - 0.5) * R * 1.2;
-      const y1 = y0 + (Math.random() - 0.5) * R * 0.9;
+      const z = R * 1.02;
+      const y0 = (Math.random() - 0.5) * R * 0.8;
+      const y1 = y0 + (Math.random() - 0.5) * R * 0.5;
       const dir = Math.random() > 0.5 ? 1 : -1;
-      s.from.set(-dir * R * 1.7, y0, z);
-      s.to.set(dir * R * 1.7, y1, z);
+      s.from.set(-dir * R * 1.2, y0, z);
+      s.to.set(dir * R * 1.2, y1, z);
     }
     if (!s.active) return;
-    const p = (t - s.start) / 1.6;
+    const p = (t - s.start) / 3.0;
     if (p >= 1) {
       s.active = false;
       s.next = t + intervalSec;
