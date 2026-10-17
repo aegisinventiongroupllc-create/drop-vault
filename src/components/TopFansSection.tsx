@@ -22,15 +22,17 @@ interface FanMessage {
 
 const MEDAL = ["text-gold", "text-slate-300", "text-amber-600"];
 
-const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creatorName: string }) => {
+const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { creatorId: string; creatorName: string; initiallyOpen?: boolean }) => {
   const [fans, setFans] = useState<FanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [myId, setMyId] = useState<string | null>(null);
   const [messages, setMessages] = useState<FanMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(initiallyOpen);
   const [activeFan, setActiveFan] = useState<string | null>(null);
+  const [messageError, setMessageError] = useState(false);
+  const requestRef = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const loadFans = useCallback(async () => {
@@ -60,16 +62,23 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
   // Each thread is private: one fan + the creator.
   const threadFan = isCreator ? activeFan : myId;
 
+  useEffect(() => {
+    if (isCreator && fans.length && !fans.some((fan) => fan.fan_id === activeFan)) setActiveFan(fans[0].fan_id);
+  }, [isCreator, fans, activeFan]);
+
   const loadMessages = useCallback(async () => {
+    const request = ++requestRef.current;
     if (!canChat || !threadFan) { setMessages([]); return; }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("fan_messages")
       .select("id, sender_id, body, created_at")
       .eq("creator_id", creatorId)
       .eq("fan_id", threadFan)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(100);
-    if (data) setMessages(data as FanMessage[]);
+    if (request !== requestRef.current) return;
+    setMessageError(Boolean(error));
+    if (data) setMessages((data as FanMessage[]).reverse());
   }, [creatorId, canChat, threadFan]);
 
   useEffect(() => { loadMessages(); }, [loadMessages]);
@@ -90,7 +99,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
 
   const sendMessage = async () => {
     const body = draft.trim();
-    if (!body || !myId || !threadFan) return;
+    if (!body || !myId || !threadFan || sending) return;
     setSending(true);
     const { error } = await supabase.from("fan_messages").insert({ creator_id: creatorId, sender_id: myId, fan_id: threadFan, body });
     setSending(false);
@@ -124,7 +133,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
       ) : (
         <div className="bg-card border border-border rounded-xl divide-y divide-border">
           {fans.map((f) => (
-            <div key={f.fan_id} className={`flex items-center gap-3 px-3 py-2.5 ${f.fan_id === myId ? "bg-primary/10" : ""}`}>
+            <Button key={f.fan_id} variant="ghost" disabled={!isCreator && f.fan_id !== myId} aria-label={`View messages with ${isCreator ? f.display_name : creatorName}`} onClick={() => { if (isCreator) setActiveFan(f.fan_id); setChatOpen(true); }} className={`flex h-auto w-full items-center gap-3 rounded-none px-3 py-2.5 disabled:opacity-100 ${f.fan_id === myId ? "bg-primary/10" : ""}`}>
               <span className={`w-7 text-center text-sm font-bold ${MEDAL[f.rank - 1] ?? "text-muted-foreground"}`}>
                 {f.rank}
               </span>
@@ -134,7 +143,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
                 {f.fan_id === myId && <span className="ml-1.5 text-[10px] font-bold text-primary">YOU</span>}
               </span>
               <span className="text-xs font-bold text-primary">${Number(f.total_spent).toFixed(2)}</span>
-            </div>
+            </Button>
           ))}
         </div>
       )}
@@ -143,7 +152,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
       <div className="mt-4">
         {canChat ? (
           <>
-            <Button variant="neon" className="w-full gap-2" onClick={() => setChatOpen((o) => !o)}>
+            <Button variant="neon" className="w-full h-auto min-h-10 whitespace-normal gap-2" onClick={() => setChatOpen((o) => !o)}>
               <MessageCircle className="w-4 h-4" />
               {chatOpen ? "HIDE MESSAGES" : isCreator ? "PRIVATE CHATS WITH YOUR TOP FANS" : `PRIVATE CHAT WITH @${creatorName.toUpperCase()}`}
             </Button>
@@ -155,10 +164,10 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
             {chatOpen && isCreator && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {fans.map((f) => (
-                  <button key={f.fan_id} onClick={() => setActiveFan(f.fan_id)}
+                  <Button variant="secondary" key={f.fan_id} onClick={() => { setMessages([]); setActiveFan(f.fan_id); }}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold ${activeFan === f.fan_id ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
                     #{f.rank} {f.display_name}
-                  </button>
+                  </Button>
                 ))}
                 {fans.length === 0 && <p className="text-xs text-muted-foreground">No top fans yet.</p>}
               </div>
@@ -166,7 +175,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
             {chatOpen && threadFan && (
               <div className="mt-3 bg-card border border-border rounded-xl overflow-hidden">
                 <div className="max-h-64 overflow-y-auto p-3 space-y-2">
-                  {messages.length === 0 ? (
+                  {messageError ? <p role="alert" className="text-sm text-destructive">Couldn't load messages. <Button variant="ghost" onClick={loadMessages}>TRY AGAIN</Button></p> : messages.length === 0 ? (
                     <p className="text-xs text-muted-foreground text-center py-4">Private chat — only you two can see this. Say hello.</p>
                   ) : messages.map((m) => (
                     <div key={m.id} className={`flex ${m.sender_id === myId ? "justify-end" : "justify-start"}`}>
@@ -187,7 +196,7 @@ const TopFansSection = ({ creatorId, creatorName }: { creatorId: string; creator
                     maxLength={2000}
                     className="flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
                   />
-                  <Button variant="neon" size="sm" onClick={sendMessage} disabled={sending || !draft.trim()} className="px-3">
+                  <Button variant="neon" size="sm" aria-label="Send message" onClick={sendMessage} disabled={sending || !draft.trim()} className="px-3">
                     {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   </Button>
                 </div>
