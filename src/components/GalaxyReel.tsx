@@ -73,11 +73,12 @@ const buildStars = (count: number): Star[] => {
 };
 
 const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?: number }) => {
-  const { galaxyTone, reduced } = usePersonalGlobe();
+  const { galaxyTone, starStyle, reduced } = usePersonalGlobe();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(() => buildStars(1050), []);
   const toneRef = useRef<string | null>(galaxyTone ?? null);
   toneRef.current = galaxyTone ?? null;
+  const photoSrc = starStyle && starStyle !== "living" ? PHOTO_BACKDROPS[starStyle] : null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
