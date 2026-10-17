@@ -33,13 +33,43 @@ const DashboardColorPicker = () => {
   // Save to the account shortly after the last change (color wheel drags fire fast).
   const persist = (t: UserTheme) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => void saveThemeToAccount(t), 600); };
 
+  // Galaxy changes stay a live example until the person saves or cancels.
+  const savedBeforePreview = useRef<UserTheme | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+
   const set = (key: ThemeKey, hex: string) => {
     const next = { ...theme, [key]: hex };
     setTheme(next);
+    if (key === "galaxy") {
+      if (savedBeforePreview.current === null) savedBeforePreview.current = loadTheme();
+      setPreviewing(true);
+      previewTheme(next);
+      return;
+    }
     saveTheme(next);
     persist(next);
   };
-  const reset = () => { setTheme({}); saveTheme({}); persist({}); };
+  const commitPreview = () => {
+    const next = { ...theme };
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    saveTheme(next);
+    persist(next);
+  };
+  const cancelPreview = () => {
+    const saved = savedBeforePreview.current ?? {};
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    setTheme(saved);
+    saveTheme(saved);
+  };
+  const reset = () => {
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    setTheme({});
+    saveTheme({});
+    persist({});
+  };
   const setNeon = (globeNeon: boolean) => {
     const next = { ...theme, globeNeon };
     setTheme(next); saveTheme(next); persist(next);
