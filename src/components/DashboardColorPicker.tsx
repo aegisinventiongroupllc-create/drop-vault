@@ -4,7 +4,7 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
-import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
 import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
 import clusterImg from "@/assets/brb/stars-cluster.jpg";
