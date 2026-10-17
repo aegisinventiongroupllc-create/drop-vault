@@ -1,3 +1,4 @@
+import GalaxyReel from "@/components/GalaxyReel";
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -32,7 +33,8 @@ const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride }: { 
   const autoStyle = useGlobeStyle();
   const style = styleOverride ?? autoStyle;
   return (
-    <span className="inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
+    <span className="relative inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
+      {size >= 100 && <GalaxyReel className="rounded-full" />}
       <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
         <SpinningGlobe speed={speed} lights={lights} size={size} style={style} />
         <Atmosphere />

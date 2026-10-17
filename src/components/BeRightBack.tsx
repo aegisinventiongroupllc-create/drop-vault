@@ -7,8 +7,6 @@ import space3 from "@/assets/brb/space-3.jpg";
 import space4 from "@/assets/brb/space-4.jpg";
 
 const IDLE_MS = 60_000;
-const SLIDES = [space1, space2, space3, space4];
-const SLIDE_SECONDS = 12;
 
 /**
  * "Be right back" screen: after a minute with no mouse, keys or touch, a
@@ -18,6 +16,7 @@ const SLIDE_SECONDS = 12;
 const BeRightBack = () => {
   const [away, setAway] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("brb"));
   const timer = useRef<number>();
+  const hold = useRef(0);
 
   useEffect(() => {
     const reset = () => {
@@ -25,13 +24,17 @@ const BeRightBack = () => {
       timer.current = window.setTimeout(() => setAway(true), IDLE_MS);
     };
     const back = () => {
+      if (Date.now() < hold.current) return;
       setAway(false);
       reset();
     };
     const events: (keyof WindowEventMap)[] = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "wheel"];
     events.forEach((e) => window.addEventListener(e, back, { passive: true }));
+    const preview = () => { hold.current = Date.now() + 1500; setAway(true); };
+    window.addEventListener("dtt-brb-preview", preview);
     reset();
     return () => {
+      window.removeEventListener("dtt-brb-preview", preview);
       window.clearTimeout(timer.current);
       events.forEach((e) => window.removeEventListener(e, back));
     };
@@ -40,16 +43,7 @@ const BeRightBack = () => {
   if (!away) return null;
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
-      {SLIDES.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          aria-hidden
-          className="brb-slide absolute inset-0 h-full w-full object-cover"
-          style={{ animationDelay: `${i * SLIDE_SECONDS - SLIDES.length * SLIDE_SECONDS}s`, animationDuration: `${SLIDES.length * SLIDE_SECONDS}s` }}
-        />
-      ))}
+      <GalaxyReel />
       <div className="absolute inset-0 bg-background/30" aria-hidden />
       <div className="relative flex flex-col items-center gap-6">
         <MiniGlobe size={280} lights speed={0.35} />
