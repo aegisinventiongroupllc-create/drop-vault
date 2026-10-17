@@ -94,27 +94,39 @@ const vert = `
   uniform float uTime;
   uniform float uScale;
   varying float vGlow;
+  varying float vFlash;
   void main() {
-    // Slow swell: each dot builds brighter and brighter, then softly resets.
+    // Slow swell: each dot builds brighter and brighter.
     float s = 0.5 + 0.5 * sin(uTime * 0.9 + aPhase);
-    float tw = 0.35 + 0.65 * s * s * s;
+    float tw = 0.4 + 0.6 * s * s * s;
+    // Diamond glint: a sharp, brief flash with star rays.
+    float f = pow(0.5 + 0.5 * sin(uTime * 1.3 + aPhase * 3.7), 28.0);
+    vFlash = f;
     vGlow = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
     vec3 wn = normalize(mat3(modelMatrix) * position);
     vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
-    gl_PointSize = aSize * uScale * (0.8 + tw * 0.6) / -mv.z;
+    gl_PointSize = aSize * uScale * (1.0 + tw * 0.5 + f * 2.2) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;
 const frag = `
   varying float vGlow;
+  varying float vFlash;
   void main() {
-    float d = length(gl_PointCoord - 0.5);
-    float core = smoothstep(0.18, 0.0, d);
-    float halo = smoothstep(0.5, 0.0, d) * 0.25;
-    vec3 col = mix(vec3(1.0, 0.8, 0.45), vec3(1.0, 1.0, 0.95), core);
-    gl_FragColor = vec4(col, (core + halo) * vGlow);
+    vec2 p = gl_PointCoord - 0.5;
+    float d = length(p);
+    float core = smoothstep(0.12, 0.0, d);
+    float halo = smoothstep(0.5, 0.0, d) * 0.18;
+    // Four-point diamond sparkle rays + faint diagonals.
+    vec2 q = abs(p);
+    float rays = exp(-q.x * 70.0) * exp(-q.y * 5.0) + exp(-q.y * 70.0) * exp(-q.x * 5.0);
+    vec2 r2 = abs(vec2(p.x + p.y, p.x - p.y)) * 0.7071;
+    float diag = (exp(-r2.x * 90.0) * exp(-r2.y * 9.0) + exp(-r2.y * 90.0) * exp(-r2.x * 9.0)) * 0.45;
+    float spark = (rays + diag) * (0.25 + vFlash * 1.6);
+    vec3 col = mix(vec3(1.0, 0.85, 0.55), vec3(0.95, 0.98, 1.0), clamp(core + vFlash, 0.0, 1.0));
+    gl_FragColor = vec4(col, (core + halo + spark) * vGlow);
   }
 `;
 
@@ -125,13 +137,13 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     const pos: number[] = [], phase: number[] = [], size: number[] = [];
     countries.forEach((c, ci) => {
       const r = rand(ci * 7919 + 17);
-      // A few clean, separate dots per spot — never a cluttered blob.
-      const n = Math.max(1, Math.round((1 + Math.min(5, Math.sqrt(c.people) * 0.6)) * density));
+      // Separate crisp dots per spot — more of them, still never a blob.
+      const n = Math.max(2, Math.round((3 + Math.min(9, Math.sqrt(c.people) * 1.2)) * density));
       for (let i = 0; i < n; i++) {
-        const [x, y, z] = latLngToVec3(c.lat + (r() - 0.5) * 2.2, c.lng + (r() - 0.5) * 2.8, R * 1.004);
+        const [x, y, z] = latLngToVec3(c.lat + (r() - 0.5) * 3.2, c.lng + (r() - 0.5) * 4.0, R * 1.004);
         pos.push(x, y, z);
         phase.push(r() * Math.PI * 2);
-        size.push(5 + r() * 3);
+        size.push(7 + r() * 4);
       }
     });
     const g = new THREE.BufferGeometry();
