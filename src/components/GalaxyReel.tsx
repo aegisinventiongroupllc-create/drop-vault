@@ -44,28 +44,29 @@ const pickColor = () => {
 const buildStars = (count: number): Star[] => {
   const stars: Star[] = [];
   for (let i = 0; i < count; i++) {
-    const layer = i < count * 0.5 ? 0 : i < count * 0.82 ? 1 : 2;
-    // Power distribution: many faint stars, a few bright ones.
-    const bright = Math.pow(Math.random(), 2.6);
-    const r = (layer === 0 ? 0.5 : layer === 1 ? 0.7 : 1.0) * (0.5 + bright * 1.9);
+    const layer = i < count * 0.55 ? 0 : i < count * 0.85 ? 1 : 2;
+    // Power distribution: a sea of faint pinpoint stars, a few bright beacons.
+    const bright = Math.pow(Math.random(), 3.0);
+    const r = (layer === 0 ? 0.4 : layer === 1 ? 0.6 : 0.9) * (0.45 + bright * 2.1);
     stars.push({
       x: Math.random(),
       y: Math.random(),
       r,
       layer,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.5 + Math.random() * 1.3,
+      speed: 0.4 + Math.random() * 1.1,
       color: pickColor(),
-      glint: bright > 0.92 && layer === 2,
+      // Diamond glints on the genuinely bright beacons, near layers only.
+      glint: bright > 0.86 && layer >= 1,
     });
   }
   return stars;
 };
 
-const GalaxyReel = ({ className, seconds = 140 }: { className?: string; seconds?: number }) => {
+const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?: number }) => {
   const { galaxyTone, reduced } = usePersonalGlobe();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stars = useMemo(() => buildStars(760), []);
+  const stars = useMemo(() => buildStars(1050), []);
   const toneRef = useRef<string | null>(galaxyTone ?? null);
   toneRef.current = galaxyTone ?? null;
 
@@ -94,8 +95,8 @@ const GalaxyReel = ({ className, seconds = 140 }: { className?: string; seconds?
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // Layer drift speeds: px/s, slow left-to-right like a reel.
-    const layerSpeed = [w / (seconds * 3), w / (seconds * 1.6), w / seconds];
+    // Layer drift speeds: px/s, very slow left-to-right like a gentle reel.
+    const layerSpeed = [w / (seconds * 4), w / (seconds * 2.2), w / (seconds * 1.35)];
     const start = performance.now();
     const staticDraw = () => {
       ctx.clearRect(0, 0, w, h);
@@ -158,38 +159,56 @@ const drawStars = (
     // Drift left-to-right, wrapping seamlessly.
     const x = ((s.x * w + (speed * t) % w) % (w + 8)) - 4;
     const y = s.y * h;
-    const tw = 0.62 + 0.38 * Math.pow(0.5 + 0.5 * Math.sin(t * s.speed + s.phase), 1.6);
-    const alpha = (s.layer === 0 ? 0.5 : s.layer === 1 ? 0.72 : 0.95) * tw;
+    // Two-wave twinkle: a slow swell plus a quick shimmer, like real scintillation.
+    const slow = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
+    const fast = 0.5 + 0.5 * Math.sin(t * (s.speed * 3.1 + 0.7) + s.phase * 2.3);
+    const tw = 0.55 + 0.45 * Math.pow(slow, 1.4) * (0.82 + 0.18 * fast);
+    const alpha = (s.layer === 0 ? 0.55 : s.layer === 1 ? 0.8 : 1.0) * tw;
     const [r, g, b] = s.color;
 
-    // Soft glow halo for brighter stars.
-    if (s.r > 1.1) {
-      const halo = ctx.createRadialGradient(x, y, 0, x, y, s.r * 5);
-      halo.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.35})`);
+    // Realistic diffraction glow: a tight white-hot core inside a soft halo.
+    if (s.r > 0.9) {
+      const haloR = s.r * (s.glint ? 7 : 5.5);
+      const halo = ctx.createRadialGradient(x, y, 0, x, y, haloR);
+      halo.addColorStop(0, `rgba(255,255,255,${alpha * 0.5})`);
+      halo.addColorStop(0.25, `rgba(${r},${g},${b},${alpha * 0.35})`);
       halo.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = halo;
       ctx.beginPath();
-      ctx.arc(x, y, s.r * 5, 0, Math.PI * 2);
+      ctx.arc(x, y, haloR, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    // Bright core: white center ringed by the star's own color.
+    const core = ctx.createRadialGradient(x, y, 0, x, y, s.r * 1.4);
+    core.addColorStop(0, `rgba(255,255,255,${Math.min(1, alpha * 1.15)})`);
+    core.addColorStop(0.6, `rgba(${r},${g},${b},${alpha})`);
+    core.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = core;
     ctx.beginPath();
-    ctx.arc(x, y, s.r, 0, Math.PI * 2);
+    ctx.arc(x, y, s.r * 1.4, 0, Math.PI * 2);
     ctx.fill();
 
     // Diamond glint on the brightest few — like a star catching the eye.
     if (s.glint) {
-      const flare = Math.pow(tw, 3);
-      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.8 * flare})`;
-      ctx.lineWidth = 0.8;
-      const len = s.r * 6 * flare;
-      ctx.beginPath();
-      ctx.moveTo(x - len, y);
-      ctx.lineTo(x + len, y);
-      ctx.moveTo(x, y - len);
-      ctx.lineTo(x, y + len);
-      ctx.stroke();
+      const flare = Math.pow(tw, 2.4);
+      const len = s.r * 8 * flare;
+      if (len > 0.6) {
+        ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.85 * flare})`;
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(x - len, y);
+        ctx.lineTo(x + len, y);
+        ctx.moveTo(x, y - len);
+        ctx.lineTo(x, y + len);
+        // Shorter diagonal rays for a true diffraction-spike look.
+        const dlen = len * 0.45;
+        ctx.moveTo(x - dlen, y - dlen);
+        ctx.lineTo(x + dlen, y + dlen);
+        ctx.moveTo(x - dlen, y + dlen);
+        ctx.lineTo(x + dlen, y - dlen);
+        ctx.stroke();
+      }
     }
   }
 };
