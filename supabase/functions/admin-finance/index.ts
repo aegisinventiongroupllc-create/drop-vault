@@ -84,6 +84,40 @@ Deno.serve(async (req) => {
       return json({ suggestions: data || [] });
     }
 
+    if (action === "finance_details") {
+      const category = body?.category;
+      const page = body?.page ?? 0;
+      if (!Number.isSafeInteger(page) || page < 0 || page > 100000) return json({ error: "Invalid page" }, 400);
+      const transactionCategories = ["gross", "payments", "creator", "platform", "tokens"];
+      if (![...transactionCategories, "purchase", "passes", "custom"].includes(category)) return json({ error: "Invalid category" }, 400);
+      const isTransaction = transactionCategories.includes(category);
+      const table = isTransaction ? "transactions" : category === "purchase" ? "token_purchases" : category === "passes" ? "entry_passes" : "custom_requests";
+      const columns = isTransaction
+        ? "id, buyer_id, creator_id, amount_usd, creator_share_usd, platform_share_usd, payment_id, status, created_at"
+        : category === "purchase" ? "id, user_id, amount_usd, platform_fee_collected, payment_id, status, created_at"
+        : category === "passes" ? "id, user_id, amount_usd, payment_id, status, created_at"
+        : "id, customer_id, creator_id, creator_name, amount_usd, creator_share_usd, platform_share_usd, payment_id, status, created_at";
+      let query = supabase.from(table).select(columns, { count: "exact" });
+      // Match existing overview filters without changing its financial semantics.
+      query = category === "custom" ? query.in("status", ["accepted", "completed"]) : query.eq("status", category === "passes" ? "active" : "completed");
+      const { data, count, error } = await query.order("created_at", { ascending: false }).order("id", { ascending: false }).range(page * 50, page * 50 + 49);
+      if (error) return json({ error: "Couldn't load earnings records" }, 500);
+      const records = (data || []) as unknown as Record<string, any>[];
+      const ids = [...new Set(records.flatMap((row) => [row.buyer_id || row.customer_id || row.user_id, row.creator_id]).filter(Boolean))] as string[];
+      const profiles = await loadProfiles(ids);
+      const rows = records.map((row) => {
+        const gross = Number(row.amount_usd) || 0;
+        const creator = Number(row.creator_share_usd) || 0;
+        const platform = category === "purchase" ? Number(row.platform_fee_collected) || 0 : category === "passes" ? gross : Number(row.platform_share_usd) || 0;
+        const amount = category === "creator" ? creator : ["gross", "payments"].includes(category) ? gross : platform;
+        return { id: row.id, created_at: row.created_at, status: row.status, payment_id: row.payment_id,
+          amount, gross, creator, platform,
+          customer_name: profiles[row.buyer_id || row.customer_id || row.user_id]?.display_name ?? null,
+          creator_name: profiles[row.creator_id]?.display_name ?? row.creator_name ?? null };
+      });
+      return json({ rows, count: count ?? 0 });
+    }
+
     if (action === "overview") {
       const [{ data: txs }, { data: wallets }, { data: batches }, { data: purchases }, { data: passes }, { data: customs }] = await Promise.all([
         supabase.from("transactions").select("amount_usd, creator_share_usd, platform_share_usd, entry_tax, status"),
