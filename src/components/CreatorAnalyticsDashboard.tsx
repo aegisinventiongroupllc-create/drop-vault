@@ -515,7 +515,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         </div>
       </div>
 
-      <div className="px-4 mb-3"><Button variant="outline" className="w-full" onClick={() => setActiveSection("messages")}>MESSAGES — TOP 10 FANS</Button></div>
       {/* Section tabs */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
         {sections.map((s) => (
@@ -797,8 +796,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
 
       {/* Request Vault — Creator Response */}
       {activeSection === "requests" && (
-        <div className="px-4">
+        <div className="px-4 space-y-4">
           <CreatorRequestsPanel />
+          <Button variant="outline" className="w-full h-auto min-h-10 whitespace-normal" onClick={() => setActiveSection("messages")}>MESSAGES — TOP 10 FANS</Button>
         </div>
       )}
 
