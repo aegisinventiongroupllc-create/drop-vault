@@ -49,7 +49,7 @@ const vert = `
   uniform float uScale;
   varying float vGlow;
   void main() {
-    float tw = 0.55 + 0.3 * sin(uTime * 2.2 + aPhase) + 0.15 * sin(uTime * 5.3 + aPhase * 1.7);
+    float tw = 0.7 + 0.18 * sin(uTime * 2.2 + aPhase) + 0.08 * sin(uTime * 5.3 + aPhase * 1.7);
     vGlow = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     // Fade lights on the far side of the globe.
@@ -66,7 +66,7 @@ const frag = `
     float d = length(gl_PointCoord - 0.5);
     float core = smoothstep(0.5, 0.0, d);
     vec3 col = mix(vec3(1.0, 0.45, 0.12), vec3(1.0, 0.86, 0.55), core * core * core);
-    gl_FragColor = vec4(col, core * core * vGlow * 0.85);
+    gl_FragColor = vec4(col, core * core * vGlow * 0.45);
   }
 `;
 
@@ -78,8 +78,8 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     countries.forEach((c, ci) => {
       const r = rand(ci * 7919 + 17);
       // Every country glows a little; each person adds more lights (capped).
-      const n = Math.round((60 + Math.min(900, Math.sqrt(c.people) * 60)) * density);
-      const spread = 5 + Math.min(5, Math.log2(1 + c.people));
+      const n = Math.round((24 + Math.min(420, Math.sqrt(c.people) * 26)) * density);
+      const spread = 2.5 + Math.min(3, Math.log2(1 + c.people) * 0.6);
       // A few "city" hubs per country so lights cluster like real cities.
       const hubs = Array.from({ length: 4 }, () => [c.lat + (r() - 0.5) * spread * 1.4, c.lng + (r() - 0.5) * spread * 1.8]);
       for (let i = 0; i < n; i++) {
@@ -88,7 +88,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         const [x, y, z] = latLngToVec3(h[0] + g(), h[1] + g(), R * 1.004);
         pos.push(x, y, z);
         phase.push(r() * Math.PI * 2);
-        size.push(i % 11 === 0 ? 14 : 4 + r() * 5);
+        size.push(i % 13 === 0 ? 6 : 2 + r() * 2.2);
       }
     });
     const g = new THREE.BufferGeometry();
@@ -106,7 +106,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.6 * scale * dpr } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.15 * scale * dpr } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
