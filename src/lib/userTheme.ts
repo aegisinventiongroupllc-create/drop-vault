@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
 export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
 export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster";
+export const DEFAULT_STAR_STYLE: StarStyle = "cluster";
 export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean; starStyle?: StarStyle };
 
 export const STAR_STYLES: { id: StarStyle; label: string }[] = [
@@ -25,7 +26,7 @@ export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "foreground", label: "Text", vars: ["--foreground", "--card-foreground"] },
   { key: "globe", label: "Globe tone", vars: ["--globe-personal-tone"] },
   { key: "globeBorder", label: "Country outlines", vars: ["--globe-border-tone"] },
-  { key: "galaxy", label: "Star backdrop", vars: ["--galaxy-tone"] },
+  { key: "galaxy", label: "Galaxy & star color", vars: ["--galaxy-tone"] },
 ];
 
 export function hexToHsl(hex: string): string {
@@ -94,7 +95,7 @@ export function usePersonalGlobe() {
     media.addEventListener("change", motion);
     return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
   }, []);
-  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? "living", reduced };
+  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----

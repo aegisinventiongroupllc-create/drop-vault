@@ -31,4 +31,4 @@
 
 - Dashboard chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
 
-- Personal globe colors use validated ui_theme and shared globe renderers, not platform settings, to isolate each account’s choice.
+- Personal globe/galaxy colors use validated ui_theme and shared renderers, not platform settings; photo tints use color blending to preserve star luminance.
