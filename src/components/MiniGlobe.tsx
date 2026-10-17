@@ -2,14 +2,15 @@ import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { HoloSphere } from "@/components/HoloGlobe";
-import CityLights, { Atmosphere } from "@/components/CityLights";
+import CityLights, { Atmosphere, US_GLOW_HUBS } from "@/components/CityLights";
 import { useGlobeStyle, type GlobeStyle } from "@/lib/globeStyle";
 import { COUNTRY_LATLNG } from "@/components/GlobePicker";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 
 const SPECS = Object.entries(COUNTRY_LATLNG)
   .filter(([code]) => !isBlockedCountry(code))
-  .map(([, [lat, lng]]) => ({ lat, lng, people: 4 }));
+  .map(([, [lat, lng]]) => ({ lat, lng, people: 4 }))
+  .concat(US_GLOW_HUBS);
 
 const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: boolean; size: number; style: GlobeStyle }) => {
   const groupRef = useRef<THREE.Group>(null);

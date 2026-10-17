@@ -7,7 +7,7 @@ import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
 import { countryName } from "@/lib/siteTranslate";
 import { HoloSphere, latLngToVec3, R } from "@/components/HoloGlobe";
-import CityLights, { Atmosphere } from "@/components/CityLights";
+import CityLights, { Atmosphere, US_GLOW_HUBS } from "@/components/CityLights";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 import { useGlobeStyle, type GlobeStyle } from "@/lib/globeStyle";
 
@@ -139,7 +139,8 @@ const GlobeScene = ({ counts, selected, onSelect, onHover, showNames, style }: G
   const maxCount = Math.max(1, ...Object.values(counts));
   const lightSpecs = useMemo(() => Object.entries(COUNTRY_LATLNG)
     .filter(([code]) => !isBlockedCountry(code))
-    .map(([code, [lat, lng]]) => ({ lat, lng, people: counts[code] ?? 0 })), [counts]);
+    .map(([code, [lat, lng]]) => ({ lat, lng, people: counts[code] ?? 0 }))
+    .concat(US_GLOW_HUBS), [counts]);
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
