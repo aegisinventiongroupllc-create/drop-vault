@@ -41,6 +41,36 @@ Deno.serve(async (req) => {
       return map;
     };
 
+    if (action === "dashboard_stats") {
+      const { count } = await supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "creator");
+      let totalRevenue = 0;
+      for (let from = 0; ; from += 1000) {
+        const { data } = await supabase.from("transactions").select("amount_usd").eq("status", "completed").range(from, from + 999);
+        for (const t of data || []) totalRevenue += Number(t.amount_usd) || 0;
+        if (!data || data.length < 1000) break;
+      }
+      const { data: wallets } = await supabase.from("creator_wallets").select("user_id, ltc_address, pending_balance").limit(1000);
+      const profiles = await loadProfiles((wallets || []).map((w) => w.user_id));
+      return json({ totalCreators: count ?? 0, totalRevenue, wallets: wallets || [], profiles });
+    }
+
+    if (action === "activity") {
+      const role = typeof body?.role === "string" ? body.role : "all";
+      const date = typeof body?.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : "";
+      let q = supabase
+        .from("activity_logs")
+        .select("id, user_id, user_role, action_type, action_detail, metadata, activity_date, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (role === "creator" || role === "customer") q = q.eq("user_role", role);
+      if (date) q = q.eq("activity_date", date);
+      const { data, error } = await q;
+      if (error) return json({ error: error.message }, 500);
+      const rows = data || [];
+      const pmap = await loadProfiles(Array.from(new Set(rows.map((r) => r.user_id))));
+      return json({ rows: rows.map((r) => ({ ...r, email: pmap[r.user_id]?.email ?? null, display_name: pmap[r.user_id]?.display_name ?? null })) });
+    }
+
     if (action === "country_stats") {
       // Paged reads so this keeps working with very large creator counts.
       const all: any[] = [];
