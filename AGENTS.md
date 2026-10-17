@@ -1,14 +1,15 @@
 # Project architecture rules
+- Admin finance drilldowns use the server-verified guard and stable paginated allowlisted queries matching overview filters; flag accepted requests as unconfirmed. Why: protect records without changing totals or balances.
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
 - Read creator monthly revenue history from account-scoped completed transaction ledger rows with UTC month boundaries and original split percentages; aggregate full-month totals server-side and paginate details so history is accurate beyond client row limits without changing balances.
 
-- Keep creator welcome-back summaries read-only and account-scoped to completed transaction ledger rows; track last activity locally for display only, count tokens from allocation records rather than net revenue, and never alter balances for celebrations. Admin replay uses explicitly labeled sample earnings and never writes to the ledger.
+- Welcome-back summaries read only account-scoped completed transactions and token allocations; local activity is display-only. Admin samples never write the ledger.
 
 - Send customer auth callbacks to `https://dropthatthing.com`, never editor preview domains.
 - Treat `profiles.email` as private account data; social surfaces read only handle and avatar data from `public_profiles`.
-- Render `profiles.avatar_config` through shared `ProfileAvatar` for consistent identity.
+- Render `profiles.avatar_config` through `ProfileAvatar` for consistent identity.
 - Store DTT letter colors as validated six-digit hex colors or legacy palette identifiers in the shared avatar configuration; use the iro circular picker and render validated values only as SVG fills, never arbitrary CSS, to support the full color spectrum safely without AI costs.
 - Generate role-specific portraits server-side (drawn customer cartoons, near-photoreal flattering creator likenesses) from in-memory selfies; never persist originals, and store only generated portraits in account-scoped private paths to protect identity.
 - Store creator public photos in an account-owned private gallery; show the selected real photo on creator discovery surfaces while private interactions continue using the generated emoji.
@@ -28,4 +29,4 @@
 - Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
 - Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
 
-- Reuse TopFansSection for dashboard chats; customer inbox reads account-scoped fan_messages and public_profiles only. Why: restore chat navigation without revealing private threads.
+- Dashboard chats reuse TopFansSection; customer inbox reads only account-scoped fan_messages and public_profiles. Why: keep threads private.
