@@ -1,5 +1,6 @@
 import DttToken from "@/components/DttToken";
 import RequestDelivery from "@/components/RequestDelivery";
+import PrivateMessages from "@/components/PrivateMessages";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
 import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
@@ -49,7 +50,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"library" | "requests">("library");
+  const [activeTab, setActiveTab] = useState<"library" | "requests" | "messages">("library");
   const [, setTick] = useState(0);
   useEffect(() => {
     if (sessionStorage.getItem("dtt_open_buy") === "1") {
@@ -183,6 +184,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   const tabs = [
     { id: "library" as const, label: libraryTitle },
     { id: "requests" as const, label: "MY REQUESTS" },
+    { id: "messages" as const, label: "MESSAGES" },
   ];
 
   const handleRenew = (creatorName: string) => {
@@ -287,7 +289,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
       <TokenPurchaseHistory />
 
       {/* Tabs */}
-      <div className="flex gap-2 px-4 mb-4">
+      <div className="flex gap-2 px-4 mb-4 overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -380,6 +382,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
       )}
 
       {/* My Requests — real data */}
+      {activeTab === "messages" && <div className="px-4 flex-1"><PrivateMessages /></div>}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">
           <p className="text-xs text-muted-foreground mb-2">Only you can see your requests.</p>

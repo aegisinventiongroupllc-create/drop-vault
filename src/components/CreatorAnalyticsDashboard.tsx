@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import TopFansSection from "@/components/TopFansSection";
 import CreatorFanInsights from "@/components/CreatorFanInsights";
 import { useNavigate } from "react-router-dom";
 import {
@@ -46,7 +47,7 @@ const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
 
-type Section = "overview" | "verification" | "requests" | "media";
+type Section = "overview" | "verification" | "requests" | "media" | "messages";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void }) => {
   const ct = useCreatorText();
@@ -514,6 +515,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         </div>
       </div>
 
+      <div className="px-4 mb-3"><Button variant="outline" className="w-full" onClick={() => setActiveSection("messages")}>MESSAGES — TOP 10 FANS</Button></div>
       {/* Section tabs */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
         {sections.map((s) => (
@@ -590,6 +592,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
         </div>
       </div>
 
+      {activeSection === "messages" && authUserId && <TopFansSection creatorId={authUserId} creatorName={profileUsername || "Creator"} initiallyOpen />}
       {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
@@ -650,12 +653,12 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
             </div>
             <div className="space-y-2">
               {TOP_FANS.map(fan => (
-                <div key={fan.rank} className="flex items-center gap-3">
+                <Button key={fan.rank} variant="ghost" aria-label={`View messages with ${fan.name}`} onClick={() => setActiveSection("messages")} className="flex w-full items-center gap-3 px-0">
                   <span className={`text-sm font-bold w-5 text-right ${fan.rank <= 3 ? "text-gold" : "text-muted-foreground"}`}>{fan.rank}</span>
                   <ProfileAvatar label={fan.name} className="h-7 w-7" />
                   <span className="text-xs text-foreground flex-1">@{fan.name}</span>
                   <span className="text-xs font-bold text-gold">${fan.spent}</span>
-                </div>
+                </Button>
               ))}
             </div>
           </div>
