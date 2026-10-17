@@ -63,13 +63,21 @@ export default function TeaserCarousel({ items, onRefresh, onDelete }: { items: 
       })}
     </div>}
     <Dialog open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}>
-      <DialogContent className="max-w-sm max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-sm max-h-[90dvh] overflow-y-auto p-4">
         <DialogTitle>{editing ? "Edit Teaser" : selected?.title}</DialogTitle>
-        {selected && urls[selected.storage_path] && <TeaserViewport key={selected.id} url={urls[selected.storage_path]} type={selected.media_type} frame={frame} />}
+        {selected && urls[selected.storage_path] && <div className={editing ? "h-36 sm:h-48 [&>div]:h-full [&>div]:aspect-auto" : ""}><TeaserViewport key={selected.id} url={urls[selected.storage_path]} type={selected.media_type} frame={frame} /></div>}
         {editing && selected && <div className="space-y-3">
           <input aria-label="Teaser title" value={title} onChange={(event) => setTitle(event.target.value)} className="w-full bg-secondary text-foreground border border-border rounded-md p-2" />
-          <label className="block text-sm text-muted-foreground">Picture frame<select aria-label="Picture frame" value={frame} onChange={(event) => setFrame(event.target.value as TeaserFrame)} className="w-full bg-secondary text-foreground border border-border rounded-md p-2 mt-1">{FRAMES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-          <Button variant="neon" disabled={busy} onClick={async () => {
+          <fieldset className="space-y-2">
+            <legend className="text-sm text-muted-foreground">Picture frame</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {FRAMES.map((option) => <Button key={option.value} variant="outline" aria-pressed={frame === option.value} onClick={() => setFrame(option.value)} className={`h-auto min-h-12 justify-start gap-2 px-2 py-2 text-xs whitespace-normal text-left ${frame === option.value ? "border-primary bg-primary/10 ring-1 ring-primary" : ""}`}>
+                <span aria-hidden="true" className={`teaser-viewport teaser-frame-${option.value} relative h-8 w-8 shrink-0 overflow-hidden rounded-sm bg-secondary`}><span className="teaser-decoration absolute inset-0" /></span>
+                <span>{option.label}</span>
+              </Button>)}
+            </div>
+          </fieldset>
+          <Button variant="neon" className="w-full" disabled={busy} onClick={async () => {
             setBusy(true);
             const { error } = await supabase.from("creator_media").update({ title: title.trim() || "Untitled", teaser_frame: frame }).eq("id", selected.id).eq("creator_id", selected.creator_id);
             if (error) toast.error("Couldn't save teaser"); else { await onRefresh(); setSelected(null); toast.success("Teaser saved", { duration: 4000 }); }
