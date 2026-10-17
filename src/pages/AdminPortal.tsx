@@ -1,3 +1,4 @@
+import AdminFinanceBreakdown, { type FinanceCategory } from "@/components/AdminFinanceBreakdown";
 import { useEffect, useState } from "react";
 import TopCreatorsBoard from "@/components/TopCreatorsBoard";
 import { Helmet } from "react-helmet-async";
@@ -78,6 +79,7 @@ const AdminPortal = () => {
   const [activityRoleFilter, setActivityRoleFilter] = useState<"all" | "creator" | "customer">("all");
   const [activityDateFilter, setActivityDateFilter] = useState<string>(""); // YYYY-MM-DD
   const [finance, setFinance] = useState<any | null>(null);
+  const [financeCategory, setFinanceCategory] = useState<FinanceCategory | null>(null);
   const [financeLoading, setFinanceLoading] = useState(false);
   const [requests, setRequests] = useState<any[]>([]);
   const [payingAll, setPayingAll] = useState(false);
@@ -364,6 +366,7 @@ const AdminPortal = () => {
 
   return (
     <>
+      <AdminFinanceBreakdown category={financeCategory} onClose={() => setFinanceCategory(null)} earnings={finance?.platform_earnings ?? {}} />
       <Helmet>
         <title>Admin Portal</title>
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
@@ -443,22 +446,22 @@ const AdminPortal = () => {
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="border border-border rounded-md p-3">
+              <Button variant="outline" aria-label="View gross breakdown" onClick={() => setFinanceCategory("gross")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Gross paid in</div>
                 <div className="text-xl font-bold mt-1">${Number(finance?.totals?.gross_volume ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View payments breakdown" onClick={() => setFinanceCategory("payments")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Completed payments</div>
                 <div className="text-xl font-bold mt-1">{finance?.totals?.transactions ?? 0}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View creator breakdown" onClick={() => setFinanceCategory("creator")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Creators owed 90%</div>
                 <div className="text-xl font-bold mt-1 text-primary">${Number(finance?.totals?.creator_share ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View platform breakdown" onClick={() => setFinanceCategory("platform")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Your 10%</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.totals?.platform_share ?? 0).toFixed(2)}</div>
-              </div>
+              </Button>
             </div>
           </Card>
 
@@ -468,27 +471,27 @@ const AdminPortal = () => {
               <DollarSign className="w-4 h-4" /> Your Platform Earnings
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="border border-border rounded-md p-3">
+              <Button variant="outline" aria-label="View purchase breakdown" onClick={() => setFinanceCategory("purchase")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">$1 purchase fees</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.purchase_fees ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View tokens breakdown" onClick={() => setFinanceCategory("tokens")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">$2 per-token cuts</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.token_cuts ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View passes breakdown" onClick={() => setFinanceCategory("passes")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Entry passes ($20/yr)</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.entry_passes ?? 0).toFixed(2)}</div>
-              </div>
-              <div className="border border-border rounded-md p-3">
+              </Button>
+              <Button variant="outline" aria-label="View custom breakdown" onClick={() => setFinanceCategory("custom")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
                 <div className="text-muted-foreground uppercase text-[10px]">Custom request fees</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.custom_request_fees ?? 0).toFixed(2)}</div>
-              </div>
+              </Button>
             </div>
-            <div className="border border-primary/40 rounded-md p-3 mt-3 flex items-center justify-between">
+            <Button variant="outline" aria-label="View total breakdown" onClick={() => setFinanceCategory("total")} className="w-full h-auto whitespace-normal gap-3 text-left border border-primary/40 rounded-md p-3 mt-3 flex items-center justify-between">
               <span className="text-muted-foreground uppercase text-[10px] tracking-wider">Your total (before processor fees)</span>
               <span className="text-2xl font-bold text-green-400">${Number(finance?.platform_earnings?.total ?? 0).toFixed(2)}</span>
-            </div>
+            </Button>
             <p className="text-[10px] text-muted-foreground mt-2">
               CCBill's processing fee comes out of these amounts before the money reaches your bank. Creators' 90% is never touched by processor fees.
             </p>

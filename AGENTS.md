@@ -1,10 +1,11 @@
 # Project architecture rules
+- Admin finance drilldowns use the existing server-verified guard and stable paginated allowlisted queries matching overview filters; flag accepted requests as unconfirmed. Why: protect private records without altering totals or balances.
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
 - Read creator monthly revenue history from account-scoped completed transaction ledger rows with UTC month boundaries and original split percentages; aggregate full-month totals server-side and paginate details so history is accurate beyond client row limits without changing balances.
 
-- Keep creator welcome-back summaries read-only and account-scoped to completed transaction ledger rows; track last activity locally for display only, count tokens from allocation records rather than net revenue, and never alter balances for celebrations. Admin replay uses explicitly labeled sample earnings and never writes to the ledger.
+- Welcome-back summaries read only account-scoped completed transactions and token allocations; local activity is display-only. Admin samples never write the ledger.
 
 - Send customer auth callbacks to `https://dropthatthing.com`, never editor preview domains.
 - Treat `profiles.email` as private account data; social surfaces read only handle and avatar data from `public_profiles`.

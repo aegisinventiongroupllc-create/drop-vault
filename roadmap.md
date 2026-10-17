@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Make nine admin earnings totals clickable with private paginated records and unpaid-request labels; verify all categories.
 - [x] Move creator Top 10 messages beneath Requests and show all five picture-frame styles together; verified signed-in at 384×629: messages open and every frame is visible/selectable, with no browser errors. Existing teaser video still cannot decode in test Chromium.
 - [x] Restore clickable Top 10 conversations on both dashboards; verified the existing saved message opens and reopens from the real creator dashboard. Customer inbox added; customer-side browser verification remains unavailable with the current creator session.
 - [x] Add private staged request upload, server-managed 14-day paid delivery access, token renewal after expiry, and creator workspace archive without deleting customer videos, shared by both genders. Request payment checkout remains blocked pending approved provider integration below.
