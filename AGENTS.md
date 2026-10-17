@@ -29,4 +29,4 @@
 - Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
 - Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
 
-- Reuse TopFansSection for dashboard chats; customer inbox reads account-scoped fan_messages and public_profiles only. Why: restore chat navigation without revealing private threads.
+- Dashboard chats reuse TopFansSection; customer inbox reads only account-scoped fan_messages and public_profiles. Why: keep threads private.
