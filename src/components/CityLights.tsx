@@ -189,28 +189,41 @@ export const Atmosphere = () => (
  * A glowing shooting star every `intervalSec` seconds (default 15 minutes):
  * blazing white-gold head with a long, tapering sparkle trail.
  */
-const TRAIL = 70;
+const TRAIL = 140;
+const STEP = 0.0042;
 const starVert = `
   attribute float aFade;
+  attribute float aHead;
   uniform float uScale;
   varying float vA;
+  varying float vHead;
   void main() {
     vA = aFade;
+    vHead = aHead;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = uScale * (2.0 + 26.0 * aFade * aFade) / -mv.z;
+    float sz = mix(1.5 + 18.0 * aFade * aFade, 90.0 * aFade, aHead);
+    gl_PointSize = uScale * sz / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;
 const starFrag = `
   varying float vA;
+  varying float vHead;
   void main() {
-    float d = length(gl_PointCoord - 0.5);
-    float core = smoothstep(0.2, 0.0, d);
-    float halo = smoothstep(0.5, 0.0, d) * 0.5;
-    vec3 col = mix(vec3(0.55, 0.75, 1.0), vec3(1.0, 0.97, 0.85), vA);
-    gl_FragColor = vec4(col, (core + halo) * vA);
+    vec2 p = gl_PointCoord - 0.5;
+    float d = length(p);
+    vec2 q = abs(p);
+    float core = smoothstep(mix(0.2, 0.06, vHead), 0.0, d);
+    float halo = smoothstep(0.5, 0.0, d) * mix(0.45, 0.3, vHead);
+    // Head gets a crisp diamond star-flare.
+    float rays = (exp(-q.x * 90.0) * exp(-q.y * 4.0) + exp(-q.y * 90.0) * exp(-q.x * 4.0)) * vHead * 1.4;
+    vec3 tail = mix(vec3(0.5, 0.7, 1.0), vec3(1.0, 0.92, 0.7), vA);
+    vec3 col = mix(tail, vec3(1.0), clamp(core * vHead + vHead * 0.4, 0.0, 1.0));
+    gl_FragColor = vec4(col, (core + halo + rays) * vA);
   }
 `;
+
+const hash = (n: number) => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
 
 export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) => {
   const dpr = useThree((st) => st.viewport.dpr);
@@ -218,6 +231,8 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(TRAIL * 3), 3));
     g.setAttribute("aFade", new THREE.Float32BufferAttribute(new Float32Array(TRAIL), 1));
+    const head = new Float32Array(TRAIL); head[0] = 1;
+    g.setAttribute("aHead", new THREE.Float32BufferAttribute(head, 1));
     return g;
   }, []);
   const st = useRef({ active: false, next: 30, start: 0, from: new THREE.Vector3(), to: new THREE.Vector3(), ctrl: new THREE.Vector3() });
@@ -231,16 +246,17 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
       s.active = true;
       s.start = t;
       const z = R * 1.05;
-      const y0 = R * (0.3 + Math.random() * 0.5);
+      const y0 = R * (0.35 + Math.random() * 0.45);
       const dir = Math.random() > 0.5 ? 1 : -1;
-      s.from.set(-dir * R * 1.5, y0, z);
-      s.to.set(dir * R * 1.1, y0 - R * (0.6 + Math.random() * 0.5), z);
-      s.ctrl.lerpVectors(s.from, s.to, 0.5).add(new THREE.Vector3(0, R * 0.15, R * 0.2));
+      s.from.set(-dir * R * 1.6, y0, z);
+      s.to.set(dir * R * 1.3, y0 - R * (0.7 + Math.random() * 0.5), z);
+      s.ctrl.lerpVectors(s.from, s.to, 0.5).add(new THREE.Vector3(0, R * 0.22, R * 0.25));
     }
     if (!s.active) return;
-    const dur = 2.4;
+    const dur = 3.2;
     const p = (t - s.start) / dur;
-    if (p >= 1.25) {
+    const end = 1 + TRAIL * STEP;
+    if (p >= end) {
       s.active = false;
       s.next = t + intervalSec;
       (fadeAttr.array as Float32Array).fill(0);
@@ -248,15 +264,21 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
       return;
     }
     const posAttr = geom.getAttribute("position") as THREE.BufferAttribute;
-    const life = Math.min(1, p * 4) * Math.max(0, Math.min(1, (1.25 - p) * 3));
+    const life = Math.min(1, p * 5) * Math.max(0, Math.min(1, (1.05 - p) * 6));
     for (let i = 0; i < TRAIL; i++) {
-      const q = Math.max(0, Math.min(1, p - i * 0.006));
-      // Quadratic curve for a graceful arc.
+      const raw = p - i * STEP;
+      const q = Math.max(0, Math.min(1, raw));
       const a = (1 - q) * (1 - q), b = 2 * (1 - q) * q, c = q * q;
       tmp.set(0, 0, 0).addScaledVector(s.from, a).addScaledVector(s.ctrl, b).addScaledVector(s.to, c);
-      const sparkle = i > 3 ? 0.75 + 0.25 * Math.sin(t * 40 + i * 2.3) : 1;
+      // Sparkle dust drifts slightly off the line the further back it is.
+      const k = i / TRAIL;
+      const drift = k * k * 0.05;
+      tmp.x += (hash(i) - 0.5) * drift;
+      tmp.y += (hash(i + 99) - 0.5) * drift - k * k * 0.02;
       posAttr.setXYZ(i, tmp.x, tmp.y, tmp.z);
-      fadeAttr.setX(i, p - i * 0.006 > 0 ? Math.pow(1 - i / TRAIL, 1.6) * life * sparkle : 0);
+      const twinkle = i === 0 ? 1 : 0.5 + 0.5 * Math.pow(0.5 + 0.5 * Math.sin(t * 30 + i * 3.7), 3);
+      const tailLife = i === 0 ? life : Math.max(0, Math.min(1, (end - p) * 3)) * Math.min(1, p * 5);
+      fadeAttr.setX(i, raw > 0 && raw < 1.02 ? Math.pow(1 - k, 1.4) * tailLife * twinkle : 0);
     }
     posAttr.needsUpdate = true;
     fadeAttr.needsUpdate = true;
