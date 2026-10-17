@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import HexColorWheel from "@/components/HexColorWheel";
+import { Button } from "@/components/ui/button";
+import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
 import { THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 
@@ -11,6 +13,7 @@ const DashboardColorPicker = () => {
   const [open, setOpen] = useState(false);
   const [wheelFor, setWheelFor] = useState<ThemeKey | null>("primary");
   const vip = useVipGlow();
+  const [fog, setFog] = useState(getFogIntensity);
   const timer = useRef<number>();
   useEffect(() => {
     const h = () => setTheme(loadTheme());
@@ -62,9 +65,16 @@ const DashboardColorPicker = () => {
             <span>VIP room glow — neon lights and fog in your highlight color</span>
             <input type="checkbox" checked={vip} onChange={(e) => setVipGlow(e.target.checked)} className="h-4 w-4 accent-primary" />
           </label>
-          <button type="button" onClick={reset} className="w-full rounded-md border border-border py-2 text-xs font-bold tracking-widest text-muted-foreground">
+          <label className="block space-y-2 text-xs font-bold text-foreground">
+            <span className="flex justify-between"><span>Fog intensity</span><span>{fog}%</span></span>
+            <input type="range" aria-label="Fog intensity" min={0} max={100} step={1} value={fog} disabled={!vip}
+              onChange={(e) => { const value = Number(e.target.value); setFog(value); setFogIntensity(value); }}
+              className="w-full accent-primary disabled:opacity-40" />
+            <span className="flex justify-between text-muted-foreground"><span>Clear</span><span>Heavy fog</span></span>
+          </label>
+          <Button variant="outline" type="button" onClick={reset} className="w-full text-xs font-bold tracking-widest text-muted-foreground">
             RESET TO DTT COLORS
-          </button>
+          </Button>
         </>
       )}
     </div>
