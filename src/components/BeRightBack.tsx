@@ -16,7 +16,7 @@ const SLIDE_SECONDS = 12;
  * Any activity brings the app straight back.
  */
 const BeRightBack = () => {
-  const [away, setAway] = useState(false);
+  const [away, setAway] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("brb"));
   const timer = useRef<number>();
 
   useEffect(() => {
