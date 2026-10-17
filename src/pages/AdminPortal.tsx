@@ -159,25 +159,15 @@ const AdminPortal = () => {
   const loadStats = async () => {
     setLoading(true);
     try {
-      const [{ count: totalCreators }, { data: txRows }, { data: walletRows }, vaultList, teaserList] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "creator"),
-        supabase.from("transactions").select("amount_usd").eq("status", "completed"),
-        supabase.from("creator_wallets").select("user_id, ltc_address, pending_balance"),
+      const [summary, vaultList, teaserList] = await Promise.all([
+        callFinance("dashboard_stats"),
         supabase.storage.from("vault").list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } }),
         supabase.storage.from("teasers").list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } }),
       ]);
-
-      const totalRevenue = (txRows ?? []).reduce((sum, t) => sum + (Number(t.amount_usd) || 0), 0);
-
-      const userIds = (walletRows ?? []).map((w) => w.user_id);
-      let profileMap: Record<string, { display_name: string | null; email: string | null }> = {};
-      if (userIds.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, email")
-          .in("user_id", userIds);
-        profileMap = Object.fromEntries((profs ?? []).map((p) => [p.user_id, { display_name: p.display_name, email: p.email }]));
-      }
+      const totalCreators: number = summary?.totalCreators ?? 0;
+      const totalRevenue: number = Number(summary?.totalRevenue) || 0;
+      const walletRows: { user_id: string; ltc_address: string | null; pending_balance: number }[] = summary?.wallets ?? [];
+      const profileMap: Record<string, { display_name: string | null; email: string | null }> = summary?.profiles ?? {};
 
       const teaserNames = (teaserList.data ?? []).filter((f) => f.name && !f.name.startsWith(".")).map((f) => f.name);
       const { data: teaserSigned } = teaserNames.length
