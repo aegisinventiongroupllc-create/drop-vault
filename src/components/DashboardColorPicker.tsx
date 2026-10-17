@@ -4,7 +4,8 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
-import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, activeTheme, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import GalaxyReel from "@/components/GalaxyReel";
 import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
 import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
 import clusterImg from "@/assets/brb/stars-cluster.jpg";
@@ -26,7 +27,7 @@ const DashboardColorPicker = () => {
   const [fog, setFog] = useState(getFogIntensity);
   const timer = useRef<number>();
   useEffect(() => {
-    const h = () => setTheme(loadTheme());
+    const h = () => setTheme(activeTheme());
     window.addEventListener("dtt-theme", h);
     return () => window.removeEventListener("dtt-theme", h);
   }, []);
@@ -111,6 +112,13 @@ const DashboardColorPicker = () => {
                 ))}
               </div>
               {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
+              {p.key === "galaxy" && (
+                <div data-testid="galaxy-preview" className="relative mt-3 h-40 w-full overflow-hidden rounded-md border border-border bg-background">
+                  <GalaxyReel />
+                  <div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={96} lights speed={0.25} backdrop={false} /></div>
+                  <span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span>
+                </div>
+              )}
             </div>
           ))}
           {previewing && (

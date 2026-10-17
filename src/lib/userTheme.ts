@@ -76,8 +76,17 @@ export function applyTheme(theme: UserTheme = loadTheme()) {
   }
 }
 
+// Unsaved example shown on screen while someone tries colors; never stored.
+let previewing: UserTheme | null = null;
+
+/** The theme currently on screen: an unsaved example if one is active, else the saved one. */
+export function activeTheme(): UserTheme {
+  return previewing ?? loadTheme();
+}
+
 export function saveTheme(theme: UserTheme) {
   revision += 1;
+  previewing = null;
   const safe = validateTheme(theme);
   localStorage.setItem(KEY, JSON.stringify(safe));
   applyTheme(safe);
@@ -87,15 +96,16 @@ export function saveTheme(theme: UserTheme) {
 /** Live example only: applies on screen so the person can judge it, saves nothing. */
 export function previewTheme(theme: UserTheme) {
   revision += 1;
-  applyTheme(validateTheme(theme));
+  previewing = validateTheme(theme);
+  applyTheme(previewing);
   window.dispatchEvent(new Event("dtt-theme"));
 }
 
 export function usePersonalGlobe() {
-  const [theme, setTheme] = useState(loadTheme);
+  const [theme, setTheme] = useState(activeTheme);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   useEffect(() => {
-    const update = () => setTheme(loadTheme());
+    const update = () => setTheme(activeTheme());
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const motion = () => setReduced(media.matches);
     window.addEventListener("dtt-theme", update);
