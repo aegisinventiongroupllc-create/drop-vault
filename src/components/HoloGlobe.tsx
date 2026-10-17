@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import WORLD_BORDERS from "@/lib/worldBorders";
 import type { GlobeStyle } from "@/lib/globeStyle";
@@ -23,11 +24,21 @@ export const latLngToVec3 = (lat: number, lng: number, radius: number): [number,
  * Both keep the same size and position, so switching is only a change of skin.
  */
 export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
-  const { tone } = usePersonalGlobe();
+  const { tone, borderTone, borderNeon } = usePersonalGlobe();
+  const borderMats = useRef<THREE.LineBasicMaterial[]>([]);
   const colors = useMemo(() => {
     const base = new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim());
-    return { border: base, inner: base.clone().multiplyScalar(0.28), ocean: base.clone().multiplyScalar(0.13), grid: base.clone().multiplyScalar(0.6) };
-  }, [tone]);
+    const borderBase = borderTone ? new THREE.Color(borderTone) : base;
+    return { border: borderBase, inner: base.clone().multiplyScalar(0.28), ocean: base.clone().multiplyScalar(0.13), grid: base.clone().multiplyScalar(0.6) };
+  }, [tone, borderTone]);
+  // Multicolor outlines: each country's border slowly cycles through the rainbow.
+  useFrame(({ clock }) => {
+    if (!borderNeon) return;
+    const t = clock.getElapsedTime() * 0.12;
+    borderMats.current.forEach((m, i) => {
+      if (m) m.color.setHSL((t + i * 0.037) % 1, 0.9, 0.6);
+    });
+  });
   const { borders, grid } = useMemo(() => {
     const borderGeoms: THREE.BufferGeometry[] = [];
     for (const ring of WORLD_BORDERS) {
@@ -121,12 +132,11 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
         <meshBasicMaterial color={colors.ocean} transparent opacity={0.75} />
       </mesh>
       {/* Real country borders */}
-      {borders.map((g, i) => (
-        <primitive
-          key={`b${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: colors.border, transparent: true, opacity: 0.8 }))}
-        />
-      ))}
+      {borders.map((g, i) => {
+        const mat = new THREE.LineBasicMaterial({ color: colors.border, transparent: true, opacity: 0.8 });
+        borderMats.current[i] = mat;
+        return <primitive key={`b${i}`} object={new THREE.Line(g, mat)} />;
+      })}
       {/* Faint graticule */}
       {grid.map((g, i) => (
         <primitive
