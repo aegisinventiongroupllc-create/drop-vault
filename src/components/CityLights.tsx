@@ -201,22 +201,17 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
     const s = st.current;
-    // DEBUG: pin head in front of globe
-    if (head.current && headMat.current) { head.current.visible = true; head.current.position.set(0.4, 0.3, R * 1.3); headMat.current.opacity = 1; }
     if (!s.active && t >= s.next) {
       s.active = true;
       s.start = t;
-      console.log('[star] fired at', t);
-      // Random streak path skimming just past the globe, front-facing so it
-      // always crosses the view instead of hiding behind the planet.
-      const r = R * (1.12 + Math.random() * 0.25);
-      const a = Math.random() * Math.PI * 2;
-      const b = (Math.random() - 0.5) * Math.PI * 0.7;
+      // Streak across the face of the globe on a plane just above the
+      // surface, so the whole path stays inside the view.
+      const z = R * 1.06;
+      const y0 = (Math.random() - 0.5) * R * 1.2;
+      const y1 = y0 + (Math.random() - 0.5) * R * 0.9;
       const dir = Math.random() > 0.5 ? 1 : -1;
-      s.from.set(Math.cos(a) * Math.cos(b) * r, Math.sin(b) * r, Math.abs(Math.sin(a) * Math.cos(b)) * r);
-      const a2 = a + dir * (1.1 + Math.random() * 0.8);
-      const b2 = b + (Math.random() - 0.5) * 0.4;
-      s.to.set(Math.cos(a2) * Math.cos(b2) * r, Math.sin(b2) * r, Math.abs(Math.sin(a2) * Math.cos(b2)) * r);
+      s.from.set(-dir * R * 1.7, y0, z);
+      s.to.set(dir * R * 1.7, y1, z);
     }
     if (!s.active) return;
     const p = (t - s.start) / 1.6;
