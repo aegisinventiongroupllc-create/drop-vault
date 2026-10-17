@@ -11,6 +11,8 @@ const SecretAdmin = () => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Owner preview code: opens the customer $20 entry-pass page.
+    if (pw.trim() === "0524171") { window.location.href = "/entry-pass-preview"; return; }
     setBusy(true);
     const ok = await verifyAdminPasscode(pw);
     setBusy(false);
