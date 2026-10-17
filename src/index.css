@@ -197,3 +197,14 @@ body { top: 0 !important; }
   100% { transform: translate(-8vw, -150vh) scale(1.4); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .vip-smoke { animation: none; opacity: .25; bottom: 10vh; } }
+
+/* Be-right-back space slideshow: slow crossfade with drifting zoom */
+.brb-slide { opacity: 0; animation-name: brb-cycle; animation-timing-function: linear; animation-iteration-count: infinite; will-change: opacity, transform; }
+@keyframes brb-cycle {
+  0% { opacity: 0; transform: scale(1.05) translate(0, 0); }
+  6% { opacity: 1; }
+  25% { opacity: 1; }
+  31% { opacity: 0; transform: scale(1.18) translate(-2%, -1%); }
+  100% { opacity: 0; transform: scale(1.18) translate(-2%, -1%); }
+}
+@media (prefers-reduced-motion: reduce) { .brb-slide { animation: none; } .brb-slide:first-of-type { opacity: 1; } }
