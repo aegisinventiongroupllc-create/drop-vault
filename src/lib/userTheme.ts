@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
-export type ThemeKey = "primary" | "background" | "card" | "foreground";
-export type UserTheme = Partial<Record<ThemeKey, string>>;
+export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe";
+export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean };
 
 const KEY = "dtt_user_theme";
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -11,6 +12,7 @@ export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "background", label: "Background", vars: ["--background"] },
   { key: "card", label: "Boxes & cards", vars: ["--card", "--popover"] },
   { key: "foreground", label: "Text", vars: ["--foreground", "--card-foreground"] },
+  { key: "globe", label: "Globe tone", vars: ["--globe-personal-tone"] },
 ];
 
 export function hexToHsl(hex: string): string {
@@ -28,12 +30,22 @@ export function hexToHsl(hex: string): string {
   return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
+export function validateTheme(t: unknown): UserTheme {
+  if (!t || typeof t !== "object") return {};
+  const values = t as Record<string, unknown>;
+  const out: UserTheme = {};
+  for (const p of THEME_PARTS) {
+    const value = values[p.key];
+    if (typeof value === "string" && HEX.test(value)) out[p.key] = value;
+  }
+  if (typeof values.globeNeon === "boolean") out.globeNeon = values.globeNeon;
+  return out;
+}
+
 export function loadTheme(): UserTheme {
   try {
     const t = JSON.parse(localStorage.getItem(KEY) || "{}");
-    const out: UserTheme = {};
-    for (const p of THEME_PARTS) if (typeof t[p.key] === "string" && HEX.test(t[p.key])) out[p.key] = t[p.key];
-    return out;
+    return validateTheme(t);
   } catch { return {}; }
 }
 
@@ -49,8 +61,24 @@ export function applyTheme(theme: UserTheme = loadTheme()) {
 }
 
 export function saveTheme(theme: UserTheme) {
-  localStorage.setItem(KEY, JSON.stringify(theme));
-  applyTheme(theme);
+  const safe = validateTheme(theme);
+  localStorage.setItem(KEY, JSON.stringify(safe));
+  applyTheme(safe);
+  window.dispatchEvent(new Event("dtt-theme"));
+}
+
+export function usePersonalGlobe() {
+  const [theme, setTheme] = useState(loadTheme);
+  const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => {
+    const update = () => setTheme(loadTheme());
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const motion = () => setReduced(media.matches);
+    window.addEventListener("dtt-theme", update);
+    media.addEventListener("change", motion);
+    return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
+  }, []);
+  return { tone: theme.globe, neon: theme.globeNeon === true, reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----
@@ -74,6 +102,6 @@ export function startThemeSync() {
   };
   supabase.auth.onAuthStateChange((evt, session) => {
     if (evt === "SIGNED_IN" || evt === "INITIAL_SESSION") void pull(session?.user?.id);
-    if (evt === "SIGNED_OUT") { localStorage.removeItem(KEY); applyTheme({}); }
+    if (evt === "SIGNED_OUT") { localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
   });
 }
