@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import MiniGlobe from "@/components/MiniGlobe";
 
-import space1 from "@/assets/brb/space-1.jpg";
-import space2 from "@/assets/brb/space-2.jpg";
-import space3 from "@/assets/brb/space-3.jpg";
-import space4 from "@/assets/brb/space-4.jpg";
+import GalaxyReel from "@/components/GalaxyReel";
 
 const IDLE_MS = 60_000;
 
