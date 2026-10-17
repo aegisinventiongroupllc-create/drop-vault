@@ -84,6 +84,13 @@ export function saveTheme(theme: UserTheme) {
   window.dispatchEvent(new Event("dtt-theme"));
 }
 
+/** Live example only: applies on screen so the person can judge it, saves nothing. */
+export function previewTheme(theme: UserTheme) {
+  revision += 1;
+  applyTheme(validateTheme(theme));
+  window.dispatchEvent(new Event("dtt-theme"));
+}
+
 export function usePersonalGlobe() {
   const [theme, setTheme] = useState(loadTheme);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
