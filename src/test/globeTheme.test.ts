@@ -8,7 +8,7 @@ describe("personal globe preferences", () => {
   it("persists a personal galaxy tint with the Star cluster photograph", () => {
     saveTheme({ starStyle: "cluster", galaxy: "#14b8a6" });
     expect(loadTheme()).toEqual({ starStyle: "cluster", galaxy: "#14b8a6" });
-    expect(document.documentElement.style.getPropertyValue("--galaxy-tone")).toBe("174 80% 40%");
+    expect(document.documentElement.style.getPropertyValue("--galaxy-tone")).toBe("173 80% 40%");
     expect(validateTheme({ galaxy: "url(unsafe)" }).galaxy).toBeUndefined();
     saveTheme({});
     expect(document.documentElement.style.getPropertyValue("--galaxy-tone")).toBe("");
