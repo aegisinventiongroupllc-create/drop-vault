@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useRef } from "react";
-import { usePersonalGlobe } from "@/lib/userTheme";
+import { usePersonalGlobe, type StarStyle } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
+import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
+import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
+import clusterImg from "@/assets/brb/stars-cluster.jpg";
 
 /**
  * Shared realistic star-field backdrop that drifts slowly left-to-right and
- * loops forever, replacing the galaxy photo reel. Three parallax layers of
- * stars with realistic color temperature, twinkle and a faint tinted haze.
- * Tinted with the viewer's chosen backdrop color when they picked one.
- */
+ * loops forever. Either living canvas stars or a real astrophotography
+ * panorama chosen by the viewer, panned slowly like a reel. Tinted with the
+ * viewer's chosen backdrop color when they picked one (living stars only).
+  */
+
+const PHOTO_BACKDROPS: Record<Exclude<StarStyle, "living">, string> = {
+  deepfield: deepFieldImg,
+  milkyway: milkyWayImg,
+  cluster: clusterImg,
+};
 
 interface Star {
   x: number; // 0..1 of field width
