@@ -4,7 +4,7 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
 import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
-import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
 import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
 import clusterImg from "@/assets/brb/stars-cluster.jpg";
@@ -33,13 +33,43 @@ const DashboardColorPicker = () => {
   // Save to the account shortly after the last change (color wheel drags fire fast).
   const persist = (t: UserTheme) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => void saveThemeToAccount(t), 600); };
 
+  // Galaxy changes stay a live example until the person saves or cancels.
+  const savedBeforePreview = useRef<UserTheme | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+
   const set = (key: ThemeKey, hex: string) => {
     const next = { ...theme, [key]: hex };
     setTheme(next);
+    if (key === "galaxy") {
+      if (savedBeforePreview.current === null) savedBeforePreview.current = loadTheme();
+      setPreviewing(true);
+      previewTheme(next);
+      return;
+    }
     saveTheme(next);
     persist(next);
   };
-  const reset = () => { setTheme({}); saveTheme({}); persist({}); };
+  const commitPreview = () => {
+    const next = { ...theme };
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    saveTheme(next);
+    persist(next);
+  };
+  const cancelPreview = () => {
+    const saved = savedBeforePreview.current ?? {};
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    setTheme(saved);
+    saveTheme(saved);
+  };
+  const reset = () => {
+    savedBeforePreview.current = null;
+    setPreviewing(false);
+    setTheme({});
+    saveTheme({});
+    persist({});
+  };
   const setNeon = (globeNeon: boolean) => {
     const next = { ...theme, globeNeon };
     setTheme(next); saveTheme(next); persist(next);
@@ -83,6 +113,15 @@ const DashboardColorPicker = () => {
               {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
             </div>
           ))}
+          {previewing && (
+            <div className="space-y-2 rounded-md border border-primary/40 bg-primary/10 p-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Example only — nothing saved yet. Watch the star backdrop behind this box.</p>
+              <div className="flex gap-2">
+                <Button type="button" onClick={commitPreview} className="flex-1 text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
+                <Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button>
+              </div>
+            </div>
+          )}
           <div>
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
