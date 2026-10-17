@@ -92,7 +92,11 @@ export async function saveThemeToAccount(theme: UserTheme) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("profiles").update({ ui_theme: validateTheme(theme) as never }).eq("user_id", user.id);
+    const safe = validateTheme(theme);
+    const pendingKey = `${KEY}_pending_${user.id}`;
+    localStorage.setItem(pendingKey, JSON.stringify(safe));
+    const { error } = await supabase.from("profiles").update({ ui_theme: safe as never }).eq("user_id", user.id);
+    if (!error) localStorage.removeItem(pendingKey);
   } finally { saving -= 1; }
 }
 
@@ -100,6 +104,11 @@ export function startThemeSync() {
   const pull = async (uid: string | undefined) => {
     if (!uid || saving || syncedUser === uid) return;
     syncedUser = uid;
+    const pending = localStorage.getItem(`${KEY}_pending_${uid}`);
+    if (pending) {
+      try { saveTheme(validateTheme(JSON.parse(pending))); } catch {}
+      return;
+    }
     const before = revision;
     const { data } = await supabase.from("profiles").select("ui_theme").eq("user_id", uid).maybeSingle();
     const t = (data as { ui_theme?: UserTheme } | null)?.ui_theme;
