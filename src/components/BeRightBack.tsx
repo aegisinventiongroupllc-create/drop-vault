@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import MiniGlobe from "@/components/MiniGlobe";
 
+import space1 from "@/assets/brb/space-1.jpg";
+import space2 from "@/assets/brb/space-2.jpg";
+import space3 from "@/assets/brb/space-3.jpg";
+import space4 from "@/assets/brb/space-4.jpg";
+
 const IDLE_MS = 60_000;
+const SLIDES = [space1, space2, space3, space4];
+const SLIDE_SECONDS = 12;
 
 /**
  * "Be right back" screen: after a minute with no mouse, keys or touch, a
@@ -32,9 +39,22 @@ const BeRightBack = () => {
 
   if (!away) return null;
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 bg-background/95 backdrop-blur-sm animate-in fade-in duration-700" role="status" aria-label="Be right back">
-      <MiniGlobe size={280} lights speed={0.35} />
-      <p className="text-sm font-black uppercase tracking-[0.4em] text-muted-foreground animate-pulse">Be right back</p>
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
+      {SLIDES.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          aria-hidden
+          className="brb-slide absolute inset-0 h-full w-full object-cover"
+          style={{ animationDelay: `${i * SLIDE_SECONDS - SLIDES.length * SLIDE_SECONDS}s`, animationDuration: `${SLIDES.length * SLIDE_SECONDS}s` }}
+        />
+      ))}
+      <div className="absolute inset-0 bg-background/30" aria-hidden />
+      <div className="relative flex flex-col items-center gap-6">
+        <MiniGlobe size={280} lights speed={0.35} />
+        <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
+      </div>
     </div>
   );
 };
