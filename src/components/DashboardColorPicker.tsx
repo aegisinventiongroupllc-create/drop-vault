@@ -113,6 +113,15 @@ const DashboardColorPicker = () => {
               {wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
             </div>
           ))}
+          {previewing && (
+            <div className="space-y-2 rounded-md border border-primary/40 bg-primary/10 p-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Example only — nothing saved yet. Watch the star backdrop behind this box.</p>
+              <div className="flex gap-2">
+                <Button type="button" onClick={commitPreview} className="flex-1 text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
+                <Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button>
+              </div>
+            </div>
+          )}
           <div>
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
