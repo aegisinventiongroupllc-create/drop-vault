@@ -15,26 +15,26 @@ export interface CountryLightSpec { lat: number; lng: number; people: number }
  * alive with creators everywhere, even before real counts roll in.
  */
 export const US_GLOW_HUBS: CountryLightSpec[] = [
-  { lat: 40.7, lng: -74.0, people: 90 },   // New York
-  { lat: 34.0, lng: -118.2, people: 90 },  // Los Angeles
-  { lat: 41.9, lng: -87.6, people: 60 },   // Chicago
-  { lat: 29.8, lng: -95.4, people: 60 },   // Houston
-  { lat: 33.7, lng: -84.4, people: 50 },   // Atlanta
-  { lat: 25.8, lng: -80.2, people: 50 },   // Miami
-  { lat: 32.8, lng: -96.8, people: 50 },   // Dallas
-  { lat: 47.6, lng: -122.3, people: 40 },  // Seattle
-  { lat: 39.7, lng: -104.9, people: 40 },  // Denver
-  { lat: 36.2, lng: -115.1, people: 60 },  // Las Vegas
-  { lat: 42.4, lng: -71.1, people: 40 },   // Boston
-  { lat: 37.8, lng: -122.4, people: 50 },  // San Francisco
-  { lat: 39.9, lng: -75.2, people: 40 },   // Philadelphia
-  { lat: 33.4, lng: -112.1, people: 40 },  // Phoenix
-  { lat: 44.9, lng: -93.3, people: 35 },   // Minneapolis
-  { lat: 30.3, lng: -97.7, people: 40 },   // Austin
-  { lat: 38.9, lng: -77.0, people: 45 },   // Washington DC
-  { lat: 45.5, lng: -122.7, people: 35 },  // Portland
-  { lat: 36.2, lng: -86.8, people: 35 },   // Nashville
-  { lat: 35.2, lng: -80.8, people: 35 },   // Charlotte
+  { lat: 40.7, lng: -74.0, people: 55 },   // New York
+  { lat: 34.0, lng: -118.2, people: 55 },  // Los Angeles
+  { lat: 41.9, lng: -87.6, people: 26 },   // Chicago
+  { lat: 29.8, lng: -95.4, people: 26 },   // Houston
+  { lat: 33.7, lng: -84.4, people: 32 },   // Atlanta
+  { lat: 25.8, lng: -80.2, people: 32 },   // Miami
+  { lat: 32.8, lng: -96.8, people: 32 },   // Dallas
+  { lat: 47.6, lng: -122.3, people: 26 },  // Seattle
+  { lat: 39.7, lng: -104.9, people: 26 },  // Denver
+  { lat: 36.2, lng: -115.1, people: 26 },  // Las Vegas
+  { lat: 42.4, lng: -71.1, people: 26 },   // Boston
+  { lat: 37.8, lng: -122.4, people: 32 },  // San Francisco
+  { lat: 39.9, lng: -75.2, people: 26 },   // Philadelphia
+  { lat: 33.4, lng: -112.1, people: 26 },  // Phoenix
+  { lat: 44.9, lng: -93.3, people: 22 },   // Minneapolis
+  { lat: 30.3, lng: -97.7, people: 26 },   // Austin
+  { lat: 38.9, lng: -77.0, people: 30 },   // Washington DC
+  { lat: 45.5, lng: -122.7, people: 22 },  // Portland
+  { lat: 36.2, lng: -86.8, people: 22 },   // Nashville
+  { lat: 35.2, lng: -80.8, people: 22 },   // Charlotte
 ];
 
 const rand = (seed: number) => {
