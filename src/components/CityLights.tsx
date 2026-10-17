@@ -95,14 +95,15 @@ const vert = `
   uniform float uScale;
   varying float vGlow;
   void main() {
-    float tw = 0.72 + 0.28 * sin(uTime * 2.6 + aPhase) + 0.14 * sin(uTime * 6.1 + aPhase * 1.7);
+    // Slow swell: each dot builds brighter and brighter, then softly resets.
+    float s = 0.5 + 0.5 * sin(uTime * 0.9 + aPhase);
+    float tw = 0.35 + 0.65 * s * s * s;
     vGlow = tw;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    // Fade lights on the far side of the globe.
     vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
     vec3 wn = normalize(mat3(modelMatrix) * position);
     vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
-    gl_PointSize = aSize * uScale * (0.75 + tw * 0.5) / -mv.z;
+    gl_PointSize = aSize * uScale * (0.8 + tw * 0.6) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -110,9 +111,10 @@ const frag = `
   varying float vGlow;
   void main() {
     float d = length(gl_PointCoord - 0.5);
-    float core = smoothstep(0.5, 0.0, d);
-    vec3 col = mix(vec3(1.0, 0.5, 0.15), vec3(1.0, 0.95, 0.75), core * core * core);
-    gl_FragColor = vec4(col, core * core * vGlow * 0.8);
+    float core = smoothstep(0.18, 0.0, d);
+    float halo = smoothstep(0.5, 0.0, d) * 0.25;
+    vec3 col = mix(vec3(1.0, 0.8, 0.45), vec3(1.0, 1.0, 0.95), core);
+    gl_FragColor = vec4(col, (core + halo) * vGlow);
   }
 `;
 
@@ -123,18 +125,13 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
     const pos: number[] = [], phase: number[] = [], size: number[] = [];
     countries.forEach((c, ci) => {
       const r = rand(ci * 7919 + 17);
-      // Every country glows a little; each person adds more lights (capped).
-      const n = Math.round((24 + Math.min(420, Math.sqrt(c.people) * 26)) * density);
-      const spread = 2.5 + Math.min(3, Math.log2(1 + c.people) * 0.6);
-      // A few "city" hubs per country so lights cluster like real cities.
-      const hubs = Array.from({ length: 4 }, () => [c.lat + (r() - 0.5) * spread * 0.5, c.lng + (r() - 0.5) * spread * 0.7]);
+      // A few clean, separate dots per spot — never a cluttered blob.
+      const n = Math.max(1, Math.round((1 + Math.min(5, Math.sqrt(c.people) * 0.6)) * density));
       for (let i = 0; i < n; i++) {
-        const h = hubs[i % hubs.length];
-        const g = () => (r() + r() + r() - 1.5) * spread * 0.35;
-        const [x, y, z] = latLngToVec3(h[0] + g(), h[1] + g(), R * 1.004);
+        const [x, y, z] = latLngToVec3(c.lat + (r() - 0.5) * 2.2, c.lng + (r() - 0.5) * 2.8, R * 1.004);
         pos.push(x, y, z);
         phase.push(r() * Math.PI * 2);
-        size.push(i % 13 === 0 ? 9 : 2.5 + r() * 2.5);
+        size.push(5 + r() * 3);
       }
     });
     const g = new THREE.BufferGeometry();
@@ -177,76 +174,94 @@ export const Atmosphere = () => (
 );
 
 /**
- * A beautiful shooting star that streaks past the Earth every `intervalSec`
- * seconds (default 15 minutes). Bright head with a fading tail, additive glow.
+ * A glowing shooting star every `intervalSec` seconds (default 15 minutes):
+ * blazing white-gold head with a long, tapering sparkle trail.
  */
+const TRAIL = 70;
+const starVert = `
+  attribute float aFade;
+  uniform float uScale;
+  varying float vA;
+  void main() {
+    vA = aFade;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = uScale * (2.0 + 26.0 * aFade * aFade) / -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const starFrag = `
+  varying float vA;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    float core = smoothstep(0.2, 0.0, d);
+    float halo = smoothstep(0.5, 0.0, d) * 0.5;
+    vec3 col = mix(vec3(0.55, 0.75, 1.0), vec3(1.0, 0.97, 0.85), vA);
+    gl_FragColor = vec4(col, (core + halo) * vA);
+  }
+`;
+
 export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) => {
-  const head = useRef<THREE.Mesh>(null);
-  const headMat = useRef<THREE.MeshBasicMaterial>(null);
-  const tailObj = useMemo(() => {
+  const dpr = useThree((st) => st.viewport.dpr);
+  const geom = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(6), 3));
-    const m = new THREE.LineBasicMaterial({ color: "#ffe9b0", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-    const l = new THREE.Line(g, m);
-    l.visible = false;
-    return l;
+    g.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(TRAIL * 3), 3));
+    g.setAttribute("aFade", new THREE.Float32BufferAttribute(new Float32Array(TRAIL), 1));
+    return g;
   }, []);
-  const st = useRef({
-    active: false,
-    next: 8, // first one early so visitors catch it, then every intervalSec
-    start: 0,
-    from: new THREE.Vector3(),
-    to: new THREE.Vector3(),
-  });
+  const st = useRef({ active: false, next: 30, start: 0, from: new THREE.Vector3(), to: new THREE.Vector3(), ctrl: new THREE.Vector3() });
+  const tmp = useMemo(() => new THREE.Vector3(), []);
+
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
     const s = st.current;
+    const fadeAttr = geom.getAttribute("aFade") as THREE.BufferAttribute;
     if (!s.active && t >= s.next) {
       s.active = true;
       s.start = t;
-      // Streak across the face of the globe on a plane just above the
-      // surface, so the whole path stays inside the view.
-      const z = R * 1.02;
-      const y0 = (Math.random() - 0.5) * R * 0.8;
-      const y1 = y0 + (Math.random() - 0.5) * R * 0.5;
+      const z = R * 1.05;
+      const y0 = R * (0.3 + Math.random() * 0.5);
       const dir = Math.random() > 0.5 ? 1 : -1;
-      s.from.set(-dir * R * 1.2, y0, z);
-      s.to.set(dir * R * 1.2, y1, z);
+      s.from.set(-dir * R * 1.5, y0, z);
+      s.to.set(dir * R * 1.1, y0 - R * (0.6 + Math.random() * 0.5), z);
+      s.ctrl.lerpVectors(s.from, s.to, 0.5).add(new THREE.Vector3(0, R * 0.15, R * 0.2));
     }
     if (!s.active) return;
-    const p = (t - s.start) / 3.0;
-    if (p >= 1) {
+    const dur = 2.4;
+    const p = (t - s.start) / dur;
+    if (p >= 1.25) {
       s.active = false;
       s.next = t + intervalSec;
-      if (head.current) head.current.visible = false;
-      tailObj.visible = false;
+      (fadeAttr.array as Float32Array).fill(0);
+      fadeAttr.needsUpdate = true;
       return;
     }
-    const ease = p * p * (3 - 2 * p);
-    const pos = new THREE.Vector3().lerpVectors(s.from, s.to, ease);
-    const tailPos = new THREE.Vector3().lerpVectors(s.from, s.to, Math.max(0, ease - 0.18));
-    const fade = Math.sin(Math.PI * p);
-    if (head.current && headMat.current) {
-      head.current.visible = true;
-      head.current.position.copy(pos);
-      headMat.current.opacity = fade;
+    const posAttr = geom.getAttribute("position") as THREE.BufferAttribute;
+    const life = Math.min(1, p * 4) * Math.max(0, Math.min(1, (1.25 - p) * 3));
+    for (let i = 0; i < TRAIL; i++) {
+      const q = Math.max(0, Math.min(1, p - i * 0.006));
+      // Quadratic curve for a graceful arc.
+      const a = (1 - q) * (1 - q), b = 2 * (1 - q) * q, c = q * q;
+      tmp.set(0, 0, 0).addScaledVector(s.from, a).addScaledVector(s.ctrl, b).addScaledVector(s.to, c);
+      const sparkle = i > 3 ? 0.75 + 0.25 * Math.sin(t * 40 + i * 2.3) : 1;
+      posAttr.setXYZ(i, tmp.x, tmp.y, tmp.z);
+      fadeAttr.setX(i, p - i * 0.006 > 0 ? Math.pow(1 - i / TRAIL, 1.6) * life * sparkle : 0);
     }
-    tailObj.visible = true;
-    const attr = tailObj.geometry.getAttribute("position") as THREE.BufferAttribute;
-    attr.setXYZ(0, tailPos.x, tailPos.y, tailPos.z);
-    attr.setXYZ(1, pos.x, pos.y, pos.z);
-    attr.needsUpdate = true;
-    (tailObj.material as THREE.LineBasicMaterial).opacity = fade * 0.85;
+    posAttr.needsUpdate = true;
+    fadeAttr.needsUpdate = true;
   });
 
   return (
-    <group renderOrder={11}>
-      <mesh ref={head} visible={false}>
-        <sphereGeometry args={[R * 0.022, 10, 10]} />
-        <meshBasicMaterial ref={headMat} color="#fff7e0" transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-      <primitive object={tailObj} />
-    </group>
+    <points geometry={geom} renderOrder={11} frustumCulled={false}>
+      <shaderMaterial
+        vertexShader={starVert}
+        fragmentShader={starFrag}
+        uniforms={{ uScale: { value: 1.4 * dpr } }}
+        transparent
+        depthWrite={false}
+        depthTest={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
   );
 };
 
