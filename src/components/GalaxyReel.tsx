@@ -44,25 +44,26 @@ const pickColor = () => {
 const buildStars = (count: number): Star[] => {
   const stars: Star[] = [];
   for (let i = 0; i < count; i++) {
-    const layer = i < count * 0.5 ? 0 : i < count * 0.82 ? 1 : 2;
-    // Power distribution: many faint stars, a few bright ones.
-    const bright = Math.pow(Math.random(), 2.6);
-    const r = (layer === 0 ? 0.5 : layer === 1 ? 0.7 : 1.0) * (0.5 + bright * 1.9);
+    const layer = i < count * 0.55 ? 0 : i < count * 0.85 ? 1 : 2;
+    // Power distribution: a sea of faint pinpoint stars, a few bright beacons.
+    const bright = Math.pow(Math.random(), 3.0);
+    const r = (layer === 0 ? 0.4 : layer === 1 ? 0.6 : 0.9) * (0.45 + bright * 2.1);
     stars.push({
       x: Math.random(),
       y: Math.random(),
       r,
       layer,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.5 + Math.random() * 1.3,
+      speed: 0.4 + Math.random() * 1.1,
       color: pickColor(),
-      glint: bright > 0.92 && layer === 2,
+      // Diamond glints on the genuinely bright beacons, near layers only.
+      glint: bright > 0.86 && layer >= 1,
     });
   }
   return stars;
 };
 
-const GalaxyReel = ({ className, seconds = 140 }: { className?: string; seconds?: number }) => {
+const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?: number }) => {
   const { galaxyTone, reduced } = usePersonalGlobe();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(() => buildStars(760), []);
@@ -94,8 +95,8 @@ const GalaxyReel = ({ className, seconds = 140 }: { className?: string; seconds?
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // Layer drift speeds: px/s, slow left-to-right like a reel.
-    const layerSpeed = [w / (seconds * 3), w / (seconds * 1.6), w / seconds];
+    // Layer drift speeds: px/s, very slow left-to-right like a gentle reel.
+    const layerSpeed = [w / (seconds * 4), w / (seconds * 2.2), w / (seconds * 1.35)];
     const start = performance.now();
     const staticDraw = () => {
       ctx.clearRect(0, 0, w, h);
