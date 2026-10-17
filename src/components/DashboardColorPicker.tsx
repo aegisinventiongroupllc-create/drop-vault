@@ -71,6 +71,7 @@ const DashboardColorPicker = () => {
             </div>
           ))}
           <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
+          <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
             <input type="checkbox" aria-label="Multicolor neon globe sparkles" checked={theme.globeNeon === true} onChange={(e) => setNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />

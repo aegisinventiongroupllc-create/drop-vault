@@ -1,3 +1,4 @@
+import GalaxyReel from "@/components/GalaxyReel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -251,6 +252,7 @@ const GlobePicker = ({ selected, onSelect, onClose, focusCountry, focusName, sty
 
       {/* 3D holographic globe */}
       <div className="relative h-[42vh] min-h-[260px] select-none" onPointerDown={touchStart} onPointerUp={touchEnd} onPointerCancel={touchEnd} onPointerLeave={touchEnd}>
+        <GalaxyReel className="rounded-xl" />
         <Canvas camera={{ position: [0, 0.4, 2.6], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
           <GlobeScene style={style} showNames={showNames} counts={counts} selected={effectiveSelected} onSelect={viewOnly ? () => {} : (code) => { onSelect(code); onClose(); }} onHover={setHovered} />
         </Canvas>
