@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Current request
-- [ ] Add personal globe tone wheel and gentle multicolor neon sparkles to both dashboards; preserve shooting stars and verify saved preferences.
+- [x] Add personal globe tone wheel and gentle multicolor neon sparkles to the shared customer/creator color controls; shooting stars unchanged. Signed-in creator wheel, green globe, neon and reload verified; six tests pass. Account updates reject this existing profile's display-name format, so account-scoped local fallback preserves choices on this device; cross-device sync remains blocked for that profile.
 - [x] Audit personal-data RLS and tighten creator-profile-photo ownership: all public tables have RLS; profiles are owner/admin-only; public_profiles excludes private fields and is read-only; selected photos remain member-visible in a private bucket; photo mutations check folder and object ownership. Fifteen tests pass, including ten live catalog checks; real non-admin account can read its own profile but not others, anonymous private reads denied. Live photo mutations were not exercised. Public aggregate heart totals remain intentional.
 - [x] Make nine admin earnings totals clickable with private paginated records and unpaid-request labels; all nine opened under real admin access at 384×629, including the accepted $65 request fee, with no browser errors. Totals and balances unchanged.
 - [x] Move creator Top 10 messages beneath Requests and show all five picture-frame styles together; verified signed-in at 384×629: messages open and every frame is visible/selectable, with no browser errors. Existing teaser video still cannot decode in test Chromium.
