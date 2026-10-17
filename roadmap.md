@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Current request
-- [ ] Audit personal-data RLS and tighten creator-profile-photo ownership policies; verify owner-only private records and intended public fields/photos.
+- [x] Audit personal-data RLS and tighten creator-profile-photo ownership: all public tables have RLS; profiles are owner/admin-only; public_profiles excludes private fields and is read-only; selected photos remain member-visible in a private bucket; photo mutations check folder and object ownership. Fifteen tests pass, including ten live catalog checks; real non-admin account can read its own profile but not others, anonymous private reads denied. Live photo mutations were not exercised. Public aggregate heart totals remain intentional.
 - [x] Make nine admin earnings totals clickable with private paginated records and unpaid-request labels; all nine opened under real admin access at 384×629, including the accepted $65 request fee, with no browser errors. Totals and balances unchanged.
 - [x] Move creator Top 10 messages beneath Requests and show all five picture-frame styles together; verified signed-in at 384×629: messages open and every frame is visible/selectable, with no browser errors. Existing teaser video still cannot decode in test Chromium.
 - [x] Restore clickable Top 10 conversations on both dashboards; verified the existing saved message opens and reopens from the real creator dashboard. Customer inbox added; customer-side browser verification remains unavailable with the current creator session.
