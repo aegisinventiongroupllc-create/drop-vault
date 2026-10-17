@@ -1,4 +1,5 @@
 import DttToken from "@/components/DttToken";
+import RequestDelivery from "@/components/RequestDelivery";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
 import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
@@ -434,8 +435,10 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
                       <div className="flex gap-2">
                         <Button variant="neon" size="sm" className="flex-1" disabled={reqBusy} onClick={async () => {
                           setReqBusy(true);
-                          await acceptCounterOffer(req.id, req.counter_offer_usd!);
+                          if (req.counter_offer_usd === null) { setReqBusy(false); return; }
+                          const { error } = await acceptCounterOffer(req.id, req.counter_offer_usd);
                           setReqBusy(false);
+                          if (error) { toast({ title: "Couldn't accept the counter", description: error.message, variant: "destructive" }); return; }
                           refreshReqs();
                           toast({ title: "Counter accepted", description: "You can now pay for the request." });
                         }}>
@@ -453,6 +456,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
                     </div>
                   )}
 
+                  <RequestDelivery request={req} role="customer" onChange={refreshReqs} />
+                  {req.status === "accepted" && <p className="text-xs text-muted-foreground mt-2">Request payment checkout is not available yet.</p>}
                   {req.status === "declined" && (
                     <span className="text-[10px] text-muted-foreground italic mt-2 block">Creator passed on this request</span>
                   )}

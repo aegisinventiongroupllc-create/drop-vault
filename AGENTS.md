@@ -1,4 +1,6 @@
 # Project architecture rules
+- Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
+- Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
 - Read creator monthly revenue history from account-scoped completed transaction ledger rows with UTC month boundaries and original split percentages; aggregate full-month totals server-side and paginate details so history is accurate beyond client row limits without changing balances.
 

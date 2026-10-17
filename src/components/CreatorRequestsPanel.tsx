@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { useCustomRequests, acceptRequest, declineRequest, counterRequest, type CustomRequestRow } from "@/hooks/useCustomRequests";
 import { TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { toast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import RequestDelivery from "@/components/RequestDelivery";
 
 function timeLeft(iso: string | null) {
   if (!iso) return null;
@@ -48,6 +51,21 @@ const CreatorRequestsPanel = () => {
   const [counterPrice, setCounterPrice] = useState("");
   const [counterMsg, setCounterMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [fanNames, setFanNames] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const ids = Array.from(new Set(requests.map((request) => request.customer_id)));
+    if (!ids.length) return;
+    let canceled = false;
+    void (async () => {
+      const names: Record<string, string> = {};
+      for (let offset = 0; offset < ids.length; offset += 100) {
+        const { data } = await supabase.from("public_profiles").select("user_id, display_name").in("user_id", ids.slice(offset, offset + 100));
+        data?.forEach((profile) => { names[profile.user_id] = profile.display_name || "Fan"; });
+      }
+      if (!canceled) setFanNames(names);
+    })();
+    return () => { canceled = true; };
+  }, [requests]);
 
   const handleAccept = async (req: CustomRequestRow) => {
     setBusy(true);
@@ -116,7 +134,7 @@ const CreatorRequestsPanel = () => {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-foreground">{req.description}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">From a fan</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">@{fanNames[req.customer_id] || "Fan"}</p>
                     </div>
                     <div className="flex items-center gap-1 bg-primary/10 border border-primary/30 rounded-full px-2.5 py-1">
                       <DollarSign className="w-3 h-3 text-primary" />
@@ -143,6 +161,7 @@ const CreatorRequestsPanel = () => {
                   )}
 
                   {/* Counter-offer info */}
+                  <RequestDelivery request={req} role="creator" onChange={refresh} />
                   {req.status === "countered" && req.counter_offer_usd && (
                     <div className="mt-2 bg-amber-400/10 border border-amber-400/30 rounded-lg p-2">
                       <p className="text-[10px] text-muted-foreground">Your counter: <span className="text-amber-400 font-bold">${req.counter_offer_usd}</span></p>
