@@ -230,6 +230,7 @@ export const ShootingStars = ({ intervalSec = 900 }: { intervalSec?: number }) =
       head.current.visible = true;
       head.current.position.copy(pos);
       headMat.current.opacity = fade;
+      if (Math.random() < 0.1) console.log('[star] p=', p.toFixed(2), 'pos=', pos.x.toFixed(2), pos.y.toFixed(2), pos.z.toFixed(2), 'op=', fade.toFixed(2));
     }
     tailObj.visible = true;
     const attr = tailObj.geometry.getAttribute("position") as THREE.BufferAttribute;
