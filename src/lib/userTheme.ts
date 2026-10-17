@@ -6,6 +6,9 @@ export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolea
 
 const KEY = "dtt_user_theme";
 const HEX = /^#[0-9a-f]{6}$/i;
+let revision = 0;
+let saving = 0;
+let syncedUser: string | undefined;
 
 export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "primary", label: "Buttons & highlights", vars: ["--primary", "--accent", "--ring"] },
@@ -61,6 +64,7 @@ export function applyTheme(theme: UserTheme = loadTheme()) {
 }
 
 export function saveTheme(theme: UserTheme) {
+  revision += 1;
   const safe = validateTheme(theme);
   localStorage.setItem(KEY, JSON.stringify(safe));
   applyTheme(safe);
@@ -84,16 +88,22 @@ export function usePersonalGlobe() {
 // ---- Account sync: colors follow the person to every device ----
 
 export async function saveThemeToAccount(theme: UserTheme) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from("profiles").update({ ui_theme: theme as never }).eq("user_id", user.id);
+  saving += 1;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ ui_theme: validateTheme(theme) as never }).eq("user_id", user.id);
+  } finally { saving -= 1; }
 }
 
 export function startThemeSync() {
   const pull = async (uid: string | undefined) => {
-    if (!uid) return;
+    if (!uid || saving || syncedUser === uid) return;
+    syncedUser = uid;
+    const before = revision;
     const { data } = await supabase.from("profiles").select("ui_theme").eq("user_id", uid).maybeSingle();
     const t = (data as { ui_theme?: UserTheme } | null)?.ui_theme;
+    if (before !== revision || saving) return;
     if (t && typeof t === "object") {
       localStorage.setItem(KEY, JSON.stringify(t));
       applyTheme(loadTheme());
@@ -102,6 +112,6 @@ export function startThemeSync() {
   };
   supabase.auth.onAuthStateChange((evt, session) => {
     if (evt === "SIGNED_IN" || evt === "INITIAL_SESSION") void pull(session?.user?.id);
-    if (evt === "SIGNED_OUT") { localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
+    if (evt === "SIGNED_OUT") { syncedUser = undefined; localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
   });
 }

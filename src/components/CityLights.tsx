@@ -180,6 +180,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
   return (
     <points geometry={geom} renderOrder={10}>
       <shaderMaterial
+        key={`${tone ?? "default"}-${neon}`}
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
@@ -200,6 +201,7 @@ export const Atmosphere = () => {
   <mesh scale={1.12}>
     <sphereGeometry args={[R, 48, 48]} />
     <shaderMaterial
+      key={tone ?? "default"}
       transparent
       depthWrite={false}
       side={THREE.BackSide}
