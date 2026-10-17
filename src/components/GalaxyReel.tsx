@@ -167,6 +167,7 @@ const drawStars = (
   h: number,
   layerSpeed: number[],
 ) => {
+  if (!(w > 0) || !(h > 0)) return; // Zero-size canvas (e.g. mid-style-switch) would make positions NaN.
   // Faint deep-space haze behind everything, tinted by the chosen color.
   const haze = tone ?? "#1a1440";
   const [hr, hg, hb] = hexToRgb(haze);
