@@ -1,24 +1,203 @@
-import reel from "@/assets/brb/galaxy-reel-sexy.jpg";
+import { useEffect, useMemo, useRef } from "react";
 import { usePersonalGlobe } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
 
 /**
- * Shared realistic galaxy backdrop that pans slowly left-to-right on repeat.
- * Frames alternate normal/mirrored so the loop has no visible seam.
- * Tinted with the viewer's chosen galaxy color when they picked one.
+ * Shared realistic star-field backdrop that drifts slowly left-to-right and
+ * loops forever, replacing the galaxy photo reel. Three parallax layers of
+ * stars with realistic color temperature, twinkle and a faint tinted haze.
+ * Tinted with the viewer's chosen backdrop color when they picked one.
  */
-const GalaxyReel = ({ className, seconds = 120 }: { className?: string; seconds?: number }) => {
-  const { galaxyTone } = usePersonalGlobe();
+
+interface Star {
+  x: number; // 0..1 of field width
+  y: number; // 0..1 of height
+  r: number; // radius px
+  layer: number; // 0 far .. 2 near
+  phase: number; // twinkle phase
+  speed: number; // twinkle speed
+  color: [number, number, number];
+  glint: boolean; // brightest few get a diamond flare
+}
+
+// Realistic stellar color temperatures: blue-white hot → warm orange/amber cool.
+const STAR_COLORS: [number, number, number][] = [
+  [155, 194, 255],
+  [202, 222, 255],
+  [248, 249, 255],
+  [255, 244, 224],
+  [255, 226, 178],
+  [255, 202, 148],
+  [255, 178, 128],
+];
+const COLOR_WEIGHTS = [0.06, 0.16, 0.3, 0.24, 0.14, 0.07, 0.03];
+
+const pickColor = () => {
+  let roll = Math.random();
+  for (let i = 0; i < STAR_COLORS.length; i++) {
+    roll -= COLOR_WEIGHTS[i];
+    if (roll <= 0) return STAR_COLORS[i];
+  }
+  return STAR_COLORS[2];
+};
+
+const buildStars = (count: number): Star[] => {
+  const stars: Star[] = [];
+  for (let i = 0; i < count; i++) {
+    const layer = i < count * 0.5 ? 0 : i < count * 0.82 ? 1 : 2;
+    // Power distribution: many faint stars, a few bright ones.
+    const bright = Math.pow(Math.random(), 2.6);
+    const r = (layer === 0 ? 0.5 : layer === 1 ? 0.7 : 1.0) * (0.5 + bright * 1.9);
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      r,
+      layer,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.5 + Math.random() * 1.3,
+      color: pickColor(),
+      glint: bright > 0.92 && layer === 2,
+    });
+  }
+  return stars;
+};
+
+const GalaxyReel = ({ className, seconds = 140 }: { className?: string; seconds?: number }) => {
+  const { galaxyTone, reduced } = usePersonalGlobe();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stars = useMemo(() => buildStars(760), []);
+  const toneRef = useRef<string | null>(galaxyTone ?? null);
+  toneRef.current = galaxyTone ?? null;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let raf = 0;
+    let disposed = false;
+    let w = 0;
+    let h = 0;
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+
+    // Layer drift speeds: px/s, slow left-to-right like a reel.
+    const layerSpeed = [w / (seconds * 3), w / (seconds * 1.6), w / seconds];
+    const start = performance.now();
+    const staticDraw = () => {
+      ctx.clearRect(0, 0, w, h);
+      drawStars(0, toneRef.current, ctx, stars, w, h, [0, 0, 0]);
+    };
+
+    const frame = (now: number) => {
+      if (disposed) return;
+      const t = (now - start) / 1000;
+      ctx.clearRect(0, 0, w, h);
+      drawStars(t, toneRef.current, ctx, stars, w, h, layerSpeed);
+      raf = requestAnimationFrame(frame);
+    };
+
+    if (reduced) {
+      staticDraw();
+    } else {
+      raf = requestAnimationFrame(frame);
+    }
+
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [reduced, seconds, stars]);
+
   return (
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
-      <div className="galaxy-reel-track absolute inset-y-0 left-0 flex h-full" style={{ animationDuration: `${seconds}s` }}>
-        {[0, 1, 2, 3].map((i) => (
-          <img key={i} src={reel} alt="" className="h-full w-auto max-w-none object-cover" style={i % 2 ? { transform: "scaleX(-1)" } : undefined} />
-        ))}
-      </div>
-      {galaxyTone && <div className="absolute inset-0 mix-blend-color opacity-70" style={{ backgroundColor: galaxyTone }} />}
+      <canvas ref={canvasRef} className="h-full w-full" />
     </div>
   );
+};
+
+const drawStars = (
+  t: number,
+  tone: string | null,
+  ctx: CanvasRenderingContext2D,
+  stars: Star[],
+  w: number,
+  h: number,
+  layerSpeed: number[],
+) => {
+  // Faint deep-space haze behind everything, tinted by the chosen color.
+  const haze = tone ?? "#1a1440";
+  const [hr, hg, hb] = hexToRgb(haze);
+  const g1 = ctx.createRadialGradient(w * 0.28, h * 0.35, 0, w * 0.28, h * 0.35, Math.max(w, h) * 0.75);
+  g1.addColorStop(0, `rgba(${hr},${hg},${hb},0.16)`);
+  g1.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g1;
+  ctx.fillRect(0, 0, w, h);
+  const g2 = ctx.createRadialGradient(w * 0.78, h * 0.68, 0, w * 0.78, h * 0.68, Math.max(w, h) * 0.7);
+  g2.addColorStop(0, `rgba(${hr},${hg},${hb},0.1)`);
+  g2.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g2;
+  ctx.fillRect(0, 0, w, h);
+
+  for (const s of stars) {
+    const speed = layerSpeed[s.layer];
+    // Drift left-to-right, wrapping seamlessly.
+    const x = ((s.x * w + (speed * t) % w) % (w + 8)) - 4;
+    const y = s.y * h;
+    const tw = 0.62 + 0.38 * Math.pow(0.5 + 0.5 * Math.sin(t * s.speed + s.phase), 1.6);
+    const alpha = (s.layer === 0 ? 0.5 : s.layer === 1 ? 0.72 : 0.95) * tw;
+    const [r, g, b] = s.color;
+
+    // Soft glow halo for brighter stars.
+    if (s.r > 1.1) {
+      const halo = ctx.createRadialGradient(x, y, 0, x, y, s.r * 5);
+      halo.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.35})`);
+      halo.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(x, y, s.r * 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.beginPath();
+    ctx.arc(x, y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Diamond glint on the brightest few — like a star catching the eye.
+    if (s.glint) {
+      const flare = Math.pow(tw, 3);
+      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.8 * flare})`;
+      ctx.lineWidth = 0.8;
+      const len = s.r * 6 * flare;
+      ctx.beginPath();
+      ctx.moveTo(x - len, y);
+      ctx.lineTo(x + len, y);
+      ctx.moveTo(x, y - len);
+      ctx.lineTo(x, y + len);
+      ctx.stroke();
+    }
+  }
+};
+
+const hexToRgb = (hex: string): [number, number, number] => {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+  if (!m) return [26, 20, 64];
+  return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
 };
 
 export default GalaxyReel;
