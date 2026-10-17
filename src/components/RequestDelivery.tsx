@@ -47,10 +47,10 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
     const seconds = role === "creator" ? 60 : requestVideoLinkSeconds(request.delivery_access_until);
     if (!seconds) return;
     setBusy(true);
-    const { data, error } = await supabase.storage.from("request-deliveries").createSignedUrl(request.delivery_path, seconds);
+    const { data, error } = await supabase.functions.invoke("request-delivery-media", { body: { request_id: request.id } });
     setBusy(false);
     if (error) { toast({ title: "Video unavailable", description: error.message, variant: "destructive" }); return; }
-    setVideo(data.signedUrl);
+    if (typeof data?.url === "string") setVideo(data.url);
   };
 
   const action = async (kind: "archive" | "renew") => {
