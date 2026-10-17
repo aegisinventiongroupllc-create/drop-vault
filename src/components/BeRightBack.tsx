@@ -43,7 +43,7 @@ const BeRightBack = () => {
       <GalaxyReel />
       <div className="absolute inset-0 bg-background/30" aria-hidden />
       <div className="relative flex flex-col items-center gap-6">
-        <MiniGlobe size={280} lights speed={0.35} />
+        <MiniGlobe size={280} lights speed={0.35} backdrop={false} />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>

@@ -29,12 +29,12 @@ const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: 
 };
 
 // Small spinning blue globe; optional slow spin and white country lights.
-const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride }: { size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle }) => {
+const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, backdrop = true }: { size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle; backdrop?: boolean }) => {
   const autoStyle = useGlobeStyle();
   const style = styleOverride ?? autoStyle;
   return (
     <span className="relative inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
-      {size >= 100 && <GalaxyReel className="rounded-full" />}
+      {backdrop && size >= 100 && <GalaxyReel className="rounded-full" />}
       <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
         <SpinningGlobe speed={speed} lights={lights} size={size} style={style} />
         <Atmosphere />
