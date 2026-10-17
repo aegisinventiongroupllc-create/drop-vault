@@ -134,6 +134,23 @@ const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?
     };
   }, [reduced, seconds, stars]);
 
+  if (photoSrc) {
+    return (
+      <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
+        <style>{`@keyframes dtt-star-pan { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+        <div
+          className="flex h-full w-[400%]"
+          style={reduced ? undefined : { animation: `dtt-star-pan ${seconds * 2}s linear infinite` }}
+        >
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
+          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden bg-background", className)} aria-hidden>
       <canvas ref={canvasRef} className="h-full w-full" />
