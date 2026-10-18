@@ -27,6 +27,7 @@ import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
+import CreatorProfile from "@/components/CreatorProfile";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
 
 import {
@@ -51,6 +52,7 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media" | "messages";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
+  const [showMyPage, setShowMyPage] = useState(false);
   const ct = useCreatorText();
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
@@ -498,6 +500,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         window.scrollTo({ top: 0, behavior: "auto" });
       }} />
       {mediaUploadInput}
+      {showMyPage && profileUsername && (
+        <div className="fixed inset-0 z-[80] overflow-y-auto bg-background">
+          <CreatorProfile creatorName={profileUsername} onBack={() => setShowMyPage(false)} />
+        </div>
+      )}
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center gap-3">
@@ -524,6 +531,22 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             <Play className="w-3.5 h-3.5" />
             FEED
           </button>
+          {!adminPreview && (
+            <button
+              onClick={() => {
+                if (!profileUsername) {
+                  toast.error("Set your display name in Profile first, then you can preview your page.");
+                  return;
+                }
+                setShowMyPage(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-gold text-[10px] font-bold tracking-widest hover:bg-gold/25 transition-colors"
+              aria-label="Preview how customers see my page"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              MY PAGE
+            </button>
+          )}
           <WalletIndicator />
           <button
             onClick={handleLogout}
