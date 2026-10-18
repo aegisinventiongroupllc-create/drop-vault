@@ -2,6 +2,19 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_STAR_STYLE, activeTheme, loadTheme, previewTheme, saveTheme, validateTheme } from "@/lib/userTheme";
 
 describe("personal globe preferences", () => {
+  it("keeps idle sky choices separate from the normal globe backdrop", () => {
+    saveTheme({ brbStyle: "cosmicGold", brbTone: "#14b8a6" });
+    expect(loadTheme().brbStyle).toBe("cosmicGold");
+    expect(loadTheme().brbTone).toBe("#14b8a6");
+    expect(loadTheme().starStyle).toBeUndefined();
+    expect(loadTheme().galaxy).toBeUndefined();
+    expect(loadTheme().dashboardSky).toBeUndefined();
+    saveTheme({});
+  });
+  it("requires explicit dashboard opt-in and validates idle sky settings", () => {
+    expect(validateTheme({ dashboardSky: "true", brbStyle: "invalid", brbTone: "url(unsafe)" })).toEqual({});
+    expect(validateTheme({ dashboardSky: true, brbStyle: "goldenMoon", brbTone: "#ff0080" })).toEqual({ dashboardSky: true, brbStyle: "goldenMoon", brbTone: "#ff0080" });
+  });
   it("uses the third photograph, Star cluster, as the default", () => {
     expect(DEFAULT_STAR_STYLE).toBe("cluster");
   });

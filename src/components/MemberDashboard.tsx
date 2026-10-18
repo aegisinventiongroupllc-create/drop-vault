@@ -1,4 +1,5 @@
 import DttToken from "@/components/DttToken";
+import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import RequestDelivery from "@/components/RequestDelivery";
 import PrivateMessages from "@/components/PrivateMessages";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
@@ -250,7 +251,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   };
 
   return (
-    <div className="mobile-scroll-shell flex flex-col">
+    <div className="mobile-scroll-shell relative isolate flex flex-col">
+      <PersonalSkyBackdrop />
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
         <WalletIndicator />

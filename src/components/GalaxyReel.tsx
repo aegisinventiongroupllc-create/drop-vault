@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
-import { usePersonalGlobe, type StarStyle } from "@/lib/userTheme";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { hexToHsl, usePersonalGlobe, type StarStyle } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
-import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
-import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
-import clusterImg from "@/assets/brb/stars-cluster.jpg";
+import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 
 /**
  * Shared realistic star-field backdrop that drifts slowly left-to-right and
@@ -12,11 +10,7 @@ import clusterImg from "@/assets/brb/stars-cluster.jpg";
    * viewer's chosen backdrop color while retaining bright stellar highlights.
   */
 
-const PHOTO_BACKDROPS: Record<Exclude<StarStyle, "living">, string> = {
-  deepfield: deepFieldImg,
-  milkyway: milkyWayImg,
-  cluster: clusterImg,
-};
+const PHOTO_BACKDROPS = SKY_BACKDROPS;
 
 interface Star {
   x: number; // 0..1 of field width
@@ -72,8 +66,11 @@ const buildStars = (count: number): Star[] => {
   return stars;
 };
 
-const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?: number }) => {
-  const { galaxyTone, starStyle, reduced } = usePersonalGlobe();
+const GalaxyReel = ({ className, seconds = 240, scope = "globe", styleOverride, toneOverride }: { className?: string; seconds?: number; scope?: "globe" | "brb"; styleOverride?: StarStyle; toneOverride?: string }) => {
+  const personal = usePersonalGlobe();
+  const { reduced } = personal;
+  const starStyle = styleOverride ?? (scope === "brb" ? personal.brbStyle : personal.starStyle);
+  const galaxyTone = toneOverride ?? (scope === "brb" ? personal.brbTone : personal.galaxyTone);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(() => buildStars(1050), []);
   const toneRef = useRef<string | null>(galaxyTone ?? null);
@@ -136,7 +133,7 @@ const GalaxyReel = ({ className, seconds = 240 }: { className?: string; seconds?
 
   if (photoSrc) {
     return (
-      <div className={cn("pointer-events-none absolute inset-0 isolate overflow-hidden bg-background", className)} aria-hidden>
+      <div className={cn("pointer-events-none absolute inset-0 isolate overflow-hidden bg-background", className)} style={{ "--galaxy-tone": galaxyTone ? hexToHsl(galaxyTone) : undefined } as CSSProperties} aria-hidden>
         <div
           className="galaxy-reel-track flex h-full w-[400%]"
           style={{ animationDuration: `${seconds * 2}s` }}
