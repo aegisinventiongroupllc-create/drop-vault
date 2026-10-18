@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
@@ -14,13 +14,14 @@ import MiniGlobe from "@/components/MiniGlobe";
 
 interface AuthScreenProps {
   onAdmin: () => void;
+  onExitPreview?: () => void;
 }
 
 type Mode = "login" | "signup" | "forgot";
 
 const AUTH_REDIRECT_ORIGIN = "https://dropthatthing.com";
 
-const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
+const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +29,20 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
+
+  // Triple-tap the DROPTHATTHING logo to leave the signed-in preview of this page.
+  const logoTaps = useRef(0);
+  const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleLogoTap = () => {
+    logoTaps.current += 1;
+    if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+    logoTapTimer.current = setTimeout(() => { logoTaps.current = 0; }, 900);
+    if (logoTaps.current >= 3) {
+      logoTaps.current = 0;
+      if (logoTapTimer.current) { clearTimeout(logoTapTimer.current); logoTapTimer.current = null; }
+      onExitPreview?.();
+    }
+  };
 
   // Pink globe on the sign-in page only; restore the default tone when leaving.
   useEffect(() => {
@@ -145,7 +160,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
           <div className="mx-auto mb-5 flex justify-center" style={{ "--globe-tone": "#ff4da6" } as React.CSSProperties}>
             <MiniGlobe size={96} lights backdrop={false} />
           </div>
-          <h1 className="font-display text-2xl font-bold text-foreground notranslate">
+          <h1 onClick={handleLogoTap} className="cursor-pointer select-none font-display text-2xl font-bold text-foreground notranslate">
             <span className="block">DROPTHAT</span><span className="block text-primary">THING</span>
           </h1>
           <p className="mt-5 text-muted-foreground text-sm">
