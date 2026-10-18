@@ -31,7 +31,7 @@ describe.skipIf(!db)('deployed atomic renewals in isolated fixtures',()=>{
  }));
  it.each([90,92,95])('records eligible %i percent split and exactly 14 days once',split=>fixture(async(sql,f)=>{
   await sql`SELECT set_config('test.split',${String(split)},true)`;
-  const old=await sql`SELECT expires_at FROM pg_temp.subscriptions WHERE id=${f.id}`;
+  const old=await sql`SELECT expires_at::text AS expires_at FROM pg_temp.subscriptions WHERE id=${f.id}`;
   const first=await sql`SELECT pg_temp.test_renew(${f.id},${old[0].expires_at}) AS outcome`;
   const again=await sql`SELECT pg_temp.test_renew(${f.id},${old[0].expires_at}) AS outcome`;
   expect(first[0].outcome).toBe('renewed');expect(again[0].outcome).toBe('skipped');
