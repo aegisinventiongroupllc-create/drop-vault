@@ -4,9 +4,9 @@
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
-- Monthly revenue uses account-scoped completed ledger rows, UTC months and original splits; aggregate full months server-side and paginate details for accurate history without changing balances.
+- Monthly revenue: account-scoped completed rows, UTC months, original splits; aggregate server-side, paginate details.
 
-- Welcome-back summaries read only account-scoped completed transactions and token allocations; local activity is display-only. Admin samples never write the ledger.
+- Welcome-back summaries read only account-scoped completed ledger rows; admin samples never write it.
 
 - Send customer auth callbacks to `https://dropthatthing.com`, never editor preview domains.
 - Keep profiles owner/admin-only and public_profiles a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
