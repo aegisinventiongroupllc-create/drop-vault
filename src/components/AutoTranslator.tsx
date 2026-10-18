@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeTranslations } from '@/lib/translationCache';
 
 /**
  * Translates every visible word on screen into the visitor's own language
@@ -29,13 +30,16 @@ const AutoTranslator = () => {
     document.documentElement.lang = lang;
     if (lang === "en") return;
 
-    const cacheKey = `dtt_tr_${lang}`;
+    const cacheKey = `dtt_tr_v2_${lang}`;
     let cache: Record<string, string> = {};
-    try { cache = JSON.parse(localStorage.getItem(cacheKey) || "{}"); } catch { cache = {}; }
+    try { cache = sanitizeTranslations(JSON.parse(localStorage.getItem(cacheKey) || "{}")); } catch { cache = {}; }
     const translatedOut = new Set<string>(Object.values(cache));
     const pending = new Set<string>();
     const inflight = new Set<string>();
     let timer: number | undefined;
+    let disposed=false;
+    let flushing=false;
+    const attempts=new Map<string,number>();
 
     const skip = (el: Element | null) => {
       for (let e = el; e; e = e.parentElement) {
@@ -54,7 +58,7 @@ const AutoTranslator = () => {
       const t = raw.trim();
       if (!want(t)) return;
       if (cache[t]) node.nodeValue = raw.replace(t, cache[t]);
-      else if (!inflight.has(t)) pending.add(t);
+      else if (!inflight.has(t) && (attempts.get(t)??0)<3) pending.add(t);
     };
 
     const applyAttrs = (el: Element) => {
@@ -62,7 +66,7 @@ const AutoTranslator = () => {
         const v = el.getAttribute(a);
         if (!v || !want(v)) continue;
         if (cache[v.trim()]) el.setAttribute(a, cache[v.trim()]);
-        else if (!inflight.has(v.trim())) pending.add(v.trim());
+        else if (!inflight.has(v.trim()) && (attempts.get(v.trim())??0)<3) pending.add(v.trim());
       }
     };
 
@@ -84,21 +88,30 @@ const AutoTranslator = () => {
     };
 
     const flush = async () => {
+      if(flushing||disposed)return;
       const batch = Array.from(pending).slice(0, 60);
       batch.forEach((b) => { pending.delete(b); inflight.add(b); });
       if (!batch.length) return;
+      flushing=true;
+      batch.forEach(b=>attempts.set(b,(attempts.get(b)??0)+1));
       try {
-        const { data } = await supabase.functions.invoke("translate-text", { body: { lang, texts: batch } });
-        const tr: Record<string, string> = data?.translations || {};
+        const { data,error } = await supabase.functions.invoke("translate-text", { body: { lang, texts: batch } });
+        if(disposed)return;
+        if(error||data?.error)throw Error('Translation unavailable');
+        const tr = sanitizeTranslations(data?.translations);
         for (const [k, v] of Object.entries(tr)) { cache[k] = v; translatedOut.add(v); }
+        cache=sanitizeTranslations(cache);
         try { localStorage.setItem(cacheKey, JSON.stringify(cache)); } catch { /* full */ }
         scan(document.body);
       } catch { /* keep English on failure */ }
       batch.forEach((b) => inflight.delete(b));
-      if (pending.size) schedule();
+      flushing=false;
+      batch.forEach(b=>{if(!cache[b]&&(attempts.get(b)??0)<3)pending.add(b);});
+      if (pending.size) {window.clearTimeout(timer);timer=window.setTimeout(()=>void flush(),1000*Math.max(...batch.map(b=>attempts.get(b)??1)));}
     };
 
     const schedule = () => {
+      if(flushing||disposed)return;
       window.clearTimeout(timer);
       timer = window.setTimeout(() => { void flush(); }, 250);
     };
@@ -115,7 +128,7 @@ const AutoTranslator = () => {
       if (pending.size) schedule();
     });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: [...ATTRS] });
-    return () => { obs.disconnect(); window.clearTimeout(timer); };
+    return () => { disposed=true;obs.disconnect(); window.clearTimeout(timer); };
   }, []);
 
   return null;

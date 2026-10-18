@@ -38,6 +38,11 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [vaultCount, setVaultCount] = useState<number>(0);
   const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
+  const [vaultOffset,setVaultOffset]=useState(0);
+  const [moreVault,setMoreVault]=useState(false);
+  const [vaultError,setVaultError]=useState("");
+  const [vaultLoading,setVaultLoading]=useState(false);
+  useEffect(()=>{setVaultItems([]);setVaultOffset(0);},[creatorId]);
   const [unlocking, setUnlocking] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const { balance, refresh: refreshBalance } = useTokenBalance();
@@ -89,12 +94,21 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   useEffect(() => {
     if (!isUnlocked || !creatorId) { setVaultItems([]); return; }
     let cancel = false;
-    (async () => {
-      const { data, error } = await supabase.functions.invoke("vault-media", { body: { creator_id: creatorId } });
-      if (!cancel && !error && data?.items) setVaultItems(data.items);
-    })();
-    return () => { cancel = true; };
-  }, [isUnlocked, creatorId]);
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const load=async()=>{
+      setVaultLoading(true);
+      const {data,error}=await supabase.functions.invoke("vault-media",{body:{creator_id:creatorId,offset:vaultOffset}});
+      if(cancel)return;
+      setVaultLoading(false);
+      if(error || !data?.items){setVaultError("Vault unavailable. Your access may have expired.");setVaultItems([]);return;}
+      setVaultError("");setMoreVault(!!data.has_more);
+      setVaultItems(previous=>vaultOffset===0?data.items:[...previous.filter(p=>!data.items.some((item:{id:string})=>item.id===p.id)),...data.items]);
+      const expiry=data.access_until?Date.parse(data.access_until)-Date.now():Infinity;
+      timer=setTimeout(()=>{if(data.access_until && Date.parse(data.access_until)<=Date.now()){setVaultItems([]);setVaultError("Access expired. Renew to keep watching.");}else if(vaultOffset>0){setVaultItems([]);setVaultOffset(0);}else void load();},Math.max(1000,Math.min(50*60000,expiry)));
+    };
+    void load();
+    return () => {cancel=true;clearTimeout(timer);};
+  }, [isUnlocked,creatorId,vaultOffset]);
 
   const handleUnlock = async () => {
     if (!creatorId) {
@@ -282,7 +296,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               </span>
             </div>
 
-            {vaultCount === 0 ? (
+            {vaultError ? <p role="alert" className="text-sm text-destructive py-4">{vaultError}</p> : vaultCount === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-6">This creator hasn't added any long-form videos yet.</p>
             ) : vaultItems.length === 0 ? (
               <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
@@ -291,7 +305,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {vaultItems.map((v) => (
                   <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
                     {v.url ? (
-                      <video src={v.url} className="w-full aspect-video object-cover bg-black" controls playsInline preload="metadata" />
+                      <video src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
                     ) : (
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
                     )}
@@ -301,6 +315,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               </div>
             )}
 
+            {moreVault && <Button variant="outline" disabled={vaultLoading} onClick={()=>setVaultOffset(n=>n+24)}>{vaultLoading ? 'Loading…' : 'More videos'}</Button>}
             <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking}>
               {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               EXTEND +14 DAYS — 1 BIT-TOKEN

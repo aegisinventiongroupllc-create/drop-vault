@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activityLog";
 import { watermarkCreatorMedia, type WatermarkProgress } from "@/lib/mediaWatermark";
+import { uploadBrandedFile } from '@/lib/resumableUpload';
 
 export type MediaBucket = "teasers" | "vault";
 
@@ -10,7 +11,7 @@ export async function uploadMedia(
   userId: string,
   fixedName?: string,
   onProgress?: WatermarkProgress
-): Promise<{ url: string; path: string } | { error: string }> {
+): Promise<{ path: string } | { error: string }> {
   let brandedFile: File;
   try {
     brandedFile = await watermarkCreatorMedia(file, onProgress);
@@ -21,15 +22,10 @@ export async function uploadMedia(
   const fileName = fixedName ? `${fixedName}.${ext}` : `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
   const filePath = `${userId}/${fileName}`;
 
-  const { error } = await supabase.storage.from(bucket).upload(filePath, brandedFile, {
-    contentType: brandedFile.type,
-    cacheControl: "3600",
-    upsert: !!fixedName, // Auto-replace when using a fixed name
-  });
+  const { error } = await uploadBrandedFile(bucket,filePath,brandedFile,onProgress);
 
   if (error) return { error: error.message };
 
-  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
   // Fire-and-forget activity log
   logActivity("media_upload", `Uploaded to ${bucket}`, {
     bucket,
@@ -38,7 +34,7 @@ export async function uploadMedia(
     mime: brandedFile.type,
     watermark: "DTT",
   });
-  return { url: data.publicUrl, path: filePath };
+  return { path: filePath };
 }
 
 export async function deleteMedia(bucket: MediaBucket, path: string) {

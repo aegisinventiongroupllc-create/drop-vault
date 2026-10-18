@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { watermarkCreatorMedia } from "@/lib/mediaWatermark";
+import { uploadBrandedFile } from '@/lib/resumableUpload';
 import { canStageRequest, requestAccessActive, requestVideoLinkSeconds, REQUEST_RENEWAL_TOKENS } from "@/lib/requestDelivery";
 import type { CustomRequestRow } from "@/hooks/useCustomRequests";
 
@@ -11,6 +12,8 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const [video, setVideo] = useState<string | null>(null);
+  const uploadAbort = useRef<AbortController | null>(null);
+  useEffect(()=>()=>{uploadAbort.current?.abort();},[]);
   const [, tick] = useState(0);
   const active = requestAccessActive(request.delivery_access_until);
   useEffect(() => {
@@ -22,6 +25,7 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
   const upload = async (file: File) => {
     if (!file.type.startsWith("video/")) { toast({ title: "Choose a video", variant: "destructive" }); return; }
     setBusy(true);
+    uploadAbort.current = new AbortController();
     let stagedPath: string | null = null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -29,7 +33,7 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
       const branded = await watermarkCreatorMedia(file, (message, percent) => setProgress(`${message} ${percent}%`));
       stagedPath = `${user.id}/${request.id}/${crypto.randomUUID()}.${branded.name.split(".").pop() || "mp4"}`;
       setProgress("Saving private request video…");
-      const { error } = await supabase.storage.from("request-deliveries").upload(stagedPath, branded, { contentType: branded.type, upsert: false });
+      const { error } = await uploadBrandedFile('request-deliveries',stagedPath,branded,(message,percent)=>setProgress(`${message} ${percent}%`),uploadAbort.current.signal);
       if (error) throw error;
       const result = await supabase.rpc("attach_request_delivery", { _request_id: request.id, _path: stagedPath });
       if (result.error) throw result.error;
@@ -69,6 +73,7 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
     <div className="mt-3 border border-dashed border-primary/40 rounded-lg p-3 space-y-2">
       <input ref={input} type="file" accept="video/*" aria-label="Request video" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); }} />
       <Button variant="neon" className="w-full whitespace-normal" disabled={busy} onClick={() => input.current?.click()}>UPLOAD REQUEST VIDEO</Button>
+      {busy && <Button variant="outline" onClick={()=>uploadAbort.current?.abort()}>Cancel upload</Button>}
       <p className="text-xs text-muted-foreground" role="status">{progress || (request.status === "accepted" ? "Private draft — customer access starts only after confirmed payment." : "Customer receives 14 days of private access on delivery.")}</p>
     </div>
   );

@@ -18,25 +18,19 @@ export interface CreatorMediaItem {
 export function useCreatorMedia(creatorId: string | null) {
   const [items, setItems] = useState<CreatorMediaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!creatorId) return;
     setLoading(true);
-    const rows: CreatorMediaItem[] = [];
-    for (let offset = 0; ; offset += 500) {
-    const { data, error } = await supabase
-      .from("creator_media")
-      .select("*")
-      .eq("creator_id", creatorId)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + 499);
-    if (error || !data) break;
-    rows.push(...(data as CreatorMediaItem[]));
-    if (data.length < 500) break;
-    }
-    setItems(rows);
+    const {data, error: readError} = await supabase.from("creator_media").select("*").eq("creator_id",creatorId).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+24);
+    setError(readError?.message ?? null);
+    if (!readError && data) {const rows=data.slice(0,24) as CreatorMediaItem[];setItems(previous=>offset===0?rows:[...previous.filter(p=>!rows.some(r=>r.id===p.id)),...rows]);setHasMore(data.length>24);}
     setLoading(false);
-  }, [creatorId]);
+  }, [creatorId,offset]);
+  useEffect(() => {setItems([]);setOffset(0);},[creatorId]);
 
   useEffect(() => {
     refresh();
@@ -84,12 +78,13 @@ export function useCreatorMedia(creatorId: string | null) {
   };
 
   const deleteMedia = async (id: string, bucket: "teasers" | "vault", path: string) => {
-    await supabase.storage.from(bucket).remove([path]);
+    const {error: removeError} = await supabase.storage.from(bucket).remove([path]);
+    if (removeError) return {error:removeError.message};
     const { error } = await supabase.from("creator_media").delete().eq("id", id);
     if (error) return { error: error.message };
     await refresh();
     return { success: true };
   };
 
-  return { items, loading, refresh, insertMedia, renameMedia, deleteMedia };
+  return { items, loading, error, hasMore, loadMore:()=>setOffset(n=>n+24), refresh, insertMedia, renameMedia, deleteMedia };
 }

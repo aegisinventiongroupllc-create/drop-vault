@@ -1404,6 +1404,7 @@ export type Database = {
           hearts: number
         }[]
       }
+      get_my_creator_metrics: { Args: never; Returns: Json }
       get_my_monthly_revenue: {
         Args: never
         Returns: {
@@ -1428,6 +1429,34 @@ export type Database = {
           routing_last4: string
           updated_at: string
         }[]
+      }
+      get_teaser_page: {
+        Args: {
+          _country?: string
+          _offset?: number
+          _query?: string
+          _vault: string
+        }
+        Returns: {
+          active_from: string | null
+          active_until: string | null
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          media_type: string
+          storage_path: string
+          teaser_frame: string
+          title: string
+          updated_at: string
+          views: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "creator_media"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_top_fans: {
         Args: { _creator_id: string }
@@ -1461,6 +1490,35 @@ export type Database = {
         Returns: boolean
       }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
+      renew_subscription_atomic: {
+        Args: { _expected_expiry: string; _subscription_id: string }
+        Returns: string
+      }
+      search_creator_page: {
+        Args: {
+          _countries?: string[]
+          _offset?: number
+          _query: string
+          _vault?: string
+        }
+        Returns: {
+          avatar_config: Json | null
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          profile_photo_path: string | null
+          role: string | null
+          tags: string[] | null
+          user_id: string | null
+          vault_side: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {
