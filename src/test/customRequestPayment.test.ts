@@ -48,9 +48,9 @@ describe.skipIf(!db)("custom request payment database authorization", () => {
       }
       const [{ d }] = await sql`SELECT pg_get_functiondef('public.mark_custom_request_paid(uuid,text)'::regprocedure) AS d`;
       const [{ t }] = await sql`SELECT pg_get_functiondef('public.activate_paid_request_delivery()'::regprocedure) AS t`;
-      const swap = (s: string) => s.replaceAll("public.custom_request_payment_receipts", "pg_temp.custom_request_payment_receipts")
-        .replaceAll("public.custom_requests", "pg_temp.custom_requests")
-        .replaceAll("auth.role()", "(current_setting('request.jwt.claims',true)::jsonb->>'role')");
+      const swap = (s: string) => s.split("public.custom_request_payment_receipts").join("pg_temp.custom_request_payment_receipts")
+        .split("public.custom_requests").join("pg_temp.custom_requests")
+        .split("auth.role()").join("(current_setting('request.jwt.claims',true)::jsonb->>'role')");
       await sql.unsafe(swap(d).replace("public.mark_custom_request_paid(", "pg_temp.mark_paid("));
       await sql.unsafe(swap(t).replace("public.activate_paid_request_delivery(", "pg_temp.activate("));
       await sql.unsafe(`CREATE TRIGGER a BEFORE UPDATE ON pg_temp.custom_requests FOR EACH ROW EXECUTE FUNCTION pg_temp.activate()`);

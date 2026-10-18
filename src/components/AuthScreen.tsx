@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Star, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "@/hooks/use-toast";
@@ -122,14 +122,19 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
 
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+    <div className="dtt-auth-screen fixed inset-0 z-50 overflow-y-auto bg-background">
       <div className="flex min-h-full flex-col">
-      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-8 text-center">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
-            DROPTHAT<span className="text-primary">THING</span>
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between border-b border-border px-6 py-5">
+        <span className="font-display text-sm font-bold text-foreground notranslate">DTT<span className="text-primary">.</span></span>
+        <span className="text-xs text-muted-foreground">MEMBERS ONLY · 18+</span>
+      </header>
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
+        <div className="mb-2 w-full">
+          <img src="/apple-touch-icon.png" alt="DTT" width={72} height={72} className="mx-auto mb-5 h-[72px] w-[72px] object-contain" />
+          <h1 className="font-display text-2xl font-bold text-foreground notranslate">
+            <span className="block">DROPTHAT</span><span className="block text-primary">THING</span>
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="mt-5 text-muted-foreground text-sm">
             {mode === "login" && "Welcome back. Log in to continue."}
             {mode === "signup" && "Create your account to get started."}
             {mode === "forgot" && "Enter your email and we'll send you a reset link."}
@@ -138,50 +143,53 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
 
         {mode === "signup" && (
           <div className="grid grid-cols-2 gap-2 w-full">
-            <button
+            <Button
               type="button"
               onClick={() => setRole("customer")}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold tracking-widest transition-all border ${
                 role === "customer" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border"
               }`}
             >
-              <Users className="w-4 h-4" /> CUSTOMER
-            </button>
-            <button
+              CUSTOMER
+            </Button>
+            <Button
               type="button"
               onClick={() => setRole("creator")}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold tracking-widest transition-all border ${
                 role === "creator" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border"
               }`}
             >
-              <Star className="w-4 h-4" /> CREATOR
-            </button>
+              CREATOR
+            </Button>
           </div>
         )}
 
         <div className="w-full space-y-2">
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <label htmlFor="dtt-email" className="mb-2 block text-left text-xs font-medium text-muted-foreground">Email address</label>
             <Input
+              id="dtt-email"
               type="text"
               inputMode="email"
-              placeholder="Email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => { setEmail(e.target.value); setAdminError(""); }}
-              className="pl-9"
+              className="h-12 rounded-md bg-secondary/50"
               autoComplete="email"
               onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
             />
           </div>
           {mode !== "forgot" && (
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <label htmlFor="dtt-password" className="mb-2 block text-left text-xs font-medium text-muted-foreground">Password</label>
+              <div className="relative">
               <Input
+                id="dtt-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-9 pr-11"
+                className="h-12 rounded-md bg-secondary/50 pr-11"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
               />
@@ -196,6 +204,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
               >
                 {showPassword ? <EyeOff /> : <Eye />}
               </Button>
+              </div>
             </div>
           )}
         </div>
@@ -204,7 +213,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
         <Button
           variant="neon"
           size="lg"
-          className="w-full text-base font-semibold"
+          className="h-12 w-full text-sm font-semibold"
           onClick={handleSubmit}
           disabled={loading}
         >
@@ -218,26 +227,33 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
         </Button>
 
         {mode !== "forgot" && (
+          <>
+          <div className="flex w-full items-center gap-4" aria-hidden="true"><span className="h-px flex-1 bg-border" /><span className="text-xs text-muted-foreground">or</span><span className="h-px flex-1 bg-border" /></div>
           <Button
             variant="outline"
             size="lg"
-            className="w-full text-base font-semibold"
+            className="h-12 w-full text-sm font-semibold"
             disabled={loading}
             onClick={async () => {
               setLoading(true);
-              const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-              if (result.error) {
-                toast({ title: "Google sign-in failed", description: result.error.message ?? "Try again.", variant: "destructive" });
+              try {
+                const result = await lovable.auth.signInWithOAuth("google", {
+                  redirect_uri: AUTH_REDIRECT_ORIGIN,
+                  extraParams: { prompt: "select_account" },
+                });
+                if (result.error) throw result.error;
+                if (result.redirected) return;
+                await logActivity("login", "Google");
+              } catch (error) {
+                toast({ title: "Google sign-in failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });
+              } finally {
                 setLoading(false);
-                return;
               }
-              if (result.redirected) return;
-              await logActivity("login", "Google");
-              setLoading(false);
             }}
           >
             CONTINUE WITH GOOGLE
           </Button>
+          </>
         )}
 
 
@@ -245,39 +261,39 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
         <div className="flex flex-col items-center gap-1.5 mt-1">
           {mode === "login" && (
             <>
-              <button
+              <Button variant="link"
                 type="button"
                 onClick={() => setMode("forgot")}
-                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="h-auto p-0 text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 Forgot password?
-              </button>
-              <button
+              </Button>
+              <Button variant="link"
                 type="button"
                 onClick={() => setMode("signup")}
-                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="h-auto p-0 text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 New here? Create an account
-              </button>
+              </Button>
             </>
           )}
           {mode === "signup" && (
-            <button
+            <Button variant="link"
               type="button"
               onClick={() => setMode("login")}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               Already have an account? Log in
-            </button>
+            </Button>
           )}
           {mode === "forgot" && (
-            <button
+            <Button variant="link"
               type="button"
               onClick={() => setMode("login")}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               Back to log in
-            </button>
+            </Button>
           )}
         </div>
 

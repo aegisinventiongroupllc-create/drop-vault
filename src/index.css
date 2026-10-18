@@ -203,3 +203,6 @@ body { top: 0 !important; }
 .galaxy-photo-tint { background: hsl(var(--galaxy-tone)); mix-blend-mode: color; opacity: .85; }
 @keyframes galaxy-pan { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .galaxy-reel-track { animation: none; } }
+
+.dtt-auth-screen { letter-spacing: 0; }
+.dtt-auth-screen h1 { line-height: 1.4; }
