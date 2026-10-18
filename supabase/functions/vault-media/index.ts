@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { playbackLifetime } from '../../../src/lib/mediaAccess.ts';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -82,12 +83,13 @@ Deno.serve(async (req) => {
       const {data:role}=await admin.from("user_roles").select("role").eq("user_id",uid).eq("role","admin").maybeSingle();
       if(!role){const {data:sub}=await admin.from("subscriptions").select("expires_at").eq("customer_id",uid).eq("creator_id",creatorId).eq("status","active").gt("expires_at",new Date().toISOString()).maybeSingle();if(!sub)return json({error:"LOCKED"},403);accessUntil=sub.expires_at;}
     }
-    const linkSeconds=accessUntil?Math.max(0,Math.min(3600,Math.floor((Date.parse(accessUntil)-Date.now())/1000))):3600;
+    const linkSeconds=playbackLifetime(accessUntil);
     if(linkSeconds<1)return json({error:"LOCKED"},403);
     if (paths.length) {
-      const { data: signed } = await admin.storage
+      const { data: signed,error: signingError } = await admin.storage
         .from("vault")
         .createSignedUrls(paths, linkSeconds);
+      if(signingError)return json({error:'Playback temporarily unavailable'},503);
       signed?.forEach((s: any, i: number) => {
         if (s.signedUrl) urlMap[paths[i]] = s.signedUrl;
       });
