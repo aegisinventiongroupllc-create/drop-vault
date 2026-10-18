@@ -13,7 +13,7 @@ const SPECS = Object.entries(COUNTRY_LATLNG)
   .map(([, [lat, lng]]) => ({ lat, lng, people: 4 }))
   .concat(US_GLOW_HUBS).concat(WORLD_GLOW_HUBS);
 
-const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: boolean; size: number; style: GlobeStyle }) => {
+const SpinningGlobe = ({ speed, lights, size, style, dotScale, glintBoost }: { speed: number; lights: boolean; size: number; style: GlobeStyle; dotScale?: number; glintBoost?: number }) => {
   const groupRef = useRef<THREE.Group>(null);
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
@@ -22,14 +22,14 @@ const SpinningGlobe = ({ speed, lights, size, style }: { speed: number; lights: 
   return (
     <group ref={groupRef} rotation={[0.3, 0, 0]}>
       <HoloSphere style={style} />
-      {lights && <CityLights countries={SPECS} density={0.6} scale={size / 140} />}
+      {lights && <CityLights countries={SPECS} density={0.6} scale={size / 140} dotScale={dotScale} glintBoost={glintBoost} />}
       {lights && <ShootingStars />}
     </group>
   );
 };
 
 // Small spinning blue globe; optional slow spin and white country lights.
-const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, backdrop = true }: { size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle; backdrop?: boolean }) => {
+const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, backdrop = true, dotScale, glintBoost }: { size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle; backdrop?: boolean; dotScale?: number; glintBoost?: number }) => {
   const autoStyle = useGlobeStyle();
   const style = styleOverride ?? autoStyle;
   return (
