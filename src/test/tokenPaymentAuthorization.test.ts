@@ -1,22 +1,11 @@
 // @vitest-environment node
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
 
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1 }) : null;
 describe.skipIf(!db)("token payment database authorization", () => {
   // Test the deployed body against isolated temporary tables; sandbox cannot
   // assume service_role or call auth.role(). Live privileges checked separately.
-  beforeAll(async () => {
-    if (!db) throw Error("Database required");
-    for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {
-      await db.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
-    }
-    const rows = await db`SELECT pg_get_functiondef('public.credit_tokens(uuid,text,integer,numeric)'::regprocedure) AS definition`;
-    let definition = rows[0].definition.replace("public.credit_tokens(", "pg_temp.test_credit_tokens(");
-    for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) definition = definition.replaceAll(`public.${table}`, `pg_temp.${table}`);
-    definition = definition.replaceAll("auth.role()", "(current_setting('request.jwt.claims',true)::jsonb->>'role')");
-    await db.unsafe(definition);
-  });
   afterAll(async () => { await db?.end(); });
   it.each(["anon", "authenticated"])("denies %s execution and receipt writes", async role => {
     if (!db) throw Error("Database required");
@@ -25,17 +14,20 @@ describe.skipIf(!db)("token payment database authorization", () => {
       has_table_privilege(${role},'public.token_payment_receipts','UPDATE') AS update`;
     expect(rows[0]).toMatchObject({ execute: false, insert: false, update: false });
   });
-  it("blocks an unauthorized call inside the function", async () => {
-    if (!db) throw Error("Database required");
-    await expect(db.begin(async sql => {
-      await sql`SELECT set_config('request.jwt.claims','{"role":"authenticated"}',true)`;
-      await sql`SELECT pg_temp.test_credit_tokens(gen_random_uuid(),'unauthorized',1,25)`;
-    })).rejects.toMatchObject({ code: "42501" });
-  });
   it("rejects unpaid, mismatched and invalid attempts; credits a verified receipt once", async () => {
     if (!db) throw Error("Database required");
     const rollback = new Error("rollback isolated test");
     const result = await db.begin(async sql => {
+    for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {
+      await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+    }
+    const rows = await sql`SELECT pg_get_functiondef('public.credit_tokens(uuid,text,integer,numeric)'::regprocedure) AS definition`;
+    let definition = rows[0].definition.replace("public.credit_tokens(", "pg_temp.test_credit_tokens(");
+    for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) definition = definition.replaceAll(`public.${table}`, `pg_temp.${table}`);
+    definition = definition.replaceAll("auth.role()", "(current_setting('request.jwt.claims',true)::jsonb->>'role')");
+    await sql.unsafe(definition);
+      await sql`SELECT set_config('request.jwt.claims','{"role":"authenticated"}',true)`;
+      await expect(sql.savepoint(tx => tx`SELECT pg_temp.test_credit_tokens(gen_random_uuid(),'unauthorized',1,25)`)).rejects.toMatchObject({ code: "42501" });
       const uid = crypto.randomUUID(); const id = crypto.randomUUID();
       await sql`SELECT set_config('request.jwt.claims','{"role":"service_role"}',true)`;
       await expect(sql.savepoint(tx => tx`SELECT pg_temp.test_credit_tokens(${uid},${id},1,25)`)).rejects.toMatchObject({ code: "42501" });
