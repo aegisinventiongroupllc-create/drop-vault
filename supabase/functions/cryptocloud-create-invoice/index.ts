@@ -133,6 +133,18 @@ Deno.serve(async (req) => {
     }
 
     const invoice = ccJson.result;
+    if (isEntryPass) {
+      if (typeof invoice?.uuid !== "string" || !invoice.uuid) return json({ error: "Invalid payment invoice" }, 502);
+      // Separate service client: never forward the customer's Authorization to receipt writes.
+      const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { error } = await server.from("entry_pass_payment_receipts").insert({
+        payment_id: invoice.uuid.replace(/^INV-/i, ""), order_id: orderId,
+        user_id: userId, amount_usd, currency: "USD", method: "crypto",
+      });
+      if (error) return json({ error: "Checkout could not be recorded; please retry" }, 500);
+    }
     return json({
       invoice_url: invoice.link,
       invoice_id: invoice.uuid,
