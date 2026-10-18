@@ -4,7 +4,7 @@
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew request access and subscriptions atomically: lock balances/access, preserve ledger splits, and reject duplicate cycles. Subscription renewal is service-only and checks expected expiry. Why: retries must not double-charge or leave partial earnings.
 
-- Revenue and dashboard metrics aggregate complete account-scoped earnings server-side in UTC; paginate history and filter/coalesce realtime. Why: prevent truncated earnings and unrelated refresh storms.
+- Revenue and dashboard metrics aggregate complete account-scoped earnings server-side in UTC; paginate history and filter/coalesce realtime. Why: avoid truncation and refresh storms.
 
 - Welcome-back summaries read account-scoped completed ledger rows only; admin samples never write them.
 
@@ -13,7 +13,7 @@
 - Use ProfileAvatar.
 - Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
 - Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
-- Creator real photos stay in owner-owned private galleries; discovery shows the selected photo, private interactions the emoji. Why: separate public and private identity.
+- Creator real photos stay in owner-owned private galleries; discovery shows the selected photo, private interactions the emoji. Why: separate identities.
 - Capture bounded-resolution selfies in-page; release tracks on capture/close and skip landmark scanning. Why: avoid phone camera handoffs and heavy WASM.
 - Prebundle color pickers with deduped React to avoid mixed hook chunks.
 - Process new creator media through the shared permanent watermark encoder before storage uploads, including the public photo gallery; fail closed on encoding errors and exclude private verification documents and customer selfies, because display overlays do not brand downloaded files.
@@ -32,7 +32,7 @@
 
 - Chats reuse TopFansSection with account-scoped messages and safe public identities.
 
-- Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate personal choices.
+- Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate choices.
 - Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.
 
 - Page search/media reads and refresh authorized vault links no later than access expiry. Why: avoid bulk downloads and stale access.
