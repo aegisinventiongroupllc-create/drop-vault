@@ -1404,6 +1404,7 @@ export type Database = {
           hearts: number
         }[]
       }
+      get_my_creator_metrics: { Args: never; Returns: Json }
       get_my_monthly_revenue: {
         Args: never
         Returns: {
@@ -1461,6 +1462,10 @@ export type Database = {
         Returns: boolean
       }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
+      renew_subscription_atomic: {
+        Args: { _expected_expiry: string; _subscription_id: string }
+        Returns: string
+      }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {
