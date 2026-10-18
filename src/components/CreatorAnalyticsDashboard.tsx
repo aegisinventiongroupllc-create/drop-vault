@@ -74,7 +74,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
       setRewardPreview({ usd: 180, tokens: 10 });
     }
   };
-  const handleSignInTap_unused = handleSignInTap;
+  const dismissReward = () => { setRewardPreview(null); welcomeBack.dismiss(); };
   const handleLogout = async () => {
     await logActivity("logout", "Creator dashboard");
     onBack();
