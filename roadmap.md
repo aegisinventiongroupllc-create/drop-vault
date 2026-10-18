@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Secure crypto Bit-Token confirmation with server-created checkout receipts, authoritative paid-invoice validation, and unpaid/unauthorized/duplicate tests; real-payment test follows separately.
 - [x] Secure entry-pass granting with server-only authorization and matching verified receipts; crypto confirmation retrieves merchant invoice data tied to the server-created checkout. All 34 tests pass, deployed payment handlers, and live anonymous/signed-in grant calls and unsigned notices are denied. Database business-rule tests use temporary tables and the deployed function body without changing real access. Real paid-provider confirmation remains unverified; invoices created before this fix lack receipts and fail closed.
 - [x] Default to the third Star cluster photograph and enable personal photo tint through the shared circular galaxy color wheel; slow drift retained. Browser verified loaded photo, color blending and device-local persistence after reload; cross-device account saving retains the existing profile limitation.
 - [x] Add personal globe tone wheel and gentle multicolor neon sparkles to the shared customer/creator color controls; shooting stars unchanged. Signed-in creator wheel, green globe, neon and reload verified; six tests pass. Account updates reject this existing profile's display-name format, so account-scoped local fallback preserves choices on this device; cross-device sync remains blocked for that profile.

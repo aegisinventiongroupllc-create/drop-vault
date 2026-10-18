@@ -133,16 +133,20 @@ Deno.serve(async (req) => {
     }
 
     const invoice = ccJson.result;
-    if (isEntryPass) {
+    const isTokenPackage = !body?.kind || body.kind === "token_package";
+    if (isEntryPass || isTokenPackage) {
       if (typeof invoice?.uuid !== "string" || !invoice.uuid) return json({ error: "Invalid payment invoice" }, 502);
       // Separate service client: never forward the customer's Authorization to receipt writes.
       const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
         auth: { autoRefreshToken: false, persistSession: false },
       });
-      const { error } = await server.from("entry_pass_payment_receipts").insert({
+      const receipt = {
         payment_id: invoice.uuid.replace(/^INV-/i, ""), order_id: orderId,
-        user_id: userId, amount_usd, currency: "USD", method: "crypto",
-      });
+        user_id: userId, amount_usd, currency: "USD",
+      };
+      const { error } = isEntryPass
+        ? await server.from("entry_pass_payment_receipts").insert({ ...receipt, method: "crypto" })
+        : await server.from("token_payment_receipts").insert({ ...receipt, tokens });
       if (error) return json({ error: "Checkout could not be recorded; please retry" }, 500);
     }
     return json({

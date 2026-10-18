@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { confirmEntryPassInvoice, invoiceKey } from "../_shared/entryPassPayment.ts";
+import { confirmTokenInvoice } from "../_shared/tokenPayment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,16 +10,6 @@ const corsHeaders = {
 const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY") ?? "";
 const API_KEY = (Deno.env.get("CRYPTOCLOUD_API_KEY") ?? "").trim().replace(/^Token\s+/i, "");
 
-// Server-side price catalog (must mirror cryptocloud-create-invoice)
-const MAX_TOKENS = 501;
-function expectedAmountsForTokens(tokens: number): number[] {
-  if (tokens === 1) return [25];
-  if (tokens === 5) return [125];
-  const amounts = [(tokens - 1) * 20 + 1];
-  if (tokens >= 1 && tokens <= 100) amounts.push(tokens * 25); // any quantity at a flat $25 each
-  if (tokens === 501) amounts.push(10002); // "Legendary" $10,001 tier + $1 admin fee
-  return amounts;
-}
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -80,7 +71,6 @@ Deno.serve(async (req) => {
     const status = (payload.status || "").toLowerCase();
     const invoiceId = payload.invoice_id;
     const orderId = payload.order_id;
-    const amountUsd = parseFloat(payload.amount_crypto ? payload.invoice_info_amount || "0" : payload.amount || "0");
 
     if (status !== "success") {
       return new Response(JSON.stringify({ ok: true, ignored: status }), {
@@ -122,48 +112,43 @@ Deno.serve(async (req) => {
       });
     }
 
-    // order_id format: dtt-<ts>-<tokens>-<userId>
+    // Notifications identify a server-created checkout, not its buyer or price.
     if (!orderId?.startsWith("dtt-")) {
       return new Response(JSON.stringify({ ok: true, ignored: "non-dtt order" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const parts = orderId.split("-");
-    const tokens = parseInt(parts[2], 10);
-    const userId = parts.slice(3).join("-");
-
-    // Re-validate the token count against the server price catalog so no caller can
-    // pay a tiny amount and receive a large token balance.
-    if (!Number.isInteger(tokens) || tokens < 1 || tokens > MAX_TOKENS) {
-      console.error("rejected token count", { orderId, tokens });
-      return new Response(JSON.stringify({ error: "invalid token count" }), { status: 400 });
-    }
-    const expected = expectedAmountsForTokens(tokens);
-    if (amountUsd > 0 && !expected.some((a) => Math.abs(a - amountUsd) <= 0.5)) {
-      console.error("amount/token mismatch", { orderId, tokens, amountUsd, expected });
-      return new Response(JSON.stringify({ error: "amount does not match token package" }), {
-        status: 400,
-      });
-    }
-
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
-
-    const { data: credited, error: rpcErr } = await supabase.rpc("credit_tokens", {
-      _user_id: userId,
-      _payment_id: invoiceId,
-      _tokens: tokens,
-      _amount_usd: amountUsd || 0,
-    });
-
-    if (rpcErr) {
-      console.error("credit_tokens error", rpcErr);
-      return new Response(JSON.stringify({ error: rpcErr.message }), { status: 500 });
+    const { data: receipt, error: receiptError } = await supabase.from("token_payment_receipts")
+      .select("*").eq("payment_id", invoiceKey(invoiceId)).eq("order_id", orderId).maybeSingle();
+    if (receiptError || !receipt || !API_KEY) {
+      return new Response(JSON.stringify({ error: "Unknown token checkout" }), { status: 400 });
     }
-
+    const credited = await confirmTokenInvoice(receipt, async () => {
+      const response = await fetch("https://api.trybit.com/v2/invoice/merchant/info", {
+        method: "POST", headers: { Authorization: `Token ${API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ uuids: [receipt.payment_id] }),
+      });
+      if (!response.ok) throw new Error("Payment verification unavailable");
+      const body = await response.json();
+      if (body.status !== "success" || !Array.isArray(body.result)) throw new Error("Invalid verification response");
+      return body.result.find((item: { uuid?: string }) => invoiceKey(item.uuid) === receipt.payment_id);
+    }, async () => {
+      const { error } = await supabase.from("token_payment_receipts")
+        .update({ verified_at: new Date().toISOString() }).eq("payment_id", receipt.payment_id);
+      if (error) throw new Error("Could not record verified token payment");
+    }, async () => {
+      const { data, error } = await supabase.rpc("credit_tokens", {
+        _user_id: receipt.user_id, _payment_id: receipt.payment_id,
+        _tokens: receipt.tokens, _amount_usd: Number(receipt.amount_usd),
+      });
+      if (error) throw new Error("Could not grant verified tokens");
+      return data === true;
+    });
     return new Response(
-      JSON.stringify({ ok: true, tokens_credited: credited, buyer_id: userId }),
+      JSON.stringify({ ok: true, tokens_credited: credited }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
