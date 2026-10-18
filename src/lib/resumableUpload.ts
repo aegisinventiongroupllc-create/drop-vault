@@ -9,6 +9,7 @@ export async function uploadBrandedFile(bucket:string,path:string,file:File,onPr
   catch{return {error:{message:'Connection interrupted. Please retry the upload.'}};}
  }
  const {data,error}=await supabase.auth.getSession();
+ if(signal?.aborted)return {error:{message:'Upload cancelled'}};
  if(error||!data.session)return {error:{message:'Sign in to upload.'}};
  const endpoint=`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/upload/resumable`;
  return new Promise(resolve=>{
@@ -23,7 +24,7 @@ export async function uploadBrandedFile(bucket:string,path:string,file:File,onPr
    onProgress:(sent,total)=>onProgress?.('Saving watermarked media…',Math.round(sent/total*100)),
    onSuccess:()=>finish(null),onError:()=>finish({message:'Upload interrupted after retries. Please try again.'})
   });
-  const cancel=()=>{void upload.abort(true);finish({message:'Upload cancelled'});};
+  const cancel=()=>{void upload.abort(true).catch(()=>{});finish({message:'Upload cancelled'});};
   signal?.addEventListener('abort',cancel,{once:true});
   upload.findPreviousUploads().then(previous=>{if(done)return;if(previous[0])upload.resumeFromPreviousUpload(previous[0]);upload.start();}).catch(()=>finish({message:'Couldn’t start the upload. Please retry.'}));
  });

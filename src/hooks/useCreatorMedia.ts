@@ -18,19 +18,19 @@ export interface CreatorMediaItem {
 export function useCreatorMedia(creatorId: string | null) {
   const [items, setItems] = useState<CreatorMediaItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [limit, setLimit] = useState(24);
+  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!creatorId) return;
     setLoading(true);
-    const {data, error: readError} = await supabase.from("creator_media").select("*").eq("creator_id",creatorId).order("created_at",{ascending:false}).order("id",{ascending:false}).range(0,limit);
+    const {data, error: readError} = await supabase.from("creator_media").select("*").eq("creator_id",creatorId).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+24);
     setError(readError?.message ?? null);
-    if (!readError && data) {setItems(data.slice(0,limit) as CreatorMediaItem[]);setHasMore(data.length>limit);}
+    if (!readError && data) {const rows=data.slice(0,24) as CreatorMediaItem[];setItems(previous=>offset===0?rows:[...previous.filter(p=>!rows.some(r=>r.id===p.id)),...rows]);setHasMore(data.length>24);}
     setLoading(false);
-  }, [creatorId,limit]);
-  useEffect(() => {setItems([]);setLimit(24);},[creatorId]);
+  }, [creatorId,offset]);
+  useEffect(() => {setItems([]);setOffset(0);},[creatorId]);
 
   useEffect(() => {
     refresh();
@@ -86,5 +86,5 @@ export function useCreatorMedia(creatorId: string | null) {
     return { success: true };
   };
 
-  return { items, loading, error, hasMore, loadMore:()=>setLimit(n=>n+24), refresh, insertMedia, renameMedia, deleteMedia };
+  return { items, loading, error, hasMore, loadMore:()=>setOffset(n=>n+24), refresh, insertMedia, renameMedia, deleteMedia };
 }

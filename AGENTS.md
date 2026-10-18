@@ -18,12 +18,12 @@
 - Prebundle color pickers with deduped React to avoid mixed hook chunks.
 - Process new creator media through the shared permanent watermark encoder before storage uploads, including the public photo gallery; fail closed on encoding errors and exclude private verification documents and customer selfies, because display overlays do not brand downloaded files.
 
-- Card checkout runs through CCBill FlexForms built server-side with a salted digest; the unsigned webhook credits only from CCBill IP ranges, re-checks price against the server catalog, and credits idempotently per transaction id. The card button stays hidden until all CCBill secrets exist.
+- CCBill: server-signed FlexForms, IP-restricted webhook, catalog-price verification, idempotent credits; hide cards without secrets. Why: prevent forged payment.
 
-- Creator uploads require owner/creator authorization, reviewed approval and latest server-confirmed live Yoti adult evidence via restrictive storage/record policies and request helper; exclude IDs/avatars. Yoti signs requests and records environment server-side. Why: prevent verification bypass.
+- Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; IDs/avatars excluded. Why: prevent verification bypass.
 
 - Chargeback lockouts are applied only by the server-side CCBill webhook via handle_chargeback; bans live in account_bans (not profiles) so users cannot clear them, and admins lift them with admin_lift_ban. Why: user-editable rows must never control bans.
-- Translate UI with global AutoTranslator (visitor language → translate-text, cached in translation_cache and locally); mark owner-only/code areas notranslate. Why: static locales cannot cover all languages.
+- Global AutoTranslator uses bounded versioned caches/retries and per-service miss coalescing; owner/code areas notranslate. Why: avoid duplicate work; cross-instance deduplication remains separate.
 - Publish heart totals through a trigger-maintained aggregate table, never public fan rows; subscribe social surfaces and creator analytics to totals so counts update without revealing identities.
 - Keep teaser frames and activation windows on account-owned media; select one active item atomically through an owner-validated function, fall back to latest after expiry, and preserve permanent upload watermarking.
 - Capture request country server-side from the requesting account at creation and preserve it on updates; rank scoped request groups without exposing private profile fields.
@@ -34,3 +34,6 @@
 
 - Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate personal choices.
 - Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.
+
+- Page search/media reads and refresh authorized vault links no later than access expiry. Why: avoid bulk downloads and stale access.
+- Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
