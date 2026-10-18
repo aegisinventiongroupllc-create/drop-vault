@@ -27,6 +27,7 @@ import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
+import CreatorProfile from "@/components/CreatorProfile";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
 
 import {
@@ -51,6 +52,7 @@ const FOLLOWERS_LIST: string[] = [];
 type Section = "overview" | "verification" | "requests" | "media" | "messages";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
+  const [showMyPage, setShowMyPage] = useState(false);
   const ct = useCreatorText();
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
