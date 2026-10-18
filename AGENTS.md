@@ -33,3 +33,4 @@
 - Dashboard chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
 
 - Personal globe/galaxy colors use validated ui_theme and shared renderers, not platform settings; photo tints use color blending to preserve star luminance.
+- Custom requests become paid only through the service-only mark_custom_request_paid with a verified, matching invoice receipt priced from the agreed request; a trigger blocks any other transition to paid/completed. Why: agreement or client writes must never unlock delivery.
