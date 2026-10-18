@@ -500,6 +500,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         window.scrollTo({ top: 0, behavior: "auto" });
       }} />
       {mediaUploadInput}
+      {showMyPage && profileUsername && (
+        <div className="fixed inset-0 z-[80] overflow-y-auto bg-background">
+          <CreatorProfile creatorName={profileUsername} onBack={() => setShowMyPage(false)} />
+        </div>
+      )}
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center gap-3">
