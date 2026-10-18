@@ -10,6 +10,7 @@ import { logActivity } from "@/lib/activityLog";
 
 import { verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
+import pinkGlobe from "@/assets/dtt-globe-pink.png";
 
 interface AuthScreenProps {
   onAdmin: () => void;
