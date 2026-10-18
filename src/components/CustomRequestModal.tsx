@@ -52,56 +52,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
     return fnError?.message || "Payment failed.";
   };
 
-  const handleCryptoPay = async (currency: string) => {
-    if (!consentChecked) { setError("Please confirm you agree to the policies before paying."); return; }
-    await logConsent("crypto", currency);
-    setStep("processing");
-    setError(null);
-    try {
-      const invoiceTotal = totalDue;
-      const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: { kind: "custom_request", bid_tokens: bidTokens },
-      });
-      if (fnError) throw new Error(await readFunctionError(fnError));
-      if (data?.error) throw new Error(data.error);
-
-      // Record the dollar request so it shows up for the creator and in the admin portal
-      try {
-        const { data: u } = await supabase.auth.getUser();
-        const uid = u.user?.id;
-        if (uid) {
-          const { data: creatorProfile } = await supabase
-            .from("public_profiles")
-            .select("user_id")
-            .eq("display_name", creatorName)
-            .maybeSingle();
-          await supabase.from("custom_requests").insert({
-            customer_id: uid,
-            creator_id: creatorProfile?.user_id ?? null,
-            creator_name: creatorName,
-            description,
-            amount_usd: data?.amount_usd ?? invoiceTotal,
-            tokens: data?.tokens ?? tokenCalc.total,
-            creator_share_usd: Math.round(split.creatorShare * 100) / 100,
-            platform_share_usd: Math.round(split.totalPlatformRevenue * 100) / 100,
-            status: "pending",
-            payment_id: data?.invoice_id ?? null,
-          });
-        }
-      } catch {}
-
-      setPaymentInfo({ invoice_url: data.invoice_url, payment_id: data.invoice_id, pay_currency: "LTC" });
-      if (data?.invoice_url) window.open(data.invoice_url, "_blank");
-      setStep("success");
-      import("@/lib/activityLog").then(({ logActivity }) =>
-        logActivity("custom_request_sent", `Crypto request to ${creatorName}`, {
-          creator: creatorName, amount_usd: invoiceTotal, tokens: tokenCalc.total, currency,
-        })
-      );
-    } catch (err: any) {
-      setError(err.message || "Payment failed.");
-      setStep("buy");
-    }
+  // Requests are paid only after the creator agrees, from MY REQUESTS.
+  const handleCryptoPay = async (_currency: string) => {
+    setError("Pay for a request from MY REQUESTS once the creator accepts it.");
   };
 
   const handleCardPay = async () => {

@@ -460,7 +460,23 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
                   )}
 
                   <RequestDelivery request={req} role="customer" onChange={refreshReqs} />
-                  {req.status === "accepted" && <p className="text-xs text-muted-foreground mt-2">Request payment checkout is not available yet.</p>}
+                  {req.status === "accepted" && (
+                    <Button variant="neon" size="sm" className="w-full mt-2" disabled={reqBusy} onClick={async () => {
+                      setReqBusy(true);
+                      const { data, error } = await supabase.functions.invoke("cryptocloud-create-invoice", {
+                        body: { kind: "custom_request", request_id: req.id },
+                      });
+                      setReqBusy(false);
+                      if (error || data?.error || !data?.invoice_url) {
+                        toast({ title: "Couldn't start payment", description: data?.error || "Please try again.", variant: "destructive" });
+                        return;
+                      }
+                      window.open(data.invoice_url, "_blank");
+                      toast({ title: "Payment opened", description: "Your request unlocks once the payment is confirmed." });
+                    }}>
+                      PAY ${(Number(req.amount_usd) + 5).toFixed(2)} WITH CRYPTO
+                    </Button>
+                  )}
                   {req.status === "declined" && (
                     <span className="text-[10px] text-muted-foreground italic mt-2 block">Creator passed on this request</span>
                   )}
