@@ -1,39 +1,31 @@
 # Project architecture rules
-- Crypto pass/token credits require server-only authorization and matching verified checkout receipts; reconcile merchant invoices and credit idempotently. Why: unpaid calls and retries cannot create extra access or tokens.
-- Admin finance drilldowns use the server-verified guard and stable paginated allowlisted queries matching overview filters; flag accepted requests as unconfirmed. Why: protect records without changing totals or balances.
-- Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
-- Renew request access and subscriptions atomically: lock balances/access, preserve ledger splits, and reject duplicate cycles. Subscription renewal is service-only and checks expected expiry. Why: retries must not double-charge or leave partial earnings.
-
-- Revenue and dashboard metrics aggregate complete account-scoped earnings server-side in UTC; paginate history and filter/coalesce realtime. Why: avoid truncation and refresh storms.
-
-- Welcome-back summaries read account-scoped completed ledger rows only; admin samples never write them.
-
-- Auth callbacks go to `https://dropthatthing.com`; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: retain secure Google sign-in.
-- Profiles are owner/admin-only; public_profiles is a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
-- Use ProfileAvatar.
-- Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
-- Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
-- Creator real photos stay in owner-owned private galleries; discovery shows the selected photo, private interactions the emoji. Why: separate identities.
-- Capture bounded-resolution selfies in-page; release tracks on capture/close and skip landmark scanning. Why: avoid phone camera handoffs and heavy WASM.
-- Prebundle color pickers with deduped React to avoid mixed hook chunks.
-- Process new creator media through the shared permanent watermark encoder before storage uploads, including the public photo gallery; fail closed on encoding errors and exclude private verification documents and customer selfies, because display overlays do not brand downloaded files.
-
-- CCBill: server-signed FlexForms, IP-restricted webhook, catalog-price verification, idempotent credits; hide cards without secrets. Why: prevent forged payment.
-
-- Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; IDs/avatars excluded. Why: prevent verification bypass.
-
-- Chargeback lockouts are applied only by the server-side CCBill webhook via handle_chargeback; bans live in account_bans (not profiles) so users cannot clear them, and admins lift them with admin_lift_ban. Why: user-editable rows must never control bans.
-- Global AutoTranslator uses bounded versioned caches/retries and per-service miss coalescing; owner/code areas notranslate. Why: avoid duplicate work; cross-instance deduplication remains separate.
-- Publish heart totals through a trigger-maintained aggregate table, never public fan rows; subscribe social surfaces and creator analytics to totals so counts update without revealing identities.
-- Keep teaser frames and activation windows on account-owned media; select one active item atomically through an owner-validated function, fall back to latest after expiry, and preserve permanent upload watermarking.
-- Capture request country server-side from the requesting account at creation and preserve it on updates; rank scoped request groups without exposing private profile fields.
-- Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
-- Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
-
-- Chats reuse TopFansSection with account-scoped messages and safe public identities.
-
-- Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate choices.
-- Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.
-
-- Page search/media reads and refresh authorized vault links no later than access expiry. Why: avoid bulk downloads and stale access.
+- Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
+- Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
+- Retain request deliveries in a separate private bucket; creator cleanup archives, never deletes customer media. Payment/delivery fields remain server-managed with expiring customer access. Why: agreement is not payment.
+- Renew requests/subscriptions atomically, locking balances/access and preserving ledger splits; reject duplicate cycles. Subscription renewal is service-only with expected-expiry checks. Why: prevent double charges/partial earnings.
+- Aggregate complete account-scoped earnings server-side in UTC; paginate history and scope/coalesce realtime. Why: avoid truncation and refresh storms.
+- Welcome-back reads only account-scoped completed ledger rows; admin samples never write them. Why: preserve real earnings.
+- Auth callbacks use the DTT public domain; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: secure branded sign-in.
+- Profiles are owner/admin-only; public_profiles is a safe read-only projection; photo writes require folder/object ownership. Why: prevent identity leaks and cross-account edits.
+- Use ProfileAvatar. Why: consistent private identities.
+- Validate avatar colors; use iro wheels and SVG fills, not arbitrary CSS. Why: safe customization.
+- Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
+- Creator real photos stay in owner-owned private galleries; discovery shows selected photos, private interactions the emoji. Why: separate identities.
+- Capture bounded selfies in-page, release tracks on capture/close, skip landmark scanning. Why: avoid camera handoffs/heavy WASM.
+- Prebundle color pickers with deduped React. Why: avoid mixed hook chunks.
+- Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
+- CCBill uses server-signed FlexForms, IP-restricted webhooks, catalog-price checks and idempotent credits; hide cards without secrets. Why: prevent forged payments.
+- Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; exclude onboarding IDs/avatars. Why: prevent verification bypass.
+- Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
+- AutoTranslator uses bounded versioned caches/retries and per-service miss coalescing; owner/code areas remain notranslate. Why: avoid duplicate work; cross-instance coordination is separate.
+- Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
+- Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
+- Snapshot request country server-side at creation and preserve on updates; rank scoped groups. Why: avoid exposing private profile fields.
+- Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
+- Share vault artwork/teaser frame styles across studio/feed; persist language countdown start across reloads. Why: continuous transitions.
+- Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
+- Personal colors use validated ui_theme and blended renderers; independent idle skies and opt-in dashboard skies never alter public profiles. Why: isolate choices.
+- Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
+- Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
+- Recover through Cloud UI database exports and separate owner-controlled Storage downloads; rehearse only in isolation, require written vendor content approval before media integration. Why: snapshots omit files and live restores lose later writes.
