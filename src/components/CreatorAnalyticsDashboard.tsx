@@ -49,11 +49,22 @@ const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media" | "messages";
 
-const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void }) => {
+const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
   const ct = useCreatorText();
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
   const logoTaps = useRef({ count: 0, lastAt: 0 });
+  // Triple-tap the dashboard logo opens the sign-in page preview (pink globe).
+  const signInTaps = useRef({ count: 0, lastAt: 0 });
+  const handleSignInTap = () => {
+    const now = Date.now();
+    const count = now - signInTaps.current.lastAt < 1200 ? signInTaps.current.count + 1 : 1;
+    signInTaps.current = { count, lastAt: now };
+    if (count >= 3) {
+      signInTaps.current.count = 0;
+      onSignInPreview?.();
+    }
+  };
   const previewCoinRain = () => {
     const now = Date.now();
     const count = now - logoTaps.current.lastAt < 1500 ? logoTaps.current.count + 1 : 1;
@@ -491,7 +502,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full p-0" aria-label="DTT celebration preview" title="Triple-tap to preview coin rain" onClick={previewCoinRain}>
               <ProfileAvatar config={DEFAULT_AVATAR} label="DTT" className="h-10 w-10 border-primary/50" />
             </Button>
-          ) : <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />}
+          ) : (
+            <button onClick={handleSignInTap} className="cursor-pointer select-none rounded-full" aria-label="DTT">
+              <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
+            </button>
+          )}
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">

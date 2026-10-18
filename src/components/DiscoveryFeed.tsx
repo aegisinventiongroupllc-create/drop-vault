@@ -349,12 +349,26 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     </div>
   );
 });
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
   const [myUnlocks, setMyUnlocks] = useState<Set<string>>(new Set());
   const addUnlock = useCallback((id: string) => setMyUnlocks((prev) => new Set(prev).add(id)), []);
+
+  // Triple-tap the DROPTHATTHING logo opens the sign-in page preview.
+  const logoTaps = useRef(0);
+  const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleLogoTap = () => {
+    logoTaps.current += 1;
+    if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+    logoTapTimer.current = setTimeout(() => { logoTaps.current = 0; }, 900);
+    if (logoTaps.current >= 3) {
+      logoTaps.current = 0;
+      if (logoTapTimer.current) { clearTimeout(logoTapTimer.current); logoTapTimer.current = null; }
+      onLogoTripleTap?.();
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -452,7 +466,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     <div className="min-h-[100dvh]">
       <div className={`fixed left-0 right-0 z-30 bg-gradient-to-b from-background via-background/80 to-transparent pb-4 ${hasVaultToggle ? "top-10" : topOffset ? "top-9" : "top-0"}`}>
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <h1 translate="no" className="notranslate font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
+          <h1 onClick={handleLogoTap} translate="no" className="notranslate cursor-pointer select-none font-display text-lg font-bold tracking-wider">DROP<span className="text-primary">THAT</span>THING</h1>
           <div className="flex items-center gap-2">
             {onGlobeOpen && (
               <button

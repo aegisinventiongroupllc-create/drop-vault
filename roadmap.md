@@ -78,3 +78,4 @@
 - [x] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
 - [x] Globe: pick a country for the day → that country's own scrollable teaser feed, split Women/Men
 - [x] Globe: owner switch between the DTT brand look and the real-Earth look, saved for everyone; both skins photographed in the running app, saved choice confirmed to drive which one shows, anyone can read it, signed-out visitors cannot change it (the admin GLOBE tab itself still needs the owner's own tap)
+- [x] Triple-tap the DTT logo (feed wordmark or dashboard avatar) previews the pink-globe sign-in page; triple-tap inside exits back — verified signed-in both ways.
