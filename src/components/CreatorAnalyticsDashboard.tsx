@@ -363,7 +363,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         media_type: file.type.startsWith("image/") ? "photo" : "video",
       });
       if ("error" in dbResult) {
-        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
+        const cleanup = await supabase.storage.from(bucket).remove([result.path]);
+        setUploadMsg(`Upload failed: ${dbResult.error}`);
+        toast.error(cleanup.error ? "File saved but listing failed. Contact support before uploading again." : "Upload not completed. Please retry.", { id: uploadToastId, duration: 4000 });
       } else {
         setUploadMsg(`✓ "${title}" uploaded to ${bucket === "vault" ? "Full Video Vault" : "Teasers"}`);
         toast.success(`"${title}" uploaded`, { id: uploadToastId, description: undefined, duration: 4000 });
@@ -422,7 +424,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         media_type: file.type.startsWith("image/") ? "photo" : "video",
       });
       if ("error" in dbResult) {
-        toast.error(`Saved file but couldn't record title: ${dbResult.error}`, { id: uploadToastId, description: undefined, duration: 4000 });
+        const cleanup = await supabase.storage.from("teasers").remove([result.path]);
+        setUploadMsg(`Upload failed: ${dbResult.error}`);
+        toast.error(cleanup.error ? "File saved but listing failed. Contact support before uploading again." : "Upload not completed. Please retry.", { id: uploadToastId, duration: 4000 });
       } else {
         setUploadMsg(`✓ "${title}" teaser uploaded.`);
         toast.success("Teaser uploaded", { id: uploadToastId, description: undefined, duration: 4000 });

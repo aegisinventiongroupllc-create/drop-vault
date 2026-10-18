@@ -38,6 +38,11 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [vaultCount, setVaultCount] = useState<number>(0);
   const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
+  const [vaultOffset,setVaultOffset]=useState(0);
+  const [moreVault,setMoreVault]=useState(false);
+  const [vaultError,setVaultError]=useState("");
+  const [vaultLoading,setVaultLoading]=useState(false);
+  useEffect(()=>{setVaultItems([]);setVaultOffset(0);},[creatorId]);
   const [unlocking, setUnlocking] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const { balance, refresh: refreshBalance } = useTokenBalance();
@@ -89,12 +94,21 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   useEffect(() => {
     if (!isUnlocked || !creatorId) { setVaultItems([]); return; }
     let cancel = false;
-    (async () => {
-      const { data, error } = await supabase.functions.invoke("vault-media", { body: { creator_id: creatorId } });
-      if (!cancel && !error && data?.items) setVaultItems(data.items);
-    })();
-    return () => { cancel = true; };
-  }, [isUnlocked, creatorId]);
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const load=async()=>{
+      setVaultLoading(true);
+      const {data,error}=await supabase.functions.invoke("vault-media",{body:{creator_id:creatorId,offset:vaultOffset}});
+      if(cancel)return;
+      setVaultLoading(false);
+      if(error || !data?.items){setVaultError("Vault unavailable. Your access may have expired.");setVaultItems([]);return;}
+      setVaultError("");setMoreVault(!!data.has_more);
+      setVaultItems(previous=>vaultOffset===0?data.items:[...previous.filter(p=>!data.items.some((item:{id:string})=>item.id===p.id)),...data.items]);
+      const expiry=data.access_until?Date.parse(data.access_until)-Date.now():Infinity;
+      timer=setTimeout(()=>{if(expiry<=60000){setVaultItems([]);setVaultError("Access expired. Renew to keep watching.");}else void load();},Math.max(1000,Math.min(50*60000,expiry)));
+    };
+    void load();
+    return () => {cancel=true;clearTimeout(timer);};
+  }, [isUnlocked,creatorId,vaultOffset]);
 
   const handleUnlock = async () => {
     if (!creatorId) {
