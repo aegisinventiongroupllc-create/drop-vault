@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Test Google sign-in on the published DTT domain, inspect visible branding and callback destination, and fix confirmed app-side failures without replacing owner Google credentials.
 - [x] Polish DTT sign-in with gold logo, black/pink design, labeled inputs and shared controls; desktop/mobile views and controls verified, 15 tests pass, build OK. Google callback uses public DTT domain.
 - [ ] Confirm Google account chooser shows DTT: public broker requests did not expose active client branding; owner Google credentials/settings and real account-chooser test remain unverified. No owner credentials were changed.
 - [x] Enforce server-confirmed live creator age verification and reviewed approval through restrictive storage/media-registration policies and request attachment helper; preserve private ID/avatar onboarding uploads. Yoti records environment and verified evidence server-side; legacy/sandbox results fail closed. 24 upload-security tests and 25 regression tests pass; real signed-in unverified customer direct uploads denied in all four creator buckets. Creator rule cases use isolated temporary tables with deployed function bodies. Yoti handler deployed; successful real creator upload remains blocked by no confirmed live Yoti records (see off-site task).
