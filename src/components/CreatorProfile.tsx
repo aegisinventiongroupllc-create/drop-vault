@@ -296,7 +296,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               </span>
             </div>
 
-            {vaultCount === 0 ? (
+            {vaultError ? <p role="alert" className="text-sm text-destructive py-4">{vaultError}</p> : vaultCount === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-6">This creator hasn't added any long-form videos yet.</p>
             ) : vaultItems.length === 0 ? (
               <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
@@ -305,7 +305,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {vaultItems.map((v) => (
                   <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
                     {v.url ? (
-                      <video src={v.url} className="w-full aspect-video object-cover bg-black" controls playsInline preload="metadata" />
+                      <video src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
                     ) : (
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
                     )}
@@ -315,6 +315,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               </div>
             )}
 
+            {moreVault && <Button variant="outline" disabled={vaultLoading} onClick={()=>setVaultOffset(n=>n+24)}>{vaultLoading ? 'Loading…' : 'More videos'}</Button>}
             <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking}>
               {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               EXTEND +14 DAYS — 1 BIT-TOKEN
