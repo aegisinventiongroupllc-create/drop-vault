@@ -1057,6 +1057,39 @@ export type Database = {
         }
         Relationships: []
       }
+      token_payment_receipts: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          currency: string
+          order_id: string
+          payment_id: string
+          tokens: number
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          currency?: string
+          order_id: string
+          payment_id: string
+          tokens: number
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          currency?: string
+          order_id?: string
+          payment_id?: string
+          tokens?: number
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       token_purchases: {
         Row: {
           amount_usd: number

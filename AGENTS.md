@@ -1,5 +1,5 @@
 # Project architecture rules
-- Entry-pass credits require service-role authorization and a matching server-verified receipt; reconcile crypto invoices with server-created orders. Why: unpaid calls cannot grant access and retries cannot extend it twice.
+- Crypto pass/token credits require server-only authorization and matching verified checkout receipts; reconcile merchant invoices and credit idempotently. Why: unpaid calls and retries cannot create extra access or tokens.
 - Admin finance drilldowns use the server-verified guard and stable paginated allowlisted queries matching overview filters; flag accepted requests as unconfirmed. Why: protect records without changing totals or balances.
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
