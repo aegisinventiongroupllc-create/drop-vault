@@ -526,6 +526,22 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             <Play className="w-3.5 h-3.5" />
             FEED
           </button>
+          {!adminPreview && (
+            <button
+              onClick={() => {
+                if (!profileUsername) {
+                  toast.error("Set your display name in Profile first, then you can preview your page.");
+                  return;
+                }
+                setShowMyPage(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-gold text-[10px] font-bold tracking-widest hover:bg-gold/25 transition-colors"
+              aria-label="Preview how customers see my page"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              MY PAGE
+            </button>
+          )}
           <WalletIndicator />
           <button
             onClick={handleLogout}
