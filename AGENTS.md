@@ -32,5 +32,5 @@
 
 - Chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
 
-- Personal globe/galaxy colors use validated ui_theme and shared renderers, not platform settings; photo tints use color blending to preserve star luminance.
+- Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate personal choices.
 - Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.
