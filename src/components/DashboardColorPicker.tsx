@@ -7,15 +7,7 @@ import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
 import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, activeTheme, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import GalaxyReel from "@/components/GalaxyReel";
 import SkyGalleryPicker from "@/components/SkyGalleryPicker";
-import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
-import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
-import clusterImg from "@/assets/brb/stars-cluster.jpg";
-
-const STAR_THUMBS: Record<"deepfield" | "milkyway" | "cluster", string> = {
-  deepfield: deepFieldImg,
-  milkyway: milkyWayImg,
-  cluster: clusterImg,
-};
+import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -134,7 +126,7 @@ const DashboardColorPicker = () => {
           <div>
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-              {STAR_STYLES.filter((s) => s.id === "living" || s.id === "deepfield" || s.id === "milkyway" || s.id === "cluster").map((s) => {
+              {STAR_STYLES.map((s) => {
                 const active = (theme.starStyle ?? DEFAULT_STAR_STYLE) === s.id;
                 return (
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
@@ -142,7 +134,7 @@ const DashboardColorPicker = () => {
                     {s.id === "living" ? (
                       <div className="flex h-10 w-full items-center justify-center bg-[#050510] text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
                     ) : (
-                      <img src={STAR_THUMBS[s.id as keyof typeof STAR_THUMBS]} alt="" className="h-10 w-full object-cover" loading="lazy" />
+                      <img src={SKY_BACKDROPS[s.id]} alt="" className="h-10 w-full object-cover" loading="lazy" />
                     )}
                     <span className="block px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">{s.label}</span>
                   </button>
