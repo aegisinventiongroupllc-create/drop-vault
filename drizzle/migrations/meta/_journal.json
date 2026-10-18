@@ -351,6 +351,13 @@
       "when": 1792286157160,
       "tag": "0049_secure_crypto_token_payment_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1792286984891,
+      "tag": "0050_enforce_verified_creator_uploads",
+      "breakpoints": true
     }
   ]
 }
