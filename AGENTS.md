@@ -4,12 +4,12 @@
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
 - Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
 
-- Monthly revenue: account-scoped completed rows, UTC months, original splits; aggregate server-side, paginate details.
+- Monthly revenue: account-scoped completed rows, UTC months, original splits; aggregate server-side; paginate.
 
 - Welcome-back summaries read only account-scoped completed ledger rows; admin samples never write it.
 
 - Auth callbacks go to `https://dropthatthing.com`; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: retain secure Google sign-in.
-- Keep profiles owner/admin-only and public_profiles a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
+- Profiles are owner/admin-only; public_profiles is a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
 - Use ProfileAvatar for avatar_config.
 - Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
 - Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
