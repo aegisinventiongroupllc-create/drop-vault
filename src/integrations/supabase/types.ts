@@ -430,6 +430,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_request_payment_receipts: {
+        Row: {
+          amount_usd: number
+          base_usd: number
+          created_at: string
+          currency: string
+          order_id: string
+          payment_id: string
+          request_id: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_usd: number
+          base_usd: number
+          created_at?: string
+          currency?: string
+          order_id: string
+          payment_id: string
+          request_id: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_usd?: number
+          base_usd?: number
+          created_at?: string
+          currency?: string
+          order_id?: string
+          payment_id?: string
+          request_id?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       custom_requests: {
         Row: {
           amount_usd: number
@@ -1418,6 +1454,10 @@ export type Database = {
       increment_media_view: { Args: { _media_id: string }; Returns: undefined }
       is_top_fan: {
         Args: { _creator_id: string; _user_id: string }
+        Returns: boolean
+      }
+      mark_custom_request_paid: {
+        Args: { _payment_id: string; _request_id: string }
         Returns: boolean
       }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
