@@ -54,6 +54,17 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
   const logoTaps = useRef({ count: 0, lastAt: 0 });
+  // Triple-tap the dashboard logo opens the sign-in page preview (pink globe).
+  const signInTaps = useRef({ count: 0, lastAt: 0 });
+  const handleSignInTap = () => {
+    const now = Date.now();
+    const count = now - signInTaps.current.lastAt < 1200 ? signInTaps.current.count + 1 : 1;
+    signInTaps.current = { count, lastAt: now };
+    if (count >= 3) {
+      signInTaps.current.count = 0;
+      onSignInPreview?.();
+    }
+  };
   const previewCoinRain = () => {
     const now = Date.now();
     const count = now - logoTaps.current.lastAt < 1500 ? logoTaps.current.count + 1 : 1;
@@ -63,7 +74,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
       setRewardPreview({ usd: 180, tokens: 10 });
     }
   };
-  const dismissReward = () => { setRewardPreview(null); welcomeBack.dismiss(); };
+  const handleSignInTap_unused = handleSignInTap;
   const handleLogout = async () => {
     await logActivity("logout", "Creator dashboard");
     onBack();
