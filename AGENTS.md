@@ -10,7 +10,7 @@
 
 - Auth callbacks go to `https://dropthatthing.com`; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: retain secure Google sign-in.
 - Profiles are owner/admin-only; public_profiles is a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
-- Use ProfileAvatar for avatar_config.
+- Use ProfileAvatar.
 - Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
 - Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
 - Creator real photos stay in owner-owned private galleries; discovery shows the selected photo, private interactions the emoji. Why: separate public and private identity.
@@ -30,7 +30,7 @@
 - Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
 - Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
 
-- Chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
+- Chats reuse TopFansSection with account-scoped messages and safe public identities.
 
 - Personal colors use validated ui_theme and color-blended renderers; independent idle sky fields and opt-in dashboard sky never change public profiles. Why: isolate personal choices.
 - Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.

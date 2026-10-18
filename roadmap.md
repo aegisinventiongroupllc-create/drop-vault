@@ -1,11 +1,11 @@
 # Roadmap
 
 ## Current request
-- [ ] Reliability remediation: make automatic renewals atomic and retry-safe; validate deductions, access, ledger and creator earnings together.
-- [ ] Reliability remediation: bound media/discovery reads, refresh authorized playback URLs, improve upload retries and failures, and preserve permanent watermarking.
-- [ ] Reliability remediation: remove truncated dashboard earnings calculations, scope realtime listeners, and deduplicate translation work.
-- [ ] Recovery readiness: verify daily backup inventory with owner and rehearse recovery in an isolated destination; media recovery requires separate stored-file copies.
-- [ ] Growth readiness: establish storage/bandwidth budgets, monitoring and controlled traffic tests; adaptive video processing needs an approved external service before implementation.
+- [x] Reliability remediation: service-only atomic renewal deployed; 9 isolated authorization, split, expiry, retry and rollback tests pass. Live paid renewal/concurrent-worker stress awaits an isolated populated environment.
+- [x] Reliability remediation: 24-item media/discovery/search pages, visible-only video loading, authorized playback refresh, resumable branded uploads, registration cleanup/error handling. Signed-in Analytics/Media/Feed verified; live interrupted uploads and populated paid vault remain blocked by eligible Yoti account/payment.
+- [x] Reliability remediation: complete account-scoped UTC dashboard metrics, scoped/coalesced realtime, bounded translation cache/retries and per-service translation miss coalescing. Cross-instance coordination is a separate growth gate.
+- [ ] Recovery readiness: blocked by confirmed snapshot/restore support and approved private backup destination; recovery-readiness.md records inventory and isolated rehearsal procedure. No production restore/copy executed.
+- [ ] Growth readiness: blocked by owner budget/traffic targets, verified provider quotas, isolated test environment and written adult-content video-service approval; no paid upgrade or high-volume production test performed. See recovery-readiness.md.
 - [x] Enlarge sign-in globe; add six sky-only choices alongside four existing layouts, independent Be Right Back color preview and explicit dashboard opt-in. Eight tests pass; real creator dashboard verified all six loaded images, live wheel tint, save/readback, idle preview, dashboard opt-in, mobile fit and larger sign-in globe. Customer uses shared controls; separate customer account not exercised. Cross-device sync retains existing profile limitation.
 - [ ] Public-facing profile backdrop selection is a separate future feature; not included in this personal idle/dashboard sky update.
 - [x] Retest Google sign-in on published dropthatthing.com: Google now accepts https://dropthatthing.com/~oauth/callback and shows "Sign in to continue to dropthatthing.com" with no Lovable branding or redirect_uri_mismatch. Verified live in a fresh signed-out browser; no Google account credentials entered.
