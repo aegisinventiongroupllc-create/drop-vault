@@ -40,7 +40,7 @@ const BeRightBack = () => {
   if (!away) return null;
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
-      <GalaxyReel scope="brb" />
+      <GalaxyReel scope="brb" seconds={170} />
       <div className="absolute inset-0 bg-background/30" aria-hidden />
       <div className="relative flex flex-col items-center gap-6">
         <MiniGlobe size={280} lights speed={0.2} backdrop={false} />
