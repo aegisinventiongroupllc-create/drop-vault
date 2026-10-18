@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { priceAgreedRequest } from "../_shared/customRequestPayment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,13 +90,29 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const body = await req.json().catch(() => ({}));
-    const priced = priceRequest(body);
+    const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const isCustomRequest = body?.kind === "custom_request";
+    let requestPrice: { base_usd: number; amount_usd: number } | null = null;
+    let requestId = "";
+    if (isCustomRequest) {
+      // Requests are paid only after agreement, at the agreed price stored on the server.
+      requestId = typeof body?.request_id === "string" ? body.request_id : "";
+      if (!/^[0-9a-f-]{36}$/i.test(requestId)) return json({ error: "Choose an accepted request to pay" }, 400);
+      const { data: request } = await server.from("custom_requests")
+        .select("id,customer_id,status,amount_usd").eq("id", requestId).maybeSingle();
+      requestPrice = priceAgreedRequest(request, userId);
+      if (!requestPrice) return json({ error: "This request is not ready for payment" }, 409);
+    }
+    const priced = isCustomRequest ? { amount_usd: requestPrice!.amount_usd, tokens: 0 } : priceRequest(body);
     if ("error" in priced) return json({ error: priced.error }, 400);
 
     const { amount_usd, tokens } = priced;
     const isEntryPass = body?.kind === "entry_pass";
     const orderId = isEntryPass
       ? `dttpass-${Date.now()}-${userId}`
+      : isCustomRequest ? `dttreq-${Date.now()}-${requestId}`
       : `dtt-${Date.now()}-${tokens}-${userId}`;
 
     const ccRes = await fetch("https://api.trybit.com/v2/invoice/create", {
@@ -134,17 +151,17 @@ Deno.serve(async (req) => {
 
     const invoice = ccJson.result;
     const isTokenPackage = !body?.kind || body.kind === "token_package";
-    if (isEntryPass || isTokenPackage) {
+    if (isEntryPass || isTokenPackage || isCustomRequest) {
       if (typeof invoice?.uuid !== "string" || !invoice.uuid) return json({ error: "Invalid payment invoice" }, 502);
-      // Separate service client: never forward the customer's Authorization to receipt writes.
-      const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
-        auth: { autoRefreshToken: false, persistSession: false },
-      });
       const receipt = {
         payment_id: invoice.uuid.replace(/^INV-/i, ""), order_id: orderId,
         user_id: userId, amount_usd, currency: "USD",
       };
-      const { error } = isEntryPass
+      const { error } = isCustomRequest
+        ? await server.from("custom_request_payment_receipts").insert({
+            ...receipt, request_id: requestId, base_usd: requestPrice!.base_usd,
+          })
+        : isEntryPass
         ? await server.from("entry_pass_payment_receipts").insert({ ...receipt, method: "crypto" })
         : await server.from("token_payment_receipts").insert({ ...receipt, tokens });
       if (error) return json({ error: "Checkout could not be recorded; please retry" }, 500);

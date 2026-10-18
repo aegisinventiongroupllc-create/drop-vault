@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { confirmEntryPassInvoice, invoiceKey } from "../_shared/entryPassPayment.ts";
 import { confirmTokenInvoice } from "../_shared/tokenPayment.ts";
+import { confirmCustomRequestInvoice } from "../_shared/customRequestPayment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,6 +109,40 @@ Deno.serve(async (req) => {
         if (error) throw new Error("Could not grant verified entry pass");
       });
       return new Response(JSON.stringify({ ok: true, entry_pass: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (orderId?.startsWith("dttreq-")) {
+      const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const { data: receipt, error: receiptError } = await supabase.from("custom_request_payment_receipts")
+        .select("*").eq("payment_id", invoiceKey(invoiceId)).eq("order_id", orderId).maybeSingle();
+      if (receiptError || !receipt || !API_KEY) {
+        return new Response(JSON.stringify({ error: "Unknown request checkout" }), { status: 400 });
+      }
+      const marked = await confirmCustomRequestInvoice(receipt, async () => {
+        const response = await fetch("https://api.trybit.com/v2/invoice/merchant/info", {
+          method: "POST", headers: { Authorization: `Token ${API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ uuids: [receipt.payment_id] }),
+        });
+        if (!response.ok) throw new Error("Payment verification unavailable");
+        const body = await response.json();
+        if (body.status !== "success" || !Array.isArray(body.result)) throw new Error("Invalid verification response");
+        return body.result.find((item: { uuid?: string }) => invoiceKey(item.uuid) === receipt.payment_id);
+      }, async () => {
+        const { error } = await supabase.from("custom_request_payment_receipts")
+          .update({ verified_at: new Date().toISOString() }).eq("payment_id", receipt.payment_id);
+        if (error) throw new Error("Could not record verified request payment");
+      }, async () => {
+        const { data, error } = await supabase.rpc("mark_custom_request_paid", {
+          _request_id: receipt.request_id, _payment_id: receipt.payment_id,
+        });
+        if (error) throw new Error("Could not mark verified request paid");
+        return data === true;
+      });
+      return new Response(JSON.stringify({ ok: true, request_paid: marked }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
