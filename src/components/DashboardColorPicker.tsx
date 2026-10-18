@@ -6,11 +6,12 @@ import { getFogIntensity, setFogIntensity } from "@/lib/vipFog";
 import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
 import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, activeTheme, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import GalaxyReel from "@/components/GalaxyReel";
+import SkyGalleryPicker from "@/components/SkyGalleryPicker";
 import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
 import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
 import clusterImg from "@/assets/brb/stars-cluster.jpg";
 
-const STAR_THUMBS: Record<Exclude<StarStyle, "living">, string> = {
+const STAR_THUMBS: Record<"deepfield" | "milkyway" | "cluster", string> = {
   deepfield: deepFieldImg,
   milkyway: milkyWayImg,
   cluster: clusterImg,
@@ -133,7 +134,7 @@ const DashboardColorPicker = () => {
           <div>
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-              {STAR_STYLES.map((s) => {
+              {STAR_STYLES.filter((s) => s.id === "living" || s.id === "deepfield" || s.id === "milkyway" || s.id === "cluster").map((s) => {
                 const active = (theme.starStyle ?? DEFAULT_STAR_STYLE) === s.id;
                 return (
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
@@ -141,7 +142,7 @@ const DashboardColorPicker = () => {
                     {s.id === "living" ? (
                       <div className="flex h-10 w-full items-center justify-center bg-[#050510] text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
                     ) : (
-                      <img src={STAR_THUMBS[s.id]} alt="" className="h-10 w-full object-cover" loading="lazy" />
+                      <img src={STAR_THUMBS[s.id as keyof typeof STAR_THUMBS]} alt="" className="h-10 w-full object-cover" loading="lazy" />
                     )}
                     <span className="block px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">{s.label}</span>
                   </button>
@@ -150,6 +151,7 @@ const DashboardColorPicker = () => {
             </div>
           </div>
           <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
+          <SkyGalleryPicker />
           <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
