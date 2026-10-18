@@ -27,32 +27,27 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
   const [demandSent, setDemandSent] = useState(false);
   const [creators, setCreators] = useState<CreatorRow[]>([]);
 
-  // Load every public creator identity once; filtering happens on-device.
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config, profile_photo_path, tags, vault_side")
-        .eq("role", "creator")
-        .limit(500);
-      setCreators((data ?? []) as unknown as CreatorRow[]);
-    })();
-  }, [vault]);
-
-  const q = query.trim().toLowerCase();
-
-  // Search creators by handle, tag, or country
-  const creatorResults = q
-    ? creators.filter((c) => {
-        if (vault && c.vault_side !== vault) return false;
-        const name = (c.display_name ?? "").toLowerCase();
-        const tags = (c.tags ?? []).map((tag) => tag.toLowerCase());
-        const country = (COUNTRIES.find((x) => x.code === c.country)?.name ?? "").toLowerCase();
-        return name.includes(q) || tags.some((tag) => tag.includes(q)) || country.includes(q);
-      })
-    : [];
-
-  const noResults = q.length > 0 && creatorResults.length === 0;
+  const [offset,setOffset]=useState(0);
+  const [hasMore,setHasMore]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState("");
+  const q=query.trim().toLowerCase();
+  useEffect(()=>{setOffset(0);setCreators([]);},[q,vault]);
+  useEffect(()=>{
+    let cancelled=false;
+    if(!q){setCreators([]);setLoading(false);return;}
+    setLoading(true);
+    const timer=setTimeout(()=>{
+      const countries=COUNTRIES.filter(c=>c.name.toLowerCase().includes(q)||c.code.toLowerCase()===q).map(c=>c.code);
+      void supabase.rpc("search_creator_page",{_query:q,_vault:vault??null,_countries:countries,_offset:offset}).then(({data,error})=>{
+        if(cancelled)return;setLoading(false);setError(error?"Couldn’t load creators. Please try again.":"");
+        if(!error&&data){setHasMore(data.length>24);const rows=data.slice(0,24) as unknown as CreatorRow[];setCreators(previous=>offset===0?rows:[...previous,...rows.filter(r=>!previous.some(p=>p.user_id===r.user_id))]);}
+      });
+    },300);
+    return()=>{cancelled=true;clearTimeout(timer);};
+  },[q,vault,offset]);
+  const creatorResults=creators;
+  const noResults=q.length>0&&!loading&&!error&&creatorResults.length===0;
 
   const handleRequestDemand = async () => {
     if (!query.trim() || demandSent) return;
@@ -85,6 +80,8 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
       </div>
 
       <div className="px-4 mt-2 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
+        {loading && <p className="text-sm text-muted-foreground">Loading creators…</p>}
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {/* Creator results */}
         {creatorResults.map((creator) => (
           <div
@@ -111,6 +108,7 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
           </div>
         ))}
 
+        {hasMore && <Button variant="outline" disabled={loading} onClick={()=>setOffset(n=>n+24)}>More creators</Button>}
         {noResults && (
           <div className="text-center py-8 space-y-3">
             <Lightbulb className="w-8 h-8 text-gold mx-auto" />

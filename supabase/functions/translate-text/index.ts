@@ -6,6 +6,7 @@ const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const MAX_TEXTS = 80;
+const inProgress = new Map<string,Promise<string>>();
 const MAX_LEN = 600;
 
 async function aiTranslate(texts: string[], lang: string): Promise<string[]> {
@@ -26,6 +27,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const lang = String(body?.lang ?? "").toLowerCase();
+    if(!Array.isArray(body?.texts)||body.texts.length>MAX_TEXTS||body.texts.some((t:unknown)=>typeof t!=="string"||t.length>MAX_LEN))return json({error:"Invalid translation texts"},400);
     if (!/^[a-z]{2,3}(-[a-z0-9]{2,4})?$/.test(lang) || lang === "en") return json({ translations: {} });
     const texts: string[] = Array.from(
       new Set(
@@ -37,19 +39,33 @@ Deno.serve(async (req) => {
     ).slice(0, MAX_TEXTS) as string[];
     if (!texts.length) return json({ translations: {} });
 
-    const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const url=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!url||!key)return json({error:"Translation unavailable"},503);
+    const db = createClient(url,key);
     const out: Record<string, string> = {};
     const { data: cached } = await db.from("translation_cache").select("source, translated").eq("lang", lang).in("source", texts);
     for (const r of cached || []) out[r.source] = r.translated;
     const missing = texts.filter((t) => !(t in out));
     if (missing.length) {
-      const translated = await aiTranslate(missing, lang);
-      const rows = missing.map((s, i) => ({ lang, source: s, translated: translated[i] }));
-      rows.forEach((r) => (out[r.source] = r.translated));
-      await db.from("translation_cache").upsert(rows, { onConflict: "lang,source", ignoreDuplicates: true });
+      const fresh=missing.filter(text=>!inProgress.has(`${lang}:${text}`));
+      if(fresh.length){
+        const batch=aiTranslate(fresh,lang);
+        fresh.forEach((text,index)=>{
+          const promise=batch.then(rows=>rows[index]);
+          inProgress.set(`${lang}:${text}`,promise);
+          void promise.finally(()=>inProgress.delete(`${lang}:${text}`)).catch(()=>{});
+        });
+      }
+      const translated=await Promise.all(missing.map(text=>inProgress.get(`${lang}:${text}`)));
+      const rows=missing.map((source,index)=>({lang,source,translated:translated[index]??source}));
+      rows.forEach(row=>out[row.source]=row.translated);
+      const {error}=await db.from("translation_cache").upsert(rows,{onConflict:"lang,source",ignoreDuplicates:true});
+      if(error)console.error("Translation cache write failed",{code:error.code});
+
     }
     return json({ translations: out });
   } catch (e) {
-    return json({ translations: {}, error: String((e as Error).message) }, 200);
+    console.error("Translation request failed");
+    return json({ translations: {}, error: "Translation temporarily unavailable" }, 503);
   }
 });
