@@ -126,7 +126,7 @@ const DashboardColorPicker = () => {
           <div>
             <span className="text-xs font-bold text-foreground">Star backdrop style</span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-              {STAR_STYLES.filter((s) => s.id === "living" || s.id === "deepfield" || s.id === "milkyway" || s.id === "cluster").map((s) => {
+              {STAR_STYLES.map((s) => {
                 const active = (theme.starStyle ?? DEFAULT_STAR_STYLE) === s.id;
                 return (
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
@@ -134,7 +134,7 @@ const DashboardColorPicker = () => {
                     {s.id === "living" ? (
                       <div className="flex h-10 w-full items-center justify-center bg-[#050510] text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
                     ) : (
-                      <img src={STAR_THUMBS[s.id as keyof typeof STAR_THUMBS]} alt="" className="h-10 w-full object-cover" loading="lazy" />
+                      <img src={SKY_BACKDROPS[s.id]} alt="" className="h-10 w-full object-cover" loading="lazy" />
                     )}
                     <span className="block px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">{s.label}</span>
                   </button>
