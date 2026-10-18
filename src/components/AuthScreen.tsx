@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,6 +10,7 @@ import { logActivity } from "@/lib/activityLog";
 
 import { verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
+import MiniGlobe from "@/components/MiniGlobe";
 
 interface AuthScreenProps {
   onAdmin: () => void;
@@ -27,6 +28,17 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
+
+  // Pink globe on the sign-in page only; restore the default tone when leaving.
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.style.getPropertyValue("--globe-tone");
+    root.style.setProperty("--globe-tone", "#ff4da6");
+    return () => {
+      if (prev) root.style.setProperty("--globe-tone", prev);
+      else root.style.removeProperty("--globe-tone");
+    };
+  }, []);
 
   const validate = (): string | null => {
     const e = email.trim();
@@ -130,7 +142,9 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
       </header>
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
         <div className="mb-2 w-full">
-          <img src="/apple-touch-icon.png" alt="DTT" width={72} height={72} className="mx-auto mb-5 h-[72px] w-[72px] object-contain" />
+          <div className="mx-auto mb-5 flex justify-center" style={{ "--globe-tone": "#ff4da6" } as React.CSSProperties}>
+            <MiniGlobe size={96} lights backdrop={false} />
+          </div>
           <h1 className="font-display text-2xl font-bold text-foreground notranslate">
             <span className="block">DROPTHAT</span><span className="block text-primary">THING</span>
           </h1>
