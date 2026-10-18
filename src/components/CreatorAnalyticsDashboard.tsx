@@ -169,7 +169,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
   const liveStats = useCreatorStats();
   const welcomeBack = useCreatorWelcomeBack(authUserId, safetyAgreed);
-  const { items: mediaItems, refresh: refreshMedia, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
+  const { items: mediaItems, loading: mediaLoading, hasMore: moreMedia, loadMore: loadMoreMedia, error: mediaError, refresh: refreshMedia, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -969,18 +969,20 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
             return (
               <>
+                {mediaError && <p className="text-sm text-destructive">Couldn’t load your media. <Button variant="outline" onClick={()=>void refreshMedia()}>Try again</Button></p>}
                 <TeaserCarousel items={teasers} onRefresh={refreshMedia} onDelete={removeMediaItem} />
 
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Lock className="w-4 h-4 text-gold" />
-                    <h3 className="text-base font-semibold text-foreground">Your Full Videos ({vaults.length})</h3>
+                    <h3 className="text-base font-semibold text-foreground">Your Full Videos</h3>
                   </div>
                   <div className="space-y-2">
                     {vaults.length === 0
                       ? <p className="text-xs text-muted-foreground text-center py-4">No vault videos yet. Upload locked content above — fans pay Bit-Tokens to unlock.</p>
                       : vaults.map((m) => renderRow(m, "text-gold"))}
                   </div>
+                  {moreMedia && <Button variant="outline" disabled={mediaLoading} onClick={loadMoreMedia}>{mediaLoading ? "Loading…" : "More media"}</Button>}
                 </div>
               </>
             );

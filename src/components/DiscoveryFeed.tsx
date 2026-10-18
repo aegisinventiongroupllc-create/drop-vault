@@ -34,6 +34,7 @@ interface VideoItem {
   mediaType?: "photo" | "video";
   frame?: TeaserFrame;
   creatorId?: string;
+  storagePath?: string;
 }
 
 interface CommentRow { id: string; author_id: string; parent_id: string | null; body: string; created_at: string }
@@ -53,20 +54,21 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   const [following, setFollowing] = useState(false);
   const [viewCount, setViewCount] = useState(video.views ?? 0);
   const viewCounted = useRef(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [playbackUrl, setPlaybackUrl] = useState(video.videoUrl);
   useEffect(() => {
     // Count one view per card mount, only for real uploaded media.
-    if (viewCounted.current || !video.id || !viewerId) return;
+    if (viewCounted.current || !video.id || !viewerId || !isVisible) return;
     viewCounted.current = true;
     setViewCount((v) => v + 1);
     supabase.rpc("increment_media_view", { _media_id: video.id }).then(() => {});
-  }, [video.id, viewerId]);
+  }, [video.id, viewerId, isVisible]);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentAuthors, setCommentAuthors] = useState<Record<string, PublicIdentity>>({});
   const [replyTo, setReplyTo] = useState<CommentRow | null>(null);
   const isOwner = !!viewerId && viewerId === video.creatorId;
-  const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isRealTeaser = !!video.videoUrl;
@@ -76,6 +78,18 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   const [showBuy, setShowBuy] = useState(false);
   const gateFree = unlocked || isOwner;
   useEffect(() => { setUnlocked(initiallyUnlocked); }, [initiallyUnlocked]);
+
+  useEffect(() => {
+    if (!isVisible || !video.storagePath) return;
+    let cancelled = false;
+    const refresh = async () => {
+      const {data, error} = await supabase.storage.from("teasers").createSignedUrl(video.storagePath ?? "", 3600);
+      if (!cancelled) setPlaybackUrl(error ? undefined : data?.signedUrl);
+    };
+    void refresh();
+    const timer = setInterval(() => void refresh(), 50 * 60 * 1000);
+    return () => {cancelled=true;clearInterval(timer);};
+  }, [isVisible, video.storagePath]);
 
   const handleTimeUpdate = () => {
     const v = videoRef.current;
@@ -180,7 +194,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
       creator_id: video.creatorId,
       media_id: video.id,
       author_id: viewerId,
-      parent_id: isOwner ? replyTo!.id : null,
+      parent_id: isOwner ? replyTo?.id ?? null : null,
       body: body.slice(0, 1000),
     });
     if (error) { toast({ title: "Couldn't send", description: error.message, variant: "destructive" }); return; }
@@ -195,18 +209,18 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   return (
     <div ref={cardRef} className="relative w-full h-[calc(100vh-8rem)] snap-start flex-shrink-0">
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
-      {isRealTeaser && video.mediaType === "photo" && <img src={video.videoUrl} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />}
+      {isRealTeaser && video.mediaType === "photo" && <img loading="lazy" src={playbackUrl} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />}
       {isRealTeaser && video.mediaType !== "photo" && (
         <video
           ref={videoRef}
-          src={video.videoUrl}
+          src={isVisible ? playbackUrl : undefined}
           className="absolute inset-0 w-full h-full object-cover"
           loop={gateFree}
           playsInline
           onTimeUpdate={handleTimeUpdate}
           onEnded={() => { if (!gateFree) { setGateOpen(true); } }}
           muted={muted}
-          preload="metadata"
+          preload="none"
         />
       )}
       {isRealTeaser && <div aria-hidden="true" className={`absolute inset-0 pointer-events-none teaser-viewport teaser-frame-${video.frame || "none"}`}><div className="teaser-decoration absolute inset-0" /><img src={dttCoin} alt="" className="absolute top-4 left-1/2 -translate-x-1/2 h-10 w-10 object-contain opacity-20" /></div>}
@@ -351,6 +365,12 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
 });
 const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
+  const [pageOffset, setPageOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [vault,countryFilter,searchQuery]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
   const [myUnlocks, setMyUnlocks] = useState<Set<string>>(new Set());
@@ -387,8 +407,12 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: media } = await supabase.rpc("get_active_teasers").limit(500);
-      if (!media || cancelled) return;
+      setLoading(true);setLoadError("");
+      const { data: media, error: mediaError } = await supabase.rpc("get_teaser_page", {_vault:vault,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset});
+      if (cancelled) return;
+      if (mediaError || !media) {setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);return;}
+      setHasMore(media.length === 24);
+      if (!media.length) {setLoading(false);return;}
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
@@ -409,9 +433,10 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         };
       });
       // Teaser files are private: only pass holders, creators and admins get short-lived links.
-      const { data: signed } = media.length
+      const { data: signed, error: signingError } = media.length
         ? await supabase.storage.from("teasers").createSignedUrls(media.map((m) => m.storage_path), 60 * 60)
-        : { data: [] as { path: string | null; signedUrl: string }[] };
+        : { data: [] as { path: string | null; signedUrl: string }[], error:null };
+      if (signingError && !cancelled) setLoadError("Some teasers couldn’t load. Please try again.");
       const urlMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => { if (s.path && s.signedUrl) urlMap[s.path] = s.signedUrl; });
       const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path]).map((m) => {
@@ -435,20 +460,13 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           country: prof?.country || "GLOBAL",
           tags: prof?.tags ?? [],
           videoUrl: urlMap[m.storage_path],
+          storagePath: m.storage_path,
         };
       });
-      // Most-followed creators first (top 20), rest shuffled for discovery
-      const sorted = [...items].sort((a, b) => b.likes - a.likes);
-      const top = sorted.slice(0, 20);
-      const rest = sorted.slice(20);
-      for (let i = rest.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rest[i], rest[j]] = [rest[j], rest[i]];
-      }
-      if (!cancelled) setLiveVideos([...top, ...rest]);
-    })();
+      if (!cancelled) {setLiveVideos(previous => pageOffset === 0 ? items : [...previous, ...items.filter(item => !previous.some(p => p.id === item.id))]);setLoading(false);}
+    })().catch(() => {if(!cancelled){setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);}});
     return () => { cancelled = true; };
-  }, [vault]);
+  }, [vault,countryFilter,searchQuery,pageOffset,retry]);
 
   const allVideos = [...liveVideos, ...MOCK_VIDEOS];
   const filteredVideos = allVideos.filter(v => {
@@ -487,12 +505,13 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       </div>
 
       <div className={`h-[100dvh] snap-y snap-mandatory overflow-y-auto bottom-nav-scroll-area ${hasVaultToggle ? "pt-[9rem]" : "pt-[7rem]"}`}>
+        {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
         {filteredVideos.length > 0 ? (
           filteredVideos.map((video) => (
             <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} initiallyLiked={!!video.creatorId && myHearts.has(video.creatorId)} viewerId={viewerId} initiallyUnlocked={!!video.creatorId && myUnlocks.has(video.creatorId)} onUnlocked={addUnlock} />
           ))
         ) : (
-          countryFilter && countryFilter !== "GLOBAL" ? (
+          loading ? <p className="p-12 text-center text-muted-foreground">Loading teasers…</p> : countryFilter && countryFilter !== "GLOBAL" ? (
             <GhostCountryMessage countryCode={countryFilter} />
           ) : (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 gap-3">
@@ -501,6 +520,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
             </div>
           )
         )}
+        {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}
         <LegalFooter />
       </div>
     </div>

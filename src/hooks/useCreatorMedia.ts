@@ -18,25 +18,19 @@ export interface CreatorMediaItem {
 export function useCreatorMedia(creatorId: string | null) {
   const [items, setItems] = useState<CreatorMediaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [limit, setLimit] = useState(24);
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!creatorId) return;
     setLoading(true);
-    const rows: CreatorMediaItem[] = [];
-    for (let offset = 0; ; offset += 500) {
-    const { data, error } = await supabase
-      .from("creator_media")
-      .select("*")
-      .eq("creator_id", creatorId)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + 499);
-    if (error || !data) break;
-    rows.push(...(data as CreatorMediaItem[]));
-    if (data.length < 500) break;
-    }
-    setItems(rows);
+    const {data, error: readError} = await supabase.from("creator_media").select("*").eq("creator_id",creatorId).order("created_at",{ascending:false}).order("id",{ascending:false}).range(0,limit);
+    setError(readError?.message ?? null);
+    if (!readError && data) {setItems(data.slice(0,limit) as CreatorMediaItem[]);setHasMore(data.length>limit);}
     setLoading(false);
-  }, [creatorId]);
+  }, [creatorId,limit]);
+  useEffect(() => {setItems([]);setLimit(24);},[creatorId]);
 
   useEffect(() => {
     refresh();
@@ -84,12 +78,13 @@ export function useCreatorMedia(creatorId: string | null) {
   };
 
   const deleteMedia = async (id: string, bucket: "teasers" | "vault", path: string) => {
-    await supabase.storage.from(bucket).remove([path]);
+    const {error: removeError} = await supabase.storage.from(bucket).remove([path]);
+    if (removeError) return {error:removeError.message};
     const { error } = await supabase.from("creator_media").delete().eq("id", id);
     if (error) return { error: error.message };
     await refresh();
     return { success: true };
   };
 
-  return { items, loading, refresh, insertMedia, renameMedia, deleteMedia };
+  return { items, loading, error, hasMore, loadMore:()=>setLimit(n=>n+24), refresh, insertMedia, renameMedia, deleteMedia };
 }
