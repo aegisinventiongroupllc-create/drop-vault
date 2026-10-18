@@ -6,7 +6,7 @@
 
 - Monthly revenue: account-scoped completed rows, UTC months, original splits; aggregate server-side; paginate.
 
-- Welcome-back summaries read only account-scoped completed ledger rows; admin samples never write it.
+- Welcome-back summaries read account-scoped completed ledger rows only; admin samples never write them.
 
 - Auth callbacks go to `https://dropthatthing.com`; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: retain secure Google sign-in.
 - Profiles are owner/admin-only; public_profiles is a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
@@ -30,7 +30,7 @@
 - Resolve customer gender visibility from the persisted explicit preference, including search and library, rather than inferring Both from an absent active vault.
 - Share vault token artwork and teaser viewport frame styles across studio and feed, and persist language countdown start across reloads so transitions remain continuous.
 
-- Dashboard chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
+- Chats reuse TopFansSection; inbox reads account-scoped fan_messages and public_profiles for privacy.
 
 - Personal globe/galaxy colors use validated ui_theme and shared renderers, not platform settings; photo tints use color blending to preserve star luminance.
 - Requests turn paid only via service-only mark_custom_request_paid with a verified receipt at the agreed price; a trigger blocks other paid/completed moves. Why: agreement never unlocks delivery.
