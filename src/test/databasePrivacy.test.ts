@@ -7,10 +7,10 @@ const database = connection ? postgres(connection, { max: 1 }) : null;
 
 // Run against the live catalog only when a secure sandbox connection is available.
 describe.skipIf(!database)("live database privacy rules", () => {
-  let policies: { tablename: string; policyname: string; cmd: string; roles: string[]; qual: string | null; with_check: string | null }[] = [];
+  let policies: { tablename: string; policyname: string; permissive: string; cmd: string; roles: string[]; qual: string | null; with_check: string | null }[] = [];
   beforeAll(async () => {
     if (!database) throw new Error("Secure database connection required");
-    policies = await database`SELECT tablename, policyname, cmd, roles, qual, with_check FROM pg_policies WHERE schemaname IN ('public', 'storage')`;
+    policies = await database`SELECT tablename, policyname, permissive, cmd, roles, qual, with_check FROM pg_policies WHERE schemaname IN ('public', 'storage')`;
   });
   afterAll(async () => { await database?.end(); });
 
@@ -42,7 +42,7 @@ describe.skipIf(!database)("live database privacy rules", () => {
   });
 
   it.each(["INSERT", "UPDATE", "DELETE"])("requires both file-owner and folder-owner checks for photo %s", cmd => {
-    const writes = policies.filter(p => p.tablename === "objects" && p.cmd === cmd && `${p.qual} ${p.with_check}`.includes("creator-profile-photos"));
+    const writes = policies.filter(p => p.tablename === "objects" && p.permissive === "PERMISSIVE" && p.cmd === cmd && `${p.qual} ${p.with_check}`.includes("creator-profile-photos"));
     expect(writes).toHaveLength(1);
     expect(writes[0].roles).toEqual(["authenticated"]);
     const clauses = cmd === "UPDATE" ? [writes[0].qual, writes[0].with_check] : [cmd === "INSERT" ? writes[0].with_check : writes[0].qual];
