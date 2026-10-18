@@ -2,9 +2,9 @@
 - Crypto pass/token credits require server-only authorization and matching verified checkout receipts; reconcile merchant invoices and credit idempotently. Why: unpaid calls and retries cannot create extra access or tokens.
 - Admin finance drilldowns use the server-verified guard and stable paginated allowlisted queries matching overview filters; flag accepted requests as unconfirmed. Why: protect records without changing totals or balances.
 - Retain custom-request deliveries in a separate private bucket; creator cleanup archives the workspace entry, while server-managed payment/delivery fields and customer-expiring access preserve the retained copy. Why: creator deletion must never invalidate customer delivery, and agreement is not proof of payment.
-- Renew delivered-request access atomically from the account token balance with a completed transaction and original creator split; only expired access can renew. Why: access, charges, and earnings must remain consistent under retries.
+- Renew request access and subscriptions atomically: lock balances/access, preserve ledger splits, and reject duplicate cycles. Subscription renewal is service-only and checks expected expiry. Why: retries must not double-charge or leave partial earnings.
 
-- Monthly revenue: account-scoped completed rows, UTC months, original splits; aggregate server-side; paginate.
+- Revenue and dashboard metrics aggregate complete account-scoped earnings server-side in UTC; paginate history and filter/coalesce realtime. Why: prevent truncated earnings and unrelated refresh storms.
 
 - Welcome-back summaries read account-scoped completed ledger rows only; admin samples never write them.
 
@@ -13,7 +13,7 @@
 - Use ProfileAvatar for avatar_config.
 - Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
 - Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
-- Store creator public photos in an account-owned private gallery; show the selected real photo on creator discovery surfaces while private interactions continue using the generated emoji.
+- Creator real photos stay in owner-owned private galleries; discovery shows the selected photo, private interactions the emoji. Why: separate public and private identity.
 - Capture bounded-resolution selfies in-page; release tracks on capture/close and skip landmark scanning. Why: avoid phone camera handoffs and heavy WASM.
 - Prebundle color pickers with deduped React to avoid mixed hook chunks.
 - Process new creator media through the shared permanent watermark encoder before storage uploads, including the public photo gallery; fail closed on encoding errors and exclude private verification documents and customer selfies, because display overlays do not brand downloaded files.
