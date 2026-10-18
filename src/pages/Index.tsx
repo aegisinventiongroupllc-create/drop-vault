@@ -413,7 +413,7 @@ const Index = () => {
     if (showLegal) return <LegalPages onBack={() => setShowLegal(false)} />;
     if (showAdmin) return <MasterAdminPanel onBack={() => setShowAdmin(false)} />;
     return (
-      <CreatorAnalyticsDashboard onFeed={() => setCreatorFeed(true)} onBack={async () => {
+      <CreatorAnalyticsDashboard onFeed={() => setCreatorFeed(true)} onSignInPreview={() => setAuthPreview(true)} onBack={async () => {
         await supabase.auth.signOut();
         localStorage.removeItem(STORAGE_KEY);
         setRole(null);

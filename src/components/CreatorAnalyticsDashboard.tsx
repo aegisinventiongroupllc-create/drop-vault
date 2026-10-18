@@ -49,7 +49,7 @@ const FOLLOWERS_LIST: string[] = [];
 
 type Section = "overview" | "verification" | "requests" | "media" | "messages";
 
-const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void }) => {
+const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
   const ct = useCreatorText();
   const navigate = useNavigate();
   const [rewardPreview, setRewardPreview] = useState<{ usd: number; tokens: number } | null>(null);
@@ -502,7 +502,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed }: { o
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full p-0" aria-label="DTT celebration preview" title="Triple-tap to preview coin rain" onClick={previewCoinRain}>
               <ProfileAvatar config={DEFAULT_AVATAR} label="DTT" className="h-10 w-10 border-primary/50" />
             </Button>
-          ) : <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />}
+          ) : (
+            <button onClick={handleSignInTap} className="cursor-pointer select-none rounded-full" aria-label="DTT">
+              <ProfileAvatar config={profileAvatar} creatorPhotoPath={profilePhotoPath} label={profileUsername || "Creator"} className="h-10 w-10 border-primary/50" />
+            </button>
+          )}
           <h1 className="text-lg font-bold text-foreground tracking-wider font-display">DASHBOARD</h1>
         </div>
         <div className="flex items-center gap-2">
