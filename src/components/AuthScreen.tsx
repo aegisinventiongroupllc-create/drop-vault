@@ -130,7 +130,7 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
       </header>
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
         <div className="mb-2 w-full">
-          <img src="/apple-touch-icon.png" alt="DTT" width={72} height={72} className="mx-auto mb-5 h-[72px] w-[72px] object-contain" />
+          <img src={pinkGlobe} alt="DTT globe" width={96} height={96} className="mx-auto mb-5 h-24 w-24 object-contain" style={{ filter: "drop-shadow(0 0 14px hsl(var(--primary) / .6))" }} />
           <h1 className="font-display text-2xl font-bold text-foreground notranslate">
             <span className="block">DROPTHAT</span><span className="block text-primary">THING</span>
           </h1>
