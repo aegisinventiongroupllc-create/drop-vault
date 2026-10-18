@@ -1494,6 +1494,31 @@ export type Database = {
         Args: { _expected_expiry: string; _subscription_id: string }
         Returns: string
       }
+      search_creator_page: {
+        Args: {
+          _countries?: string[]
+          _offset?: number
+          _query: string
+          _vault?: string
+        }
+        Returns: {
+          avatar_config: Json | null
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          profile_photo_path: string | null
+          role: string | null
+          tags: string[] | null
+          user_id: string | null
+          vault_side: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {
