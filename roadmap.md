@@ -1,7 +1,8 @@
 # Roadmap
 
 ## Current request
-- [ ] Complete backup/recovery and large-video readiness requested 18 October: prepare owner export steps and provider approval requests; isolated restore and connection require an export, separate destination and approved provider account. Do not overwrite the live database.
+- [x] Prepare documented Cloud export/recovery steps and copy-ready video/backup provider inquiries; research official provider docs. Instructions delivered in Files; no export, media transfer or provider contact performed.
+- [ ] Complete backup/recovery and large-video readiness requested 18 October: blocked by owner-triggered database export/downloads, newest snapshot evidence, separate recovery destination and written vendor acceptance/account setup. No isolated restore, production overwrite or provider connection performed.
 - [x] Reliability remediation: service-only atomic renewal deployed; 9 isolated authorization, split, expiry, retry and rollback tests pass. Live paid renewal/concurrent-worker stress awaits an isolated populated environment.
 - [x] Reliability remediation: 24-item media/discovery/search pages, visible-only video loading, authorized playback refresh, resumable branded uploads, registration cleanup/error handling. Signed-in Analytics/Media/Feed verified; live interrupted uploads and populated paid vault remain blocked by eligible Yoti account/payment.
 - [x] Reliability remediation: complete account-scoped UTC dashboard metrics, scoped/coalesced realtime, bounded translation cache/retries and per-service translation miss coalescing. Cross-instance coordination is a separate growth gate.

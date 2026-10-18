@@ -19,6 +19,7 @@ For any later in-place restore: export first to preserve the current state; all 
 
 ## Video and storage approval gate
 Ask Cloudflare Stream/R2, Mux and/or Backblaze B2 for written permission for the exact DTT adult marketplace model. None is confirmed approved by this assessment. Approval for streaming does not automatically approve backup storage. Keep a separate original-file copy when a streaming service cannot export the exact input.
+18 October follow-up: official Mux docs describe signed playback and image-overlay watermarks; Backblaze B2 is a backup candidate, not adaptive playback. Prioritize written inquiries through https://www.mux.com/support and https://www.backblaze.com/contact-sales/cloud-storage. Neither vendor's eligibility for DTT is established. Cloudflare Stream does not export the exact uploaded original. Bunny's adult content tag is not proof of policy acceptance. Owner-facing export instructions and a provider request are prepared in Files; no requests have been sent.
 Do not install credentials or move existing media until destination, price, access rules, watermark behavior and content-policy approval are confirmed.
 
 ## Growth test gate
