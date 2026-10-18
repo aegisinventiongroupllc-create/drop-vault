@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import TopFansSection from "@/components/TopFansSection";
+import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import CreatorFanInsights from "@/components/CreatorFanInsights";
 import { useNavigate } from "react-router-dom";
 import {
@@ -485,7 +486,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   );
 
   return (
-    <div className="mobile-scroll-shell">
+    <div className="mobile-scroll-shell relative isolate">
+      {!adminView && <PersonalSkyBackdrop />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
         setActiveSection("overview");
