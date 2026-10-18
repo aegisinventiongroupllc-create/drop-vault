@@ -36,7 +36,7 @@ const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, back
     <span className="relative inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
       {backdrop && size >= 100 && <GalaxyReel className="rounded-full" />}
       <Canvas camera={{ position: [0, 0, 3.2], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-        <SpinningGlobe speed={speed} lights={lights} size={size} style={style} />
+        <SpinningGlobe speed={speed} lights={lights} size={size} style={style} dotScale={dotScale} glintBoost={glintBoost} />
         <Atmosphere />
       </Canvas>
     </span>
