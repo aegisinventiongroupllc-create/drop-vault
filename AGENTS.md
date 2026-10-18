@@ -23,7 +23,7 @@
 - Creator uploads require owner/creator authorization, reviewed approval and latest server-confirmed live Yoti adult evidence via restrictive storage/record policies and request helper; exclude IDs/avatars. Yoti signs requests and records environment server-side. Why: prevent verification bypass.
 
 - Chargeback lockouts are applied only by the server-side CCBill webhook via handle_chargeback; bans live in account_bans (not profiles) so users cannot clear them, and admins lift them with admin_lift_ban. Why: user-editable rows must never control bans.
-- Translate UI at runtime with the global AutoTranslator (visitor language → translate-text function, cached in translation_cache and locally); mark owner-only or code-like areas notranslate. Why: hand-written locale files can't cover every language worldwide.
+- Translate UI with global AutoTranslator (visitor language → translate-text, cached in translation_cache and locally); mark owner-only/code areas notranslate. Why: static locales cannot cover all languages.
 - Publish heart totals through a trigger-maintained aggregate table, never public fan rows; subscribe social surfaces and creator analytics to totals so counts update without revealing identities.
 - Keep teaser frames and activation windows on account-owned media; select one active item atomically through an owner-validated function, fall back to latest after expiry, and preserve permanent upload watermarking.
 - Capture request country server-side from the requesting account at creation and preserve it on updates; rank scoped request groups without exposing private profile fields.
