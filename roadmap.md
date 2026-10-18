@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Enlarge sign-in globe; add six sky-only reference choices, independent Be Right Back layout/tone preview, and optional personal dashboard backdrop; verify choices and isolation.
 - [x] Retest Google sign-in on published dropthatthing.com: Google now accepts https://dropthatthing.com/~oauth/callback and shows "Sign in to continue to dropthatthing.com" with no Lovable branding or redirect_uri_mismatch. Verified live in a fresh signed-out browser; no Google account credentials entered.
 - [x] Polish DTT sign-in with gold logo, black/pink design, labeled inputs and shared controls; desktop/mobile views and controls verified, 15 tests pass, build OK. Google callback uses public DTT domain.
 - [ ] Verify existing-account Google chooser and completed session return: owner must finish Google sign-in on dropthatthing.com in their own browser. The public signed-out Google screen is DTT-branded and accepts the exact callback; completed Google authentication is not available in the test browser.
