@@ -20,7 +20,7 @@
 
 - Card checkout runs through CCBill FlexForms built server-side with a salted digest; the unsigned webhook credits only from CCBill IP ranges, re-checks price against the server catalog, and credits idempotently per transaction id. The card button stays hidden until all CCBill secrets exist.
 
-- Creator age checks use Yoti's hosted Age Verification started and resolved server-side; results are stored per account in yoti_age_checks (owner read-only) and requests are signed server-side with the Yoti key stored only in backend secrets.
+- Creator uploads require owner/creator authorization, reviewed approval and latest server-confirmed live Yoti adult evidence via restrictive storage/record policies and request helper; exclude IDs/avatars. Yoti signs requests and records environment server-side. Why: prevent verification bypass.
 
 - Chargeback lockouts are applied only by the server-side CCBill webhook via handle_chargeback; bans live in account_bans (not profiles) so users cannot clear them, and admins lift them with admin_lift_ban. Why: user-editable rows must never control bans.
 - Translate UI at runtime with the global AutoTranslator (visitor language → translate-text function, cached in translation_cache and locally); mark owner-only or code-like areas notranslate. Why: hand-written locale files can't cover every language worldwide.

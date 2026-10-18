@@ -15,7 +15,7 @@ const normalizePem = (raw: string) => {
   const m = s.match(/-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/);
   if (!m) return s;
   const body = m[2].replace(/\s+/g, "");
-  return `-----BEGIN ${m[1]}-----\n${body.match(/.{1,64}/g)!.join("\n")}\n-----END ${m[1]}-----\n`;
+  return `-----BEGIN ${m[1]}-----\n${(body.match(/.{1,64}/g) ?? []).join("\n")}\n-----END ${m[1]}-----\n`;
 };
 const pem = normalizePem(Deno.env.get("YOTI_PRIVATE_KEY") || Deno.env.get("YOTI_PEM_KEY") || "");
 const sandbox = (Deno.env.get("YOTI_ENV") ?? "sandbox") !== "live";
@@ -49,12 +49,16 @@ Deno.serve(async (req) => {
   try {
     if (!sdkId || !pem) return json({ error: "Age check is not set up yet." }, 503);
     const authHeader = req.headers.get("Authorization") ?? "";
-    const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const url = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serverKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !anonKey || !serverKey) return json({ error: "Age check is not set up yet." }, 503);
+    const userClient = createClient(url, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: u } = await userClient.auth.getUser(authHeader.replace("Bearer ", ""));
     if (!u?.user) return json({ error: "Please sign in again." }, 401);
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const admin = createClient(url, serverKey);
 
     const body = await req.json().catch(() => ({}));
     const action = body?.action;
@@ -79,33 +83,41 @@ Deno.serve(async (req) => {
         console.error("yoti start failed", r.status, d);
         return json({ error: "Could not start the age check." }, 502);
       }
-      await admin.from("yoti_age_checks").insert({ user_id: u.user.id, session_id: d.session_id });
+      const { error } = await admin.from("yoti_age_checks").insert({ user_id: u.user.id, session_id: d.session_id, environment: sandbox ? "sandbox" : "live" });
+      if (error) return json({ error: "Could not record the age check." }, 500);
       return json({ url: `${BASE}/web/index.html?sessionID=${encodeURIComponent(d.session_id)}&sessionToken=${encodeURIComponent(d.client_session_token)}` });
     }
 
     if (action === "result") {
-      const { data: row } = await admin.from("yoti_age_checks").select("session_id, status")
-        .eq("user_id", u.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data: row, error: lookupError } = await admin.from("yoti_age_checks").select("session_id, status, environment, server_verified_at")
+        .eq("user_id", u.user.id).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
+      if (lookupError) return json({ error: "Could not retrieve the age check." }, 500);
       if (!row) return json({ status: "none" });
-      if (row.status === "passed") return json({ status: "passed" });
+      const environment = sandbox ? "sandbox" : "live";
+      if (row.environment !== environment) return json({ status: "none", error: "Start a new age check." });
+      if (row.status === "passed" && row.server_verified_at) return json({ status: "passed" });
 
       const r = await yoti("GET", `/sessions/${encodeURIComponent(row.session_id)}`);
+      if (!r.ok) return json({ error: "Could not confirm the age check." }, 502);
       const s = r.data as any;
       let status = "pending";
       if (s?.state === "EXPIRED") status = "failed";
       if (s?.state === "COMPLETED") {
         const checks: any[] = s.checks ?? [];
-        const approved = checks.length > 0 && checks.every((c) => c?.report?.recommendation?.value === "APPROVE");
+        const required = ["ID_DOCUMENT_AUTHENTICITY", "LIVENESS", "ID_DOCUMENT_FACE_MATCH"];
+        const approved = required.every(type => checks.some(c => c.type === type && c?.report?.recommendation?.value === "APPROVE"))
+          && checks.every(c => c?.report?.recommendation?.value === "APPROVE");
         let adult = false;
         const mediaId = s?.resources?.id_documents?.[0]?.document_fields?.media?.id;
         if (mediaId) {
           const m = await yoti("GET", `/sessions/${encodeURIComponent(row.session_id)}/media/${encodeURIComponent(mediaId)}`, undefined, true);
-          try { adult = ageFrom(JSON.parse(String(m.data))?.date_of_birth ?? "") >= 18; } catch { adult = false; }
+          try { adult = m.ok && ageFrom(JSON.parse(String(m.data))?.date_of_birth ?? "") >= 18; } catch { adult = false; }
         }
         status = approved && adult ? "passed" : "failed";
       }
-      await admin.from("yoti_age_checks").update({ status, method: "doc_scan", updated_at: new Date().toISOString() })
-        .eq("session_id", row.session_id);
+      const { error: updateError } = await admin.from("yoti_age_checks").update({ status, method: "doc_scan", server_verified_at: status === "passed" ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+        .eq("session_id", row.session_id).eq("user_id", u.user.id);
+      if (updateError) return json({ error: "Could not record the age result." }, 500);
       return json({ status });
     }
 
