@@ -94,6 +94,7 @@ const vert = `
   attribute float aSize;
   uniform float uTime;
   uniform float uScale;
+  uniform float uGlint;
   varying float vGlow;
   varying float vFlash;
   varying float vPhase;
@@ -110,7 +111,7 @@ const vert = `
     vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
     vec3 wn = normalize(mat3(modelMatrix) * position);
     vGlow *= smoothstep(0.0, 0.3, dot(wn, normalize(cameraPosition - wp)));
-    gl_PointSize = aSize * uScale * (1.0 + tw * 0.5 + f * 2.2) / -mv.z;
+    gl_PointSize = aSize * uScale * (1.0 + tw * 0.5 + f * 2.2 * uGlint) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -122,6 +123,7 @@ const frag = `
   uniform float uNeon;
   uniform float uTint;
   uniform vec3 uTone;
+  uniform float uGlint;
   vec3 neonColor(float h) {
     vec3 p = abs(fract(vec3(h) + vec3(0.0, 0.6667, 0.3333)) * 6.0 - 3.0);
     return mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), 0.8);
@@ -136,7 +138,7 @@ const frag = `
     float rays = exp(-q.x * 70.0) * exp(-q.y * 5.0) + exp(-q.y * 70.0) * exp(-q.x * 5.0);
     vec2 r2 = abs(vec2(p.x + p.y, p.x - p.y)) * 0.7071;
     float diag = (exp(-r2.x * 90.0) * exp(-r2.y * 9.0) + exp(-r2.y * 90.0) * exp(-r2.x * 9.0)) * 0.45;
-    float spark = (rays + diag) * (0.25 + vFlash * 1.6);
+    float spark = (rays + diag) * (0.25 + vFlash * 1.6 * uGlint);
     vec3 col = mix(vec3(1.0, 0.85, 0.55), vec3(0.95, 0.98, 1.0), clamp(core + vFlash, 0.0, 1.0));
     col = mix(col, mix(uTone, vec3(1.0), core * 0.6 + vFlash * 0.35), uTint);
     col = mix(col, mix(neonColor(vPhase * 0.159 + uTime * 0.055), vec3(1.0), core * 0.5), uNeon);
@@ -144,7 +146,7 @@ const frag = `
   }
 `;
 
-const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryLightSpec[]; density?: number; scale?: number }) => {
+const CityLights = ({ countries, density = 1, scale = 1, dotScale = 1, glintBoost = 1 }: { countries: CountryLightSpec[]; density?: number; scale?: number; dotScale?: number; glintBoost?: number }) => {
   const { tone, neon, reduced } = usePersonalGlobe();
   const tint = useMemo(() => new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim()), [tone]);
   const mat = useRef<THREE.ShaderMaterial>(null);
@@ -184,7 +186,7 @@ const CityLights = ({ countries, density = 1, scale = 1 }: { countries: CountryL
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dpr }, uNeon: { value: neon ? 1 : 0 }, uTint: { value: tone ? 1 : 0 }, uTone: { value: tint } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dotScale * dpr }, uGlint: { value: glintBoost }, uNeon: { value: neon ? 1 : 0 }, uTint: { value: tone ? 1 : 0 }, uTone: { value: tint } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
