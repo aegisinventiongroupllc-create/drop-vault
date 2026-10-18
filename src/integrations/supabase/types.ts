@@ -1430,6 +1430,34 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_teaser_page: {
+        Args: {
+          _country?: string
+          _offset?: number
+          _query?: string
+          _vault: string
+        }
+        Returns: {
+          active_from: string | null
+          active_until: string | null
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          media_type: string
+          storage_path: string
+          teaser_frame: string
+          title: string
+          updated_at: string
+          views: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "creator_media"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_top_fans: {
         Args: { _creator_id: string }
         Returns: {
