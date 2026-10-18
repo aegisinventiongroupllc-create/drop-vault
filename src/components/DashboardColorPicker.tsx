@@ -7,15 +7,7 @@ import { setVipGlow, useVipGlow } from "@/components/VipBackdrop";
 import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, activeTheme, loadTheme, previewTheme, saveTheme, saveThemeToAccount, type StarStyle, type ThemeKey, type UserTheme } from "@/lib/userTheme";
 import GalaxyReel from "@/components/GalaxyReel";
 import SkyGalleryPicker from "@/components/SkyGalleryPicker";
-import deepFieldImg from "@/assets/brb/stars-deep-field.jpg";
-import milkyWayImg from "@/assets/brb/stars-milky-way.jpg";
-import clusterImg from "@/assets/brb/stars-cluster.jpg";
-
-const STAR_THUMBS: Record<"deepfield" | "milkyway" | "cluster", string> = {
-  deepfield: deepFieldImg,
-  milkyway: milkyWayImg,
-  cluster: clusterImg,
-};
+import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
