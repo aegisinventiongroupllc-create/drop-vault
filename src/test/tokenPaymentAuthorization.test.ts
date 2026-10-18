@@ -19,6 +19,7 @@ describe.skipIf(!db)("token payment database authorization", () => {
     const rollback = new Error("rollback isolated test");
     const result = await db.begin(async sql => {
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {
+      await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`);
       await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
     }
     const rows = await sql`SELECT pg_get_functiondef('public.credit_tokens(uuid,text,integer,numeric)'::regprocedure) AS definition`;
