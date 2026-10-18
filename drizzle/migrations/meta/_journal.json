@@ -337,6 +337,13 @@
       "when": 1792227869440,
       "tag": "0047_harden_personal_data_and_creator_photo_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1792285670310,
+      "tag": "0048_secure_entry_pass_verified_payments",
+      "breakpoints": true
     }
   ]
 }

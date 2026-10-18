@@ -31,6 +31,7 @@ export function useEntryPass(enabled: boolean): EntryPassState {
         .from("entry_passes")
         .select("expires_at")
         .eq("user_id", uid)
+        .eq("status", "active")
         .gt("expires_at", new Date().toISOString())
         .order("expires_at", { ascending: false })
         .limit(1);

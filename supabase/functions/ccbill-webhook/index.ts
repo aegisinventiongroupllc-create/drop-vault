@@ -73,10 +73,16 @@ Deno.serve(async (req) => {
   // Vault Entry Pass sales: $20 flat, no tokens.
   if (field("dtt_pkg") === "entry_pass") {
     if (!/^[0-9a-f-]{36}$/i.test(userId) || !transactionId) return ok({ error: "invalid sale" }, 400);
-    if (Math.abs(billed - 20.00) > 0.01) {
+    if (!Number.isFinite(billed) || billed !== 20) {
       console.error("ccbill pass amount mismatch", { transactionId, billed });
       return ok({ error: "amount mismatch" }, 400);
     }
+    const { error: receiptError } = await supabase.from("entry_pass_payment_receipts").upsert({
+      payment_id: `ccbill-${transactionId}`, order_id: `ccbill-${transactionId}`,
+      user_id: userId, amount_usd: billed, currency: "USD", method: "card",
+      verified_at: new Date().toISOString(),
+    }, { onConflict: "payment_id", ignoreDuplicates: true });
+    if (receiptError) return ok({ error: "payment receipt failed" }, 500);
     const { error } = await supabase.rpc("credit_entry_pass", {
       _user_id: userId,
       _payment_id: `ccbill-${transactionId}`,

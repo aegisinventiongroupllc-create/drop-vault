@@ -574,6 +574,39 @@ export type Database = {
         }
         Relationships: []
       }
+      entry_pass_payment_receipts: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          currency: string
+          method: string
+          order_id: string
+          payment_id: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          currency?: string
+          method: string
+          order_id: string
+          payment_id: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          currency?: string
+          method?: string
+          order_id?: string
+          payment_id?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       entry_passes: {
         Row: {
           amount_usd: number

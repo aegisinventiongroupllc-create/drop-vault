@@ -1,11 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { confirmEntryPassInvoice, invoiceKey } from "../_shared/entryPassPayment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "*",
 };
 
-const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY")!;
+const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY") ?? "";
+const API_KEY = (Deno.env.get("CRYPTOCLOUD_API_KEY") ?? "").trim().replace(/^Token\s+/i, "");
 
 // Server-side price catalog (must mirror cryptocloud-create-invoice)
 const MAX_TOKENS = 501;
@@ -53,6 +55,7 @@ async function verifyJwtHS256(token: string, secret: string): Promise<any | null
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
   try {
     // CryptoCloud sends application/x-www-form-urlencoded
@@ -65,10 +68,8 @@ Deno.serve(async (req) => {
       for (const [k, v] of form.entries()) payload[k] = String(v);
     }
 
-    console.log("CryptoCloud postback", payload);
-
     const token = payload.token;
-    if (!token) {
+    if (!token || !SECRET) {
       return new Response(JSON.stringify({ error: "missing token" }), { status: 400 });
     }
     const verified = await verifyJwtHS256(token, SECRET);
@@ -89,30 +90,34 @@ Deno.serve(async (req) => {
 
     // Vault Entry Pass orders use the dttpass-<ts>-<userId> prefix.
     if (orderId?.startsWith("dttpass-")) {
-      const parts = orderId.split("-");
-      const userId = parts.slice(2).join("-");
-      if (!/^[0-9a-f-]{36}$/i.test(userId)) {
-        return new Response(JSON.stringify({ error: "invalid pass order" }), { status: 400 });
-      }
-      if (amountUsd > 0 && Math.abs(amountUsd - 20) > 0.5) {
-        console.error("pass amount mismatch", { orderId, amountUsd });
-        return new Response(JSON.stringify({ error: "amount does not match entry pass price" }), { status: 400 });
-      }
-
       const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
         auth: { autoRefreshToken: false, persistSession: false },
       });
-      const { error: passErr } = await supabase.rpc("credit_entry_pass", {
-        _user_id: userId,
-        _payment_id: invoiceId,
-        _amount_usd: amountUsd || 20,
-        _method: "crypto",
-      });
-      if (passErr) {
-        console.error("credit_entry_pass error", passErr);
-        return new Response(JSON.stringify({ error: passErr.message }), { status: 500 });
+      const { data: receipt, error: receiptError } = await supabase.from("entry_pass_payment_receipts")
+        .select("*").eq("payment_id", invoiceKey(invoiceId)).eq("order_id", orderId).maybeSingle();
+      if (receiptError || !receipt || !API_KEY) {
+        return new Response(JSON.stringify({ error: "Unknown entry-pass checkout" }), { status: 400 });
       }
-      return new Response(JSON.stringify({ ok: true, entry_pass: true, buyer_id: userId }), {
+      await confirmEntryPassInvoice(receipt, async () => {
+        const response = await fetch("https://api.trybit.com/v2/invoice/merchant/info", {
+          method: "POST", headers: { Authorization: `Token ${API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ uuids: [receipt.payment_id] }),
+        });
+        if (!response.ok) throw new Error("Payment verification unavailable");
+        const body = await response.json();
+        if (body.status !== "success" || !Array.isArray(body.result)) throw new Error("Invalid verification response");
+        return body.result.find((item: { uuid?: string }) => invoiceKey(item.uuid) === receipt.payment_id);
+      }, async () => {
+        const { error } = await supabase.from("entry_pass_payment_receipts")
+          .update({ verified_at: new Date().toISOString() }).eq("payment_id", receipt.payment_id);
+        if (error) throw new Error("Could not record verified payment");
+      }, async () => {
+        const { error } = await supabase.rpc("credit_entry_pass", {
+          _user_id: receipt.user_id, _payment_id: receipt.payment_id, _amount_usd: 20, _method: "crypto",
+        });
+        if (error) throw new Error("Could not grant verified entry pass");
+      });
+      return new Response(JSON.stringify({ ok: true, entry_pass: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -163,6 +168,6 @@ Deno.serve(async (req) => {
     );
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Payment confirmation failed; no access granted" }), { status: 500 });
   }
 });
