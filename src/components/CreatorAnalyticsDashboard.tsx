@@ -487,7 +487,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
   return (
     <div className="mobile-scroll-shell relative isolate">
-      {!adminView && <PersonalSkyBackdrop />}
+      {!adminPreview && <PersonalSkyBackdrop />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
         setActiveSection("overview");
