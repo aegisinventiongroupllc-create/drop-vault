@@ -1230,8 +1230,10 @@ export type Database = {
       yoti_age_checks: {
         Row: {
           created_at: string
+          environment: string
           id: string
           method: string | null
+          server_verified_at: string | null
           session_id: string
           status: string
           updated_at: string
@@ -1239,8 +1241,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          environment?: string
           id?: string
           method?: string | null
+          server_verified_at?: string | null
           session_id: string
           status?: string
           updated_at?: string
@@ -1248,8 +1252,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          environment?: string
           id?: string
           method?: string | null
+          server_verified_at?: string | null
           session_id?: string
           status?: string
           updated_at?: string
@@ -1305,6 +1311,10 @@ export type Database = {
       attach_request_delivery: {
         Args: { _path: string; _request_id: string }
         Returns: undefined
+      }
+      can_upload_creator_media: {
+        Args: { _creator_id: string }
+        Returns: boolean
       }
       can_upload_request_delivery: { Args: { _name: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
