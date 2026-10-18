@@ -29,6 +29,17 @@ const AuthScreen = ({ onAdmin }: AuthScreenProps) => {
   const [loading, setLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
 
+  // Pink globe on the sign-in page only; restore the default tone when leaving.
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.style.getPropertyValue("--globe-tone");
+    root.style.setProperty("--globe-tone", "#ff4da6");
+    return () => {
+      if (prev) root.style.setProperty("--globe-tone", prev);
+      else root.style.removeProperty("--globe-tone");
+    };
+  }, []);
+
   const validate = (): string | null => {
     const e = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return "Please enter a valid email address.";
