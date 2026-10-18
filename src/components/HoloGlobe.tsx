@@ -129,7 +129,7 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
       </mesh>
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color={colors.ocean} transparent opacity={0.75} />
+        <meshBasicMaterial color={colors.ocean} />
       </mesh>
       {/* Real country borders */}
       {borders.map((g, i) => {
