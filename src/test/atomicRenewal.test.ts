@@ -31,9 +31,9 @@ describe.skipIf(!db)('deployed atomic renewals in isolated fixtures',()=>{
  }));
  it.each([90,92,95])('records eligible %i percent split and exactly 14 days once',split=>fixture(async(sql,f)=>{
   await sql`SELECT set_config('test.split',${String(split)},true)`;
-  const old=await sql`SELECT expires_at::text AS expires_at FROM pg_temp.subscriptions WHERE id=${f.id}`;
-  const first=await sql`SELECT pg_temp.test_renew(${f.id},${old[0].expires_at}) AS outcome`;
-  const again=await sql`SELECT pg_temp.test_renew(${f.id},${old[0].expires_at}) AS outcome`;
+  await sql`CREATE TEMP TABLE old_expiry AS SELECT expires_at FROM pg_temp.subscriptions WHERE id=${f.id}`;
+  const first=await sql`SELECT pg_temp.test_renew(${f.id},(SELECT expires_at FROM pg_temp.old_expiry)) AS outcome`;
+  const again=await sql`SELECT pg_temp.test_renew(${f.id},(SELECT expires_at FROM pg_temp.old_expiry)) AS outcome`;
   expect(first[0].outcome).toBe('renewed');expect(again[0].outcome).toBe('skipped');
   const state=await sql`SELECT balance,(SELECT count(*) FROM pg_temp.transactions) AS count,(SELECT creator_share_usd FROM pg_temp.transactions LIMIT 1) AS cut,(SELECT extract(epoch FROM expires_at-now()) FROM pg_temp.subscriptions WHERE id=${f.id}) AS seconds,(SELECT renewal_count FROM pg_temp.subscriptions WHERE id=${f.id}) AS renewals FROM pg_temp.token_balances WHERE user_id=${f.uid}`;
   expect(state[0].balance).toBe(1);expect(Number(state[0].count)).toBe(1);expect(Number(state[0].cut)).toBe(20*split/100);expect(Number(state[0].seconds)).toBe(14*86400);expect(state[0].renewals).toBe(1);
