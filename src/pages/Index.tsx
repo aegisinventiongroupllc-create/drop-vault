@@ -109,6 +109,8 @@ const Index = () => {
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  // Owner shortcut: triple-tap the DTT logo to preview the sign-in page while signed in
+  const [authPreview, setAuthPreview] = useState(false);
   const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
 
   // Listen for auth changes and restore the account's saved dashboard choice.
@@ -257,6 +259,7 @@ const Index = () => {
                   countryFilter={countryFilter}
                   onGlobeOpen={() => setShowGlobe(true)}
                   topOffset
+                  onLogoTripleTap={() => setAuthPreview(true)}
                 />
               )}
               {activeTab === "trending" && (
@@ -320,6 +323,11 @@ const Index = () => {
   // Not signed in → show auth (unless admin passcode used)
   if (!authedUserId) {
     return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
+  }
+
+  // Owner shortcut: sign-in page preview (triple-tapped DTT logo)
+  if (authPreview) {
+    return <AuthScreen onAdmin={() => navigate("/admin-portal")} onExitPreview={() => setAuthPreview(false)} />;
   }
 
   // Signed in but profile not yet hydrated
@@ -511,6 +519,7 @@ const Index = () => {
           onSearch={() => setShowSearch(true)}
           hasVaultToggle={true}
           countryFilter={countryFilter}
+          onLogoTripleTap={() => setAuthPreview(true)}
         />
       )}
       {activeTab === "trending" && (
