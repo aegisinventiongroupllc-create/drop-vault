@@ -10,12 +10,12 @@
 
 - Send customer auth callbacks to `https://dropthatthing.com`, never editor preview domains.
 - Keep profiles owner/admin-only and public_profiles a read-only safe projection; photo writes require folder and file ownership. Why: prevent identity leaks and cross-account edits.
-- Render `profiles.avatar_config` through `ProfileAvatar` for consistent identity.
+- Render `profiles.avatar_config` via `ProfileAvatar` for consistent identity.
 - Validate avatar letter colors; use the iro wheel and SVG fills, never arbitrary CSS. Why: safe full-spectrum customization.
 - Generate role-specific portraits server-side from in-memory selfies; never save originals. Keep generated portraits account-private to protect identity.
 - Store creator public photos in an account-owned private gallery; show the selected real photo on creator discovery surfaces while private interactions continue using the generated emoji.
 - Capture selfies in an in-page camera with bounded resolution and release tracks on capture/close; skip client landmark scanning in the selfie-only flow to avoid phone camera handoffs and heavy WASM processing.
-- Prebundle color pickers with deduplicated React. Why: prevent mixed hook chunks in lazy previews.
+- Prebundle color pickers with deduplicated React to prevent mixed hook chunks in lazy previews.
 - Process new creator media through the shared permanent watermark encoder before storage uploads, including the public photo gallery; fail closed on encoding errors and exclude private verification documents and customer selfies, because display overlays do not brand downloaded files.
 
 - Card checkout runs through CCBill FlexForms built server-side with a salted digest; the unsigned webhook credits only from CCBill IP ranges, re-checks price against the server catalog, and credits idempotently per transaction id. The card button stays hidden until all CCBill secrets exist.
