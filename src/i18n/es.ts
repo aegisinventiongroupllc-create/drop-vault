@@ -42,7 +42,7 @@ const es: Translations = {
   tos_section2_title: "2. Elegibilidad",
   tos_section2_text: "Debe tener al menos 18 años de edad para usar esta Plataforma. Al usar la Plataforma, usted declara y garantiza que cumple con este requisito de edad.",
   tos_section3_title: "3. Economía de Bit-Tokens",
-  tos_section3_text: "Los Bit-Tokens son tokens de acceso digital valorados en $20 USD cada uno. Otorgan 14 días calendario de acceso al perfil de un Creador. Los tokens no son reembolsables una vez comprados. El acceso expira automáticamente después del período de 14 días.",
+  tos_section3_text: "Los Bit-Tokens son tokens de acceso digital con un precio de $25 USD cada uno ($20 de valor del token + $5 de tarifa de servicio y procesamiento). Otorgan 14 días calendario de acceso al perfil de un Creador. Los tokens no son reembolsables una vez comprados. El acceso expira automáticamente después del período de 14 días.",
   tos_section4_title: "4. Política de No Reembolso",
   tos_section4_text: "Todas las compras de Bit-Tokens y Solicitudes Personalizadas son finales. No se emitirán reembolsos por compras de tokens digitales, períodos de acceso expirados o solicitudes personalizadas rechazadas.",
   tos_section5_title: "5. División de Ingresos",
