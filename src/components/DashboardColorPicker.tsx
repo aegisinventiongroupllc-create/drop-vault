@@ -9,6 +9,7 @@ import GalaxyReel from "@/components/GalaxyReel";
 import SkyGalleryPicker from "@/components/SkyGalleryPicker";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 import { toast } from "@/hooks/use-toast";
+import FoldBox from "@/components/FoldBox";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -96,13 +97,22 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
       {open && (
         <>
           {THEME_PARTS.map((p) => (
-            <div key={p.key}>
-              <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">{p.label}</span>
-                <button type="button" aria-label={`Open color wheel for ${p.label}`} onClick={() => setWheelFor(wheelFor === p.key ? null : p.key)}
-                  className="h-7 w-10 overflow-hidden rounded border border-border">
-                  <svg viewBox="0 0 10 10" className="h-full w-full"><rect width="10" height="10" fill={theme[p.key] ?? "#ff0080"} /></svg>
-                </button>
+            <FoldBox key={p.key} title={p.label}>
+              {p.key === "galaxy" && (
+                <div data-testid="galaxy-preview" className="sticky top-0 z-10 relative mb-3 h-40 w-full overflow-hidden rounded-md border border-border bg-background">
+                  <GalaxyReel />
+                  <div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={96} lights speed={0.25} backdrop={false} /></div>
+                  <span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span>
+                </div>
+              )}
+              {p.key === "galaxy" && <div className="mb-3"><HexColorWheel color={theme.galaxy ?? "#ffffff"} label="Color wheel for Galaxy & star color" onChange={(hex) => set("galaxy", hex)} /></div>}
+              <div className="mb-1.5 flex items-center justify-end">
+                {p.key !== "galaxy" && (
+                  <button type="button" aria-label={`Open color wheel for ${p.label}`} onClick={() => setWheelFor(wheelFor === p.key ? null : p.key)}
+                    className="h-7 w-10 overflow-hidden rounded border border-border">
+                    <svg viewBox="0 0 10 10" className="h-full w-full"><rect width="10" height="10" fill={theme[p.key] ?? "#ff0080"} /></svg>
+                  </button>
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {SWATCHES.map((hex) => (
@@ -113,35 +123,26 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
                 ))}
               </div>
               {p.key !== "galaxy" && wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
-              {p.key === "galaxy" && <div className="mt-3"><HexColorWheel color={theme.galaxy ?? "#ffffff"} label="Color wheel for Galaxy & star color" onChange={(hex) => set("galaxy", hex)} /></div>}
-              {p.key === "galaxy" && (
-                <div data-testid="galaxy-preview" className="relative mt-3 h-40 w-full overflow-hidden rounded-md border border-border bg-background">
-                  <GalaxyReel />
-                  <div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={96} lights speed={0.25} backdrop={false} /></div>
-                  <span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span>
+              {p.key === "galaxy" && previewing && (
+                <div className="mt-3 space-y-2 rounded-md border border-primary/40 bg-primary/10 p-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Example only — nothing saved yet.</p>
+                  <div className="flex gap-2">
+                    <Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
+                    <Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button>
+                  </div>
                 </div>
               )}
-            </div>
+            </FoldBox>
           ))}
-          {previewing && (
-            <div className="space-y-2 rounded-md border border-primary/40 bg-primary/10 p-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Example only — nothing saved yet. Watch the star backdrop behind this box.</p>
-              <div className="flex gap-2">
-                <Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
-                <Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button>
-              </div>
-            </div>
-          )}
-          <div>
-            <span className="text-xs font-bold text-foreground">Star backdrop style</span>
-            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+          <FoldBox title="Star backdrop style">
+            <div className="grid grid-cols-2 gap-1.5">
               {STAR_STYLES.map((s) => {
                 const active = (theme.starStyle ?? DEFAULT_STAR_STYLE) === s.id;
                 return (
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => setStarStyle(s.id)}
                     className={`overflow-hidden rounded-md border-2 text-left ${active ? "border-primary" : "border-border"}`}>
                     {s.id === "living" ? (
-                      <div className="flex h-10 w-full items-center justify-center bg-[#050510] text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
+                      <div className="flex h-10 w-full items-center justify-center bg-background text-[10px] font-bold tracking-widest text-muted-foreground">✦ ✧ ✦</div>
                     ) : (
                       <img src={SKY_BACKDROPS[s.id]} alt="" className="h-10 w-full object-cover" loading="lazy" />
                     )}
@@ -150,9 +151,9 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
                 );
               })}
             </div>
-          </div>
-          <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
-          <SkyGalleryPicker />
+          </FoldBox>
+          <FoldBox title="Globe preview"><div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div></FoldBox>
+          <FoldBox title="Be Right Back sky gallery"><SkyGalleryPicker /></FoldBox>
           <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
