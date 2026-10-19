@@ -602,7 +602,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
             <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">Fee reverts to 10% when timer hits zero</p>
+            <p className="text-[10px] text-muted-foreground">Returns to your standard or eligible founding split when the timer ends</p>
           </div>
         )}
         {!splitState.incentiveActive && (
@@ -682,9 +682,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <span className="text-xs font-bold tracking-wider text-foreground">PAYOUT STRUCTURE</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
-              Includes a flat <span className="font-semibold text-foreground">$1.00 Network Tax</span> per request.
-              Custom requests ($500–$10,001): same flat $1 fee, no matter the request size.
+              <span className="font-semibold text-foreground">Standard: 90% of the $20 token value — $18 per Bit-Token.</span>{" "}
+              Customers pay $25 ($20 token value + $5 service and processing fee); fees do not reduce your share.
+              Founding creators: 92% ($18.40) for their first 365 days. Power Week: 95% ($19) for 7 days.
+              Custom requests: 85% of the agreed base price; customers pay the $1 service fee and $4 processing cover separately.
             </p>
           </div>
 
@@ -831,8 +832,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           {/* Revenue Split Info */}
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-bold text-foreground">Standard Payout: 90/10 Split.</span>{" "}
-              Includes a flat $1.00 Network Tax per request.
+              <span className="font-bold text-foreground">Standard: $18 per Bit-Token (90% of $20 token value).</span>{" "}
+              Customer price: $25, including a separate $5 service and processing fee.
+              Eligible founding creators receive $18.40 (92%) for 365 days; Power Week pays $19 (95%) for 7 days.
+              Custom requests pay you 85% of the agreed base price; customer-paid fees never reduce your share.
             </p>
           </div>
         </div>
