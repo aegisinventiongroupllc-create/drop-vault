@@ -1,3 +1,4 @@
+import CreatorAgreementModal, { CREATOR_AGREEMENT_TEXT, CREATOR_AGREEMENT_VERSION } from "@/components/CreatorAgreementModal";
 import { useState, useEffect, useRef } from "react";
 import TopFansSection from "@/components/TopFansSection";
 import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
@@ -100,15 +101,17 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const [showSafetyModal, setShowSafetyModal] = useState(true);
   const [safetyAgreed, setSafetyAgreed] = useState(false);
   const [safetyChecked, setSafetyChecked] = useState(false);
+  const [creatorAgreed, setCreatorAgreed] = useState(false);
   useEffect(() => {
     let off = false;
     supabase.auth.getUser().then(async ({ data }) => {
       const uid = data.user?.id;
       if (!uid) { if (!off) setSafetyChecked(true); return; }
       const { data: rows } = await supabase.from("legal_consents")
-        .select("id").eq("user_id", uid).eq("consent_type", "creator_safety").limit(1);
+        .select("consent_type").eq("user_id", uid).in("consent_type", ["creator_safety", "creator_agreement"]).limit(10);
       if (off) return;
-      if (rows && rows.length) { setSafetyAgreed(true); setShowSafetyModal(false); }
+      if (rows?.some((r) => r.consent_type === "creator_safety")) { setSafetyAgreed(true); setShowSafetyModal(false); }
+      if (rows?.some((r) => r.consent_type === "creator_agreement")) setCreatorAgreed(true);
       setSafetyChecked(true);
     });
     return () => { off = true; };
@@ -481,6 +484,19 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           user_agent: navigator.userAgent,
         }).then(() => {});
       }
+    }} />;
+  }
+
+  if (!adminPreview && safetyChecked && authUserId && !creatorAgreed) {
+    return <CreatorAgreementModal onAgree={() => {
+      setCreatorAgreed(true);
+      supabase.from("legal_consents").insert({
+        user_id: authUserId,
+        consent_type: "creator_agreement",
+        consent_text: CREATOR_AGREEMENT_TEXT,
+        terms_version: CREATOR_AGREEMENT_VERSION,
+        user_agent: navigator.userAgent,
+      }).then(() => {});
     }} />;
   }
 

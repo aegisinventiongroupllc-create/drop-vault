@@ -405,6 +405,20 @@ Deno.serve(async (req) => {
       return json({ ok: true, women: top("women"), men: top("men") });
     }
 
+    if (action === "founding_creators") {
+      const { data: rows, error } = await supabase
+        .from("founding_creators").select("*").order("country").order("vault_side").order("slot").limit(5000);
+      if (error) return json({ error: error.message }, 500);
+      const ids = (rows || []).map((r: any) => r.creator_id);
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("user_id, display_name, email").in("user_id", ids)
+        : { data: [] as any[] };
+      const pMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
+      return json({ ok: true, rows: (rows || []).map((r: any) => ({
+        ...r, display_name: pMap.get(r.creator_id)?.display_name ?? null, email: pMap.get(r.creator_id)?.email ?? null,
+      })) });
+    }
+
     if (action === "power_weeks") {
       const { data: weeks, error } = await supabase
         .from("power_weeks").select("*").order("started_at", { ascending: false }).limit(500);

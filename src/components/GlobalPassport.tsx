@@ -21,13 +21,10 @@ export const COUNTRIES: Country[] = [
   { code: "ES", name: "Spain", flag: "🇪🇸" },
   { code: "IT", name: "Italy", flag: "🇮🇹" },
   { code: "JP", name: "Japan", flag: "🇯🇵" },
-  { code: "KR", name: "South Korea", flag: "🇰🇷" },
   { code: "IN", name: "India", flag: "🇮🇳" },
   { code: "CO", name: "Colombia", flag: "🇨🇴" },
   { code: "AR", name: "Argentina", flag: "🇦🇷" },
-  { code: "PH", name: "Philippines", flag: "🇵🇭" },
   { code: "ZA", name: "South Africa", flag: "🇿🇦" },
-  { code: "NG", name: "Nigeria", flag: "🇳🇬" },
   { code: "PT", name: "Portugal", flag: "🇵🇹" },
 ];
 
