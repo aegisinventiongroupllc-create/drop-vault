@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { getAdminPasscode } from "@/lib/adminSession";
-import { countryName } from "@/lib/siteTranslate";
+import { countryName as translatedCountryName } from "@/lib/siteTranslate";
+import { COUNTRIES } from "@/components/GlobalPassport";
+const countryName = (code: string, fallback: string) => translatedCountryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? (code === "GLOBAL" ? "Country not recorded" : fallback));
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { foundingCountries } from "@/lib/foundingCreators";
 
 interface CountryRow { country: string; women: number; men: number }
 export interface CountryCreator {
@@ -10,12 +15,11 @@ export interface CountryCreator {
 }
 
 const call = async (body: Record<string, unknown>) => {
-  const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/admin-finance`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() },
-    body: JSON.stringify({ action: "country_stats", ...body }),
+  const { data, error } = await supabase.functions.invoke("admin-finance", {
+    headers: { "x-admin-passcode": getAdminPasscode() }, body: { action: "country_stats", ...body },
   });
-  return res.json();
+  if (error || data?.error) throw new Error("Could not load country stats. Please retry.");
+  return data;
 };
 
 const flag = (code: string) =>
@@ -30,15 +34,21 @@ const AdminCountries = ({ onOpenCreator }: { onOpenCreator: (c: CountryCreator) 
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
-    call({}).then((d) => setCountries(Array.isArray(d?.countries) ? d.countries : [])).catch(() => setCountries([])).finally(() => setLoading(false));
-  }, []);
+  const [error, setError] = useState("");
+  const load = () => {
+    setLoading(true); setError("");
+    call({}).then((d) => {
+      const map = new Map<string, CountryRow>(foundingCountries().map((c) => [c.code, { country: c.code, women: 0, men: 0 }]));
+      for (const row of d?.countries ?? []) map.set(row.country, row);
+      setCountries([...map.values()].sort((a, b) => countryName(a.country, a.country).localeCompare(countryName(b.country, b.country))));
+    }).catch((e) => setError(e.message)).finally(() => setLoading(false));
+  };
+  useEffect(load, []);
 
   const openCountry = async (code: string) => {
-    setOpen(code); setCreators([]); setLoading(true);
+    setOpen(code); setCreators([]); setLoading(true); setError("");
     try { const d = await call({ country: code }); setCreators(Array.isArray(d?.creators) ? d.creators : []); }
-    catch { setCreators([]); }
+    catch { setError("Could not load creators. Please retry."); }
     setLoading(false);
   };
 
@@ -46,21 +56,22 @@ const AdminCountries = ({ onOpenCreator }: { onOpenCreator: (c: CountryCreator) 
     const list = creators.filter((c) => (side === "men" ? c.vault_side === "men" : c.vault_side !== "men"));
     return (
       <div className="px-4 space-y-3">
-        <button onClick={() => setOpen(null)} className="text-xs font-bold text-primary">← ALL COUNTRIES</button>
+        <Button variant="ghost" onClick={() => setOpen(null)} className="text-xs font-bold text-primary">← ALL COUNTRIES</Button>
         <p className="text-sm font-bold text-foreground">{flag(open)} {countryName(open, open)}</p>
         <div className="flex gap-2">
           {(["women", "men"] as const).map((s) => (
-            <button key={s} onClick={() => setSide(s)}
+            <Button variant="ghost" key={s} onClick={() => setSide(s)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider ${side === s ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
               {s === "women" ? "WOMEN" : "MEN"} ({creators.filter((c) => (s === "men" ? c.vault_side === "men" : c.vault_side !== "men")).length})
-            </button>
+            </Button>
           ))}
         </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
         {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
-        {!loading && list.length === 0 && <p className="text-xs text-muted-foreground">No creators here yet.</p>}
+        {!loading && !error && list.length === 0 && <p className="text-xs text-muted-foreground">No creators here yet.</p>}
         {list.map((c) => (
-          <button key={c.user_id} onClick={() => onOpenCreator(c)}
-            className="w-full text-left rounded-xl border border-border bg-card p-3 hover:border-primary/50 transition-colors">
+          <Button variant="ghost" key={c.user_id} onClick={() => onOpenCreator(c)}
+            className="w-full h-auto whitespace-normal text-left rounded-lg border border-border bg-card p-3 hover:border-primary/50 transition-colors">
             <div className="flex items-center justify-between">
               <p className="text-sm font-bold text-foreground">@{c.display_name || "creator"}</p>
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.verification_status}</span>
@@ -70,7 +81,7 @@ const AdminCountries = ({ onOpenCreator }: { onOpenCreator: (c: CountryCreator) 
                 <div key={l as string}><p className="text-xs font-bold text-foreground">{v}</p><p className="text-[9px] text-muted-foreground">{l}</p></div>
               ))}
             </div>
-          </button>
+          </Button>
         ))}
       </div>
     );
@@ -79,20 +90,22 @@ const AdminCountries = ({ onOpenCreator }: { onOpenCreator: (c: CountryCreator) 
   const shown = countries.filter((c) => !q || countryName(c.country, c.country).toLowerCase().includes(q.toLowerCase()) || c.country.toLowerCase().includes(q.toLowerCase()));
   return (
     <div className="px-4 space-y-3">
+      <Button variant="outline" size="sm" disabled={loading} onClick={load}>REFRESH</Button>
       <div>
         <p className="text-sm font-bold text-foreground">Creators by country</p>
         <p className="text-xs text-muted-foreground">Tap a country to see every creator's stats</p>
       </div>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search country..."
         className="w-full bg-secondary rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-      {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
-      {!loading && shown.length === 0 && <p className="text-xs text-muted-foreground">No creators yet.</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+        {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
+      {!loading && !error && shown.length === 0 && <p className="text-xs text-muted-foreground">No creators yet.</p>}
       {shown.map((c) => (
-        <button key={c.country} onClick={() => void openCountry(c.country)}
-          className="w-full flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors">
+        <Button variant="ghost" key={c.country} onClick={() => void openCountry(c.country)}
+          className="w-full h-auto whitespace-normal flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors">
           <span className="text-sm font-bold text-foreground">{flag(c.country)} {countryName(c.country, c.country)}</span>
           <span className="text-xs text-muted-foreground">Women {c.women} · Men {c.men}</span>
-        </button>
+        </Button>
       ))}
     </div>
   );

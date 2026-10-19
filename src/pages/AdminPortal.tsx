@@ -1,3 +1,5 @@
+import AdminCountries from "@/components/AdminCountries";
+import AdminFoundingCreators from "@/components/AdminFoundingCreators";
 import AdminFinanceBreakdown, { type FinanceCategory } from "@/components/AdminFinanceBreakdown";
 import { useEffect, useState } from "react";
 import TopCreatorsBoard from "@/components/TopCreatorsBoard";
@@ -67,6 +69,7 @@ interface Stats {
 
 const AdminPortal = () => {
   const navigate = useNavigate();
+  const [countrySection, setCountrySection] = useState<"countries" | "founding" | null>(null);
   const [authed] = useState(() => isAdminUnlocked());
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -348,9 +351,9 @@ const AdminPortal = () => {
 
       <div className="min-h-screen bg-background text-foreground p-4 pb-24">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h1 className="text-xl sm:text-2xl font-bold tracking-wider">ADMIN PORTAL</h1>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -385,6 +388,13 @@ const AdminPortal = () => {
             </div>
           </div>
 
+          <nav aria-label="Country administration" className="flex flex-wrap gap-2">
+            <Button variant={countrySection === null ? "default" : "outline"} onClick={() => setCountrySection(null)}>OVERVIEW</Button>
+            <Button variant={countrySection === "countries" ? "default" : "outline"} onClick={() => setCountrySection("countries")}>COUNTRIES</Button>
+            <Button variant={countrySection === "founding" ? "gold" : "outline"} onClick={() => setCountrySection("founding")}>FOUNDING 10</Button>
+          </nav>
+          {countrySection === "countries" && <section className="py-4 border-y border-border"><AdminCountries onOpenCreator={setSelectedCreator} /></section>}
+          {countrySection === "founding" && <section className="py-4 border-y border-border"><AdminFoundingCreators /></section>}
           {/* Platform Overview */}
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">
