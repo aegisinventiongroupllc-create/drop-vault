@@ -48,7 +48,7 @@ const LegalFooter = () => {
           Crypto payments settle directly in LTC (Litecoin) to our secure platform wallet. Card payments coming soon.
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
-          DropThatThing is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
+          DropThatThing is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>
         </p>
       </footer>
 
@@ -98,7 +98,7 @@ const AboutDtt = () => (
     <p><strong className="text-foreground">How payment works.</strong> Purchases use Bit-Tokens, a digital access credit. 1 Bit-Token = $20 USD = 14 days of access to one creator's vault. Access ends automatically after 14 days unless renewed. A one-time entry pass is required for new customers and is valid for 365 days. Payments are made in cryptocurrency through our licensed payment processor; Bit-Tokens have no cash value, cannot be withdrawn, traded or transferred, and are used only on DTT.</p>
     <p><strong className="text-foreground">How creators are paid.</strong> Creators keep 90% of what fans spend on their content (92% for founding creators during their first year; 95% during a Power Week bonus). DTT keeps the remainder as its platform fee. Payouts are sent in Litecoin (LTC) to the creator's verified wallet.</p>
     <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must pass identity and age verification (Yoti) and manual approval before uploading. All creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported to authorities.</p>
-    <p>Contact: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a> · admin@dttmediallc.com</p>
+    <p>Contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a> · admin@dttmediallc.com</p>
   </SectionShell>
 );
 
@@ -111,7 +111,7 @@ const CreatorPurchaseRules = () => (
     <p><strong className="text-foreground">5. No loans or credit.</strong> DTT does not offer loans, credit, cash advances, "buy now pay later" or any internal lending between users, creators or the platform. Bit-Tokens must be fully paid before they are credited and cannot be borrowed, lent or converted back to money. Creator earnings are paid only from completed, confirmed purchases.</p>
     <p><strong className="text-foreground">6. Creator payouts.</strong> Earnings follow the published revenue split and are paid in LTC to the creator's verified wallet. Earnings from charged-back or fraudulent payments are reversed.</p>
     <p><strong className="text-foreground">7. Age restrictions.</strong> DTT is for adults 18+ only (or the age of majority where you live, if higher). Access is blocked in restricted countries. Accounts found to belong to minors are closed immediately.</p>
-    <p><strong className="text-foreground">8. Enforcement.</strong> DTT may remove content, suspend accounts or withhold payouts during investigations of rule violations. Report concerns to <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>.</p>
+    <p><strong className="text-foreground">8. Enforcement.</strong> DTT may remove content, suspend accounts or withhold payouts during investigations of rule violations. Report concerns to <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>.</p>
   </SectionShell>
 );
 
@@ -128,7 +128,7 @@ const Statement2257 = () => (
     <p><strong className="text-foreground">DTT Media LLC</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
     <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Yoti).</p>
     <p><strong className="text-foreground">Custodian of Records</strong><br/>DTT Media LLC — Custodian of Records<br/>Business mailing address: being finalized; available on request at the email below.</p>
-    <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: dropthatthingmedia@gmail.com</p>
+    <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: admin@dttmediallc.com</p>
   </SectionShell>
 );
 
@@ -155,7 +155,7 @@ const PrivacyPolicy = () => (
     <p><strong className="text-foreground">3. Legal Basis (GDPR/UK).</strong> Contract performance, legal obligation (AML/CTF), and legitimate interests in fraud prevention.</p>
     <p><strong className="text-foreground">4. Third-Party Processors.</strong> Yoti (identity and age verification), our cloud database and hosting provider, and a Litecoin blockchain monitoring service. All processors are bound by data processing agreements.</p>
     <p><strong className="text-foreground">5. Retention.</strong> KYC records: 5 years post-account-closure (regulatory requirement). Transaction logs: 7 years. Marketing data: until you opt out.</p>
-    <p><strong className="text-foreground">6. Your Rights.</strong> Access, correction, deletion (subject to legal retention), portability, objection. Email dropthatthingmedia@gmail.com to exercise rights.</p>
+    <p><strong className="text-foreground">6. Your Rights.</strong> Access, correction, deletion (subject to legal retention), portability, objection. Email admin@dttmediallc.com to exercise rights.</p>
     <p><strong className="text-foreground">7. Cookies.</strong> Essential cookies only; no third-party advertising trackers.</p>
     <p><strong className="text-foreground">8. Data Sales.</strong> We do not sell user data.</p>
     <p><strong className="text-foreground">9. International Transfers.</strong> Data may be processed in the US and EU under Standard Contractual Clauses.</p>
@@ -168,7 +168,7 @@ const RefundPolicy = () => (
     <p><strong className="text-foreground">All sales are final.</strong> Bit-Tokens are digital access credits delivered immediately upon payment confirmation and are non-refundable once credited.</p>
     <p><strong className="text-foreground">Exceptions.</strong> A refund will be issued only if: (a) tokens were charged but not credited within 24 hours due to a technical error on our side; (b) duplicate charge confirmed by the payment processor; (c) refund is required by applicable consumer protection law in your jurisdiction.</p>
     <p><strong className="text-foreground">Crypto Refunds.</strong> Crypto payments are non-reversible by nature; refunds (if approved) are returned in LTC to the originating wallet, typically within 1–3 business days of approval.</p>
-    <p><strong className="text-foreground">How to Request.</strong> Email <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a> with order ID, transaction hash (if crypto), and reason. Response within 5 business days.</p>
+    <p><strong className="text-foreground">How to Request.</strong> Email <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a> with order ID, transaction hash (if crypto), and reason. Response within 5 business days.</p>
     <p><strong className="text-foreground">Chargebacks.</strong> Fraudulent or abusive chargebacks result in permanent account termination and may be reported to credit bureaus and law enforcement.</p>
   </SectionShell>
 );
@@ -181,7 +181,7 @@ const AmlPolicy = () => (
     <p><strong className="text-foreground">Transaction Monitoring.</strong> Automated systems flag structuring, velocity anomalies, and high-risk geographies. Suspicious Activity Reports (SARs) are filed where required by law.</p>
     <p><strong className="text-foreground">Prohibited Sources.</strong> Funds derived from criminal activity, mixers/tumblers, darknet markets, or sanctioned entities are refused; accounts are terminated and authorities notified.</p>
     <p><strong className="text-foreground">Record Keeping.</strong> KYC and transaction records retained for 5 years (or longer where required).</p>
-    <p>Compliance contact: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
+    <p>Compliance contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
   </SectionShell>
 );
 
@@ -199,7 +199,7 @@ const RiskDisclosure = () => (
 const Complaints = () => (
   <SectionShell title="Complaints Procedure">
     <p>We aim to resolve all complaints fairly and promptly.</p>
-    <p><strong className="text-foreground">Step 1 — Contact Us.</strong> Email <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a> with subject line "COMPLAINT" and include your account email, order/transaction ID, and a description of the issue.</p>
+    <p><strong className="text-foreground">Step 1 — Contact Us.</strong> Email <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a> with subject line "COMPLAINT" and include your account email, order/transaction ID, and a description of the issue.</p>
     <p><strong className="text-foreground">Step 2 — Acknowledgement.</strong> We acknowledge complaints within 2 business days and aim to resolve within 15 business days. Complex cases may take up to 35 business days; we will keep you informed.</p>
     <p><strong className="text-foreground">Step 3 — Regulatory Escalation.</strong> Unresolved complaints may be escalated to the financial ombudsman or consumer protection authority in your jurisdiction.</p>
   </SectionShell>
@@ -209,7 +209,7 @@ const ContactInfo = () => (
   <SectionShell title="Contact Us">
     <p><strong className="text-foreground">DTT Media LLC</strong></p>
     <p>Operator of DropThatThing. Business mailing address: being finalized; available on request. For all inquiries — support, compliance, partnerships, refunds, complaints, and legal — please contact our team at the email below.</p>
-    <p><strong className="text-foreground">Support email:</strong> <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
+    <p><strong className="text-foreground">Support email:</strong> <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
     <p><strong className="text-foreground">Response time:</strong> within 2 business days.</p>
     <p className="text-muted-foreground/60 text-[10px]">Payments: direct LTC (Litecoin) settlement.</p>
   </SectionShell>
@@ -295,7 +295,7 @@ const DmcaTakedown = () => {
       <div className="space-y-2">
         <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
         <p><strong className="text-foreground">Designated DMCA Agent</strong></p>
-        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a><br/>Backup: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a></p>
+        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a><br/>Backup: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
         <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
       </div>
 

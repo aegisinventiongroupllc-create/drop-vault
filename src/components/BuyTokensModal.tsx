@@ -294,7 +294,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                     <li>• This purchase is for <span className="text-foreground font-semibold">digital goods delivered immediately</span>: {isEntryPass ? "your Vault Entry Pass activates" : "Bit-Tokens credit"} as soon as payment is confirmed. <span className="text-foreground font-semibold">All sales are final and non-refundable</span> once credit is delivered.</li>
                     <li>• Strictly 18+. You confirm the card is yours and the funds are lawful.</li>
                     <li>• Disputed or unauthorized charges (chargebacks) can result in permanent account suspension.</li>
-                    <li>• Questions before you buy? Contact <span className="text-foreground font-semibold">dropthatthingmedia@gmail.com</span> — we answer before and after purchase.</li>
+                    <li>• Questions before you buy? Contact <span className="text-foreground font-semibold">admin@dttmediallc.com</span> — we answer before and after purchase.</li>
                   </ul>
                 </div>
 

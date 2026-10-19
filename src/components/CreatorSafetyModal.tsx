@@ -22,7 +22,7 @@ const CreatorSafetyModal = ({ onAgree }: { onAgree: () => void }) => {
             <p><span className="text-foreground font-medium">{ct.safety_age_h}</span> {ct.safety_age}</p>
             <p><span className="text-foreground font-medium">{ct.safety_rev_h}</span> {ct.safety_rev}</p>
             <p><span className="text-foreground font-medium">{ct.safety_priv_h}</span> {ct.safety_priv}</p>
-            <p>{ct.safety_contact} <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary underline">dropthatthingmedia@gmail.com</a></p>
+            <p>{ct.safety_contact} <a href="mailto:admin@dttmediallc.com" className="text-primary underline">admin@dttmediallc.com</a></p>
           </div>
 
           <label className="flex items-start gap-3 cursor-pointer">
