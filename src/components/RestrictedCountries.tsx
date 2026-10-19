@@ -62,6 +62,8 @@ const GHOST_LIST = [
   "U.S. Virgin Islands",
 ];
 
+const COMPLIANCE_REVIEW = ["Japan", "South Africa"];
+
 const CountryColumn = ({ items }: { items: string[] }) => (
   <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
     {items.map((c) => (
@@ -119,6 +121,12 @@ const RestrictedCountries = () => (
           payouts pending case-by-case review.
         </p>
         <CountryColumn items={GHOST_LIST} />
+      </div>
+
+      <div>
+        <p className="text-foreground font-bold mb-2">4. Temporarily Paused — Compliance Review</p>
+        <p className="mb-2 text-[11px]">DTT has paused these markets while reviewing Japan’s obscenity and content-distribution requirements and South Africa’s FPB registration and classification requirements. This is a precautionary business restriction, not a claim that all adult content or every African country is prohibited. The same restrictions apply to men and women.</p>
+        <CountryColumn items={COMPLIANCE_REVIEW} />
       </div>
 
       <div className="bg-secondary/40 border border-border rounded-lg p-3 space-y-2">
