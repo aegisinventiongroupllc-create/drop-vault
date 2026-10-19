@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { TOKEN_VALUE_USD } from "@/lib/tokenEconomy";
+import { TOKEN_INVOICE_USD } from "@/lib/tokenEconomy";
 
 const KnowYourCoinsModal = ({ onClose }: { onClose: () => void }) => {
   return (
@@ -19,12 +19,13 @@ const KnowYourCoinsModal = ({ onClose }: { onClose: () => void }) => {
                 <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">B</span>
                 <span className="text-sm font-semibold text-foreground">1 Bit-Token</span>
               </div>
-              <span className="text-lg font-bold text-primary">${TOKEN_VALUE_USD}</span>
+              <span className="text-lg font-bold text-primary">${TOKEN_INVOICE_USD}</span>
             </div>
           </div>
 
           <div className="space-y-2 text-xs text-muted-foreground">
             <p>• <span className="text-foreground font-medium">1 Bit-Token</span> = 14 days of full access to ONE Creator Profile</p>
+            <p>• $20 token value + $5 service and processing fee</p>
             <p>• Access auto-locks after 14 days — no stacking</p>
             <p>• Custom Requests are flat $1 per request</p>
           </div>
