@@ -27,7 +27,7 @@ const Pricing = () => (
 
       <header className="space-y-2 text-center">
         <h1 className="font-display text-2xl font-bold tracking-wider">PRICING</h1>
-        <p className="text-sm text-muted-foreground">Simple coins. No subscriptions. One $1 fee per purchase.</p>
+        <p className="text-sm text-muted-foreground">Simple coins. No subscriptions. $25 per Bit-Token ($20 token + $5 service fee).</p>
       </header>
 
       <section className="rounded-2xl border-2 border-primary neon-glow-sm bg-card p-5 space-y-2">
