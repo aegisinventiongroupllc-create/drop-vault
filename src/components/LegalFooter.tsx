@@ -4,13 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 
-type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints" | "restricted" | "dmca";
+type LegalView = null | "tos" | "privacy" | "2257" | "contact" | "refund" | "aml" | "risk" | "complaints" | "restricted" | "dmca" | "about" | "rules";
 
 const LegalFooter = () => {
   const [view, setView] = useState<LegalView>(null);
   const close = () => setView(null);
 
   const links: { id: Exclude<LegalView, null>; label: string }[] = [
+    { id: "about", label: "About DTT" },
+    { id: "rules", label: "Creator & Purchase Rules" },
     { id: "tos", label: "Terms of Service" },
     { id: "privacy", label: "Privacy Policy" },
     { id: "refund", label: "Refund Policy" },
@@ -60,6 +62,8 @@ const LegalFooter = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex-1 overflow-y-auto overscroll-contain p-6" style={{ WebkitOverflowScrolling: "touch" }}>
+              {view === "about" && <AboutDtt />}
+              {view === "rules" && <CreatorPurchaseRules />}
               {view === "2257" && <Statement2257 />}
               {view === "tos" && <TermsOfService />}
               {view === "privacy" && <PrivacyPolicy />}
@@ -85,6 +89,31 @@ const LegalFooter = () => {
     </>
   );
 };
+
+
+const AboutDtt = () => (
+  <SectionShell title="About DropThatThing (DTT)">
+    <p><strong className="text-foreground">What DTT is.</strong> DropThatThing is an adults-only (18+) subscription platform operated by DTT Media LLC, a United States company. Independent, identity-verified adult creators publish photos and videos in two sections: the Women's Vault and the Men's Vault. Fans pay to unlock access to the creators they choose.</p>
+    <p><strong className="text-foreground">Services offered.</strong> (1) Creator vault access: fans unlock a creator's full library for a fixed period. (2) Teaser discovery feed: free 15-second previews so fans can choose creators before paying. (3) Custom requests: fans can request personalized content, which the creator may accept or decline. (4) Private messaging between creators and their top fans. (5) Creator tools: analytics, earnings history, upload management and profile customization.</p>
+    <p><strong className="text-foreground">How payment works.</strong> Purchases use Bit-Tokens, a digital access credit. 1 Bit-Token = $20 USD = 14 days of access to one creator's vault. Access ends automatically after 14 days unless renewed. A one-time entry pass is required for new customers and is valid for 365 days. Payments are made in cryptocurrency through our licensed payment processor; Bit-Tokens have no cash value, cannot be withdrawn, traded or transferred, and are used only on DTT.</p>
+    <p><strong className="text-foreground">How creators are paid.</strong> Creators keep 90% of what fans spend on their content (92% for founding creators during their first year; 95% during a Power Week bonus). DTT keeps the remainder as its platform fee. Payouts are sent in Litecoin (LTC) to the creator's verified wallet.</p>
+    <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must pass identity and age verification (Yoti) and manual approval before uploading. All creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported to authorities.</p>
+    <p>Contact: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a> · admin@dttmediallc.com</p>
+  </SectionShell>
+);
+
+const CreatorPurchaseRules = () => (
+  <SectionShell title="Creator & Purchase Rules">
+    <p><strong className="text-foreground">1. Who may be a creator.</strong> Creators must be at least 18, pass live identity and age verification, accept the creator safety agreement, and be approved by DTT before uploading anything. Creators are independent contractors, not employees of DTT Media LLC.</p>
+    <p><strong className="text-foreground">2. What creators may upload.</strong> Only content they personally own, featuring only themselves or other verified adults who gave written consent and whose age and identity records the creator keeps (18 U.S.C. § 2257). Prohibited: anyone under 18 or appearing to be a minor, non-consensual or hidden-camera content, violence, bestiality, incest, drugs, weapons, illegal acts, or content copied from others. Violations result in removal, permanent ban, forfeiture of unpaid earnings and reporting to law enforcement.</p>
+    <p><strong className="text-foreground">3. Custom requests.</strong> A creator may accept or decline any request. The price is agreed before work begins. Content is delivered only after payment is confirmed, and the fan receives 14 days of access, which can be renewed. Requests must follow the same content rules above.</p>
+    <p><strong className="text-foreground">4. Buying content.</strong> Fans must be 18+. Purchases grant a personal, non-transferable license to view content on DTT only. Downloading for redistribution, re-uploading, sharing accounts or recording content is prohibited and may be pursued under the DMCA. All sales are final except as stated in the Refund Policy.</p>
+    <p><strong className="text-foreground">5. No loans or credit.</strong> DTT does not offer loans, credit, cash advances, "buy now pay later" or any internal lending between users, creators or the platform. Bit-Tokens must be fully paid before they are credited and cannot be borrowed, lent or converted back to money. Creator earnings are paid only from completed, confirmed purchases.</p>
+    <p><strong className="text-foreground">6. Creator payouts.</strong> Earnings follow the published revenue split and are paid in LTC to the creator's verified wallet. Earnings from charged-back or fraudulent payments are reversed.</p>
+    <p><strong className="text-foreground">7. Age restrictions.</strong> DTT is for adults 18+ only (or the age of majority where you live, if higher). Access is blocked in restricted countries. Accounts found to belong to minors are closed immediately.</p>
+    <p><strong className="text-foreground">8. Enforcement.</strong> DTT may remove content, suspend accounts or withhold payouts during investigations of rule violations. Report concerns to <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>.</p>
+  </SectionShell>
+);
 
 const SectionShell = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <>
