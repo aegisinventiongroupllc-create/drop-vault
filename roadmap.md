@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Fix Be Right Back to inherit Your galaxy unless a separate idle sky is saved; verify shared customer/creator choices, one-minute idle and return.
 - [x] Prepare documented Cloud export/recovery steps and copy-ready video/backup provider inquiries; research official provider docs. Instructions delivered in Files; no export, media transfer or provider contact performed.
 - [ ] Complete backup/recovery and large-video readiness requested 18 October: blocked by owner-triggered database export/downloads, newest snapshot evidence, separate recovery destination and written vendor acceptance/account setup. No isolated restore, production overwrite or provider connection performed.
 - [x] Reliability remediation: service-only atomic renewal deployed; 9 isolated authorization, split, expiry, retry and rollback tests pass. Live paid renewal/concurrent-worker stress awaits an isolated populated environment.

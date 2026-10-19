@@ -110,6 +110,14 @@ export function previewTheme(theme: UserTheme) {
   window.dispatchEvent(new Event("dtt-theme"));
 }
 
+/** A separate idle sky overrides the main galaxy only after an explicit selection. */
+export function resolveIdleSky(theme: UserTheme): { style: StarStyle; tone?: string } {
+  return {
+    style: theme.brbStyle ?? theme.starStyle ?? DEFAULT_STAR_STYLE,
+    tone: theme.brbStyle ? theme.brbTone : theme.brbTone ?? theme.galaxy,
+  };
+}
+
 export function usePersonalGlobe() {
   const [theme, setTheme] = useState(activeTheme);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -121,7 +129,8 @@ export function usePersonalGlobe() {
     media.addEventListener("change", motion);
     return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
   }, []);
-  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, brbStyle: theme.brbStyle ?? DEFAULT_STAR_STYLE, brbTone: theme.brbTone, dashboardSky: theme.dashboardSky === true, reduced };
+  const idleSky = resolveIdleSky(theme);
+  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, brbStyle: idleSky.style, brbTone: idleSky.tone, dashboardSky: theme.dashboardSky === true, reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----
