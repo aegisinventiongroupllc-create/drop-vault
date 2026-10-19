@@ -98,7 +98,7 @@ const AboutDtt = () => (
     <p><strong className="text-foreground">How payment works.</strong> Purchases use Bit-Tokens, a digital access credit. 1 Bit-Token = $20 USD = 14 days of access to one creator's vault. Access ends automatically after 14 days unless renewed. A one-time entry pass is required for new customers and is valid for 365 days. Payments are made in cryptocurrency through our licensed payment processor; Bit-Tokens have no cash value, cannot be withdrawn, traded or transferred, and are used only on DTT.</p>
     <p><strong className="text-foreground">How creators are paid.</strong> Creators keep 90% of what fans spend on their content (92% for founding creators during their first year; 95% during a Power Week bonus). DTT keeps the remainder as its platform fee. Payouts are sent in Litecoin (LTC) to the creator's verified wallet.</p>
     <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must pass identity and age verification (Yoti) and manual approval before uploading. All creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported to authorities.</p>
-    <p>Contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a> · admin@dttmediallc.com</p>
+    <p>Contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
   </SectionShell>
 );
 
@@ -295,7 +295,7 @@ const DmcaTakedown = () => {
       <div className="space-y-2">
         <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
         <p><strong className="text-foreground">Designated DMCA Agent</strong></p>
-        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a><br/>Backup: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
+        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
         <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
       </div>
 
