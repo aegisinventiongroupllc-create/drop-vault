@@ -602,7 +602,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
             <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">Fee reverts to 10% when timer hits zero</p>
+            <p className="text-[10px] text-muted-foreground">Returns to your standard or eligible founding split when the timer ends</p>
           </div>
         )}
         {!splitState.incentiveActive && (
