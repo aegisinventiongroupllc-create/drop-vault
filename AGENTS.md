@@ -29,4 +29,4 @@
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover through Cloud UI database exports and separate owner-controlled Storage downloads; rehearse only in isolation, require written vendor content approval before media integration. Why: snapshots omit files and live restores lose later writes.
-- Live-database tests connect with prepared statements off and a 30s timeout. Why: the pooled connection drops prepared statements and slows under full parallel runs.
+- Subdirectories have their own AGENTS.md; read it before changing files there.
