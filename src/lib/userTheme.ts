@@ -139,12 +139,15 @@ export async function saveThemeToAccount(theme: UserTheme) {
   saving += 1;
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return false;
     const safe = validateTheme(theme);
     const pendingKey = `${KEY}_pending_${user.id}`;
     localStorage.setItem(pendingKey, JSON.stringify(safe));
     const { error } = await supabase.from("profiles").update({ ui_theme: safe as never }).eq("user_id", user.id);
     if (!error) localStorage.removeItem(pendingKey);
+    return !error;
+  } catch {
+    return false;
   } finally { saving -= 1; }
 }
 
