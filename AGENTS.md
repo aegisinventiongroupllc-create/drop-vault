@@ -30,4 +30,4 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- Founding splits use permanent approval slots; both admin views share country lists including empty discovery markets. Why: visible vacancies never alter awards.
+- Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
