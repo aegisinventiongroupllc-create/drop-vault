@@ -202,6 +202,13 @@ body { top: 0 !important; }
 .galaxy-reel-track { animation: galaxy-pan linear infinite; will-change: transform; }
 .galaxy-photo-tint { background: hsl(var(--galaxy-tone)); mix-blend-mode: color; opacity: .85; }
 @keyframes galaxy-pan { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+/* Gentle, visible breathing for the entry-pass globe. */
+@keyframes globe-breathe {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.25)); }
+  50% { transform: scale(1.07); filter: drop-shadow(0 0 18px hsl(var(--primary) / 0.55)); }
+}
+.globe-breathe { animation: globe-breathe 4.5s ease-in-out infinite; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) { .globe-breathe { animation-duration: 9s; } }
 @media (prefers-reduced-motion: reduce) { .galaxy-reel-track { animation: none; } }
 
 .dtt-auth-screen { letter-spacing: 0; }

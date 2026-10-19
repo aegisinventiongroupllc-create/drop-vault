@@ -137,13 +137,7 @@ export const HoloSphere = ({ style = "brand" }: { style?: GlobeStyle }) => {
         borderMats.current[i] = mat;
         return <primitive key={`b${i}`} object={new THREE.Line(g, mat)} />;
       })}
-      {/* Faint graticule */}
-      {grid.map((g, i) => (
-        <primitive
-          key={`g${i}`}
-          object={new THREE.Line(g, new THREE.LineBasicMaterial({ color: colors.grid, transparent: true, opacity: 0.12 }))}
-        />
-      ))}
+      {/* Latitude/longitude grid intentionally not rendered — country outlines only. */}
     </group>
   );
 };
