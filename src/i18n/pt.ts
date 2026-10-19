@@ -75,7 +75,7 @@ const pt: Translations = {
   pay_with_crypto: "PAGAR COM CRIPTO",
 
   tip_amounts: "Escolher valor da gorjeta",
-  tip_fee_note: "$1.00 taxa DTT por gorjeta",
+  tip_fee_note: "Sem taxa extra — o criador fica com 90%",
 
   payout_ltc_only: "Pagamos apenas via LTC. Envie seu endereço Litecoin abaixo.",
   payout_instruction: "Todos os pagamentos são processados em Litecoin (LTC) — a moeda de pagamento universal independentemente do seu país ou moeda local.",

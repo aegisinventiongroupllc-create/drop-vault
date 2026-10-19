@@ -445,7 +445,7 @@ const AdminPortal = () => {
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <Button variant="outline" aria-label="View purchase breakdown" onClick={() => setFinanceCategory("purchase")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
-                <div className="text-muted-foreground uppercase text-[10px]">$1 purchase fees</div>
+                <div className="text-muted-foreground uppercase text-[10px]">$1 service fees</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.purchase_fees ?? 0).toFixed(2)}</div>
               </Button>
               <Button variant="outline" aria-label="View tokens breakdown" onClick={() => setFinanceCategory("tokens")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">

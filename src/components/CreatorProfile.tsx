@@ -141,10 +141,10 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const TIP_AMOUNTS = [5, 10, 20, 50, 100];
 
   const handleSendTip = (amount: number) => {
-    const netAmount = amount - ADMIN_FEE_USD;
+    const netAmount = Math.round(amount * 0.9 * 100) / 100;
     // In production, this generates an LTC checkout invoice
     setTipSent(true);
-    setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (after $${ADMIN_FEE_USD} platform fee).`);
+    setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (90%).`);
     setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
   };
 
@@ -219,7 +219,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           SEND A TIP
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Show your support — $1 platform fee per tip
+          Show your support — no extra fee, creator keeps 90%
         </p>
       </div>
 
@@ -231,7 +231,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <Heart className="w-5 h-5 inline text-pink-400 mr-1" /> Send a Tip to {creatorName}
             </h3>
             <p className="text-xs text-muted-foreground text-center mb-4">
-              A flat ${ADMIN_FEE_USD} DTT fee is deducted. The rest goes to the creator.
+              No extra fee. The creator keeps 90% of every tip.
             </p>
             {tipNotification ? (
               <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
@@ -257,8 +257,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {selectedTip && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
                     <div className="flex justify-between"><span>Tip Amount:</span><span className="text-foreground font-bold">${selectedTip}</span></div>
-                    <div className="flex justify-between"><span>DTT Fee:</span><span className="text-destructive font-bold">-${ADMIN_FEE_USD}</span></div>
-                    <div className="flex justify-between border-t border-border pt-1"><span>Creator Receives:</span><span className="text-primary font-bold">${selectedTip - ADMIN_FEE_USD}</span></div>
+                    <div className="flex justify-between"><span>Platform share (10%):</span><span className="text-foreground font-bold">${Math.round(selectedTip * 10) / 100}</span></div>
+                    <div className="flex justify-between border-t border-border pt-1"><span>Creator Receives:</span><span className="text-primary font-bold">${Math.round(selectedTip * 90) / 100}</span></div>
                   </div>
                 )}
                 <Button
