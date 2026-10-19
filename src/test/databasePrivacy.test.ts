@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
 
 const connection = process.env.SUPABASE_DB_URL;
-const database = connection ? postgres(connection, { max: 1 }) : null;
+const database = connection ? postgres(connection, { max: 1, prepare: false }) : null;
 
 // Run against the live catalog only when a secure sandbox connection is available.
 describe.skipIf(!database)("live database privacy rules", () => {

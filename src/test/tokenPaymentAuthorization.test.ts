@@ -2,7 +2,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
 
-const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1 }) : null;
+const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("token payment database authorization", () => {
   // Test the deployed body against isolated temporary tables; sandbox cannot
   // assume service_role or call auth.role(). Live privileges checked separately.
