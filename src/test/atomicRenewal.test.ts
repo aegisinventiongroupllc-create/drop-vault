@@ -1,7 +1,7 @@
 // @vitest-environment node
 import {afterAll,describe,it,expect} from 'vitest';
 import postgres from 'postgres';
-const db=process.env.SUPABASE_DB_URL?postgres(process.env.SUPABASE_DB_URL,{max:1}):null;
+const db=process.env.SUPABASE_DB_URL?postgres(process.env.SUPABASE_DB_URL,{max:1,prepare:false}):null;
 describe.skipIf(!db)('deployed atomic renewals in isolated fixtures',()=>{
  afterAll(async()=>{await db?.end();});
  async function setup(sql:postgres.TransactionSql){

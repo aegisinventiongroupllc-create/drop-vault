@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
-const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1 }) : null;
+const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("creator upload authorization", () => {
   afterAll(async () => { await db?.end(); });
   it.each(["INSERT", "UPDATE"])("restricts %s on every creator bucket without blocking onboarding", async cmd => {

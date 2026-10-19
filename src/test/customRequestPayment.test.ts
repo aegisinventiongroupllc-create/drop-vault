@@ -31,7 +31,7 @@ describe("custom request invoice verification", () => {
   });
 });
 
-const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1 }) : null;
+const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("custom request payment database authorization", () => {
   afterAll(async () => { await db?.end(); });
   it.each(["anon", "authenticated"])("denies %s marking paid or writing receipts", async role => {
