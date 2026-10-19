@@ -250,7 +250,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
           <p className="text-xs text-muted-foreground">or <span className="text-primary font-bold">{BUNDLE_TOKENS} Tokens for ${BUNDLE_INVOICE_USD}</span></p>
           <div className="flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-secondary/80 border border-border">
             <span className="text-xs text-primary font-medium">Creator keeps 90%</span>
-            <span className="text-xs text-muted-foreground">• $1 Platform Fee</span>
+            <span className="text-xs text-muted-foreground">• $5 service fee included</span>
           </div>
           <p className="text-[9px] text-muted-foreground/60">14-day access • 336 hours</p>
           <p className="text-[9px] text-muted-foreground/60 max-w-[80%] text-center px-4">

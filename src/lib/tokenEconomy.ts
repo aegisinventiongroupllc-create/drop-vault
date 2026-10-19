@@ -115,12 +115,12 @@ export function calculateCustomRequestSplit(baseAmount: number) {
 }
 
 /**
- * Tip split: flat $1 DTT fee, remainder to creator
+ * Tip split: no customer fee; platform keeps 10%, creator 90%
  */
 export function calculateTipSplit(tipAmount: number) {
-  const adminFee = ADMIN_FEE_USD;
-  const creatorShare = tipAmount - adminFee;
-  return { tipAmount, adminFee, creatorShare };
+  const platformShare = Math.round(tipAmount * PLATFORM_SPLIT_PERCENT) / 100;
+  const creatorShare = Math.round(tipAmount * CREATOR_SPLIT_PERCENT) / 100;
+  return { tipAmount, adminFee: 0, platformShare, creatorShare };
 }
 
 /**

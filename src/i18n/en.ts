@@ -75,7 +75,7 @@ const en: Translations = {
   pay_with_crypto: "PAY WITH CRYPTO",
 
   tip_amounts: "Choose tip amount",
-  tip_fee_note: "$1.00 DTT fee per tip",
+  tip_fee_note: "No extra fee — creator keeps 90%",
 
   payout_ltc_only: "We payout via LTC only. Submit your Litecoin address below.",
   payout_instruction: "All payouts are processed in Litecoin (LTC) — the universal payout currency regardless of your country or local currency.",

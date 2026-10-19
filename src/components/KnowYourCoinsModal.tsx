@@ -27,7 +27,7 @@ const KnowYourCoinsModal = ({ onClose }: { onClose: () => void }) => {
             <p>• <span className="text-foreground font-medium">1 Bit-Token</span> = 14 days of full access to ONE Creator Profile</p>
             <p>• $20 token value + $5 service and processing fee</p>
             <p>• Access auto-locks after 14 days — no stacking</p>
-            <p>• Custom Requests are flat $1 per request</p>
+            <p>• Custom requests: flat $1 service fee per request</p>
           </div>
 
           <Button variant="neon" className="w-full" onClick={onClose}>

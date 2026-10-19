@@ -109,7 +109,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               {customBidTokens && Number(customBidTokens) > 0 && (
                 <p className="text-[10px] text-gold mt-1">
-                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 DTT Fee + $4 processing cover
+                  = ${Math.min(Number(customBidTokens), MAX_TOKENS) * TOKEN_BASE_VALUE_USD} USD + $1 service fee + $4 processing cover
                 </p>
               )}
             </div>
@@ -126,7 +126,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               <div className="text-right">
                 <span className="text-primary font-bold text-lg">${activePrice}</span>
-                <p className="text-[10px] text-muted-foreground">DTT Flat Fee: ${ADMIN_FEE_USD}</p>
+                <p className="text-[10px] text-muted-foreground">Service fee: ${ADMIN_FEE_USD}</p>
               </div>
             </div>
 
@@ -168,7 +168,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-foreground font-medium">${activePrice}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">DTT Flat Fee</span>
+                <span className="text-muted-foreground">Service Fee</span>
                 <span className="text-gold font-medium">+${ADMIN_FEE_USD}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -239,7 +239,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
               <p className="text-xs text-muted-foreground mb-1">TOTAL DUE</p>
               <p className="text-2xl font-bold text-primary">${totalDue}</p>
-              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} DTT Fee + ${CUSTOM_REQUEST_PROCESSING_FEE_USD} processing cover</p>
+              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} service fee + ${CUSTOM_REQUEST_PROCESSING_FEE_USD} processing cover</p>
             </div>
 
             {error && (
