@@ -16,6 +16,8 @@ export const BLOCKED_COUNTRY_CODES: ReadonlySet<string> = new Set([
   "KW", "LB", "LY", "MY", "MV", "MA", "NP", "OM", "PK", "QA",
   "SA", "SG", "SO", "LK", "SD", "TN", "TR", "TM", "AE", "UZ",
   "VN", "YE",
+  // Added Oct 2026 review: adult sites blocked or criminalised
+  "KR", "PH", "NG",
 ]);
 
 export const isBlockedCountry = (code?: string | null): boolean => {
