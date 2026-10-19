@@ -706,6 +706,39 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_creators: {
+        Row: {
+          country: string
+          creator_id: string
+          ends_at: string
+          locked_at: string
+          slot: number
+          split_creator: number
+          split_platform: number
+          vault_side: string
+        }
+        Insert: {
+          country: string
+          creator_id: string
+          ends_at?: string
+          locked_at?: string
+          slot: number
+          split_creator?: number
+          split_platform?: number
+          vault_side: string
+        }
+        Update: {
+          country?: string
+          creator_id?: string
+          ends_at?: string
+          locked_at?: string
+          slot?: number
+          split_creator?: number
+          split_platform?: number
+          vault_side?: string
+        }
+        Relationships: []
+      }
       legal_consents: {
         Row: {
           consent_text: string
@@ -1353,6 +1386,7 @@ export type Database = {
         Returns: boolean
       }
       can_upload_request_delivery: { Args: { _name: string }; Returns: boolean }
+      claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       creator_split_percent: { Args: { _creator_id: string }; Returns: number }
