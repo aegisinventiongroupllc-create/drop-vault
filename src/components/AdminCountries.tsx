@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getAdminPasscode } from "@/lib/adminSession";
-import { countryName } from "@/lib/siteTranslate";
+import { countryName as translatedCountryName } from "@/lib/siteTranslate";
+import { COUNTRIES } from "@/components/GlobalPassport";
+const countryName = (code: string, fallback: string) => translatedCountryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? (code === "GLOBAL" ? "Country not recorded" : fallback));
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { foundingCountries } from "@/lib/foundingCreators";
