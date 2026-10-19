@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_STAR_STYLE, activeTheme, loadTheme, previewTheme, saveTheme, validateTheme } from "@/lib/userTheme";
+import { DEFAULT_STAR_STYLE, activeTheme, loadTheme, previewTheme, resolveIdleSky, saveTheme, validateTheme } from "@/lib/userTheme";
 
 describe("personal globe preferences", () => {
+  it("uses the customer's or creator's main galaxy and color on idle when no separate sky was saved", () => {
+    expect(resolveIdleSky({ starStyle: "blueMeteor", galaxy: "#14b8a6" })).toEqual({ style: "blueMeteor", tone: "#14b8a6" });
+  });
+  it("preserves a separately saved idle sky and its color", () => {
+    expect(resolveIdleSky({ starStyle: "blueMeteor", galaxy: "#14b8a6", brbStyle: "cosmicGold", brbTone: "#ff0080" })).toEqual({ style: "cosmicGold", tone: "#ff0080" });
+  });
+  it("keeps original sky colors when explicitly saved without an idle tint", () => {
+    expect(resolveIdleSky({ galaxy: "#14b8a6", brbStyle: "goldenMoon" })).toEqual({ style: "goldenMoon", tone: undefined });
+  });
   it("keeps idle sky choices separate from the normal globe backdrop", () => {
     saveTheme({ brbStyle: "cosmicGold", brbTone: "#14b8a6" });
     expect(loadTheme().brbStyle).toBe("cosmicGold");

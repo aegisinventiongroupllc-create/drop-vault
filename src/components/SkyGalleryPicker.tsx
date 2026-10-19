@@ -1,33 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import HexColorWheel from "@/components/HexColorWheel";
 import GalaxyReel from "@/components/GalaxyReel";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
-import { activeTheme, DEFAULT_STAR_STYLE, loadTheme, saveTheme, saveThemeToAccount, STAR_STYLES } from "@/lib/userTheme";
+import { loadTheme, resolveIdleSky, saveTheme, saveThemeToAccount, STAR_STYLES } from "@/lib/userTheme";
 
 export default function SkyGalleryPicker() {
   const saved = loadTheme();
-  const [style, setStyle] = useState(saved.brbStyle ?? DEFAULT_STAR_STYLE);
-  const [tone, setTone] = useState(saved.brbTone ?? "#ffffff");
-  const [tinted, setTinted] = useState(Boolean(saved.brbTone));
+  const idleSky = resolveIdleSky(saved);
+  const [style, setStyle] = useState(idleSky.style);
+  const [tone, setTone] = useState(idleSky.tone ?? "#ffffff");
+  const [tinted, setTinted] = useState(Boolean(idleSky.tone));
   const [dashboard, setDashboard] = useState(saved.dashboardSky === true);
   const [dirty, setDirty] = useState(false);
   const keep = () => {
     const previous = loadTheme();
-    setStyle(previous.brbStyle ?? DEFAULT_STAR_STYLE);
-    setTone(previous.brbTone ?? "#ffffff");
-    setTinted(Boolean(previous.brbTone));
+    const sky = resolveIdleSky(previous);
+    setStyle(sky.style);
+    setTone(sky.tone ?? "#ffffff");
+    setTinted(Boolean(sky.tone));
     setDashboard(previous.dashboardSky === true);
     setDirty(false);
   };
+  useEffect(() => {
+    const update = () => { if (!dirty) keep(); };
+    window.addEventListener("dtt-theme", update);
+    return () => window.removeEventListener("dtt-theme", update);
+  }, [dirty]);
   const save = () => {
-    const next = { ...activeTheme(), brbStyle: style, brbTone: tinted ? tone : undefined, dashboardSky: dashboard };
+    const next = { ...loadTheme(), brbStyle: style, brbTone: tinted ? tone : undefined, dashboardSky: dashboard };
     saveTheme(next);
     void saveThemeToAccount(next);
     setDirty(false);
   };
+  const useMainGalaxy = () => {
+    const next = { ...loadTheme() };
+    delete next.brbStyle;
+    delete next.brbTone;
+    saveTheme(next);
+    void saveThemeToAccount(next);
+    keep();
+  };
   return <section className="space-y-3 border-t border-border pt-4" aria-label="Be Right Back sky gallery">
     <h3 className="text-xs font-bold text-foreground">Be Right Back sky gallery</h3>
+    <Button variant="outline" type="button" className="w-full text-xs" onClick={useMainGalaxy}>Use my galaxy for Be Right Back</Button>
     <div className="relative h-44 overflow-hidden rounded-md border border-border" data-testid="sky-gallery-preview">
       <GalaxyReel styleOverride={style} toneOverride={tinted ? tone : ""} />
     </div>
