@@ -147,7 +147,7 @@ const frag = `
 `;
 
 const CityLights = ({ countries, density = 1, scale = 1, dotScale = 1, glintBoost = 1 }: { countries: CountryLightSpec[]; density?: number; scale?: number; dotScale?: number; glintBoost?: number }) => {
-  const { tone, neon, reduced } = usePersonalGlobe();
+  const { tone, neon, reduced, whiteLights } = usePersonalGlobe();
   const tint = useMemo(() => new THREE.Color(tone ?? getComputedStyle(document.documentElement).getPropertyValue("--globe-tone").trim()), [tone]);
   const mat = useRef<THREE.ShaderMaterial>(null);
   const dpr = useThree((st) => st.viewport.dpr);
@@ -175,7 +175,7 @@ const CityLights = ({ countries, density = 1, scale = 1, dotScale = 1, glintBoos
     if (!mat.current) return;
     mat.current.uniforms.uTime.value = reduced ? 0 : clock.elapsedTime;
     mat.current.uniforms.uNeon.value = neon ? 1 : 0;
-    mat.current.uniforms.uTint.value = tone ? 1 : 0;
+    mat.current.uniforms.uTint.value = tone && !whiteLights ? 1 : 0;
     mat.current.uniforms.uTone.value.copy(tint);
   });
 
@@ -186,7 +186,7 @@ const CityLights = ({ countries, density = 1, scale = 1, dotScale = 1, glintBoos
         ref={mat}
         vertexShader={vert}
         fragmentShader={frag}
-        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dotScale * dpr }, uGlint: { value: glintBoost }, uNeon: { value: neon ? 1 : 0 }, uTint: { value: tone ? 1 : 0 }, uTone: { value: tint } }}
+        uniforms={{ uTime: { value: 0 }, uScale: { value: 1.3 * scale * dotScale * dpr }, uGlint: { value: glintBoost }, uNeon: { value: neon ? 1 : 0 }, uTint: { value: tone && !whiteLights ? 1 : 0 }, uTone: { value: tint } }}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
