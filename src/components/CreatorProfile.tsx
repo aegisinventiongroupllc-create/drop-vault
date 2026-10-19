@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
 import CustomRequestModal from "@/components/CustomRequestModal";
-import { ADMIN_FEE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useSubscriptions } from "@/hooks/useSubscriptions";

@@ -126,7 +126,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               </div>
               <div className="text-right">
                 <span className="text-primary font-bold text-lg">${activePrice}</span>
-                <p className="text-[10px] text-muted-foreground">DTT Flat Fee: ${ADMIN_FEE_USD}</p>
+                <p className="text-[10px] text-muted-foreground">Service fee: ${ADMIN_FEE_USD}</p>
               </div>
             </div>
 
