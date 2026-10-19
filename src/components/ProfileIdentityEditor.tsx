@@ -1,5 +1,5 @@
 import VipBackdrop from "@/components/VipBackdrop";
-import DashboardColorPicker from "@/components/DashboardColorPicker";
+import DashboardColorPicker, { type DashboardColorPickerHandle } from "@/components/DashboardColorPicker";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,9 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   const [wheelOpen, setWheelOpen] = useState(true);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [photoError, setPhotoError] = useState("");
+  const [handleError, setHandleError] = useState("");
+  const handleInput = useRef<HTMLInputElement>(null);
+  const colorPicker = useRef<DashboardColorPickerHandle>(null);
   const dirty = useRef(false);
 
   useEffect(() => {
@@ -61,7 +64,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         setHandle(data.display_name ?? "");
         setCountry(data.country || "GLOBAL");
         setIsCreator((data as { role?: string }).role === "creator");
-        setTags(Array.isArray((data as { tags?: string[] }).tags) ? (data as { tags?: string[] }).tags! : []);
+        const storedTags = (data as { tags?: string[] }).tags;
+        setTags(Array.isArray(storedTags) ? storedTags : []);
         const stored = parseAvatarConfig(data.avatar_config);
         setAvatar(stored.portraitPath ? stored : { ...stored, useDttIcon: true });
       }
@@ -88,14 +92,22 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
   }, [handle, avatar, loading]);
 
   const updateAvatar: typeof setAvatar = (value) => { dirty.current = true; setAvatar(value); };
-  const updateHandle = (value: string) => { dirty.current = true; setHandle(value); };
+  const updateHandle = (value: string) => { dirty.current = true; setHandleError(""); setHandle(value); };
 
   const save = async (blobOverride?: Blob, avatarOverride?: AvatarConfig) => {
+    // Personal colors never depend on changing a public identity.
+    const galaxySaved = await colorPicker.current?.saveGalaxy();
+    if (!dirty.current && !blobOverride && !avatarOverride) {
+      if (!galaxySaved) toast({ title: "No identity changes to save" });
+      return;
+    }
     const currentAvatar = avatarOverride ?? avatar;
     const blobToUpload = currentAvatar.useDttIcon ? undefined : blobOverride ?? portraitBlob;
     const clean = handle.trim().replace(/^@/, "");
     if (!HANDLE_PATTERN.test(clean)) {
-      toast({ title: "Choose a valid handle", description: "Use 3–24 letters, numbers, underscores, or periods.", variant: "destructive" });
+      setHandleError("Use 3–24 letters, numbers, underscores, or periods. Start with a letter, number, or underscore.");
+      handleInput.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      handleInput.current?.focus({ preventScroll: true });
       return;
     }
     setSaving(true);
@@ -207,7 +219,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
 
       <div className="text-left">
         <label htmlFor="display-handle" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Public avatar name</label>
-        <Input id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" onChange={(event) => updateHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
+        <Input ref={handleInput} id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" aria-invalid={!!handleError} aria-describedby={handleError ? "display-handle-error" : undefined} onChange={(event) => updateHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
+        {handleError && <p id="display-handle-error" role="alert" className="mt-2 text-xs text-destructive">{handleError}</p>}
       </div>
 
       <div className="space-y-4 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
@@ -284,7 +297,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         </p>
       </div>
 
-      <DashboardColorPicker />
+      <DashboardColorPicker ref={colorPicker} />
 
       {isCreator && (
       <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">

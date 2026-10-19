@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [x] Fix galaxy saving independently of identity edits and focus invalid handles; 15 tests pass. Real signed-in creator saved tint with unchanged legacy handle, no warning, and reload persistence. Account sync remains unavailable for this legacy profile; explicit device-only feedback shown. Customer controls share the tested implementation; unpaid customer gate not bypassed.
 - [x] Make the main galaxy color wheel always visible directly under Galaxy & star color, above the live preview and backdrop choices, in shared creator/customer controls; retain explicit save/cancel. Signed-in creator wheel rendered and interacted with; customer uses same controls.
 - [x] Fix shared customer/creator Be Right Back galaxy inheritance and add Use my galaxy reset for separate idle selections. Thirteen tests pass; real creator selection, loaded matching image after 61 seconds and click-to-return verified; original choices restored. Named customer account reaches unpaid entry-pass gate, so its dashboard-specific end-to-end check remains blocked without verified payment; no access bypass performed.
 - [x] Prepare documented Cloud export/recovery steps and copy-ready video/backup provider inquiries; research official provider docs. Instructions delivered in Files; no export, media transfer or provider contact performed.

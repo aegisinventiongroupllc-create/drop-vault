@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import HexColorWheel from "@/components/HexColorWheel";
 import MiniGlobe from "@/components/MiniGlobe";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,14 @@ import { DEFAULT_STAR_STYLE, STAR_STYLES, THEME_PARTS, activeTheme, loadTheme, p
 import GalaxyReel from "@/components/GalaxyReel";
 import SkyGalleryPicker from "@/components/SkyGalleryPicker";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
+import { toast } from "@/hooks/use-toast";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
 /** Lets each creator or customer recolor their own dashboard. */
-const DashboardColorPicker = () => {
+export type DashboardColorPickerHandle = { saveGalaxy: () => Promise<boolean> };
+
+const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => {
   const [theme, setTheme] = useState<UserTheme>(loadTheme);
   const [open, setOpen] = useState(false);
   const [wheelFor, setWheelFor] = useState<ThemeKey | null>("primary");
@@ -43,13 +46,18 @@ const DashboardColorPicker = () => {
     saveTheme(next);
     persist(next);
   };
-  const commitPreview = () => {
+  const commitPreview = async () => {
+    if (!previewing) return false;
     const next = { ...theme };
     savedBeforePreview.current = null;
     setPreviewing(false);
     saveTheme(next);
-    persist(next);
+    window.clearTimeout(timer.current);
+    const synced = await saveThemeToAccount(next);
+    toast({ title: synced ? "Galaxy color saved" : "Galaxy color saved on this device", description: synced ? undefined : "Account sync is unavailable. Your color is kept on this device." });
+    return true;
   };
+  useImperativeHandle(ref, () => ({ saveGalaxy: commitPreview }));
   const cancelPreview = () => {
     const saved = savedBeforePreview.current ?? {};
     savedBeforePreview.current = null;
@@ -119,7 +127,7 @@ const DashboardColorPicker = () => {
             <div className="space-y-2 rounded-md border border-primary/40 bg-primary/10 p-2">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Example only — nothing saved yet. Watch the star backdrop behind this box.</p>
               <div className="flex gap-2">
-                <Button type="button" onClick={commitPreview} className="flex-1 text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
+                <Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy color</Button>
                 <Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button>
               </div>
             </div>
@@ -172,6 +180,6 @@ const DashboardColorPicker = () => {
       )}
     </div>
   );
-};
+});
 
 export default DashboardColorPicker;
