@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
 export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
 export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster" | "blueMeteor" | "crescent" | "cosmicGold" | "violetWorld" | "celestialStorm" | "goldenMoon";
@@ -118,7 +118,11 @@ export function resolveIdleSky(theme: UserTheme): { style: StarStyle; tone?: str
   };
 }
 
+export type GlobeOverride = { tone?: string; borderTone?: string; whiteLights?: boolean };
+export const GlobeOverrideContext = createContext<GlobeOverride | null>(null);
+
 export function usePersonalGlobe() {
+  const override = useContext(GlobeOverrideContext);
   const [theme, setTheme] = useState(activeTheme);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   useEffect(() => {
@@ -130,7 +134,8 @@ export function usePersonalGlobe() {
     return () => { window.removeEventListener("dtt-theme", update); media.removeEventListener("change", motion); };
   }, []);
   const idleSky = resolveIdleSky(theme);
-  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, brbStyle: idleSky.style, brbTone: idleSky.tone, dashboardSky: theme.dashboardSky === true, reduced };
+  if (override) return { tone: override.tone ?? theme.globe, neon: false, borderTone: override.borderTone ?? theme.globeBorder, borderNeon: false, whiteLights: override.whiteLights === true, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, brbStyle: idleSky.style, brbTone: idleSky.tone, dashboardSky: theme.dashboardSky === true, reduced };
+  return { tone: theme.globe, neon: theme.globeNeon === true, borderTone: theme.globeBorder, borderNeon: theme.globeBorderNeon === true, whiteLights: false, galaxyTone: theme.galaxy, starStyle: theme.starStyle ?? DEFAULT_STAR_STYLE, brbStyle: idleSky.style, brbTone: idleSky.tone, dashboardSky: theme.dashboardSky === true, reduced };
 }
 
 // ---- Account sync: colors follow the person to every device ----
