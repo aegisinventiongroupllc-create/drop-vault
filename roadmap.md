@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Verify the two named TryBit reviewer accounts through their real signed-in screens, recheck payout fee wording, and rerun checks. Do not grant unpaid access or bypass creator verification.
 - [x] Correct creator-facing token payout wording and both payout notices: $25 checkout ($20 value + $5 fee), standard $18, founding $18.40, Power Week $19. Signed-in creator analytics verified; 31 related checks pass, build OK. Monthly RPC and detail reads are account-scoped, not owner-wide profits. Reviewer emails confirmed by owner, profiles not yet completed; no reviewer access or verification bypass granted.
 - [x] Fix galaxy saving independently of identity edits and focus invalid handles; 15 tests pass. Real signed-in creator saved tint with unchanged legacy handle, no warning, and reload persistence. Account sync remains unavailable for this legacy profile; explicit device-only feedback shown. Customer controls share the tested implementation; unpaid customer gate not bypassed.
 - [x] Make the main galaxy color wheel always visible directly under Galaxy & star color, above the live preview and backdrop choices, in shared creator/customer controls; retain explicit save/cancel. Signed-in creator wheel rendered and interacted with; customer uses same controls.
