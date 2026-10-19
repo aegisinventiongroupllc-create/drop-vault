@@ -21,7 +21,7 @@ const SpinningGlobe = ({ speed, lights, size, style, dotScale, glintBoost, pulse
       groupRef.current.rotation.y += delta * speed;
       // Slow, subtle breathing: the whole globe gently swells and settles.
       if (pulse > 0) {
-        const s = 1 + pulse * (0.5 - 0.5 * Math.cos(clock.getElapsedTime() * 0.8));
+        const s = 1 + pulse * (0.5 - 0.5 * Math.cos(clock.getElapsedTime() * 1.25));
         groupRef.current.scale.setScalar(s);
       }
     }
