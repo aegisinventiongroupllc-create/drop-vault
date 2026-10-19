@@ -38,7 +38,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
         <div className="relative mx-auto h-32 w-32 select-none">
           <div className="absolute inset-0 opacity-90">
             <GlobeOverrideContext.Provider value={PINK_GLOBE}>
-              <MiniGlobe size={128} speed={0.15} lights backdrop={false} pulse={0.012} />
+              <MiniGlobe size={128} speed={0.15} lights backdrop={false} pulse={0.04} />
             </GlobeOverrideContext.Provider>
           </div>
           <p className="absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]">DTT</p>
