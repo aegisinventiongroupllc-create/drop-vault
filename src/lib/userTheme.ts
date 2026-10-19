@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
 export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
 export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster" | "blueMeteor" | "crescent" | "cosmicGold" | "violetWorld" | "celestialStorm" | "goldenMoon";

@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { ENTRY_PASS_PRICE_USD } from "@/lib/tokenEconomy";
 import MiniGlobe from "@/components/MiniGlobe";
+import { GlobeOverrideContext, type GlobeOverride } from "@/lib/userTheme";
+
+// Pink globe, medium-dark pink outlines, bright white lights.
+const PINK_GLOBE: GlobeOverride = { tone: "#ff4da6", borderTone: "#d6337f", whiteLights: true };
 
 const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -33,7 +37,9 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
       <div className="w-full max-w-md space-y-6 text-center relative">
         <div className="relative mx-auto h-32 w-32 select-none">
           <div className="absolute inset-0 opacity-90">
-            <MiniGlobe size={128} speed={0.15} lights />
+            <GlobeOverrideContext.Provider value={PINK_GLOBE}>
+              <MiniGlobe size={128} speed={0.15} lights backdrop={false} />
+            </GlobeOverrideContext.Provider>
           </div>
           <p className="absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]">DTT</p>
         </div>
