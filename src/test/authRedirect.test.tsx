@@ -8,6 +8,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 vi.mock("@/lib/activityLog", () => ({ logActivity: vi.fn() }));
 vi.mock("@/lib/adminSession", () => ({ verifyAdminPasscode: vi.fn() }));
 vi.mock("@/components/LegalFooter", () => ({ default: () => null }));
+vi.mock("@/components/MiniGlobe", () => ({ default: () => null }));
 
 afterEach(cleanup);
 describe("DTT Google callback", () => {
