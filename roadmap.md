@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Current request
-- [x] Make the main galaxy color wheel always visible with the backdrop choices in the shared creator/customer color controls; retain live preview and explicit save/cancel.
+- [x] Make the main galaxy color wheel always visible directly under Galaxy & star color, above the live preview and backdrop choices, in shared creator/customer controls; retain explicit save/cancel. Signed-in creator wheel rendered and interacted with; customer uses same controls.
 - [x] Fix shared customer/creator Be Right Back galaxy inheritance and add Use my galaxy reset for separate idle selections. Thirteen tests pass; real creator selection, loaded matching image after 61 seconds and click-to-return verified; original choices restored. Named customer account reaches unpaid entry-pass gate, so its dashboard-specific end-to-end check remains blocked without verified payment; no access bypass performed.
 - [x] Prepare documented Cloud export/recovery steps and copy-ready video/backup provider inquiries; research official provider docs. Instructions delivered in Files; no export, media transfer or provider contact performed.
 - [ ] Complete backup/recovery and large-video readiness requested 18 October: blocked by owner-triggered database export/downloads, newest snapshot evidence, separate recovery destination and written vendor acceptance/account setup. No isolated restore, production overwrite or provider connection performed.

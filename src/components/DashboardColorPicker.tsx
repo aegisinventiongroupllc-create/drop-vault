@@ -105,6 +105,7 @@ const DashboardColorPicker = () => {
                 ))}
               </div>
               {p.key !== "galaxy" && wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
+              {p.key === "galaxy" && <div className="mt-3"><HexColorWheel color={theme.galaxy ?? "#ffffff"} label="Color wheel for Galaxy & star color" onChange={(hex) => set("galaxy", hex)} /></div>}
               {p.key === "galaxy" && (
                 <div data-testid="galaxy-preview" className="relative mt-3 h-40 w-full overflow-hidden rounded-md border border-border bg-background">
                   <GalaxyReel />
@@ -140,10 +141,6 @@ const DashboardColorPicker = () => {
                   </button>
                 );
               })}
-            </div>
-            <div className="mt-3 space-y-3">
-              <p className="text-xs font-bold text-foreground">Galaxy color tone</p>
-              <HexColorWheel color={theme.galaxy ?? "#ffffff"} label="Color wheel for Galaxy & star color" onChange={(hex) => set("galaxy", hex)} />
             </div>
           </div>
           <div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div>
