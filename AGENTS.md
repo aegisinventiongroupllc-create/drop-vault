@@ -5,7 +5,7 @@
 - Renew requests/subscriptions atomically, locking balances/access and preserving ledger splits; reject duplicate cycles. Subscription renewal is service-only with expected-expiry checks. Why: prevent double charges/partial earnings.
 - Aggregate complete account-scoped earnings server-side in UTC; paginate history and scope/coalesce realtime. Why: avoid truncation and refresh storms.
 - Welcome-back reads only account-scoped completed ledger rows; admin samples never write them. Why: preserve real earnings.
-- Auth callbacks use the DTT public domain; Google uses the generated Cloud helper and owner Auth credentials, not app secrets. Why: secure branded sign-in.
+- Email auth callbacks use the DTT public domain; Google returns to the DTT domain on live hosts and to the initiating origin elsewhere, via the generated Cloud helper and owner Auth credentials. Why: branded sign-in whose session reaches the window that started it.
 - Profiles are owner/admin-only; public_profiles is a safe read-only projection; photo writes require folder/object ownership. Why: prevent identity leaks and cross-account edits.
 - Use ProfileAvatar. Why: consistent private identities.
 - Validate avatar colors; use iro wheels and SVG fills, not arbitrary CSS. Why: safe customization.

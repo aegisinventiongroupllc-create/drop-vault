@@ -21,6 +21,19 @@ type Mode = "login" | "signup" | "forgot";
 
 const AUTH_REDIRECT_ORIGIN = "https://dropthatthing.com";
 
+// Google must hand the session back to the same window that started sign-in.
+// Live DTT hosts all resolve to the public domain; any other origin (e.g. the
+// editor preview) must receive the result itself or sign-in never completes.
+export const googleReturnOrigin = (origin: string = window.location.origin): string => {
+  try {
+    const host = new URL(origin).hostname;
+    if (host === "dropthatthing.com" || host.endsWith(".dropthatthing.com") || host === "neon-vaults.lovable.app") {
+      return AUTH_REDIRECT_ORIGIN;
+    }
+  } catch { /* fall through */ }
+  return origin;
+};
+
 const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -267,7 +280,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
               setLoading(true);
               try {
                 const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: AUTH_REDIRECT_ORIGIN,
+                  redirect_uri: googleReturnOrigin(),
                   extraParams: { prompt: "select_account" },
                 });
                 if (result.error) throw result.error;
