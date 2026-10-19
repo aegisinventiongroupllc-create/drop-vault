@@ -30,3 +30,4 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover through Cloud UI database exports and separate owner-controlled Storage downloads; rehearse only in isolation, require written vendor content approval before media integration. Why: snapshots omit files and live restores lose later writes.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
+- Founding splits come only from permanent founding_creators slots claimed by trigger on creator approval (per country and vault side). Why: signup order or profile edits cannot reshuffle locked splits.

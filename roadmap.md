@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [x] Founding 10 per country per vault locked at 92/8 for a year on approval, admin FOUNDING 10 tab, Creator Agreement screen recorded in legal trail; removed South Korea, Philippines, Nigeria from allowed countries.
 - [x] Prepare truthful TryBit preparation reply and corrected reviewer guide (v2); previous guide falsely claimed granted customer access/tokens and approved creator/sample content. Draft answers the visible support checklist and asks for permitted reviewer access/test integration, adult/synthetic content policy, fee schedule and formal approval. No email sent.
 - [ ] Complete launch sequence requested 19 October: publish confirmed DMCA agent details and business mailing address when supplied; obtain written adult-content and synthetic-media approval, finish approved payment connection, then owner performs a real $20 entry-pass test. Address, registration, vendor approval/credentials and owner's payment are blockers; no fabricated approvals or money movement.
 - [ ] Teaser production awaits a non-explicit adult dance brief and TryBit's synthetic-content acceptance; never present fictional performers as verified real creators.
