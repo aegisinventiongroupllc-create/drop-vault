@@ -11,7 +11,7 @@
 - Validate avatar colors; use iro wheels and SVG fills, not arbitrary CSS. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
 - Creator real photos stay in owner-owned private galleries; discovery shows selected photos, private interactions the emoji. Why: separate identities.
-- Capture bounded selfies in-page, release tracks on capture/close, skip landmark scanning. Why: avoid camera handoffs/heavy WASM.
+- Capture bounded selfies in-page, release tracks, skip landmark scans. Why: avoid camera handoffs/WASM.
 - Prebundle color pickers with deduped React. Why: avoid mixed hook chunks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
 - CCBill uses server-signed FlexForms, IP-restricted webhooks, catalog-price checks and idempotent credits; hide cards without secrets. Why: prevent forged payments.
@@ -28,6 +28,6 @@
 - Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
-- Recover through Cloud UI database exports and separate owner-controlled Storage downloads; rehearse only in isolation, require written vendor content approval before media integration. Why: snapshots omit files and live restores lose later writes.
+- Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- Founding splits come only from permanent founding_creators slots claimed by trigger on creator approval (per country and vault side). Why: signup order or profile edits cannot reshuffle locked splits.
+- Founding splits come only from permanent trigger-claimed slots on approval. Why: edits cannot reshuffle splits.
