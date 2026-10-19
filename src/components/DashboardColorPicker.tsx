@@ -55,7 +55,7 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
     saveTheme(next);
     window.clearTimeout(timer.current);
     const synced = await saveThemeToAccount(next);
-    toast({ title: synced ? "Galaxy color saved" : "Galaxy color saved on this device", description: synced ? undefined : "Account sync is unavailable. Your color is kept on this device." });
+    toast({ title: synced ? "Galaxy saved" : "Galaxy saved on this device", description: synced ? undefined : "Account sync is unavailable. Your color is kept on this device." });
     return true;
   };
   useImperativeHandle(ref, () => ({ saveGalaxy: commitPreview }));
@@ -83,7 +83,10 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
   };
   const setStarStyle = (starStyle: StarStyle) => {
     const next = { ...theme, starStyle };
-    setTheme(next); saveTheme(next); persist(next);
+    setTheme(next);
+    if (savedBeforePreview.current === null) savedBeforePreview.current = loadTheme();
+    setPreviewing(true);
+    previewTheme(next);
   };
 
   return (
@@ -152,7 +155,8 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
               })}
             </div>
           </FoldBox>
-          <FoldBox title="Globe preview"><div className="flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} /></div></FoldBox>
+          <FoldBox title="Globe preview"><div data-testid="globe-preview" className="relative h-48 w-full overflow-hidden rounded-md border border-border bg-background"><GalaxyReel /><div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} backdrop={false} /></div><span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span></div>
+            {previewing && <div className="mt-2 flex gap-2"><Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy</Button><Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button></div>}</FoldBox>
           <FoldBox title="Be Right Back sky gallery"><SkyGalleryPicker /></FoldBox>
           <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
           <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
