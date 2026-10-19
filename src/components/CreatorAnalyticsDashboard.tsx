@@ -683,9 +683,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               <span className="font-semibold text-foreground">Standard: 90% of the $20 token value — $18 per Bit-Token.</span>{" "}
-              Customers pay $25 ($20 token value + $5 service and processing fee); fees do not reduce your share.
+              Customers pay $25 ($20 token value + $5 service and processing fee). There is no additional $1 Bit-Token fee; the $5 fee does not reduce your share.
               Founding creators: 92% ($18.40) for their first 365 days. Power Week: 95% ($19) for 7 days.
-              Custom requests: 85% of the agreed base price; customers pay the $1 service fee and $4 processing cover separately.
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+              Custom requests only: you earn 85% of the agreed base price. The customer pays a separate $1 service fee plus $4 processing cover; neither is deducted from your earnings.
             </p>
           </div>
 
@@ -833,7 +835,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-xs text-muted-foreground text-center">
               <span className="font-bold text-foreground">Standard: $18 per Bit-Token (90% of $20 token value).</span>{" "}
-              Customer price: $25, including a separate $5 service and processing fee.
+              Customer price: $25, including a separate $5 service and processing fee. No additional $1 Bit-Token fee.
               Eligible founding creators receive $18.40 (92%) for 365 days; Power Week pays $19 (95%) for 7 days.
               Custom requests pay you 85% of the agreed base price; customer-paid fees never reduce your share.
             </p>
