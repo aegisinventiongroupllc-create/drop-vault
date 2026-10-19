@@ -22,7 +22,7 @@
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
 - Snapshot request country server-side at creation and preserve on updates; rank scoped groups. Why: avoid exposing private profile fields.
 - Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
-- Share vault artwork/teaser frame styles across studio/feed; persist language countdown start across reloads. Why: continuous transitions.
+- Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
 - Personal colors use validated ui_theme and blended renderers; idle skies inherit the main galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report account sync failures. Why: invalid handles must not block personal colors.
 - Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
@@ -30,4 +30,4 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- Founding splits come only from permanent trigger-claimed slots on approval. Why: edits cannot reshuffle splits.
+- Founding splits use permanent approval slots; both admin views share country lists including empty discovery markets. Why: visible vacancies never alter awards.

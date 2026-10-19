@@ -298,6 +298,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   }
 
   const sections: { id: Section; label: string }[] = [
+    { id: "countries", label: "COUNTRIES" },
+    { id: "founding", label: "FOUNDING 10" },
     { id: "flow", label: "HOW IT WORKS" },
     { id: "verification", label: "VERIFY" },
     { id: "analytics", label: "ANALYTICS" },
@@ -306,10 +308,8 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "payouts", label: "PAYOUTS" },
     { id: "requests", label: "REQUESTS" },
     { id: "suggestions", label: "SUGGESTIONS" },
-    { id: "countries", label: "COUNTRIES" },
     { id: "globe", label: "GLOBE" },
     { id: "powerweek", label: "⚡ POWER" },
-    { id: "founding", label: "FOUNDING 10" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
