@@ -63,7 +63,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
         </a>
 
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          The pass is an immediate digital license — all sales final once activated. Questions? dropthatthingmedia@gmail.com
+          The pass is an immediate digital license — all sales final once activated. Questions? admin@dttmediallc.com
         </p>
       </div>
 
