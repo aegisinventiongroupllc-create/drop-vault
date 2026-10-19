@@ -168,7 +168,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                 <span className="text-foreground font-medium">${activePrice}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">DTT Flat Fee</span>
+                <span className="text-muted-foreground">Service Fee</span>
                 <span className="text-gold font-medium">+${ADMIN_FEE_USD}</span>
               </div>
               <div className="flex justify-between text-sm">
