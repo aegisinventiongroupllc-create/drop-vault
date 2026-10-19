@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BuyTokensModal from "@/components/BuyTokensModal";
@@ -7,6 +7,18 @@ import MiniGlobe from "@/components/MiniGlobe";
 
 const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
   const [open, setOpen] = useState(false);
+
+  // Pink globe here too, matching the sign-in page; restore the default tone when leaving.
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.style.getPropertyValue("--globe-tone");
+    root.style.setProperty("--globe-tone", "#ff4da6");
+    return () => {
+      if (prev) root.style.setProperty("--globe-tone", prev);
+      else root.style.removeProperty("--globe-tone");
+    };
+  }, []);
+
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden">
