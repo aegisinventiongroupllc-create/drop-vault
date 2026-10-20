@@ -41,3 +41,11 @@ A project-scoped running-limit inventory returned no configured credit limits on
 6. Rehearse separate file backup and database recovery per `recovery-readiness.md`; database snapshots omit storage files. Only measured capacity plus provider commitments can justify a concurrency claim.
 
 The next decision is a funded pilot target and approved delivery service—not simply adding database disk or raising the per-file ceiling.
+
+## Usage-based delivery candidate
+
+Bunny Stream is a research candidate, not selected or approved: official documentation describes [expiring token playback](https://bunny.net/docs/stream/token-authentication), [storage and delivery pricing](https://bunny.net/docs/stream/pricing) and [optional original-file retention](https://bunny.net/docs/stream/storage-structure). Its [acceptable-use policy](https://bunny.net/acceptable-use/) did not establish written acceptance of DTT's adult-UGC model in this review. Do not quote unverified current region rates or million-viewer support. A displayed player logo does not meet DTT's permanent watermark requirement; preserve burned-in branding and separate original backup.
+
+AWS documents [private CloudFront delivery](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PrivateContent.html), but DTT-specific content approval, costs and capacity commitments also remain unconfirmed. Neither candidate was connected or contacted.
+
+Copy-ready provider inquiry, not sent: “DTT Media LLC operates an 18+ marketplace for verified adult creators and paying adult customers. Do you accept our exact consensual legal adult photo/video UGC model in writing? Please confirm private expiring playback, permanent watermark encoding, original-file export, separate backup suitability, supported countries, upload and peak delivery quotas, usage-based rates, spending controls and a staged path toward one million simultaneous viewers. We need actual capacity commitments and costs, not an unlimited-storage claim.”
