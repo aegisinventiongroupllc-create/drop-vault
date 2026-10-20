@@ -811,7 +811,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <h3 className="text-base font-semibold text-foreground">Profile Info</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-3">Build the private identity fans see throughout DTT. Your email and legal name are never shown.</p>
-              <ProfileIdentityEditor compact onSaved={(handle, avatar) => { setProfileUsername(handle); setProfileAvatar(avatar); }} />
+              <ProfileIdentityEditor compact creator onSaved={(handle, avatar) => { setProfileUsername(handle); setProfileAvatar(avatar); }} />
           </div>
 
           {authUserId && (

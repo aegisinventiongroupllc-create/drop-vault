@@ -145,6 +145,7 @@ export async function saveThemeToAccount(theme: UserTheme) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
+    localStorage.setItem(`${KEY}_owner`, user.id);
     const safe = validateTheme(theme);
     const pendingKey = `${KEY}_pending_${user.id}`;
     localStorage.setItem(pendingKey, JSON.stringify(safe));
@@ -165,18 +166,21 @@ export function startThemeSync() {
       try { saveTheme(validateTheme(JSON.parse(pending))); } catch {}
       return;
     }
+    if (localStorage.getItem(`${KEY}_owner`) !== uid) { localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
     const before = revision;
     const { data } = await supabase.from("profiles").select("ui_theme").eq("user_id", uid).maybeSingle();
     const t = (data as { ui_theme?: UserTheme } | null)?.ui_theme;
     if (before !== revision || saving) return;
+    localStorage.setItem(`${KEY}_owner`, uid);
     if (t && typeof t === "object") {
-      localStorage.setItem(KEY, JSON.stringify(t));
+      localStorage.setItem(KEY, JSON.stringify(validateTheme(t)));
       applyTheme(loadTheme());
       window.dispatchEvent(new Event("dtt-theme"));
     }
   };
   supabase.auth.onAuthStateChange((evt, session) => {
     if (evt === "SIGNED_IN" || evt === "INITIAL_SESSION") void pull(session?.user?.id);
-    if (evt === "SIGNED_OUT") { syncedUser = undefined; localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
+    if (evt === "INITIAL_SESSION" && !session) { localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
+    if (evt === "SIGNED_OUT") { localStorage.removeItem(`${KEY}_owner`); syncedUser = undefined; localStorage.removeItem(KEY); applyTheme({}); window.dispatchEvent(new Event("dtt-theme")); }
   });
 }

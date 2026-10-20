@@ -33,10 +33,10 @@ const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
   }
 };
 
-const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
+const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { compact?: boolean; creator?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
   const [handle, setHandle] = useState("");
   const [country, setCountry] = useState("GLOBAL");
-  const [isCreator, setIsCreator] = useState(false);
+  const [isCreator, setIsCreator] = useState(creator);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [avatar, setAvatar] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, useDttIcon: true });
@@ -63,7 +63,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       if (data) {
         setHandle(data.display_name ?? "");
         setCountry(data.country || "GLOBAL");
-        setIsCreator((data as { role?: string }).role === "creator");
+        setIsCreator(creator || (data as { role?: string }).role === "creator");
         const storedTags = (data as { tags?: string[] }).tags;
         setTags(Array.isArray(storedTags) ? storedTags : []);
         const stored = parseAvatarConfig(data.avatar_config);
