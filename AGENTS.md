@@ -24,7 +24,7 @@
 - Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
-- Personal colors use validated ui_theme and blended renderers; idle skies inherit the main galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report account sync failures. Why: invalid handles must not block personal colors.
+- Personal colors use validated ui_theme and blended renderers; idle skies inherit the galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report sync failures. Why: invalid handles must not block colors.
 - Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
