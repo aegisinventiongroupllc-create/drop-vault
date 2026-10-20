@@ -27,6 +27,10 @@ At the returned Cloud quotes of 0.15 requested credits/GB cached or 0.45 request
 
 Storage is a different dimension: hypothetically 100,000 creators retaining 10 GB each means 1,000,000 GB of original files, before encoded versions or separate backups. Registered account counts alone do not determine either storage or viewing traffic.
 
+For staged test planning, the same hypothetical bitrate gives 135 GB for 100 simultaneous viewers for one hour, 1,350 GB for 1,000 and 13,500 GB for 10,000. These are workload scenarios, not authorized traffic generation or forecasts. Smaller pilots must also be funded and measured.
+
+A project-scoped running-limit inventory returned no configured credit limits on 20 October. This result does not establish workspace limits or external-provider billing controls. No spending cap was created: the owner supplied no amount, and a hard block could interrupt customer access.
+
 ## Next gates, in order
 
 1. Confirm written acceptance of DTT's exact adult-UGC model from the selected storage/streaming and backup services; no vendor is confirmed approved here. Confirm private playback, permanent watermarking, original-file retention and expiring access.
