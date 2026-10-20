@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Improve worldwide customer/creator language coverage, including Top 10 and requests, and inspect payment buttons for TryBit's ongoing review without enabling unapproved payments.
 - [x] Show COUNTRIES and FOUNDING 10 in both owner dashboards, with empty countries, full-name fallback and ten separate women/men places; real Spain slot shows @LEMONADE and 19 vacancies across both lists. Actual owner login/list reads verified without runtime errors; 12 tests pass and build OK. Japan and South Africa removed from discovery and added to precautionary geo list pending legal/FPB review, not a continent-wide Africa block or legal guarantee. Existing client-side geo gate is not tamper-proof server enforcement; existing overview has horizontal mobile overflow outside the changed lists.
 - [x] Founding 10 per country per vault locked at 92/8 for a year on approval, admin FOUNDING 10 tab, Creator Agreement screen recorded in legal trail; removed South Korea, Philippines, Nigeria from allowed countries.
 - [x] Prepare truthful TryBit preparation reply and corrected reviewer guide (v2); previous guide falsely claimed granted customer access/tokens and approved creator/sample content. Draft answers the visible support checklist and asks for permitted reviewer access/test integration, adult/synthetic content policy, fee schedule and formal approval. No email sent.
