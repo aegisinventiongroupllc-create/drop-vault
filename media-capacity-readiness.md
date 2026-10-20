@@ -42,6 +42,21 @@ A project-scoped running-limit inventory returned no configured credit limits on
 
 The next decision is a funded pilot target and approved delivery service—not simply adding database disk or raising the per-file ceiling.
 
+## Conditional $100 / $500 comparison — 20 October 2026
+
+Owner is considering these amounts, not authorizing a purchase. These are hypothetical media-only budgets using Bunny's advertised starting storage rate ($0.01/GB-month) and standard regional CDN rates ($0.01–$0.06/GB), not current DTT costs or an approved vendor quote. Sources: https://bunny.net/pricing/stream/ and https://bunny.net/pricing/cdn/ . Regional standard rates: Europe/North America $0.01, Asia/Oceania $0.03, South America $0.045, Middle East/Africa $0.06 per GB. Volume-network prices differ and are not assumed here.
+
+Assume 3 Mbps video: one viewer-hour delivers 1.35 GB; six one-hour originals plus one one-minute teaser total 8.1225 GB per creator. Actual files vary. Allocate 20% to storage and 80% to delivery for illustration, not a required plan.
+
+| Monthly media budget | Storage allocation at starting rate | Six-video original-only creator libraries | Monthly viewer-hours at regional delivery range |
+| --- | --- | --- | --- |
+| $100 | $20: 2,000 GB | about 246 | $80: about 988–5,926 |
+| $500 | $100: 10,000 GB | about 1,231 | $400: about 4,938–29,630 |
+
+Library figures exclude playback renditions, replicated copies, photos and separate backups. If stored versions total three times the originals (hypothetical, not measured), those library figures become about 82 and 410. Viewer-hours are cumulative monthly viewing, not supported simultaneous viewers or account counts. Customers sharing authorized access to a creator's files need not each receive a separate stored copy; private request media remains separately authorized.
+
+These figures exclude tax, application hosting/database/auth, translation, age verification, payment fees, special encoding/watermark processing and backup costs. For one million viewers watching one hour at 3 Mbps, the standard regional delivery-only calculation is $13,500–$81,000 before volume negotiation; this is not an approved quote or proof of capacity. Written content acceptance and actual capacity/cost terms are still prerequisites.
+
 ## Usage-based delivery candidate
 
 Bunny Stream is a research candidate, not selected or approved: official documentation describes [expiring token playback](https://bunny.net/docs/stream/token-authentication), [storage and delivery pricing](https://bunny.net/docs/stream/pricing) and [optional original-file retention](https://bunny.net/docs/stream/storage-structure). Its [acceptable-use policy](https://bunny.net/acceptable-use/) did not establish written acceptance of DTT's adult-UGC model in this review. Do not quote unverified current region rates or million-viewer support. A displayed player logo does not meet DTT's permanent watermark requirement; preserve burned-in branding and separate original backup.
