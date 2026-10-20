@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { hexToHsl, usePersonalGlobe, type StarStyle } from "@/lib/userTheme";
 import { cn } from "@/lib/utils";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
@@ -77,6 +77,44 @@ const GalaxyReel = ({ className, seconds = 240, scope = "globe", styleOverride, 
   toneRef.current = galaxyTone ?? null;
   const photoSrc = starStyle && starStyle !== "living" ? PHOTO_BACKDROPS[starStyle] : null;
 
+  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
+  const activePhotoSrc = loadedPhoto === photoSrc ? photoSrc : null;
+
+  useEffect(() => {
+    if (!photoSrc) return;
+    let disposed = false;
+    let image: HTMLImageElement | null = null;
+    let loading = false;
+    let loaded = false;
+    const load = () => {
+      if (disposed || loading || loaded || document.hidden) return;
+      loading = true;
+      image = new Image();
+      image.onload = () => {
+        loading = false;
+        if (disposed) return;
+        loaded = true;
+        setLoadedPhoto(photoSrc);
+      };
+      image.onerror = () => {
+        loading = false;
+        if (!disposed) setLoadedPhoto(null);
+      };
+      image.src = photoSrc;
+    };
+    load();
+    document.addEventListener("visibilitychange", load);
+    window.addEventListener("pageshow", load);
+    window.addEventListener("online", load);
+    return () => {
+      disposed = true;
+      if (image) { image.onload = null; image.onerror = null; }
+      document.removeEventListener("visibilitychange", load);
+      window.removeEventListener("pageshow", load);
+      window.removeEventListener("online", load);
+    };
+  }, [photoSrc]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -129,19 +167,19 @@ const GalaxyReel = ({ className, seconds = 240, scope = "globe", styleOverride, 
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [reduced, seconds, stars, photoSrc]);
+  }, [reduced, seconds, stars, activePhotoSrc]);
 
-  if (photoSrc) {
+  if (activePhotoSrc) {
     return (
       <div className={cn("pointer-events-none absolute inset-0 isolate overflow-hidden bg-background", className)} style={{ "--galaxy-tone": galaxyTone ? hexToHsl(galaxyTone) : undefined } as CSSProperties} aria-hidden>
         <div
           className="galaxy-reel-track flex h-full w-[400%]"
           style={{ animationDuration: `${seconds * 2}s` }}
         >
-          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
-          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
-          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover" />
-          <img src={photoSrc} alt="" draggable={false} className="h-full w-1/4 object-cover scale-x-[-1]" />
+          {[0, 1, 2, 3].map((frame) => (
+            <div key={frame} className={cn("h-full w-1/4 shrink-0 bg-cover bg-center", frame % 2 === 1 && "scale-x-[-1]")}
+              style={{ backgroundImage: `url(${JSON.stringify(activePhotoSrc)})` }} />
+          ))}
         </div>
         {galaxyTone && <div className="galaxy-photo-tint absolute inset-0" />}
       </div>

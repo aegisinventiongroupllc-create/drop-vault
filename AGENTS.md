@@ -5,9 +5,9 @@
 - Renew requests/subscriptions atomically, locking balances/access and preserving ledger splits; reject duplicate cycles. Subscription renewal is service-only with expected-expiry checks. Why: prevent double charges/partial earnings.
 - Aggregate complete account-scoped earnings server-side in UTC; paginate history and scope/coalesce realtime. Why: avoid truncation and refresh storms.
 - Welcome-back reads only account-scoped completed ledger rows; admin samples never write them. Why: preserve real earnings.
-- Email auth callbacks use the DTT public domain; Google returns to the DTT domain on live hosts and to the initiating origin elsewhere, via the generated Cloud helper and owner Auth credentials. Why: branded sign-in whose session reaches the window that started it.
+- Auth callbacks use DTT; Google uses the initiating origin off live hosts, with the generated Cloud helper and owner credentials. Why: branded sign-in returns to its originating window.
 - Profiles are owner/admin-only; public_profiles is a safe read-only projection; photo writes require folder/object ownership. Why: prevent identity leaks and cross-account edits.
-- Use ProfileAvatar. Why: consistent private identities.
+- Use ProfileAvatar for consistent private identities.
 - Validate avatar colors; use iro wheels and SVG fills, not arbitrary CSS. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
 - Creator real photos stay in owner-owned private galleries; discovery shows selected photos, private interactions the emoji. Why: separate identities.
@@ -24,10 +24,12 @@
 - Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
-- Personal colors use validated ui_theme and blended renderers; idle skies inherit the main galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report account sync failures. Why: invalid handles must not block personal colors.
+- Personal colors use validated ui_theme and blended renderers; idle skies inherit the galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report sync failures. Why: invalid handles must not block colors.
 - Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
 - Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
+
+- Sky photos preload as background layers with star fallback and resume/online retries. Why: failed images must not draw borders behind globes.
