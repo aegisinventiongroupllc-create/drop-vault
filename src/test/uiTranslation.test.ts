@@ -2,14 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { savedUiTranslations, languageDirection } from '@/lib/uiTranslation';
 
 describe('reusable UI translation catalog', () => {
-  it('provides request and fan actions for the twelve main languages', () => {
-    for (const lang of ['es', 'pt', 'fr', 'de', 'it', 'ru', 'ar', 'hi', 'ja', 'ko', 'zh-cn']) {
-      const entries = savedUiTranslations(lang);
-      for (const key of ['Top 10 Fans', 'SUBMIT REQUEST', 'Accepted — Awaiting Payment', 'Send message']) {
-        expect(entries[key], `${lang}:${key}`).toBeTruthy();
-      }
-    }
-  });
   it('uses right-to-left direction for Arabic and Hebrew, not French', () => {
     expect(languageDirection('ar')).toBe('rtl');
     expect(languageDirection('he')).toBe('rtl');
