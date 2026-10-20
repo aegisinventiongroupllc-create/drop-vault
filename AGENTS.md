@@ -7,17 +7,17 @@
 - Welcome-back reads only account-scoped completed ledger rows; admin samples never write them. Why: preserve real earnings.
 - Auth callbacks use DTT; Google uses the initiating origin off live hosts, with the generated Cloud helper and owner credentials. Why: branded sign-in returns to its originating window.
 - Profiles are owner/admin-only; public_profiles is a safe read-only projection; photo writes require folder/object ownership. Why: prevent identity leaks and cross-account edits.
-- Use ProfileAvatar for consistent private identities.
-- Validate avatar colors; use iro wheels and SVG fills, not arbitrary CSS. Why: safe customization.
+- Use ProfileAvatar for private identities.
+- Validate avatar colors; use iro wheels/SVG fills. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
 - Creator real photos stay in owner-owned private galleries; discovery shows selected photos, private interactions the emoji. Why: separate identities.
-- Capture bounded selfies in-page, release tracks, skip landmark scans. Why: avoid camera handoffs/WASM.
-- Prebundle color pickers with deduped React. Why: avoid mixed hook chunks.
+- Bound in-page selfies, release tracks, skip scans. Why: avoid handoffs/WASM.
+- Prebundle pickers with deduped React. Why: avoid mixed hooks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
 - CCBill uses server-signed FlexForms, IP-restricted webhooks, catalog-price checks and idempotent credits; hide cards without secrets. Why: prevent forged payments.
 - Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; exclude onboarding IDs/avatars. Why: prevent verification bypass.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
-- AutoTranslator uses bounded versioned caches/retries and per-service miss coalescing; owner/code areas remain notranslate. Why: avoid duplicate work; cross-instance coordination is separate.
+- AutoTranslator applies source-matched static UI catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code stay notranslate. Why: avoid private cache exposure and repeat spend; cross-instance coordination is separate.
 - Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
 - Snapshot request country server-side at creation and preserve on updates; rank scoped groups. Why: avoid exposing private profile fields.
