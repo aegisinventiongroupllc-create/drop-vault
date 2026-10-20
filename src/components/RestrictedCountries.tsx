@@ -10,10 +10,10 @@ const OFAC_SANCTIONED = [
   "Crimea Region (Ukraine)",
   "Donetsk People's Republic (Ukraine)",
   "Luhansk People's Republic (Ukraine)",
-  "Russia (sanctioned individuals & entities)",
-  "Belarus (sanctioned individuals & entities)",
-  "Venezuela (sanctioned government & entities)",
-  "Myanmar (Burma) (sanctioned entities)",
+  "Russia (DTT whole-country exclusion)",
+  "Belarus (DTT whole-country exclusion)",
+  "Venezuela (DTT whole-country exclusion)",
+  "Myanmar (Burma) (DTT whole-country exclusion)",
 ];
 
 const ADULT_CONTENT_PROHIBITED = [
@@ -107,10 +107,10 @@ const RestrictedCountries = () => (
 
       <div>
         <p className="text-foreground font-bold mb-2">
-          3. DTT "Ghost List" — Internal Risk Block
+          3. Territory Review — Not a Verified Country Block
         </p>
         <p className="mb-2 text-[11px]">
-          DTT treats these territories as internal risk-review entries. Viewing and payout eligibility require separate review; inclusion does not establish a legal prohibition.
+          These entries and the Ukrainian regions above require separate territory-level review. They are not enforced by the current country-code list; listing them here does not establish a working territory block or legal prohibition.
         </p>
         <CountryColumn items={GHOST_LIST} />
       </div>
@@ -124,7 +124,7 @@ const RestrictedCountries = () => (
       <div className="bg-secondary/40 border border-border rounded-lg p-3 space-y-2">
         <p className="text-foreground font-bold text-[11px]">Current Checks and Limitations</p>
         <p className="text-[11px]">
-          The app checks an IP-based country estimate at entry. This browser check can fail or be bypassed and does not prove comprehensive checkout, wallet or payout screening. Stronger server-side enforcement and compliance review are required before launch. Do not use a VPN or other means to evade DTT restrictions.
+          Entry is blocked for excluded country estimates and when the region cannot be detected. Saved browser country values and local admin overrides do not grant entry. This remains a browser check, not tamper-proof server enforcement; direct media access, checkout, sanctions screening and state-level age-assurance requirements need separate protection and qualified review before launch. Countries not listed are not certified legally safe. Do not use a VPN or other means to evade DTT restrictions.
         </p>
       </div>
 

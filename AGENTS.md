@@ -20,7 +20,8 @@
 - AutoTranslator merges source-matched ui/launch catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code and input values stay unchanged. Why: protect private text and avoid repeated translation spend.
 - Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
-- Snapshot request country server-side at creation and preserve on updates; rank scoped groups. Why: avoid exposing private profile fields.
+- Snapshot request country at creation; preserve on updates. Why: privacy.
+- GeoGate fails closed, no local overrides; not server enforcement.
 - Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
