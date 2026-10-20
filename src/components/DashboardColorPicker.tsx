@@ -97,6 +97,9 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
           {open ? "HIDE COLORS" : "SHOW COLORS"}
         </button>
       </div>
+      <Button variant="outline" type="button" onClick={reset} className="w-full border-primary/60 text-xs font-black uppercase tracking-widest text-primary">
+        Back to original DTT colors
+      </Button>
       {open && (
         <>
           {THEME_PARTS.map((p) => (
