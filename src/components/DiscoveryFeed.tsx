@@ -266,7 +266,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
             DROP THAT THING IN YOUR LIBRARY
           </h3>
           <p className="text-sm text-muted-foreground">1 Bit-Token adds @{video.creator} to your library, finishes this teaser and opens their full vault for 14 days.</p>
-          <Button variant="neon" size="lg" className="text-base px-8" disabled={unlocking} onClick={handleMakeMine}>
+          <Button variant="neon" size="lg" className="text-base px-8" disabled={unlocking} onClick={() => { setGateOpen(false); onCreatorClick(video.creator); }}>
             {unlocking ? "UNLOCKING..." : `UNLOCK @${video.creator.toUpperCase()} CONTENT`}
           </Button>
           <button className="text-xs text-muted-foreground underline" onClick={() => setGateOpen(false)}>Not now</button>

@@ -12,7 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
-import ProfileAvatar from "@/components/ProfileAvatar";
+import CreatorTeaserAvatar from "@/components/CreatorTeaserAvatar";
 import TopFansSection from "@/components/TopFansSection";
 import CreatorHeartButton from "@/components/CreatorHeartButton";
 import DttToken from "@/components/DttToken";
@@ -167,7 +167,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
         {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <ProfileAvatar config={avatarConfig} creatorPhotoPath={profilePhotoPath} label={creatorName} className="h-24 w-24 border-4 border-background neon-glow" />
+          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} isMen={document.documentElement.classList.contains("vault-men")} />
         </div>
       </div>
 
