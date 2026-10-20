@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Design usage/revenue-based storage forecasts and searchable personality backdrop galleries (gaming, tasteful adult moods, floating bubbles); separate private customer dashboards from public creator profiles, retain wheel. Owner asks how to set it up; implementation scope and funded generation limits not yet agreed.
 - [ ] Prioritize private video/photo capacity, verified payments and full offered-country translation for a target of millions of simultaneous users. Capacity is unproven; funding limit, approved media service, verified quotas and isolated load environment remain required before upgrades or large tests.
 - [x] Add reusable source-matched translations, including main-language Top 10/request actions and statuses; signed-out pages use saved phrases without anonymous AI. German consent and signed-in unavailable-card notice verified, no page errors. Remove simulated tip success and unreachable request payment step; hide absent CCBill checkout. No provider enabled or money moved.
 - [ ] Complete full language coverage for every offered locale, legal page and populated customer/creator flow. Local catalog remains partial; full reviewed legal translations need qualified review. Paid Top 10 and delivery walkthroughs remain blocked by eligible paid reviewer accounts; TryBit approval/connection and live payment remain outstanding.
