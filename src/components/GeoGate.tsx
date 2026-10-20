@@ -14,7 +14,7 @@ type GeoState =
 const fetchCountry = async (): Promise<string | null> => {
   // Try ipapi.co first (free, CORS-enabled)
   try {
-    const r = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+    const r = await fetch("https://ipapi.co/json/", { cache: "no-store", signal: AbortSignal.timeout(5000) });
     if (r.ok) {
       const j = await r.json();
       if (isCountryCode(j?.country_code)) return j.country_code.toUpperCase();
@@ -22,7 +22,7 @@ const fetchCountry = async (): Promise<string | null> => {
   } catch { /* fall through */ }
   // Fallback: ipwho.is (free, CORS-enabled)
   try {
-    const r = await fetch("https://ipwho.is/", { cache: "no-store" });
+    const r = await fetch("https://ipwho.is/", { cache: "no-store", signal: AbortSignal.timeout(5000) });
     if (r.ok) {
       const j = await r.json();
       if (j?.success !== false && isCountryCode(j?.country_code)) return j.country_code.toUpperCase();

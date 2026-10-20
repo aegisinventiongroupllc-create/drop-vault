@@ -3,7 +3,7 @@ import { cleanup, render, waitFor } from "@testing-library/react";
 import GeoGate from "@/components/GeoGate";
 
 vi.mock("@/components/LegalFooter", () => ({ default: () => null }));
-vi.mock("@/components/GhostCountryMessage", () => ({ default: () => null }));
+vi.mock("@/components/GhostCountryMessage", () => ({ default: () => <input aria-label="Restriction state" /> }));
 
 afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); });
 
@@ -16,7 +16,7 @@ describe("country entry access", () => {
     vi.stubGlobal("fetch", fetcher);
     const view = enter();
     await waitFor(() => expect(fetcher).toHaveBeenCalled());
-    await waitFor(() => expect(view.queryByRole("button")).toBeNull());
+    await waitFor(() => expect(view.getByRole("textbox", { name: "Restriction state" })).toBeInTheDocument());
     expect(view.queryByRole("textbox", { name: "Protected account" })).toBeNull();
   });
   it("allows a nonexcluded detected country without relying on a saved value", async () => {
