@@ -158,20 +158,20 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
           <FoldBox title="Globe preview"><div data-testid="globe-preview" className="relative h-48 w-full overflow-hidden rounded-md border border-border bg-background"><GalaxyReel /><div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} backdrop={false} /></div><span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span></div>
             {previewing && <div className="mt-2 flex gap-2"><Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy</Button><Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button></div>}</FoldBox>
           <FoldBox title="Be Right Back sky gallery"><SkyGalleryPicker /></FoldBox>
-          <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="w-full rounded-md border border-border p-2 text-xs font-black uppercase tracking-widest text-foreground">Preview be right back screen</button>
-          <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
+          <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="dtt-panel w-full p-3 text-xs font-black uppercase tracking-widest text-primary">Preview be right back screen</button>
+          <label className="dtt-panel flex items-center justify-between gap-3 p-3 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
             <input type="checkbox" aria-label="Multicolor neon globe sparkles" checked={theme.globeNeon === true} onChange={(e) => setNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />
           </label>
-          <label className="flex items-center justify-between gap-3 rounded-md border border-border p-2 text-xs font-bold text-foreground">
+          <label className="dtt-panel flex items-center justify-between gap-3 p-3 text-xs font-bold text-foreground">
             <span>Multicolor country outlines</span>
             <input type="checkbox" aria-label="Multicolor country outlines" checked={theme.globeBorderNeon === true} onChange={(e) => setBorderNeon(e.target.checked)} className="h-4 w-4 shrink-0 accent-primary" />
           </label>
-          <label className="flex items-center justify-between rounded-md border border-border p-2 text-xs font-bold text-foreground">
+          <label className="dtt-panel flex items-center justify-between gap-3 p-3 text-xs font-bold text-foreground">
             <span>VIP room glow — neon lights and fog in your highlight color</span>
             <input type="checkbox" checked={vip} onChange={(e) => setVipGlow(e.target.checked)} className="h-4 w-4 accent-primary" />
           </label>
-          <label className="block space-y-2 text-xs font-bold text-foreground">
+          <label className="dtt-panel block space-y-2 p-3 text-xs font-bold text-foreground">
             <span className="flex justify-between"><span>Fog intensity</span><span>{fog}%</span></span>
             <input type="range" aria-label="Fog intensity" min={0} max={100} step={1} value={fog} disabled={!vip}
               onChange={(e) => { const value = Number(e.target.value); setFog(value); setFogIntensity(value); }}

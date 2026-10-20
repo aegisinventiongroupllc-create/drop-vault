@@ -207,8 +207,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <VipBackdrop />
         <div className="relative z-10 shrink-0 p-1">
-          <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`h-28 w-28 border-[3px] border-primary neon-glow transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
-          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>
+          <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`dtt-photo-pop h-28 w-28 border-[3px] border-primary transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
+          {!isCreator && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>}
         </div>
         <div className="relative z-10 min-w-0 flex-1 text-left">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Private identity</p>
@@ -223,7 +223,8 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         {handleError && <p id="display-handle-error" role="alert" className="mt-2 text-xs text-destructive">{handleError}</p>}
       </div>
 
-      <div className="space-y-4 rounded-lg border border-border bg-card/50 p-3 text-left shadow-2xl sm:p-4">
+      {isCreator && <p className="dtt-panel p-3 text-left text-xs text-muted-foreground">Creators use real photos and videos. Choose your profile photo in your photo gallery.</p>}
+      {!isCreator && <div className="dtt-panel space-y-4 p-3 text-left sm:p-4">
         {avatar.useDttIcon && <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your DTT colors</p>
@@ -295,7 +296,7 @@ const ProfileIdentityEditor = ({ compact = false, onSaved }: { compact?: boolean
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           Your selfie is never saved. It is processed securely and deleted from our systems after your emoji is created.
         </p>
-      </div>
+      </div>}
 
       <DashboardColorPicker ref={colorPicker} />
 
