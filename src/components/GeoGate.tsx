@@ -12,9 +12,15 @@ type GeoState =
   | { status: "unknown" };
 
 const fetchCountry = async (): Promise<string | null> => {
+  const lookup = async (url: string) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    try { return await fetch(url, { cache: "no-store", signal: controller.signal }); }
+    finally { clearTimeout(timer); }
+  };
   // Try ipapi.co first (free, CORS-enabled)
   try {
-    const r = await fetch("https://ipapi.co/json/", { cache: "no-store", signal: AbortSignal.timeout(5000) });
+    const r = await lookup("https://ipapi.co/json/");
     if (r.ok) {
       const j = await r.json();
       if (isCountryCode(j?.country_code)) return j.country_code.toUpperCase();
@@ -22,7 +28,7 @@ const fetchCountry = async (): Promise<string | null> => {
   } catch { /* fall through */ }
   // Fallback: ipwho.is (free, CORS-enabled)
   try {
-    const r = await fetch("https://ipwho.is/", { cache: "no-store", signal: AbortSignal.timeout(5000) });
+    const r = await lookup("https://ipwho.is/");
     if (r.ok) {
       const j = await r.json();
       if (j?.success !== false && isCountryCode(j?.country_code)) return j.country_code.toUpperCase();
