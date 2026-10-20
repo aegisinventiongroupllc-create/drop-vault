@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Prepare DTT before the owner requests TryBit moderation; leave the provider toggle unchanged. First milestone: correct unsupported readiness claims, establish payment availability checks, complete launch-critical translations and verify eligible account flows. External approval, business address/DMCA, live Yoti, payment receipts and isolated capacity/recovery evidence remain blockers; no advertising or paid upgrades authorized.
 - [ ] Design usage/revenue-based storage forecasts and searchable personality backdrop galleries (gaming, tasteful adult moods, floating bubbles); separate private customer dashboards from public creator profiles, retain wheel. Owner asks how to set it up; implementation scope and funded generation limits not yet agreed.
 - [ ] Prioritize private video/photo capacity, verified payments and full offered-country translation for a target of millions of simultaneous users. Capacity is unproven; funding limit, approved media service, verified quotas and isolated load environment remain required before upgrades or large tests.
 - [x] Add reusable source-matched translations, including main-language Top 10/request actions and statuses; signed-out pages use saved phrases without anonymous AI. German consent and signed-in unavailable-card notice verified, no page errors. Remove simulated tip success and unreachable request payment step; hide absent CCBill checkout. No provider enabled or money moved.
