@@ -158,7 +158,9 @@
     "Completed": "Abgeschlossen",
     "Declined": "Abgelehnt",
     "Expired": "Abgelaufen",
-    "No requests yet. They'll appear here when fans send them.": "Noch keine Wünsche. Sie erscheinen hier, sobald Fans sie senden."
+    "No requests yet. They'll appear here when fans send them.": "Noch keine Wünsche. Sie erscheinen hier, sobald Fans sie senden.",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "Ich habe die Nutzungsbedingungen und die Datenschutzerklärung von DTT gelesen, verstanden und akzeptiere sie. Zahlungen werden von sicheren externen Zahlungsdienstleistern abgewickelt; Rückerstattungen unterliegen der DTT-Rückerstattungsrichtlinie.",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "Ich erkenne an, dass alle Creator selbstständige Auftragnehmer und keine Mitarbeiter von DTT sind. Ich stimme den in den Nutzungsbedingungen beschriebenen Haftungsbeschränkungen zu."
   },
   "nl": {
     "VERIFYING REGION…": "REGIO VERIFIËREN…",
@@ -633,7 +635,9 @@
     "Completed": "已完成",
     "Declined": "已拒绝",
     "Expired": "已过期",
-    "No requests yet. They'll appear here when fans send them.": "暂无请求。粉丝发送请求后将显示在这里。"
+    "No requests yet. They'll appear here when fans send them.": "暂无请求。粉丝发送请求后将显示在这里。",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "我已阅读、理解并同意DTT的服务条款和隐私政策。我理解付款由安全的第三方支付服务商处理，退款遵循DTT退款政策。",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "我确认所有创作者均为独立承包商，而非DTT员工。我同意服务条款中说明的责任限制。"
   },
   "hi": {
     "PRICING": "कीमतें",
@@ -798,7 +802,9 @@
     "Completed": "पूरा हुआ",
     "Declined": "अस्वीकृत",
     "Expired": "समय समाप्त",
-    "No requests yet. They'll appear here when fans send them.": "अभी कोई अनुरोध नहीं है। प्रशंसकों के भेजने पर वे यहाँ दिखाई देंगे।"
+    "No requests yet. They'll appear here when fans send them.": "अभी कोई अनुरोध नहीं है। प्रशंसकों के भेजने पर वे यहाँ दिखाई देंगे।",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "मैंने DTT की सेवा की शर्तें और गोपनीयता नीति पढ़ी और समझी हैं और उनसे सहमत हूँ। भुगतान सुरक्षित तृतीय-पक्ष सेवाओं द्वारा संसाधित होते हैं और धनवापसी DTT की धनवापसी नीति के अनुसार होती है।",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "मैं स्वीकार करता/करती हूँ कि सभी रचनाकार स्वतंत्र ठेकेदार हैं, DTT के कर्मचारी नहीं। मैं सेवा की शर्तों में वर्णित दायित्व की सीमाओं से सहमत हूँ।"
   },
   "pt-br": {
     "VERIFYING REGION…": "VERIFICANDO REGIÃO…",
@@ -1228,8 +1234,8 @@
     "Payments: direct LTC (Litecoin) settlement.": "Платежи: прямые расчёты в LTC (Litecoin).",
     "About DTT": "О DTT",
     "Creator & Purchase Rules": "Правила для авторов и покупок",
-    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "Я прочитал(а), понимаю и принимаю Условия использования и Политику конфиденциальности DTT. Я понимаю, что платежи обрабатываются безопасными сторонними платёжными операторами, а возврат средств осуществляется в соответствии с Политикой возврата средств DTT.",
-    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "Я подтверждаю, что все авторы на этой платформе являются независимыми исполнителями, а не сотрудниками DTT. Я соглашаюсь с ограничениями ответственности, описанными в Условиях использования.",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "Я прочитал(а), понимаю и принимаю Условия использования и Политику конфиденциальности DTT. Платежи обрабатываются безопасными сторонними операторами; возвраты регулируются Политикой возвратов DTT.",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "Я признаю, что все авторы являются независимыми подрядчиками, а не сотрудниками DTT. Я согласен(на) с ограничениями ответственности, описанными в Условиях использования.",
     "Simple coins. No subscriptions. $25 per Bit-Token ($20 token + $5 service fee).": "Простые монеты. Без подписок. $25 за Bit-Token ($20 за токен + $5 сервисный сбор).",
     "Top 10 Fans": "Топ-10 поклонников",
     "The Request Vault": "Vault желаний",
@@ -1420,7 +1426,9 @@
     "Completed": "مكتمل",
     "Declined": "مرفوض",
     "Expired": "منتهي الصلاحية",
-    "No requests yet. They'll appear here when fans send them.": "لا توجد طلبات بعد. ستظهر هنا عندما يرسلها المعجبون."
+    "No requests yet. They'll appear here when fans send them.": "لا توجد طلبات بعد. ستظهر هنا عندما يرسلها المعجبون.",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "قرأت وفهمت وأوافق على شروط الخدمة وسياسة الخصوصية لدى DTT. أفهم أن المدفوعات تعالجها جهات خارجية آمنة وأن المبالغ المستردة تخضع لسياسة الاسترداد لدى DTT.",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "أقر بأن جميع صناع المحتوى متعاقدون مستقلون وليسوا موظفين لدى DTT. أوافق على حدود المسؤولية الموضحة في شروط الخدمة."
   },
   "ja": {
     "Share your ideas...": "アイデアを共有...",
@@ -1589,7 +1597,9 @@
     "Completed": "完了",
     "Declined": "辞退",
     "Expired": "期限切れ",
-    "No requests yet. They'll appear here when fans send them.": "まだリクエストはありません。ファンから届くとここに表示されます。"
+    "No requests yet. They'll appear here when fans send them.": "まだリクエストはありません。ファンから届くとここに表示されます。",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "DTTの利用規約とプライバシーポリシーを読み、理解し、同意します。支払いは安全な第三者決済業者によって処理され、返金にはDTTの返金ポリシーが適用されることを理解しています。",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "すべてのクリエイターは独立した契約者であり、DTTの従業員ではないことを認めます。利用規約に記載された責任の制限に同意します。"
   },
   "ko": {
     "Log out": "로그아웃",
@@ -1758,7 +1768,9 @@
     "Completed": "완료됨",
     "Declined": "거절됨",
     "Expired": "만료됨",
-    "No requests yet. They'll appear here when fans send them.": "아직 요청이 없습니다. 팬이 보내면 여기에 표시됩니다."
+    "No requests yet. They'll appear here when fans send them.": "아직 요청이 없습니다. 팬이 보내면 여기에 표시됩니다.",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "DTT의 서비스 약관과 개인정보 처리방침을 읽고 이해했으며 이에 동의합니다. 결제는 안전한 외부 결제업체가 처리하며 환불에는 DTT 환불 정책이 적용됨을 이해합니다.",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "모든 크리에이터가 DTT 직원이 아닌 독립 계약자임을 인정합니다. 서비스 약관에 명시된 책임 제한에 동의합니다."
   },
   "zh": {
     "VERIFYING REGION…": "正在验证地区…",
@@ -1937,7 +1949,9 @@
     "Completed": "Completata",
     "Declined": "Rifiutata",
     "Expired": "Scaduta",
-    "No requests yet. They'll appear here when fans send them.": "Ancora nessuna richiesta. Appariranno qui quando i fan le invieranno."
+    "No requests yet. They'll appear here when fans send them.": "Ancora nessuna richiesta. Appariranno qui quando i fan le invieranno.",
+    "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.": "Ho letto, compreso e accetto i Termini di servizio e l’Informativa sulla privacy di DTT. Comprendo che i pagamenti sono gestiti da fornitori terzi sicuri e che i rimborsi seguono la Politica di rimborso di DTT.",
+    "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.": "Riconosco che tutti i creator sono collaboratori indipendenti, non dipendenti di DTT. Accetto le limitazioni di responsabilità descritte nei Termini di servizio."
   },
   "es": {
     "VERIFYING REGION…": "VERIFICANDO REGIÓN…",
