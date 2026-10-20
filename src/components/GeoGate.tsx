@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Globe, Loader2 } from "lucide-react";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
-import GhostCountryMessage from "@/components/GhostCountryMessage";
 import LegalFooter from "@/components/LegalFooter";
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +84,7 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
-          <GhostCountryMessage countryCode={state.country} />
+          <h1 className="text-sm font-bold text-foreground px-6 text-center">DTT IS UNAVAILABLE IN THIS REGION</h1>
           <p className="mt-4 px-6 text-center text-[10px] text-muted-foreground/70 max-w-sm">
             DTT is not available in your detected region ({state.country}) under our current market restrictions. See the Restricted Countries policy below.
           </p>
