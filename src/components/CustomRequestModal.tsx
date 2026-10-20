@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Loader2, CreditCard, Coins, ArrowLeftRight } from "lucide-react";
+import { X, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,27 +11,8 @@ const MIN_CUSTOM_BID_TOKENS = 1;
 const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onClose: () => void }) => {
   const [customBidTokens, setCustomBidTokens] = useState("");
   const [description, setDescription] = useState("");
-  const [step, setStep] = useState<"select" | "details" | "confirm" | "buy" | "processing" | "success">("select");
+  const [step, setStep] = useState<"select" | "details" | "confirm" | "success">("select");
   const [error, setError] = useState<string | null>(null);
-  const [paymentInfo, setPaymentInfo] = useState<{ pay_address?: string; pay_amount?: number; pay_currency?: string; payment_id?: string; invoice_url?: string } | null>(null);
-  const [consentChecked, setConsentChecked] = useState(false);
-
-  const logConsent = async (method: "card" | "crypto", currency?: string) => {
-    try {
-      let ip = "unknown";
-      try {
-        const r = await fetch("https://api.ipify.org?format=json");
-        ip = (await r.json()).ip;
-      } catch {}
-      await supabase.from("legal_consents").insert({
-        ip_address: ip,
-        user_agent: navigator.userAgent,
-        terms_version: "2.0",
-        consent_text: `[CUSTOM-REQUEST] @${creatorName} via ${method}${currency ? ` (${currency.toUpperCase()})` : ""} — agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure.`,
-        consent_type: "checkout_consent",
-      });
-    } catch {}
-  };
 
   // Calculate price based on custom bid
   const bidTokens = Math.min(Number(customBidTokens) || 0, MAX_TOKENS);
@@ -40,26 +21,6 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const split = calculateCustomRequestSplit(activePrice);
   const totalDue = split.invoiceTotal;
 
-  // Edge functions that return a non-2xx status give a generic message — dig out the real one.
-  const readFunctionError = async (fnError: any): Promise<string> => {
-    try {
-      const res = fnError?.context;
-      if (res && typeof res.json === "function") {
-        const body = await res.clone().json();
-        if (body?.error) return String(body.error);
-      }
-    } catch {}
-    return fnError?.message || "Payment failed.";
-  };
-
-  // Requests are paid only after the creator agrees, from MY REQUESTS.
-  const handleCryptoPay = async (_currency: string) => {
-    setError("Pay for a request from MY REQUESTS once the creator accepts it.");
-  };
-
-  const handleCardPay = async () => {
-    setError("Card payments are coming soon. Please use LTC for now.");
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center">
@@ -67,9 +28,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground font-display tracking-wider">CUSTOM REQUEST</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" aria-label="Close request" onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* ─── STEP 1: Select Tier or Custom Bid ─── */}
@@ -231,93 +192,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           </div>
         )}
 
-        {/* ─── STEP 4: Buy Request-Tokens ─── */}
-        {step === "buy" && (
-          <div className="p-4 space-y-4">
-            <h3 className="text-sm font-bold text-foreground tracking-wider text-center">BUY REQUEST-TOKENS</h3>
-
-            <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
-              <p className="text-xs text-muted-foreground mb-1">TOTAL DUE</p>
-              <p className="text-2xl font-bold text-primary">${totalDue}</p>
-              <p className="text-xs text-muted-foreground mt-1">${activePrice} base + ${ADMIN_FEE_USD} service fee + ${CUSTOM_REQUEST_PROCESSING_FEE_USD} processing cover</p>
-            </div>
-
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-destructive">{error}</p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">CARD — SECURE FIAT ON-RAMP · SETTLES IN LTC</p>
-              <button
-                onClick={handleCardPay}
-                disabled={!consentChecked}
-                className="w-full bg-secondary border-2 border-primary/40 rounded-xl p-4 text-center hover:border-primary transition-all neon-glow-sm disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  <p className="text-sm font-bold text-foreground">CREDIT / DEBIT CARD</p>
-                </div>
-                <p className="text-xs text-primary font-semibold">Pay ${totalDue}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Visa / MC / Apple Pay · KYC may be required</p>
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-bold tracking-wider">OR PAY WITH CRYPTO</p>
-              <div className="grid grid-cols-3 gap-2">
-                {["ltc", "btc", "eth"].map((coin) => (
-                  <button
-                    key={coin}
-                    onClick={() => handleCryptoPay(coin)}
-                    disabled={!consentChecked}
-                    className="bg-secondary border border-border rounded-xl p-3 text-center hover:border-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Coins className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                    <p className="text-sm font-bold text-foreground">{coin.toUpperCase()}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-              <p className="text-[10px] text-muted-foreground">
-                All payments settle in <span className="text-primary font-bold">LTC (Litecoin)</span>.
-                DTT Flat Fee: <span className="text-gold font-bold">$1.00</span>. Network & processor fees apply.
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                Crypto values are volatile and transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final — see Refund Policy.
-              </p>
-            </div>
-
-            <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={consentChecked}
-                onChange={(e) => setConsentChecked(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-primary shrink-0"
-              />
-              <span className="text-[10px] text-muted-foreground leading-relaxed">
-                I confirm I am 18+, the funds are mine and lawful, and I have read and accept the
-                <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
-              </span>
-            </label>
-
-            <Button variant="outline" className="w-full" onClick={() => { setStep("confirm"); setError(null); }}>
-              BACK
-            </Button>
-          </div>
-        )}
-
-        {/* ─── Processing ─── */}
-        {step === "processing" && (
-          <div className="p-8 text-center space-y-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
-            <h3 className="text-lg font-bold text-foreground font-display tracking-wider">PROCESSING</h3>
-            <p className="text-sm text-muted-foreground">Creating payment & reserving your request…</p>
-          </div>
-        )}
+        {error && <p role="alert" className="px-4 py-3 text-sm text-destructive">{error}</p>}
 
         {/* ─── Success ─── */}
         {step === "success" && (
@@ -330,6 +205,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
               Your request has been sent to <span className="text-foreground font-medium">@{creatorName}</span>. They can accept, decline, or send a counter-offer. You'll see updates in your dashboard under MY REQUESTS.
             </p>
             <p className="text-[10px] text-muted-foreground">Requests expire in 14 days if the creator doesn't respond.</p>
+            <p className="text-xs text-muted-foreground">Submitting a request does not take payment. Checkout requires creator acceptance and an available payment connection.</p>
             <Button variant="neon" className="w-full" onClick={onClose}>DONE</Button>
           </div>
         )}
