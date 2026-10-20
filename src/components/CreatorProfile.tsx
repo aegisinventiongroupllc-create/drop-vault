@@ -34,6 +34,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [tipSent, setTipSent] = useState(false);
   const [tipNotification, setTipNotification] = useState<string | null>(null);
 
+  const [isMen, setIsMen] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [vaultCount, setVaultCount] = useState<number>(0);
   const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
@@ -53,7 +54,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, avatar_config, profile_photo_path")
+        .select("user_id, avatar_config, profile_photo_path, vault_side")
         .ilike("display_name", creatorName)
         .limit(1)
         .maybeSingle();
@@ -61,6 +62,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         setCreatorId(data?.user_id ?? null);
         setAvatarConfig(data?.avatar_config ?? null);
         setProfilePhotoPath(data?.profile_photo_path ?? null);
+        setIsMen(data?.vault_side === "men");
       }
     })();
     return () => { cancel = true; };
@@ -167,7 +169,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
         {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} isMen={document.documentElement.classList.contains("vault-men")} />
+          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} isMen={isMen} />
         </div>
       </div>
 
