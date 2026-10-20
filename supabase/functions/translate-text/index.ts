@@ -25,6 +25,12 @@ async function aiTranslate(texts: string[], lang: string): Promise<string[]> {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const url=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!url||!key)return json({error:"Translation unavailable"},503);
+    const db = createClient(url,key);
+    const token=(req.headers.get("Authorization")??"").replace(/^Bearer\s+/i,"");
+    const { data: auth } = token ? await db.auth.getUser(token) : { data: { user: null } };
+    if(!auth?.user)return json({error:"Sign in required"},401);
     const body = await req.json().catch(() => ({}));
     const lang = String(body?.lang ?? "").toLowerCase();
     if(!Array.isArray(body?.texts)||body.texts.length>MAX_TEXTS||body.texts.some((t:unknown)=>typeof t!=="string"||t.length>MAX_LEN))return json({error:"Invalid translation texts"},400);
@@ -39,9 +45,6 @@ Deno.serve(async (req) => {
     ).slice(0, MAX_TEXTS) as string[];
     if (!texts.length) return json({ translations: {} });
 
-    const url=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!url||!key)return json({error:"Translation unavailable"},503);
-    const db = createClient(url,key);
     const out: Record<string, string> = {};
     const { data: cached } = await db.from("translation_cache").select("source, translated").eq("lang", lang).in("source", texts);
     for (const r of cached || []) out[r.source] = r.translated;
