@@ -142,11 +142,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const TIP_AMOUNTS = [5, 10, 20, 50, 100];
 
   const handleSendTip = (amount: number) => {
-    const netAmount = Math.round(amount * 0.9 * 100) / 100;
-    // In production, this generates an LTC checkout invoice
-    setTipSent(true);
-    setTipNotification(`Tip of $${amount} sent! Creator receives $${netAmount} (90%).`);
-    setTimeout(() => { setShowTipModal(false); setTipSent(false); setSelectedTip(null); setTipNotification(null); }, 3000);
+    toast({ title: "Tip checkout unavailable", description: "No payment has been taken. Tips need an approved payment connection." });
   };
 
   return (
@@ -204,7 +200,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           Request Custom Media
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Premium commissions from $500 — $10,001 • Direct LTC payment
+          Make a personal offer. Payment follows acceptance and requires an available checkout.
         </p>
       </div>
 
@@ -265,12 +261,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 <Button
                   variant="neon"
                   className="w-full"
-                  disabled={!selectedTip}
+                  disabled
                   onClick={() => selectedTip && handleSendTip(selectedTip)}
                 >
                   <DollarSign className="w-4 h-4 mr-1" />
-                  {selectedTip ? `SEND $${selectedTip} TIP` : "SELECT AN AMOUNT"}
+                  TIP CHECKOUT UNAVAILABLE
                 </Button>
+                <p role="status" className="mt-3 text-xs text-muted-foreground text-center">No payment has been taken. Tips need an approved payment connection.</p>
               </>
             )}
           </div>

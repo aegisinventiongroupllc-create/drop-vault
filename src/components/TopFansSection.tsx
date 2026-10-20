@@ -139,7 +139,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
               </span>
               <ProfileAvatar config={f.avatar_config} label={f.display_name} className="h-8 w-8 border-0" />
               <span className="flex-1 text-sm font-semibold text-foreground truncate">
-                {f.display_name}
+                <span translate="no">{f.display_name}</span>
                 {f.fan_id === myId && <span className="ml-1.5 text-[10px] font-bold text-primary">YOU</span>}
               </span>
               <span className="text-xs font-bold text-primary">${Number(f.total_spent).toFixed(2)}</span>
@@ -166,7 +166,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
                 {fans.map((f) => (
                   <Button variant="secondary" key={f.fan_id} onClick={() => { setMessages([]); setActiveFan(f.fan_id); }}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold ${activeFan === f.fan_id ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
-                    #{f.rank} {f.display_name}
+                    #{f.rank} <span translate="no">{f.display_name}</span>
                   </Button>
                 ))}
                 {fans.length === 0 && <p className="text-xs text-muted-foreground">No top fans yet.</p>}
@@ -180,8 +180,8 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
                   ) : messages.map((m) => (
                     <div key={m.id} className={`flex ${m.sender_id === myId ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[80%] rounded-xl px-3 py-2 ${m.sender_id === myId ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
-                        <p className="text-[9px] font-bold opacity-70 mb-0.5">{nameOf(m.sender_id)}</p>
-                        <p className="text-sm whitespace-pre-wrap break-words">{m.body}</p>
+                        <p translate="no" className="text-[9px] font-bold opacity-70 mb-0.5">{nameOf(m.sender_id)}</p>
+                        <p translate="no" className="text-sm whitespace-pre-wrap break-words">{m.body}</p>
                       </div>
                     </div>
                   ))}

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeTranslations } from '@/lib/translationCache';
+import { savedUiTranslations, languageDirection } from '@/lib/uiTranslation';
 
 /**
  * Translates every visible word on screen into the visitor's own language
@@ -28,11 +29,13 @@ const AutoTranslator = () => {
   useEffect(() => {
     const lang = getTargetLang();
     document.documentElement.lang = lang;
+    document.documentElement.dir = languageDirection(lang);
     if (lang === "en") return;
 
     const cacheKey = `dtt_tr_v2_${lang}`;
     let cache: Record<string, string> = {};
     try { cache = sanitizeTranslations(JSON.parse(localStorage.getItem(cacheKey) || "{}")); } catch { cache = {}; }
+    cache = { ...cache, ...savedUiTranslations(lang) };
     const translatedOut = new Set<string>(Object.values(cache));
     const pending = new Set<string>();
     const inflight = new Set<string>();
@@ -40,6 +43,16 @@ const AutoTranslator = () => {
     let disposed=false;
     let flushing=false;
     const attempts=new Map<string,number>();
+    let signedIn = false;
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      signedIn = Boolean(session);
+      if (signedIn && pending.size) schedule();
+    });
+    void supabase.auth.getSession().then(({ data }) => {
+      if (disposed) return;
+      signedIn = Boolean(data.session);
+      if (signedIn && pending.size) schedule();
+    });
 
     const skip = (el: Element | null) => {
       for (let e = el; e; e = e.parentElement) {
@@ -88,7 +101,7 @@ const AutoTranslator = () => {
     };
 
     const flush = async () => {
-      if(flushing||disposed)return;
+      if(flushing||disposed||!signedIn)return;
       const batch = Array.from(pending).slice(0, 60);
       batch.forEach((b) => { pending.delete(b); inflight.add(b); });
       if (!batch.length) return;
@@ -128,7 +141,7 @@ const AutoTranslator = () => {
       if (pending.size) schedule();
     });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: [...ATTRS] });
-    return () => { disposed=true;obs.disconnect(); window.clearTimeout(timer); };
+    return () => { disposed=true;obs.disconnect(); authListener.subscription.unsubscribe(); window.clearTimeout(timer); };
   }, []);
 
   return null;

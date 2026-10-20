@@ -133,8 +133,8 @@ const CreatorRequestsPanel = () => {
                 <div key={req.id} className="border border-border rounded-xl p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">{req.description}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">@{fanNames[req.customer_id] || "Fan"}</p>
+                      <p translate="no" className="text-sm font-medium text-foreground">{req.description}</p>
+                      <p translate="no" className="text-xs text-muted-foreground mt-0.5">@{fanNames[req.customer_id] || "Fan"}</p>
                     </div>
                     <div className="flex items-center gap-1 bg-primary/10 border border-primary/30 rounded-full px-2.5 py-1">
                       <DollarSign className="w-3 h-3 text-primary" />
@@ -165,7 +165,7 @@ const CreatorRequestsPanel = () => {
                   {req.status === "countered" && req.counter_offer_usd && (
                     <div className="mt-2 bg-amber-400/10 border border-amber-400/30 rounded-lg p-2">
                       <p className="text-[10px] text-muted-foreground">Your counter: <span className="text-amber-400 font-bold">${req.counter_offer_usd}</span></p>
-                      {req.counter_message && <p className="text-[10px] text-muted-foreground italic mt-1">"{req.counter_message}"</p>}
+                      {req.counter_message && <p translate="no" className="text-[10px] text-muted-foreground italic mt-1">"{req.counter_message}"</p>}
                     </div>
                   )}
 

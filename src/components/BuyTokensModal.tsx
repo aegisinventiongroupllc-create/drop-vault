@@ -8,7 +8,7 @@ import {
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 
-const FINAL_SALE_TEXT = "I agree that purchasing Bit-Tokens grants an immediate digital license. All sales are final and non-refundable once tokens are credited to my account. Checking this box creates a timestamped record of this agreement — stored with my purchase details, IP address, and device information — which is attached to this purchase and may be provided to CCBill as proof of consent.";
+const FINAL_SALE_TEXT = "I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.";
 
 interface BuyTokensModalProps {
   onClose: () => void;
@@ -226,22 +226,23 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <h3 className="text-sm font-bold text-foreground tracking-wider text-center mb-2">CHOOSE HOW TO PAY</h3>
 
             {/* Payment method chooser */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
+            <div className={cardEnabled ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"}>
+              <Button variant="outline"
                 onClick={() => setPayMethod("crypto")}
-                className={`rounded-xl border-2 p-3 text-center transition-all ${payMethod === "crypto" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
+                className={`h-auto flex-col whitespace-normal rounded-xl border-2 p-3 text-center transition-all ${payMethod === "crypto" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
               >
                 <p className="text-sm font-bold text-foreground">CRYPTO</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">LTC · USDT</p>
-              </button>
-              <button
+              </Button>
+              {cardEnabled && <Button variant="outline"
                 onClick={() => setPayMethod("card")}
-                className={`rounded-xl border-2 p-3 text-center transition-all ${payMethod === "card" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
+                className={`h-auto flex-col whitespace-normal rounded-xl border-2 p-3 text-center transition-all ${payMethod === "card" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
               >
                 <p className="text-sm font-bold text-foreground">DEBIT / CREDIT CARD</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Visa · Mastercard · Discover · JCB</p>
-              </button>
+              </Button>}
             </div>
+            {!cardEnabled && <p role="status" className="text-xs text-muted-foreground text-center">CCBill card checkout is unavailable. TryBit is still under review; its live checkout is not connected.</p>}
 
             {/* Order summary — shown for both methods */}
             <div className="rounded-xl border border-border bg-secondary/50 p-3 space-y-1">
@@ -315,8 +316,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                   </>
                 ) : (
                   <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center">
-                    <p className="text-sm font-bold text-muted-foreground">CARD CHECKOUT ACTIVATING</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">Card payments unlock as soon as our card processor finishes account approval. Crypto payment works right now.</p>
+                    <p className="text-sm font-bold text-muted-foreground">CARD CHECKOUT UNAVAILABLE</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">Card checkout requires processor approval and a completed payment connection.</p>
                   </div>
                 )}
               </>

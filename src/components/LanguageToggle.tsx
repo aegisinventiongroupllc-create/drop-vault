@@ -4,6 +4,7 @@ import { useI18n } from "@/i18n/I18nContext";
 import type { Locale } from "@/i18n/types";
 import { EXTRA_LANGUAGES, setAutoLang } from "@/lib/siteTranslate";
 import { getTargetLang } from "@/components/AutoTranslator";
+import { Button } from '@/components/ui/button';
 
 const LanguageToggle = () => {
   const { setLocale, locales } = useI18n();
@@ -25,43 +26,43 @@ const LanguageToggle = () => {
 
   return (
     <div ref={ref} className="relative notranslate" translate="no">
-      <button
+      <Button variant="ghost"
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-secondary/60 border border-border hover:border-primary/40 transition-all text-xs font-bold tracking-wider text-foreground"
         aria-label="Change language"
       >
         <Globe className="w-3.5 h-3.5 text-primary" />
         <span className="uppercase">{getTargetLang()}</span>
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-xl overflow-y-auto max-h-[60vh] shadow-xl z-50 min-w-[170px]">
           {(Object.keys(locales) as Locale[]).map((l) => (
-            <button
+            <Button variant="ghost"
               key={l}
               onClick={() => {
                 setLocale(l);
                 setOpen(false);
                 setAutoLang(null);
               }}
-              className={itemCls(getTargetLang() === l)}
+              className={`${itemCls(getTargetLang() === l)} justify-start h-auto whitespace-normal`}
             >
               {locales[l]}
-            </button>
+            </Button>
           ))}
           <div className="border-t border-border" />
           {Object.entries(EXTRA_LANGUAGES).map(([code, label]) => (
-            <button
+            <Button variant="ghost"
               key={code}
               onClick={() => {
                 setLocale("en");
                 setOpen(false);
                 setAutoLang(code);
               }}
-              className={itemCls(getTargetLang() === code.toLowerCase())}
+              className={`${itemCls(getTargetLang() === code.toLowerCase())} justify-start h-auto whitespace-normal`}
             >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
