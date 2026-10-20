@@ -4,8 +4,8 @@ const en: Translations = {
   age_title: "DROPTHAT",
   age_subtitle: "This platform contains age-restricted content. You must agree to all terms below to enter.",
   age_consent: "I certify that I am at least 18 years of age and legally permitted to view adult content in my jurisdiction.",
-  tos_consent: "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that all card transactions are final and handled via a secure third-party processor.",
-  contractor_consent: "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to hold DTT and its affiliates harmless and waive all rights to legal action.",
+  tos_consent: "I have read, understand, and agree to the Terms of Service and Privacy Policy of DTT. I understand that payments are handled by secure third-party processors and refunds follow the DTT Refund Policy.",
+  contractor_consent: "I acknowledge that all creators on this platform are independent contractors, not employees of DTT. I agree to the limitations of liability described in the Terms of Service.",
   age_enter: "I AGREE — ENTER",
   age_leave: "I AM UNDER 18 — LEAVE",
 
