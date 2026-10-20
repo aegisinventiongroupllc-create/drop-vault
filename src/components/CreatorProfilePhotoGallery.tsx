@@ -50,7 +50,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
   useEffect(() => { void loadPhotos(); }, [creatorId]);
 
   const uploadPhoto = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
+    if (file.type && !file.type.startsWith("image/")) {
       toast({ title: "Choose a photo", description: "Use a JPG, PNG, or WEBP image.", variant: "destructive" });
       return;
     }
@@ -131,7 +131,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
         <p className="mt-1 text-xs text-muted-foreground">Your selected real photo appears in the feed, creator page, and member libraries. Your emoji remains in private conversations.</p>
       </div>
 
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => {
+      <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={(event) => {
         const file = event.target.files?.[0];
         if (file) void uploadPhoto(file);
         event.target.value = "";
