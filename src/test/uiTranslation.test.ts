@@ -8,7 +8,7 @@ describe('reusable UI translation catalog', () => {
     expect(languageDirection('fr')).toBe('ltr');
   });
   it('does not contain cached account-specific names or email addresses', () => {
-    for (const lang of ['es', 'pt', 'fr', 'de', 'it', 'ru', 'ar', 'hi', 'ja', 'ko', 'zh-cn']) {
+    for (const lang of ['es', 'pt', 'fr', 'de', 'it', 'nl', 'pl', 'ru', 'uk', 'tr', 'ar', 'he', 'hi', 'ja', 'ko', 'zh-cn', 'zh-tw', 'th', 'vi', 'id', 'ms', 'tl', 'sv', 'no', 'da', 'fi', 'el', 'cs', 'ro', 'hu', 'bg', 'sr', 'hr', 'sw', 'af']) {
       expect(Object.keys(savedUiTranslations(lang)).some(key => key.includes('@') || key.includes('BlondieVibes'))).toBe(false);
     }
   });

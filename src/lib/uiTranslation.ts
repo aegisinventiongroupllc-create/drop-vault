@@ -1,11 +1,18 @@
 import catalog from '@/i18n/uiCatalog.json';
+import launchCatalog from '@/i18n/launchCatalog.json';
 import { paymentStatusTranslations } from '@/i18n/paymentStatus';
 
 const dictionaries: Record<string, Record<string, string>> = catalog;
+const launchDictionaries: Record<string, Record<string, string>> = launchCatalog;
 export function savedUiTranslations(lang: string): Record<string, string> {
   const normalized = lang.toLowerCase();
   const fallback = normalized === 'pt' ? 'pt-br' : normalized === 'zh-tw' ? undefined : normalized.split('-')[0];
-  return { ...(fallback ? dictionaries[fallback] : {}), ...dictionaries[normalized], ...paymentStatusTranslations(normalized) };
+  const base = normalized.split('-')[0];
+  return {
+    ...(fallback ? dictionaries[fallback] : {}), ...dictionaries[normalized],
+    ...launchDictionaries[base], ...launchDictionaries[normalized],
+    ...paymentStatusTranslations(normalized),
+  };
 }
 
 export function uiTranslation(source: string, lang: string): string {

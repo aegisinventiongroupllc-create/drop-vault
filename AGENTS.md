@@ -17,7 +17,7 @@
 - CCBill uses signed forms, private/IP-restricted notices and idempotent catalog credits. paymentReadiness requires DTT_<PROVIDER>_LIVE_APPROVED/CHECKOUT_VERIFIED flags and credentials. Why: keys do not prove approval.
 - Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; exclude onboarding IDs/avatars. Why: prevent verification bypass.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
-- AutoTranslator applies source-matched static UI catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code stay notranslate. Why: avoid private cache exposure and repeat spend; cross-instance coordination is separate.
+- AutoTranslator merges source-matched ui/launch catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code and input values stay unchanged. Why: protect private text and avoid repeated translation spend.
 - Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
 - Snapshot request country server-side at creation and preserve on updates; rank scoped groups. Why: avoid exposing private profile fields.
