@@ -82,31 +82,25 @@ const RestrictedCountries = () => (
     </h3>
     <div className="text-xs text-muted-foreground space-y-4 leading-relaxed">
       <p>
-        DTT
-        prohibit access from the jurisdictions listed below. Customers
-        and Creators residing in or accessing the platform from these regions are
-        blocked from registration, content access, payments, and payouts. Lists are
-        reviewed continuously against OFAC, UN, EU, UK HMT, and applicable national
-        sanctions and adult-content regulations.
+        DTT restricts the markets below under its current business policy. Legal and payment requirements vary by jurisdiction and require qualified review. This list is not a guarantee of comprehensive sanctions screening or country enforcement.
       </p>
 
       <div>
         <p className="text-foreground font-bold mb-2">
-          1. OFAC / UN / EU Sanctioned Jurisdictions
+          1. Sanctions-Related Restrictions — Review Required
         </p>
         <p className="mb-2 text-[11px]">
-          Comprehensive embargoes — no payments, payouts, or accounts permitted.
+          Restrictions may apply to a territory, an individual or an entity; not every listed country is subject to a comprehensive embargo. DTT does not authorize sanctions evasion.
         </p>
         <CountryColumn items={OFAC_SANCTIONED} />
       </div>
 
       <div>
         <p className="text-foreground font-bold mb-2">
-          2. Adult-Content Prohibited Jurisdictions
+          2. Adult-Content Risk Restrictions
         </p>
         <p className="mb-2 text-[11px]">
-          Local law prohibits or heavily restricts adult content. Access is blocked
-          to protect users and comply with extraterritorial enforcement risk.
+          DTT excludes these markets pending jurisdiction-specific advice. Inclusion is a business restriction, not a blanket statement that all adult content is illegal there.
         </p>
         <CountryColumn items={ADULT_CONTENT_PROHIBITED} />
       </div>
@@ -116,9 +110,7 @@ const RestrictedCountries = () => (
           3. DTT "Ghost List" — Internal Risk Block
         </p>
         <p className="mb-2 text-[11px]">
-          U.S. territories and regions where licensing, tax, or banking partners
-          impose additional restrictions. Some allow viewing but block creator
-          payouts pending case-by-case review.
+          DTT treats these territories as internal risk-review entries. Viewing and payout eligibility require separate review; inclusion does not establish a legal prohibition.
         </p>
         <CountryColumn items={GHOST_LIST} />
       </div>
@@ -130,18 +122,14 @@ const RestrictedCountries = () => (
       </div>
 
       <div className="bg-secondary/40 border border-border rounded-lg p-3 space-y-2">
-        <p className="text-foreground font-bold text-[11px]">Enforcement Mechanism</p>
+        <p className="text-foreground font-bold text-[11px]">Current Checks and Limitations</p>
         <p className="text-[11px]">
-          • IP geolocation check at app load and at every checkout.<br />
-          • Crypto wallet screening via OFAC/sanctions lists.<br />
-          • Creator payouts blocked at the wallet layer for restricted residency.<br />
-          • VPN circumvention is a Terms violation and triggers account termination
-          and fund forfeiture.
+          The app checks an IP-based country estimate at entry. This browser check can fail or be bypassed and does not prove comprehensive checkout, wallet or payout screening. Stronger server-side enforcement and compliance review are required before launch. Do not use a VPN or other means to evade DTT restrictions.
         </p>
       </div>
 
       <p className="text-[10px] text-muted-foreground/70">
-        This list is non-exhaustive and updated as sanctions and local law change.
+        This list is non-exhaustive and subject to review as sanctions and local law change.
         Questions or appeals: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>.
         Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}.
       </p>

@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [x] Preparation milestone: server paymentReadiness now requires explicit approval/verified-checkout flags and credentials; CCBill/TryBit availability probes expose only enabled and fail closed. Corrected unsupported active-payment, sanctions-screening, processor-contract/retention and registered-agent claims; manual LTC and token-value splits clarified. Saved pending-payment notices cover all 36 offered languages; four typed locales have corrected payment/refund copy. 86 focused checks plus 19 pricing/translation checks passed. Signed-in entry-pass checkout showed disabled payment without page errors; latest app build OK. No TryBit toggle, funds, approval, verification or publication changed. Full translations, robust country enforcement, eligible media/payment journeys, legal confirmation and isolated capacity/recovery remain open.
 - [ ] Prepare DTT before the owner requests TryBit moderation; leave the provider toggle unchanged. First milestone: correct unsupported readiness claims, establish payment availability checks, complete launch-critical translations and verify eligible account flows. External approval, business address/DMCA, live Yoti, payment receipts and isolated capacity/recovery evidence remain blockers; no advertising or paid upgrades authorized.
 - [ ] Design usage/revenue-based storage forecasts and searchable personality backdrop galleries (gaming, tasteful adult moods, floating bubbles); separate private customer dashboards from public creator profiles, retain wheel. Owner asks how to set it up; implementation scope and funded generation limits not yet agreed.
 - [ ] Prioritize private video/photo capacity, verified payments and full offered-country translation for a target of millions of simultaneous users. Capacity is unproven; funding limit, approved media service, verified quotas and isolated load environment remain required before upgrades or large tests.
@@ -85,7 +86,7 @@
 - [x] Yoti age check: use uploaded sandbox key file (signed requests)
 
 - [x] Custom request workflow: real database-backed offers, creator accept/decline/counter, customer counter-offer response, 14-day expiry, 42-hour fulfillment deadline, private per dashboard, creator reuse video tip
-- [ ] Tips: add $4 card processing fee and wire to real payment (crypto invoice or CCBill when live)
+- [ ] Tips: wire to verified approved payment with no extra tip fee; blocked by approved processor setup.
 - [ ] Custom request payment step: wire accepted requests to crypto/card checkout after creator accepts
 
 ## Waiting on the user (off-site)
@@ -100,7 +101,7 @@
 - [ ] Virtual mailbox address for DTT Media LLC, then put it on the DMCA, Contact and records pages, the $6 Copyright Office listing and the CCBill application.
 
 - [x] Full button-by-button test signed in as a creator and a customer (customer dashboard behind unpaid entry pass)
-- [x] Translate every word on every page into the visitor's language, including creator pages viewed from other countries
+- [ ] Translate every word on every page, including cross-country creator pages: saved coverage remains partial; full legal and populated-flow review not complete.
 - [x] Globe: pick a country for the day → that country's own scrollable teaser feed, split Women/Men
 - [x] Globe: owner switch between the DTT brand look and the real-Earth look, saved for everyone; both skins photographed in the running app, saved choice confirmed to drive which one shows, anyone can read it, signed-out visitors cannot change it (the admin GLOBE tab itself still needs the owner's own tap)
 - [x] Triple-tap the DTT logo (feed wordmark or dashboard avatar) previews the pink-globe sign-in page; triple-tap inside exits back — verified signed-in both ways.

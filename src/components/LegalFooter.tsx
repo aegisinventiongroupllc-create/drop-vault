@@ -45,7 +45,7 @@ const LegalFooter = () => {
           © {new Date().getFullYear()} DTT Media LLC. All Rights Reserved. Must be 18+ to enter.
         </p>
         <p className="text-[10px] text-muted-foreground/70 leading-relaxed mt-1">
-          Crypto payments settle directly in LTC (Litecoin) to our secure platform wallet. Card payments coming soon.
+          Payment availability is shown at checkout. Creator payouts are processed manually in Litecoin (LTC).
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
           DropThatThing is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>
@@ -95,8 +95,8 @@ const AboutDtt = () => (
   <SectionShell title="About DropThatThing (DTT)">
     <p><strong className="text-foreground">What DTT is.</strong> DropThatThing is an adults-only (18+) subscription platform operated by DTT Media LLC, a United States company. Independent, identity-verified adult creators publish photos and videos in two sections: the Women's Vault and the Men's Vault. Fans pay to unlock access to the creators they choose.</p>
     <p><strong className="text-foreground">Services offered.</strong> (1) Creator vault access: fans unlock a creator's full library for a fixed period. (2) Teaser discovery feed: free 15-second previews so fans can choose creators before paying. (3) Custom requests: fans can request personalized content, which the creator may accept or decline. (4) Private messaging between creators and their top fans. (5) Creator tools: analytics, earnings history, upload management and profile customization.</p>
-    <p><strong className="text-foreground">How payment works.</strong> Purchases use Bit-Tokens, a digital access credit. 1 Bit-Token costs $25 USD ($20 token value + $5 service and processing fee) and gives 14 days of access to one creator's vault. Access ends automatically after 14 days unless renewed. A one-time entry pass is required for new customers and is valid for 365 days. Payments are made in cryptocurrency through our licensed payment processor; Bit-Tokens have no cash value, cannot be withdrawn, traded or transferred, and are used only on DTT.</p>
-    <p><strong className="text-foreground">How creators are paid.</strong> Creators keep 90% of what fans spend on their content (92% for founding creators during their first year; 95% during a Power Week bonus). DTT keeps the remainder as its platform fee. Payouts are sent in Litecoin (LTC) to the creator's verified wallet.</p>
+    <p><strong className="text-foreground">How payment works.</strong> 1 Bit-Token costs $25 USD ($20 token value + $5 service and processing fee) and gives 14 days of access to one creator's vault. Access ends automatically unless renewed. The $20 entry pass lasts 365 days; creator unlocks are purchased separately. Checkout remains unavailable until processor approval and payment verification are confirmed. Bit-Tokens are used only on DTT and cannot be withdrawn, traded or transferred.</p>
+    <p><strong className="text-foreground">How creators are paid.</strong> A standard token unlock pays the creator $18: 90% of the $20 token value, excluding the $5 checkout fee. Eligible founding creators receive $18.40 (92%) during their first year; an active Power Week pays $19 (95%). Custom requests have separate disclosed terms. Creator payouts are processed manually in Litecoin (LTC).</p>
     <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must pass identity and age verification (Yoti) and manual approval before uploading. All creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported to authorities.</p>
     <p>Contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
   </SectionShell>
@@ -109,8 +109,8 @@ const CreatorPurchaseRules = () => (
     <p><strong className="text-foreground">3. Custom requests.</strong> A creator may accept or decline any request. The price is agreed before work begins. Content is delivered only after payment is confirmed, and the fan receives 14 days of access, which can be renewed. Requests must follow the same content rules above.</p>
     <p><strong className="text-foreground">4. Buying content.</strong> Fans must be 18+. Purchases grant a personal, non-transferable license to view content on DTT only. Downloading for redistribution, re-uploading, sharing accounts or recording content is prohibited and may be pursued under the DMCA. All sales are final except as stated in the Refund Policy.</p>
     <p><strong className="text-foreground">5. No loans or credit.</strong> DTT does not offer loans, credit, cash advances, "buy now pay later" or any internal lending between users, creators or the platform. Bit-Tokens must be fully paid before they are credited and cannot be borrowed, lent or converted back to money. Creator earnings are paid only from completed, confirmed purchases.</p>
-    <p><strong className="text-foreground">6. Creator payouts.</strong> Earnings follow the published revenue split and are paid in LTC to the creator's verified wallet. Earnings from charged-back or fraudulent payments are reversed.</p>
-    <p><strong className="text-foreground">7. Age restrictions.</strong> DTT is for adults 18+ only (or the age of majority where you live, if higher). Access is blocked in restricted countries. Accounts found to belong to minors are closed immediately.</p>
+    <p><strong className="text-foreground">6. Creator payouts.</strong> Earnings follow the published revenue split and are paid manually in LTC. Earnings from charged-back or fraudulent payments are reversed.</p>
+    <p><strong className="text-foreground">7. Age restrictions.</strong> DTT is for adults 18+ only (or the age of majority where you live, if higher). Use from restricted markets is not permitted; the Restricted Countries page explains current enforcement limitations. Accounts found to belong to minors are closed immediately.</p>
     <p><strong className="text-foreground">8. Enforcement.</strong> DTT may remove content, suspend accounts or withhold payouts during investigations of rule violations. Report concerns to <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>.</p>
   </SectionShell>
 );
@@ -127,7 +127,7 @@ const Statement2257 = () => (
     <p>All models, actors, and other persons appearing in visual depictions of actual or simulated sexually explicit conduct on this website were at least 18 years of age at the time the visual depictions were created.</p>
     <p><strong className="text-foreground">DTT Media LLC</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
     <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Yoti).</p>
-    <p><strong className="text-foreground">Custodian of Records</strong><br/>DTT Media LLC — Custodian of Records<br/>Business mailing address: being finalized; available on request at the email below.</p>
+    <p><strong className="text-foreground">Custodian of Records</strong><br/>DTT Media LLC — Custodian of Records<br/>Business mailing address is not yet published. Final recordkeeping details require confirmation before launch. Contact the email below with compliance questions.</p>
     <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: admin@dttmediallc.com</p>
   </SectionShell>
 );
@@ -138,9 +138,9 @@ const TermsOfService = () => (
     <p><strong className="text-foreground">2. Age Requirement.</strong> You must be at least 18 years of age (or the legal age of majority in your jurisdiction). Access by minors is strictly prohibited and will result in account termination and reporting to authorities.</p>
     <p><strong className="text-foreground">3. Independent Contractors.</strong> Creators are independent contractors and not employees, partners, or agents of DTT. Creators are solely responsible for their content, taxes, and legal compliance in their jurisdiction.</p>
     <p><strong className="text-foreground">4. Prohibited Use.</strong> You may not use the platform for: illegal content, content involving minors, non-consensual material, fraud, money laundering, terrorism financing, sanctions evasion, or any activity violating applicable law. Violations result in immediate account termination, fund seizure, and reporting to law enforcement.</p>
-    <p><strong className="text-foreground">5. Geographic Restrictions.</strong> The platform is not available to residents of jurisdictions where adult content or crypto-related services are prohibited, including but not limited to: OFAC-sanctioned countries (Iran, North Korea, Syria, Cuba, Crimea), and any region listed in our Ghost Country list. It is your responsibility to ensure local legality.</p>
-    <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens are digital access credits ($25 USD per token: $20 token value + $5 service and processing fee, 14-day access). No other fees are added. The Vault Entry Pass is $20 USD and lasts 365 days. Payments are accepted in cryptocurrency (LTC) and, where available, by card. Exchange rates and network fees are disclosed at checkout. Card payments coming soon.</p>
-    <p><strong className="text-foreground">7. No Refunds.</strong> All sales are final (see Refund Policy).</p>
+    <p><strong className="text-foreground">5. Geographic Restrictions.</strong> Use is not permitted where applicable law prohibits it or DTT excludes the market under its Restricted Countries policy. The current browser country estimate does not guarantee comprehensive enforcement. Language selection does not establish a user's location or legal eligibility.</p>
+    <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens cost $25 USD each ($20 value + $5 service and processing fee) and unlock one creator for 14 days. The $20 Vault Entry Pass lasts 365 days. Separate purchases and network fees must be reviewed before payment. Checkout is offered only after processor approval and verified payment setup; unavailable methods cannot take payment.</p>
+    <p><strong className="text-foreground">7. Refunds.</strong> Refund eligibility follows the Refund Policy and applicable consumer protection law.</p>
     <p><strong className="text-foreground">8. Account Security.</strong> You are responsible for safeguarding your credentials. Notify us immediately of unauthorized access.</p>
     <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT's total liability is limited to fees paid in the 30 days preceding a claim.</p>
     <p><strong className="text-foreground">10. Governing Law.</strong> These terms are governed by the laws of the Commonwealth of Pennsylvania, USA. Disputes are resolved by binding arbitration.</p>
@@ -153,13 +153,13 @@ const PrivacyPolicy = () => (
     <p><strong className="text-foreground">1. Data Collected.</strong> Email, account info, transaction history, IP address, device data, and (for Creators) government-issued ID and liveness selfies via Yoti.</p>
     <p><strong className="text-foreground">2. Purpose.</strong> Age & identity verification, fraud prevention, payment settlement, AML/KYC compliance, legal audit response.</p>
     <p><strong className="text-foreground">3. Legal Basis (GDPR/UK).</strong> Contract performance, legal obligation (AML/CTF), and legitimate interests in fraud prevention.</p>
-    <p><strong className="text-foreground">4. Third-Party Processors.</strong> Yoti (identity and age verification), our cloud database and hosting provider, and a Litecoin blockchain monitoring service. All processors are bound by data processing agreements.</p>
-    <p><strong className="text-foreground">5. Retention.</strong> KYC records: 5 years post-account-closure (regulatory requirement). Transaction logs: 7 years. Marketing data: until you opt out.</p>
+    <p><strong className="text-foreground">4. Service Providers.</strong> DTT uses cloud hosting and storage, Yoti for age and identity verification, and payment services when enabled. Provider contracts and data-transfer safeguards require confirmation before launch; this page does not establish that every agreement is complete.</p>
+    <p><strong className="text-foreground">5. Retention.</strong> Final documented retention and deletion periods require legal and operational confirmation before launch. Ask admin@dttmediallc.com about your data; legally required records may need to be retained.</p>
     <p><strong className="text-foreground">6. Your Rights.</strong> Access, correction, deletion (subject to legal retention), portability, objection. Email admin@dttmediallc.com to exercise rights.</p>
     <p><strong className="text-foreground">7. Cookies.</strong> Essential cookies only; no third-party advertising trackers.</p>
     <p><strong className="text-foreground">8. Data Sales.</strong> We do not sell user data.</p>
-    <p><strong className="text-foreground">9. International Transfers.</strong> Data may be processed in the US and EU under Standard Contractual Clauses.</p>
-    <p><strong className="text-foreground">10. Breach Notification.</strong> Affected users notified within 72 hours of confirmed breach.</p>
+    <p><strong className="text-foreground">9. International Transfers.</strong> Data may be processed outside your country. Applicable transfer safeguards and provider arrangements require confirmation before launch.</p>
+    <p><strong className="text-foreground">10. Breach Notification.</strong> DTT will follow applicable notification duties; timing and recipients depend on the law and incident.</p>
   </SectionShell>
 );
 
@@ -175,12 +175,12 @@ const RefundPolicy = () => (
 
 const AmlPolicy = () => (
   <SectionShell title="AML / KYC Policy">
-    <p>DTT maintains a strict Anti-Money Laundering (AML) and Counter-Terrorism Financing (CTF) program in line with FinCEN, FATF, and EU 5AMLD/6AMLD guidance.</p>
-    <p><strong className="text-foreground">Customer Due Diligence (CDD).</strong> Wallet origin screening applies to all crypto payments. Creators must complete full KYC (government ID + liveness selfie) via Yoti before payouts.</p>
-    <p><strong className="text-foreground">Sanctions Screening.</strong> All users are screened against OFAC, UN, EU, and UK sanctions lists. Hits result in account freeze and report filing.</p>
-    <p><strong className="text-foreground">Transaction Monitoring.</strong> Automated systems flag structuring, velocity anomalies, and high-risk geographies. Suspicious Activity Reports (SARs) are filed where required by law.</p>
-    <p><strong className="text-foreground">Prohibited Sources.</strong> Funds derived from criminal activity, mixers/tumblers, darknet markets, or sanctioned entities are refused; accounts are terminated and authorities notified.</p>
-    <p><strong className="text-foreground">Record Keeping.</strong> KYC and transaction records retained for 5 years (or longer where required).</p>
+    <p>DTT prohibits money laundering, terrorism financing and sanctions evasion. Applicable compliance obligations and provider responsibilities require qualified review before live payments.</p>
+    <p><strong className="text-foreground">Identity Checks.</strong> Creators must complete live Yoti age and identity verification and DTT approval before creator uploads. This check alone is not comprehensive financial due diligence.</p>
+    <p><strong className="text-foreground">Screening Limitations.</strong> Automated screening of every user or wallet against sanctions lists has not been established. The current entry country estimate is not a substitute for sanctions compliance.</p>
+    <p><strong className="text-foreground">Payment Controls.</strong> Server-created receipts, verified processor confirmations and duplicate-credit checks protect access and balances. These controls do not prove a complete AML monitoring or reporting program.</p>
+    <p><strong className="text-foreground">Prohibited Sources.</strong> Do not fund purchases with unlawful or sanctioned proceeds. DTT may investigate suspected abuse and act as required by applicable law.</p>
+    <p><strong className="text-foreground">Record Keeping.</strong> A documented retention and reporting process remains a launch requirement.</p>
     <p>Compliance contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
   </SectionShell>
 );
@@ -208,10 +208,10 @@ const Complaints = () => (
 const ContactInfo = () => (
   <SectionShell title="Contact Us">
     <p><strong className="text-foreground">DTT Media LLC</strong></p>
-    <p>Operator of DropThatThing. Business mailing address: being finalized; available on request. For all inquiries — support, compliance, partnerships, refunds, complaints, and legal — please contact our team at the email below.</p>
+    <p>Operator of DropThatThing. The business mailing address is not yet published. For support, compliance, partnerships, refunds, complaints and legal inquiries, use the email below.</p>
     <p><strong className="text-foreground">Support email:</strong> <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
     <p><strong className="text-foreground">Response time:</strong> within 2 business days.</p>
-    <p className="text-muted-foreground/60 text-[10px]">Payments: direct LTC (Litecoin) settlement.</p>
+    <p className="text-muted-foreground/60 text-[10px]">Creator payouts: manual Litecoin (LTC). Purchase availability is shown at checkout.</p>
   </SectionShell>
 );
 
@@ -280,7 +280,7 @@ const DmcaTakedown = () => {
   if (submitted) {
     return (
       <SectionShell title="DMCA Notice Received">
-        <p>Thank you. Your takedown notice has been logged and routed to our Designated DMCA Agent.</p>
+        <p>Thank you. Your takedown notice has been saved for DTT review.</p>
         <p>We aim to act on valid notices within <strong className="text-foreground">2 business days</strong>. You will receive a follow-up at the email address you provided.</p>
         <p className="text-muted-foreground/60 text-[10px]">Reference: filed {new Date().toLocaleString()}</p>
       </SectionShell>
@@ -294,8 +294,8 @@ const DmcaTakedown = () => {
     <SectionShell title="DMCA Copyright Takedown">
       <div className="space-y-2">
         <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
-        <p><strong className="text-foreground">Designated DMCA Agent</strong></p>
-        <p>DTT Media LLC — Designated DMCA Agent<br/>Mailing address: being finalized; available on request by email.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
+        <p><strong className="text-foreground">Copyright Contact — Agent Registration Pending Confirmation</strong></p>
+        <p>DTT Media LLC<br/>Confirmed designated-agent registration and mailing address are not yet published. The contact form does not establish completed registration.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
         <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
       </div>
 

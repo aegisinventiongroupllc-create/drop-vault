@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { crypto as stdCrypto } from "jsr:@std/crypto@1";
 import { encodeHex } from "jsr:@std/encoding@1/hex";
+import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
 
 // Server-side price catalog. The browser may only pick a package, never a price.
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
@@ -29,14 +30,23 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const cfg = env();
   const configured = Boolean(cfg.account && cfg.subaccount && cfg.flexformId && cfg.salt);
+  const enabled = liveCheckoutEnabled({
+    credentialsPresent: configured,
+    webhookSecret: Deno.env.get("CCBILL_WEBHOOK_SECRET") ?? "",
+    approval: Deno.env.get("DTT_CCBILL_LIVE_APPROVED"),
+    checkoutVerified: Deno.env.get("DTT_CCBILL_CHECKOUT_VERIFIED"),
+  });
 
   try {
     const body = await req.json().catch(() => ({}));
-    if (body?.probe === true) return json({ configured });
-    if (!configured) return json({ error: "Card payments are coming soon.", configured: false }, 503);
+    if (body?.probe === true) return json({ enabled });
+    if (!enabled) return json({ error: "Card checkout is unavailable pending processor approval and verified checkout.", enabled: false }, 503);
 
     const authHeader = req.headers.get("Authorization") ?? "";
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const backendUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!backendUrl || !anonKey) return json({ error: "Checkout unavailable" }, 503);
+    const supabase = createClient(backendUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: userData, error: userErr } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));

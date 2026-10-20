@@ -36,14 +36,28 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   const [creditedTokens, setCreditedTokens] = useState<number>(0);
   const pollRef = useRef<number | null>(null);
   const [cardEnabled, setCardEnabled] = useState(false);
+  const [cryptoEnabled, setCryptoEnabled] = useState(false);
+  const [checkingPayments, setCheckingPayments] = useState(true);
   const [rememberCard, setRememberCard] = useState(false);
   const [payMethod, setPayMethod] = useState<"crypto" | "card">("crypto");
 
-  // Card checkout appears automatically once CCBill account keys are configured on the server.
+  // Only server-confirmed approved and verified connections may offer live checkout.
   useEffect(() => {
-    supabase.functions.invoke("ccbill-create-checkout", { body: { probe: true } })
-      .then(({ data }) => setCardEnabled(Boolean(data?.configured)))
-      .catch(() => setCardEnabled(false));
+    let cancelled = false;
+    void Promise.all([
+      supabase.functions.invoke("ccbill-create-checkout", { body: { probe: true } }),
+      supabase.functions.invoke("cryptocloud-create-invoice", { body: { probe: true } }),
+    ]).then(([card, crypto]) => {
+      if (cancelled) return;
+      const cardReady = !card.error && card.data?.enabled === true;
+      const cryptoReady = !crypto.error && crypto.data?.enabled === true;
+      setCardEnabled(cardReady);
+      setCryptoEnabled(cryptoReady);
+      if (!cryptoReady && cardReady) setPayMethod("card");
+    }).catch(() => {
+      if (!cancelled) { setCardEnabled(false); setCryptoEnabled(false); }
+    }).finally(() => { if (!cancelled) setCheckingPayments(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const requireSession = async () => {
@@ -53,6 +67,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   };
 
   const handleCardCheckout = async () => {
+    if (!cardEnabled) { setError("Card checkout is unavailable."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     try {
       if (!(await requireSession())) return;
@@ -138,6 +153,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   };
 
   const handleStartCheckout = async () => {
+    if (!cryptoEnabled) { setError("TryBit checkout is unavailable."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     if (!(await requireSession())) return;
     await logConsent();
@@ -227,7 +243,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
 
             {/* Payment method chooser */}
             <div className={cardEnabled ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"}>
-              <Button variant="outline"
+              <Button variant="outline" disabled={!cryptoEnabled || checkingPayments}
                 onClick={() => setPayMethod("crypto")}
                 className={`h-auto flex-col whitespace-normal rounded-xl border-2 p-3 text-center transition-all ${payMethod === "crypto" ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}
               >
@@ -242,7 +258,11 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <p className="text-[10px] text-muted-foreground mt-0.5">Visa · Mastercard · Discover · JCB</p>
               </Button>}
             </div>
-            {!cardEnabled && <p role="status" className="text-xs text-muted-foreground text-center">CCBill card checkout is unavailable. TryBit is still under review; its live checkout is not connected.</p>}
+            <p role="status" className="text-xs text-muted-foreground text-center">
+              {checkingPayments ? "Checking payment availability…" : !cardEnabled && !cryptoEnabled
+                ? "Checkout is unavailable. Payment approval and verification are pending. No payment will be taken."
+                : !cardEnabled ? "CCBill card checkout is unavailable." : !cryptoEnabled ? "TryBit checkout is unavailable." : ""}
+            </p>
 
             {/* Order summary — shown for both methods */}
             <div className="rounded-xl border border-border bg-secondary/50 p-3 space-y-1">
@@ -270,16 +290,16 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               </div>
             )}
 
-            {payMethod === "crypto" && (
+            {payMethod === "crypto" && cryptoEnabled && (
               <>
                 <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
                   <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYING WITH</p>
                   <p className="text-2xl font-bold text-primary">LTC · USDT</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Secure hosted checkout via CryptoCloud</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Hosted checkout via TryBit</p>
                 </div>
                 <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-                  <p className="text-[10px] text-muted-foreground">You'll be redirected to CryptoCloud's secure checkout to complete payment.</p>
-                  <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. All sales final.</p>
+                  <p className="text-[10px] text-muted-foreground">You'll be redirected to TryBit's checkout to complete payment.</p>
+                  <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. Refund exceptions follow the DTT Refund Policy and applicable law.</p>
                 </div>
               </>
             )}
@@ -290,9 +310,9 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                   <p className="text-[10px] font-bold tracking-wider text-center text-muted-foreground">CARD PAYMENTS — PROCESSED BY CCBILL</p>
                   <ul className="space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
                     <li>• Your card is charged <span className="text-foreground font-semibold">once</span> for the total above. No subscription, no recurring billing, and you are not enrolled in any trial.</li>
-                    <li>• The charge appears on your card statement as <span className="text-foreground font-semibold">"CCBill.com *DTT"</span> — discreet, with no mention of content type.</li>
-                    <li>• Payments are processed over an encrypted connection by <span className="text-foreground font-semibold">CCBill</span>, our authorized sales agent. Your card details are handled by CCBill and are never stored on DTT servers.</li>
-                    <li>• This purchase is for <span className="text-foreground font-semibold">digital goods delivered immediately</span>: {isEntryPass ? "your Vault Entry Pass activates" : "Bit-Tokens credit"} as soon as payment is confirmed. <span className="text-foreground font-semibold">All sales are final and non-refundable</span> once credit is delivered.</li>
+                    <li>• Review the card-statement descriptor shown by CCBill before confirming payment.</li>
+                    <li>• Card details are handled by CCBill, not collected by DTT.</li>
+                    <li>• {isEntryPass ? "Your Vault Entry Pass activates" : "Bit-Tokens credit"} only after payment is verified. Refund exceptions follow the DTT Refund Policy and applicable law.</li>
                     <li>• Strictly 18+. You confirm the card is yours and the funds are lawful.</li>
                     <li>• Disputed or unauthorized charges (chargebacks) can result in permanent account suspension.</li>
                     <li>• Questions before you buy? Contact <span className="text-foreground font-semibold">admin@dttmediallc.com</span> — we answer before and after purchase.</li>
@@ -333,7 +353,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <span className="text-[10px] text-muted-foreground leading-relaxed">
                 I confirm I am 18+, the funds are mine and lawful, and I accept the
                 <span className="text-foreground font-semibold"> Terms, Privacy, Refund, AML/KYC, and Risk Disclosure</span> policies.
-                {payMethod === "crypto" ? <> I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span>.</> : <> I understand card charges are <span className="text-foreground font-semibold">one-time and all sales are final</span> once digital goods are delivered.</>}
+                {payMethod === "crypto" ? <> I understand crypto transactions are <span className="text-foreground font-semibold">irreversible</span>.</> : <> I understand card charges are one-time and refunds follow the DTT Refund Policy.</>}
               </span>
             </label>
 
@@ -350,7 +370,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             </label>
 
             {payMethod === "crypto" && (
-              <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleStartCheckout}>GENERATE PAYMENT — ${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</Button>
+              <Button variant="neon" className="w-full" disabled={!allAgreed || !cryptoEnabled || checkingPayments} onClick={handleStartCheckout}>{cryptoEnabled ? `GENERATE PAYMENT — $${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}` : "CHECKOUT UNAVAILABLE"}</Button>
             )}
             <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
           </div>
@@ -371,7 +391,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">COMPLETE YOUR PAYMENT</h3>
             <p className="text-xs text-muted-foreground">
-              Your secure CryptoCloud checkout opened in a new tab. Pay there and your {isEntryPass ? "pass will activate" : "tokens will credit"} automatically. You can keep this window open.
+              Your TryBit checkout opened in a new tab. Your {isEntryPass ? "pass activates" : "tokens credit"} only after payment is verified. You can keep this window open.
             </p>
 
             <a href={checkout.invoice_url} target="_blank" rel="noopener noreferrer" className="block">
@@ -381,7 +401,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <div className="bg-gold/5 border border-gold/20 rounded-lg p-3">
               <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ AUTO-VERIFICATION</p>
               <p className="text-[10px] text-muted-foreground">
-                Tokens credit automatically as soon as CryptoCloud confirms your payment. Invoice expires in 2 hours.
+                Access and tokens activate only after verified payment. Invoice expires in 2 hours.
               </p>
             </div>
 

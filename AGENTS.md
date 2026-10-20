@@ -14,7 +14,7 @@
 - Bound in-page selfies, release tracks, skip scans. Why: avoid handoffs/WASM.
 - Prebundle pickers with deduped React. Why: avoid mixed hooks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
-- CCBill uses server-signed FlexForms, IP-restricted webhooks, catalog-price checks and idempotent credits; hide cards without secrets. Why: prevent forged payments.
+- CCBill uses signed forms, private/IP-restricted notices and idempotent catalog credits. paymentReadiness requires DTT_<PROVIDER>_LIVE_APPROVED/CHECKOUT_VERIFIED flags and credentials. Why: keys do not prove approval.
 - Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; exclude onboarding IDs/avatars. Why: prevent verification bypass.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
 - AutoTranslator applies source-matched static UI catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code stay notranslate. Why: avoid private cache exposure and repeat spend; cross-instance coordination is separate.
@@ -32,4 +32,4 @@
 - Subdirectories have their own AGENTS.md; read it before changing files there.
 - Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
 
-- Sky photos preload as background layers with star fallback and resume/online retries. Why: failed images must not draw borders behind globes.
+- Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
