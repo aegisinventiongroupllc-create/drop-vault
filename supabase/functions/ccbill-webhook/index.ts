@@ -14,6 +14,13 @@ const ok = (body: unknown, status = 200) =>
 Deno.serve(async (req) => {
   if (req.method !== "POST") return ok({ error: "method not allowed" }, 405);
 
+  // Forwarded headers can be spoofed, so every notice must also carry the private
+  // webhook secret configured in CCBill's webhook URL. Fail closed when unset.
+  const secret = Deno.env.get("CCBILL_WEBHOOK_SECRET") ?? "";
+  if (secret.length < 24) return ok({ error: "webhook not configured" }, 503);
+  const given = new URL(req.url).searchParams.get("key") ?? req.headers.get("x-dtt-webhook-key") ?? "";
+  if (given !== secret) return ok({ error: "forbidden" }, 403);
+
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
   if (!CCBILL_RANGES.some((r) => ip.startsWith(r))) {
     console.warn("ccbill webhook rejected ip", ip);
