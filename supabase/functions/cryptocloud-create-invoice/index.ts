@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { priceAgreedRequest } from "../_shared/customRequestPayment.ts";
+import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,8 +9,8 @@ const corsHeaders = {
 
 const SHOP_ID = (Deno.env.get("CRYPTOCLOUD_SHOP_ID") ?? "").trim();
 const API_KEY = (Deno.env.get("CRYPTOCLOUD_API_KEY") ?? "").trim().replace(/^Token\s+/i, "");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 // ---- Server-side price catalog. The browser may only pick an item, never a price. ----
 const ADMIN_FEE_USD = 1;
@@ -79,6 +80,17 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const body = await req.json().catch(() => ({}));
+    const enabled = liveCheckoutEnabled({
+      credentialsPresent: Boolean(SHOP_ID && API_KEY),
+      webhookSecret: Deno.env.get("CRYPTOCLOUD_SECRET_KEY") ?? "",
+      approval: Deno.env.get("DTT_TRYBIT_LIVE_APPROVED"),
+      checkoutVerified: Deno.env.get("DTT_TRYBIT_CHECKOUT_VERIFIED"),
+    });
+    if (body?.probe === true) return json({ enabled });
+    if (!enabled || !SUPABASE_URL || !SERVICE_ROLE) {
+      return json({ error: "TryBit checkout is unavailable pending approval and verified checkout.", enabled: false }, 503);
+    }
     const authHeader = req.headers.get("Authorization") ?? "";
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
       global: { headers: { Authorization: authHeader } },
@@ -89,7 +101,6 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
     const userId = userData.user.id;
 
-    const body = await req.json().catch(() => ({}));
     const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
@@ -105,7 +116,8 @@ Deno.serve(async (req) => {
       requestPrice = priceAgreedRequest(request, userId);
       if (!requestPrice) return json({ error: "This request is not ready for payment" }, 409);
     }
-    const priced = isCustomRequest ? { amount_usd: requestPrice!.amount_usd, tokens: 0 } : priceRequest(body);
+    if (isCustomRequest && !requestPrice) return json({ error: "This request is not ready for payment" }, 409);
+    const priced = requestPrice ? { amount_usd: requestPrice.amount_usd, tokens: 0 } : priceRequest(body);
     if ("error" in priced) return json({ error: priced.error }, 400);
 
     const { amount_usd, tokens } = priced;
@@ -159,7 +171,7 @@ Deno.serve(async (req) => {
       };
       const { error } = isCustomRequest
         ? await server.from("custom_request_payment_receipts").insert({
-            ...receipt, request_id: requestId, base_usd: requestPrice!.base_usd,
+            ...receipt, request_id: requestId, base_usd: requestPrice?.base_usd,
           })
         : isEntryPass
         ? await server.from("entry_pass_payment_receipts").insert({ ...receipt, method: "crypto" })
