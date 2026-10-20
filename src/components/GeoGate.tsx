@@ -3,9 +3,7 @@ import { Globe, Loader2 } from "lucide-react";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 import GhostCountryMessage from "@/components/GhostCountryMessage";
 import LegalFooter from "@/components/LegalFooter";
-
-const CACHE_KEY = "dtt_geo_country";
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+import { Button } from "@/components/ui/button";
 
 type GeoState =
   | { status: "loading" }
@@ -19,7 +17,7 @@ const fetchCountry = async (): Promise<string | null> => {
     const r = await fetch("https://ipapi.co/json/", { cache: "no-store" });
     if (r.ok) {
       const j = await r.json();
-      if (j?.country_code) return String(j.country_code).toUpperCase();
+      if (isCountryCode(j?.country_code)) return j.country_code.toUpperCase();
     }
   } catch { /* fall through */ }
   // Fallback: ipwho.is (free, CORS-enabled)
@@ -27,52 +25,29 @@ const fetchCountry = async (): Promise<string | null> => {
     const r = await fetch("https://ipwho.is/", { cache: "no-store" });
     if (r.ok) {
       const j = await r.json();
-      if (j?.country_code) return String(j.country_code).toUpperCase();
+      if (j?.success !== false && isCountryCode(j?.country_code)) return j.country_code.toUpperCase();
     }
   } catch { /* ignore */ }
   return null;
 };
 
+const isCountryCode = (code: unknown): code is string =>
+  typeof code === "string" && /^[A-Za-z]{2}$/.test(code) && !["XX", "ZZ", "AA", "EU", "AP", "UN"].includes(code.toUpperCase());
+
 const GeoGate = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<GeoState>({ status: "loading" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    // Admin bypass — full access regardless of geo
-    try {
-      if (localStorage.getItem("dtt_admin_override") === "1") {
-        setState({ status: "allowed", country: "ADMIN" });
-        return;
-      }
-    } catch { /* ignore */ }
-
-    // Cache check
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const cached = JSON.parse(raw) as { code: string; ts: number };
-        if (Date.now() - cached.ts < CACHE_TTL_MS && cached.code) {
-          setState(
-            isBlockedCountry(cached.code)
-              ? { status: "blocked", country: cached.code }
-              : { status: "allowed", country: cached.code },
-          );
-          return;
-        }
-      }
-    } catch { /* ignore */ }
-
+    setState({ status: "loading" });
     let cancelled = false;
     (async () => {
       const code = await fetchCountry();
       if (cancelled) return;
       if (!code) {
-        // Fail-open: don't block on detection failure
         setState({ status: "unknown" });
         return;
       }
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ code, ts: Date.now() }));
-      } catch { /* ignore */ }
       setState(
         isBlockedCountry(code)
           ? { status: "blocked", country: code }
@@ -81,7 +56,7 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
     })();
 
     return () => { cancelled = true; };
-  }, []);
+  }, [attempt]);
 
   if (state.status === "loading") {
     return (
@@ -106,10 +81,7 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
         <div className="flex-1 flex flex-col items-center justify-center">
           <GhostCountryMessage countryCode={state.country} />
           <p className="mt-4 px-6 text-center text-[10px] text-muted-foreground/70 max-w-sm">
-            Access from your detected region ({state.country}) is restricted by our
-            payment processor,
-            applicable sanctions law, or local adult-content regulations. See our
-            Restricted Countries policy below.
+            DTT is not available in your detected region ({state.country}) under our current market restrictions. See the Restricted Countries policy below.
           </p>
         </div>
         <LegalFooter />
@@ -117,7 +89,19 @@ const GeoGate = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // allowed or unknown → render app
+  if (state.status === "unknown") {
+    return (
+      <div className="min-h-[100dvh] flex flex-col bg-background">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6 text-center">
+          <h1 className="text-sm font-bold text-foreground">REGION COULD NOT BE VERIFIED</h1>
+          <p className="text-xs text-muted-foreground max-w-sm">Access is paused until we can verify your region. Please try again or contact admin@dttmediallc.com.</p>
+          <Button variant="outline" onClick={() => setAttempt((value) => value + 1)}>TRY AGAIN</Button>
+        </div>
+        <LegalFooter />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 };
 
