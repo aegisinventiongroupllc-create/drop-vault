@@ -5,6 +5,7 @@ import type { VideoItem } from "@/components/DiscoveryFeed";
 import { teaserGateTime } from "@/lib/teaserGate";
 import { rankByInterest, readBrowsePosition, readInterests, recordInterest, saveBrowsePosition, teaserTapAction } from "@/lib/teaserBrowse";
 import dttCoin from "@/assets/dtt-reward-coin.png";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: {
   item: VideoItem; active: boolean; onPlay: () => void; onCreatorClick: (name: string) => void; unlocked: boolean;
@@ -14,10 +15,22 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
   const lastTap = useRef<number | null>(null);
   const [gate, setGate] = useState(false);
   const [error, setError] = useState(false);
+  const [url, setUrl] = useState(item.videoUrl);
+  useEffect(() => {
+    if (!active || !item.storagePath) return;
+    let cancelled = false;
+    const refresh = async () => {
+      const { data, error: signingError } = await supabase.storage.from("teasers").createSignedUrl(item.storagePath ?? "", 3600);
+      if (!cancelled) { setUrl(data?.signedUrl); if (signingError) setError(true); }
+    };
+    void refresh();
+    const timer = setInterval(() => void refresh(), 50 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [active, item.storagePath]);
   useEffect(() => {
     if (active && !gate) video.current?.play().catch(() => setError(true));
     else video.current?.pause();
-  }, [active, gate]);
+  }, [active, gate, url]);
   useEffect(() => {
     const element = tile.current;
     if (!element) return;
@@ -43,7 +56,7 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
       <Button variant="ghost" aria-label={`Play ${item.title} by @${item.creator}`} onClick={tap} className="absolute inset-0 h-full w-full p-0 rounded-none touch-manipulation">
         {item.mediaType === "photo" ? <img loading="lazy" src={item.videoUrl} alt={item.title} className="h-full w-full object-cover" /> : <>
           <div className="absolute inset-0 flex items-center justify-center bg-secondary"><ProfileAvatar config={item.creatorAvatar} creatorPhotoPath={item.creatorPhotoPath} label={item.creator} className="h-28 w-28" /></div>
-          <video ref={video} src={active ? item.videoUrl : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
+          <video ref={video} src={active ? url : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
             const current = video.current;
             if (!current || unlocked) return;
             const stop = teaserGateTime(current.duration);
@@ -96,7 +109,7 @@ export default function TeaserShelves({ items, viewerId, scope, market, marketLa
       {rows.map((row, index) => <section key={row.title} aria-label={row.title}>
         <h2 className="mb-3 text-base font-semibold text-foreground">{row.title}</h2>
         <div data-shelf={row.title} className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3" onScroll={event => { positions.current.rows[row.title] = event.currentTarget.scrollLeft; save(); }}>
-          {row.items.map(item => <ShelfTeaser key={item.id} item={item} active={active === item.id} onPlay={() => setActive(item.id)} onCreatorClick={() => openCreator(item)} unlocked={!!item.creatorId && (unlocked.has(item.creatorId) || viewerId === item.creatorId)} />)}
+          {row.items.map(item => <ShelfTeaser key={item.id} item={item} active={active === `${row.title}:${item.id}`} onPlay={() => setActive(`${row.title}:${item.id}`)} onCreatorClick={() => openCreator(item)} unlocked={!!item.creatorId && (unlocked.has(item.creatorId) || viewerId === item.creatorId)} />)}
           {!row.items.length && Array.from({ length: 5 }, (_, slot) => <article key={slot} className="w-44 shrink-0 snap-start sm:w-56">
             <div className={`relative aspect-[3/4] flex flex-col items-center justify-center gap-5 overflow-hidden rounded-lg border border-border ${index % 2 ? "bg-secondary" : "bg-card"}`}>
               <img src={dttCoin} alt="DTT" className="h-20 w-20 object-contain opacity-70" />

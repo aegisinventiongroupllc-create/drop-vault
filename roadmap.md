@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Current request
-- [ ] Keep each country's shelves separate and prioritize the customer's most-visited creators/categories, account-scoped on this device; keep published site and payment settings unchanged during TryBit review.
-- [ ] Replace customer homepage with Netflix-style titled, horizontally scrolling teaser categories and Coming soon tiles; remember account-scoped browsing position; single tap plays, double tap opens the creator page without bypassing library payment.
+- [x] Country-specific shelves prioritize creator-page visits and related categories from loaded authorized teasers; interest counts and scroll positions are account-scoped on this device. Published site/payment settings unchanged.
+- [x] Netflix-style titled horizontal shelves and Coming soon tiles added; single tap plays and double tap opens creator page with existing payment protections. Six focused tests pass; isolated shelf layout verified on desktop/mobile. Real account stops at pending Creator Agreement; populated paid-customer playback remains unverified without an eligible session.
 - [ ] Remove personal DMCA agent name after owner supplies a matching amended registration; current registered designation must remain accurate meanwhile.
 - [x] Harden country entry (20 October): removed local override/cache and fail-open behavior, restricted-country recruiting prompt and misleading exclusion attribution. Fifteen country/founding tests pass; browser verified Japan denial despite override, detection-failure block and US retry to sign-in with zero page errors. No TryBit/payment/publication changes.
 - [ ] Complete country enforcement: blocked by documented trusted server geolocation and geographically protected media/upload delivery; direct signing and issued links remain outside browser gate. Qualified legal review, US-state/UK viewer age assurance, subnational restrictions and sanctions screening remain required. See country-enforcement-readiness.md; country blocks do not guarantee protection from lawsuits.
