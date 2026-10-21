@@ -505,7 +505,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         </button>
       </div>
 
-      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${vault}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
+      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${vault}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} market={`${vault}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
         {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
         {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}
         <LegalFooter />

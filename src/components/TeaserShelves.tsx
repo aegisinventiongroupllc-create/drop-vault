@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import type { VideoItem } from "@/components/DiscoveryFeed";
 import { teaserGateTime } from "@/lib/teaserGate";
-import { readBrowsePosition, saveBrowsePosition, teaserTapAction } from "@/lib/teaserBrowse";
+import { rankByInterest, readBrowsePosition, readInterests, recordInterest, saveBrowsePosition, teaserTapAction } from "@/lib/teaserBrowse";
 import dttCoin from "@/assets/dtt-reward-coin.png";
 
 export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: {
@@ -64,14 +64,22 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
   </article>;
 }
 
-export default function TeaserShelves({ items, viewerId, scope, unlocked, onCreatorClick, loading, children }: {
-  items: VideoItem[]; viewerId: string | null; scope: string; unlocked: Set<string>; onCreatorClick: (name: string) => void; loading: boolean; children?: React.ReactNode;
+export default function TeaserShelves({ items, viewerId, scope, market, marketLabel, unlocked, onCreatorClick, loading, children }: {
+  items: VideoItem[]; viewerId: string | null; scope: string; market: string; marketLabel: string; unlocked: Set<string>; onCreatorClick: (name: string) => void; loading: boolean; children?: React.ReactNode;
 }) {
   const [active, setActive] = useState<string | null>(null);
+  const [interests, setInterests] = useState(() => readInterests(viewerId, market));
   const container = useRef<HTMLDivElement>(null);
   const positions = useRef(readBrowsePosition(viewerId, scope));
-  const tags = Array.from(new Set(items.flatMap(item => item.tags ?? []))).slice(0, 12);
-  const rows = [{ title: "New arrivals", items }, ...((tags.length ? tags : ["Cosplay", "Fitness", "Lifestyle"]).map(title => ({ title, items: items.filter(item => item.tags?.includes(title)) })))];
+  useEffect(() => setInterests(readInterests(viewerId, market)), [viewerId, market]);
+  const tagCounts = new Map<string, number>();
+  items.forEach(item => (item.tags ?? []).forEach(tag => tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)));
+  const tags = Array.from(tagCounts.keys()).sort((a, b) => (interests[`tag:${b}`] ?? 0) - (interests[`tag:${a}`] ?? 0) || (tagCounts.get(b) ?? 0) - (tagCounts.get(a) ?? 0) || a.localeCompare(b)).slice(0, 12);
+  const rows = [{ title: "Your most viewed", items: rankByInterest(items, interests) }, { title: `New in ${marketLabel}`, items }, ...((tags.length ? tags : ["Cosplay", "Fitness", "Lifestyle"]).map(title => ({ title, items: items.filter(item => item.tags?.includes(title)) })))];
+  const openCreator = (item: VideoItem) => {
+    setInterests(recordInterest(viewerId, market, [`creator:${item.creatorId}`, ...(item.tags ?? []).map(tag => `tag:${tag}`)]));
+    onCreatorClick(item.creator);
+  };
   useEffect(() => {
     positions.current = readBrowsePosition(viewerId, scope);
     setActive(null);
@@ -84,11 +92,11 @@ export default function TeaserShelves({ items, viewerId, scope, unlocked, onCrea
   const save = () => saveBrowsePosition(viewerId, scope, positions.current);
   return <div ref={container} className="h-[100dvh] overflow-y-auto bottom-nav-scroll-area pt-40 sm:pt-44" onScroll={event => { positions.current.top = event.currentTarget.scrollTop; save(); }}>
     <div className="mx-auto max-w-7xl space-y-7 px-4 pb-6 sm:px-8">
-      <div><h2 className="font-display text-xl font-bold text-foreground">{scope.startsWith("men") ? "MEN’S VAULT" : "WOMEN’S VAULT"}</h2></div>
+      <div><h2 className="font-display text-xl font-bold text-foreground">{scope.startsWith("men") ? "MEN’S VAULT" : "WOMEN’S VAULT"}</h2><p className="mt-1 text-sm text-muted-foreground">{marketLabel}</p></div>
       {rows.map((row, index) => <section key={row.title} aria-label={row.title}>
         <h2 className="mb-3 text-base font-semibold text-foreground">{row.title}</h2>
         <div data-shelf={row.title} className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3" onScroll={event => { positions.current.rows[row.title] = event.currentTarget.scrollLeft; save(); }}>
-          {row.items.map(item => <ShelfTeaser key={item.id} item={item} active={active === item.id} onPlay={() => setActive(item.id)} onCreatorClick={onCreatorClick} unlocked={!!item.creatorId && (unlocked.has(item.creatorId) || viewerId === item.creatorId)} />)}
+          {row.items.map(item => <ShelfTeaser key={item.id} item={item} active={active === item.id} onPlay={() => setActive(item.id)} onCreatorClick={() => openCreator(item)} unlocked={!!item.creatorId && (unlocked.has(item.creatorId) || viewerId === item.creatorId)} />)}
           {!row.items.length && Array.from({ length: 5 }, (_, slot) => <article key={slot} className="w-44 shrink-0 snap-start sm:w-56">
             <div className={`relative aspect-[3/4] flex flex-col items-center justify-center gap-5 overflow-hidden rounded-lg border border-border ${index % 2 ? "bg-secondary" : "bg-card"}`}>
               <img src={dttCoin} alt="DTT" className="h-20 w-20 object-contain opacity-70" />
