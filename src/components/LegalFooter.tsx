@@ -294,8 +294,8 @@ const DmcaTakedown = () => {
     <SectionShell title="DMCA Copyright Takedown">
       <div className="space-y-2">
         <p>If you are a copyright owner (or authorized agent) and believe content on DropThatThing infringes your copyright, you may submit a takedown notice under the <strong className="text-foreground">Digital Millennium Copyright Act, 17 U.S.C. § 512(c)</strong>.</p>
-        <p><strong className="text-foreground">Copyright Contact — Agent Registration Pending Confirmation</strong></p>
-        <p>DTT Media LLC<br/>Confirmed designated-agent registration and mailing address are not yet published. The contact form does not establish completed registration.<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
+        <p><strong className="text-foreground">Copyright Agent (Designated Agent under 17 U.S.C. § 512(c))</strong></p>
+        <p>Cory Quel, DTT Media LLC<br/>606 Liberty Ave, Suite 300, Pittsburgh, PA 15222<br/>Registered in the U.S. Copyright Office DMCA Designated Agent Directory (Registration No. DMCA-1083694).<br/>Email: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
         <p className="text-muted-foreground/70 text-[10px]">Knowingly false notices may subject you to liability for damages under 17 U.S.C. § 512(f).</p>
       </div>
 
