@@ -15,6 +15,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import MiniGlobe from "@/components/MiniGlobe";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { teaserGateTime } from "@/lib/teaserGate";
+import TeaserShelves from "@/components/TeaserShelves";
 
 interface VideoItem {
   id: string;
@@ -504,25 +505,11 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         </button>
       </div>
 
-      <div className={`h-[100dvh] snap-y snap-mandatory overflow-y-auto bottom-nav-scroll-area ${hasVaultToggle ? "pt-[9rem]" : "pt-[7rem]"}`}>
+      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${vault}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} market={`${vault}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
         {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
-        {filteredVideos.length > 0 ? (
-          filteredVideos.map((video) => (
-            <VideoCard key={video.id} video={video} onCreatorClick={onCreatorClick} initiallyLiked={!!video.creatorId && myHearts.has(video.creatorId)} viewerId={viewerId} initiallyUnlocked={!!video.creatorId && myUnlocks.has(video.creatorId)} onUnlocked={addUnlock} />
-          ))
-        ) : (
-          loading ? <p className="p-12 text-center text-muted-foreground">Loading teasers…</p> : countryFilter && countryFilter !== "GLOBAL" ? (
-            <GhostCountryMessage countryCode={countryFilter} />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center px-6 gap-3">
-              <p className="text-sm font-bold text-foreground tracking-wider">NO CREATORS YET</p>
-              <p className="text-xs text-muted-foreground max-w-xs">DTT just launched. Be one of the first creators to upload — your teasers will appear here.</p>
-            </div>
-          )
-        )}
         {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}
         <LegalFooter />
-      </div>
+      </TeaserShelves>
     </div>
   );
 };

@@ -34,3 +34,4 @@
 - Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
 
 - Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
+- Discovery renders category shelves from the paginated authorized teaser feed; persist only bounded account/market-scoped scroll coordinates and interest counts, never signed links, and require explicit playback gestures. Why: preserve privacy and prevent autoplay.
