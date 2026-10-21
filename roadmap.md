@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [ ] Replace customer homepage with titled, horizontally scrolling teaser categories and Coming soon tiles; remember account-scoped browsing position; single tap plays, double tap opens the creator page without bypassing library payment.
+- [ ] Remove personal DMCA agent name after owner supplies a matching amended registration; current registered designation must remain accurate meanwhile.
 - [x] Harden country entry (20 October): removed local override/cache and fail-open behavior, restricted-country recruiting prompt and misleading exclusion attribution. Fifteen country/founding tests pass; browser verified Japan denial despite override, detection-failure block and US retry to sign-in with zero page errors. No TryBit/payment/publication changes.
 - [ ] Complete country enforcement: blocked by documented trusted server geolocation and geographically protected media/upload delivery; direct signing and issued links remain outside browser gate. Qualified legal review, US-state/UK viewer age assurance, subnational restrictions and sanctions screening remain required. See country-enforcement-readiness.md; country blocks do not guarantee protection from lawsuits.
 - [x] Prepared conditional $100/$500 monthly storage-and-viewing comparisons using official Bunny starting storage/standard regional delivery rates and explicit 3 Mbps assumptions; media-capacity-readiness.md records calculations/exclusions. Neither amount is an agreed budget or purchase authorization. Provider acceptance, selected budget and isolated capacity testing remain blockers; no purchase, limit increase or paid load generated.
