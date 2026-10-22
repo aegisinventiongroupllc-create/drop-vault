@@ -120,13 +120,25 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
                   </button>
                 )}
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {SWATCHES.map((hex) => (
-                  <button key={hex} type="button" aria-label={`Use ${hex}`} onClick={() => set(p.key, hex)}
-                    className={`h-6 w-6 rounded-full border-2 ${theme[p.key] === hex ? "border-foreground" : "border-border"}`}>
-                    <svg viewBox="0 0 10 10" className="h-full w-full"><circle cx="5" cy="5" r="5" fill={hex} /></svg>
+              <div className="flex flex-wrap gap-2.5 p-1">
+                {SWATCHES.map((hex) => {
+                  const on = theme[p.key] === hex;
+                  return (
+                  <button key={hex} type="button" aria-label={`Use ${hex}`} aria-pressed={on} onClick={() => set(p.key, hex)}
+                    className={`h-8 w-8 rounded-full p-0.5 transition-transform duration-200 hover:scale-110 active:scale-95 ${on ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background" : "ring-1 ring-border/60"}`}>
+                    <svg viewBox="0 0 20 20" className="h-full w-full">
+                      <defs>
+                        <radialGradient id={`g-${p.key}-${hex.slice(1)}`} cx="35%" cy="30%" r="75%">
+                          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
+                          <stop offset="35%" stopColor={hex} stopOpacity="1" />
+                          <stop offset="100%" stopColor={hex} stopOpacity="0.75" />
+                        </radialGradient>
+                      </defs>
+                      <circle cx="10" cy="10" r="10" fill={`url(#g-${p.key}-${hex.slice(1)})`} />
+                    </svg>
                   </button>
-                ))}
+                  );
+                })}
               </div>
               {p.key !== "galaxy" && wheelFor === p.key && <div className="mt-3"><HexColorWheel color={theme[p.key] ?? "#ff0080"} label={`Color wheel for ${p.label}`} onChange={(hex) => set(p.key, hex)} /></div>}
               {p.key === "galaxy" && previewing && (
