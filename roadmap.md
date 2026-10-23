@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [ ] Repair reviewer findings in order: investigate failed teaser media, prevent empty-library purchases, default a one-token purchase to $25, reconcile policy/address/verification wording, then verify the signed-in reviewer journey. Do not publish or enable payments automatically.
+- [ ] Complete actual payment, creator-upload and geographic-compliance demonstrations only with approved providers, live verification, eligible content and trusted country enforcement; never replace missing evidence with an approval claim.
 - [x] Country-specific shelves prioritize creator-page visits and related categories from loaded authorized teasers; interest counts and scroll positions are account-scoped on this device. Published site/payment settings unchanged.
 - [x] Netflix-style titled horizontal shelves and Coming soon tiles added; single tap plays and double tap opens creator page with existing payment protections. Six focused tests pass; isolated shelf layout verified on desktop/mobile. Real account stops at pending Creator Agreement; populated paid-customer playback remains unverified without an eligible session.
 - [ ] Remove personal DMCA agent name after owner supplies a matching amended registration; current registered designation must remain accurate meanwhile.
