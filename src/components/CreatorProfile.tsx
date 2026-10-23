@@ -17,6 +17,7 @@ import TopFansSection from "@/components/TopFansSection";
 import CreatorHeartButton from "@/components/CreatorHeartButton";
 import DttToken from "@/components/DttToken";
 import { useHeartTotal } from "@/hooks/useHearts";
+import { hasLibraryContent } from "@/lib/teaserPlayback";
 
 interface Vault {
   name: string;
@@ -36,7 +37,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
   const [isMen, setIsMen] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
-  const [vaultCount, setVaultCount] = useState<number>(0);
+  const [vaultCount, setVaultCount] = useState<number | null>(null);
+  const [countError, setCountError] = useState(false);
+  const libraryAvailable = hasLibraryContent(vaultCount);
   const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
   const [vaultOffset,setVaultOffset]=useState(0);
   const [moreVault,setMoreVault]=useState(false);
@@ -71,15 +74,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
   // Public vault count (so locked users still see how many videos are inside)
   useEffect(() => {
+    setVaultCount(null);
+    setCountError(false);
     if (!creatorId) return;
     let cancel = false;
     (async () => {
-      const { count } = await supabase
-        .from("creator_media")
-        .select("id", { count: "exact", head: true })
-        .eq("creator_id", creatorId)
-        .eq("bucket", "vault");
-      if (!cancel) setVaultCount(count ?? 0);
+      const { data, error } = await supabase.rpc("get_creator_library_count", { _creator_id: creatorId });
+      if (!cancel) { setVaultCount(error ? null : Number(data)); setCountError(!!error); }
     })();
     return () => { cancel = true; };
   }, [creatorId]);
@@ -116,6 +117,10 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       toast({ title: "Creator not found", description: "We couldn't find this creator's account.", variant: "destructive" });
       return;
     }
+    if (!libraryAvailable) {
+      toast({ title: vaultCount === 0 ? "Library coming soon" : "Library unavailable", description: "No Bit-Token has been used." });
+      return;
+    }
     if (balance < 1) {
       toast({ title: "Need Bit-Tokens", description: "Buy at least 1 Bit-Token to unlock 14 days of access." });
       setShowBuyModal(true);
@@ -128,6 +133,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       if (error.message?.includes("INSUFFICIENT_TOKENS")) {
         toast({ title: "Not enough Bit-Tokens", description: "Top up to unlock 14 days of access." });
         setShowBuyModal(true);
+      } else if (error.message?.includes("LIBRARY_EMPTY")) {
+        setVaultCount(0);
+        toast({ title: "Library coming soon", description: "No Bit-Token has been used." });
       } else {
         toast({ title: "Unlock failed", description: error.message, variant: "destructive" });
       }
@@ -165,7 +173,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
         {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} isMen={isMen} />
+          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} canUnlock={libraryAvailable} isMen={isMen} />
         </div>
       </div>
 
@@ -173,7 +181,6 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       <div className="pt-16 px-4 text-center">
         <div className="flex items-center justify-center gap-2">
           <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
-          <BadgeCheck className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
         {creatorId && <CreatorHeartButton creatorId={creatorId} />}
@@ -225,10 +232,10 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => { if (!tipSent) { setShowTipModal(false); setSelectedTip(null); } }}>
           <div className="bg-card border border-border rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-foreground text-center mb-1">
-              <Heart className="w-5 h-5 inline text-pink-400 mr-1" /> Send a Tip to {creatorName}
+           <Heart className="w-5 h-5 inline text-primary mr-1" /> Send a Tip to {creatorName}
             </h3>
             <p className="text-xs text-muted-foreground text-center mb-4">
-              No extra fee. The creator keeps 90% of every tip.
+              Tip checkout is unavailable. The amounts below are a preview only; no payment will be taken.
             </p>
             {tipNotification ? (
               <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
@@ -279,7 +286,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
           Full Library
-          <span className="text-xs text-muted-foreground font-normal">({vaultCount} {vaultCount === 1 ? "video" : "videos"})</span>
+          <span className="text-xs text-muted-foreground font-normal">{vaultCount === null ? (countError ? "Unavailable" : "Checking…") : `(${vaultCount} ${vaultCount === 1 ? "item" : "items"})`}</span>
         </h3>
 
         {isUnlocked ? (
@@ -302,7 +309,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <div className="grid grid-cols-2 gap-2">
                 {vaultItems.map((v) => (
                   <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                    {v.url ? (
+                     {v.url && v.media_type === "photo" ? <img src={v.url} alt={v.title} className="w-full aspect-video object-contain bg-background" /> : v.url ? (
                       <video src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
                     ) : (
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
@@ -314,11 +321,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             )}
 
             {moreVault && <Button variant="outline" disabled={vaultLoading} onClick={()=>setVaultOffset(n=>n+24)}>{vaultLoading ? 'Loading…' : 'More videos'}</Button>}
-            <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking}>
+            <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking || !libraryAvailable}>
               {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               EXTEND +14 DAYS — 1 BIT-TOKEN
             </Button>
           </>
+        ) : !libraryAvailable ? (
+          <p role="status" className="py-6 text-center text-sm text-muted-foreground">{vaultCount === 0 ? "Library coming soon. Paid unlocks are unavailable until content is added." : countError ? "The library could not be checked. Paid unlocks are unavailable." : "Checking library availability…"}</p>
         ) : (
           <>
             <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">

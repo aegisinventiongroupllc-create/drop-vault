@@ -93,8 +93,8 @@ const LegalFooter = () => {
 
 const AboutDtt = () => (
   <SectionShell title="About DropThatThing (DTT)">
-    <p><strong className="text-foreground">What DTT is.</strong> DropThatThing is an adults-only (18+) subscription platform operated by DTT Media LLC, a United States company. Independent, identity-verified adult creators publish photos and videos in two sections: the Women's Vault and the Men's Vault. Fans pay to unlock access to the creators they choose.</p>
-    <p><strong className="text-foreground">Services offered.</strong> (1) Creator vault access: fans unlock a creator's full library for a fixed period. (2) Teaser discovery feed: free 15-second previews so fans can choose creators before paying. (3) Custom requests: fans can request personalized content, which the creator may accept or decline. (4) Private messaging between creators and their top fans. (5) Creator tools: analytics, earnings history, upload management and profile customization.</p>
+    <p><strong className="text-foreground">What DTT is.</strong> DropThatThing is an adults-only (18+) creator marketplace operated by DTT Media LLC, a Pennsylvania company. Creator photos and videos are organized into the Women's Vault and the Men's Vault. Creator uploads require live identity and age verification and DTT approval. Content availability varies by creator; empty libraries cannot be unlocked for payment.</p>
+    <p><strong className="text-foreground">Services offered.</strong> (1) Creator vault access for a fixed period. (2) Teaser discovery for entry-pass holders: teasers can be up to one minute and locked videos pause halfway. (3) Custom requests, which creators may accept or decline; payment checkout is not yet available. (4) Private messaging between creators and eligible top fans. (5) Creator tools for analytics, earnings history, uploads and profile customization. Purchases, tips and payouts have not yet been demonstrated end-to-end; live checkout remains disabled pending approval and verification.</p>
     <p><strong className="text-foreground">How payment works.</strong> 1 Bit-Token costs $25 USD ($20 token value + $5 service and processing fee) and gives 14 days of access to one creator's vault. Access ends automatically unless renewed. The $20 entry pass lasts 365 days; creator unlocks are purchased separately. Checkout remains unavailable until processor approval and payment verification are confirmed. Bit-Tokens are used only on DTT and cannot be withdrawn, traded or transferred.</p>
     <p><strong className="text-foreground">How creators are paid.</strong> A standard token unlock pays the creator $18: 90% of the $20 token value, excluding the $5 checkout fee. Eligible founding creators receive $18.40 (92%) during their first year; an active Power Week pays $19 (95%). Custom requests have separate disclosed terms. Creator payouts are processed manually in Litecoin (LTC).</p>
     <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must pass identity and age verification (Yoti) and manual approval before uploading. All creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported to authorities.</p>
@@ -124,15 +124,15 @@ const SectionShell = ({ title, children }: { title: string; children: React.Reac
 
 const Statement2257 = () => (
   <SectionShell title="18 U.S.C. § 2257 Record Keeping Compliance Statement">
-    <p>All models, actors, and other persons appearing in visual depictions of actual or simulated sexually explicit conduct on this website were at least 18 years of age at the time the visual depictions were created.</p>
+    <p>DTT prohibits depictions involving minors. Every person appearing in adult creator content must have been at least 18 when that content was made, with the applicable identity, age and consent records maintained by the responsible producer.</p>
     <p><strong className="text-foreground">DTT Media LLC</strong> is the technology platform and operator. All content is uploaded by independent contractors (Creators), who are the primary "Producers" and required by 18 U.S.C. § 2257 to maintain original records of age and identity verification.</p>
-    <p>DTT maintains secondary records of identity and age for all Creators through our automated verification systems (Yoti).</p>
-    <p><strong className="text-foreground">Custodian of Records</strong><br/>DTT Media LLC — Custodian of Records<br/>Business mailing address is not yet published. Final recordkeeping details require confirmation before launch. Contact the email below with compliance questions.</p>
+    <p>Creator uploads require a server-confirmed live Yoti check and DTT review. This requirement is not a statement that all accounts have completed verification or that Yoti results alone satisfy 18 U.S.C. § 2257 recordkeeping obligations.</p>
+    <p><strong className="text-foreground">Recordkeeping status</strong><br/>The legally appropriate custodian, records inspection location and retention process require confirmation before sexually explicit content is offered. The Pittsburgh address on the DMCA page is the registered copyright agent's address; it has not been confirmed as a § 2257 records inspection location. Compliance questions: admin@dttmediallc.com.</p>
     <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: admin@dttmediallc.com</p>
   </SectionShell>
 );
 
-const TermsOfService = () => (
+export const TermsOfService = () => (
   <SectionShell title="Terms of Service">
     <p><strong className="text-foreground">1. The Platform.</strong> DropThatThing (operated by DTT Media LLC, "DTT") is a technology platform facilitating social interaction and marketplace transactions between Customers and Independent Creators.</p>
     <p><strong className="text-foreground">2. Age Requirement.</strong> You must be at least 18 years of age (or the legal age of majority in your jurisdiction). Access by minors is strictly prohibited and will result in account termination and reporting to authorities.</p>
@@ -148,7 +148,7 @@ const TermsOfService = () => (
   </SectionShell>
 );
 
-const PrivacyPolicy = () => (
+export const PrivacyPolicy = () => (
   <SectionShell title="Privacy Policy">
     <p><strong className="text-foreground">1. Data Collected.</strong> Email, account info, transaction history, IP address, device data, and (for Creators) government-issued ID and liveness selfies via Yoti.</p>
     <p><strong className="text-foreground">2. Purpose.</strong> Age & identity verification, fraud prevention, payment settlement, AML/KYC compliance, legal audit response.</p>
@@ -190,7 +190,7 @@ const RiskDisclosure = () => (
     <p><strong className="text-foreground">Crypto Volatility.</strong> Cryptocurrencies (LTC, BTC, ETH) are highly volatile. The fiat value of crypto sent or received may change before, during, or after the transaction.</p>
     <p><strong className="text-foreground">Irreversibility.</strong> Crypto transactions are irreversible once broadcast. Always verify the address before sending. DTT and its processors cannot recover funds sent to incorrect addresses.</p>
     <p><strong className="text-foreground">Network Fees.</strong> Blockchain network fees fluctuate and are paid by the buyer.</p>
-    <p><strong className="text-foreground">No Investment.</strong> Bit-Tokens are utility access credits, not investments, securities, or stored-value instruments. They have no resale value, no interest, and expire 14 days after activation.</p>
+    <p><strong className="text-foreground">No Investment.</strong> Bit-Tokens are DTT access credits, not an investment. They cannot be withdrawn, traded or transferred, and pay no interest. Unused Bit-Tokens do not expire; creator access lasts 14 days after a token is redeemed.</p>
     <p><strong className="text-foreground">Regulatory Risk.</strong> Crypto and adult-content regulations vary by jurisdiction and may change. You are responsible for compliance with your local laws.</p>
     <p><strong className="text-foreground">No Guarantees.</strong> Service availability, creator activity, and content are not guaranteed.</p>
   </SectionShell>
@@ -208,7 +208,7 @@ const Complaints = () => (
 const ContactInfo = () => (
   <SectionShell title="Contact Us">
     <p><strong className="text-foreground">DTT Media LLC</strong></p>
-    <p>Operator of DropThatThing. The business mailing address is not yet published. For support, compliance, partnerships, refunds, complaints and legal inquiries, use the email below.</p>
+    <p>Operator of DropThatThing, based in Pennsylvania. The registered DMCA agent's address is 606 Liberty Ave, Suite 300, Pittsburgh, PA 15222 (registration DMCA-1083694). This is the copyright-notice address, not a confirmed general business mailbox or records inspection location. General mailing arrangements are still being confirmed; for support, partnerships, refunds, complaints and legal inquiries, use the email below.</p>
     <p><strong className="text-foreground">Support email:</strong> <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
     <p><strong className="text-foreground">Response time:</strong> within 2 business days.</p>
     <p className="text-muted-foreground/60 text-[10px]">Creator payouts: manual Litecoin (LTC). Purchase availability is shown at checkout.</p>

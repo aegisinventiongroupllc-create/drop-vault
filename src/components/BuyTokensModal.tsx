@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  TOKEN_INVOICE_USD, BUNDLE_TOKENS, ENTRY_PASS_PRICE_USD,
+  TOKEN_INVOICE_USD, BUNDLE_TOKENS, DEFAULT_PURCHASE_TOKENS, ENTRY_PASS_PRICE_USD,
   TRANSACTION_FEE_USD, tokenInvoiceTotal,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +24,7 @@ interface Checkout {
 
 const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModalProps) => {
   const isEntryPass = mode === "entry_pass";
-  const [quantity, setQuantity] = useState<number>(BUNDLE_TOKENS);
+  const [quantity, setQuantity] = useState<number>(DEFAULT_PURCHASE_TOKENS);
   const setQty = (n: number) => setQuantity(Math.max(1, Math.min(100, Math.round(n) || 1)));
   const pkgBody = quantity === 1 ? { package: "single" } : quantity === BUNDLE_TOKENS ? { package: "bundle" } : { package: "custom", quantity };
   const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
@@ -106,11 +106,13 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
           "postgres_changes",
           { event: "INSERT", schema: "public", table: isEntryPass ? "entry_passes" : "token_purchases", filter: `user_id=eq.${uid}` },
           (payload: any) => {
+            if (payload?.new?.payment_id !== checkout.invoice_id && payload?.new?.payment_id !== checkout.invoice_id.replace(/^INV-/, "")) return;
+            if (payload?.new?.status !== (isEntryPass ? "active" : "finished")) return;
             const credited = isEntryPass ? 0 : (payload?.new?.tokens_credited ?? tokens);
             setCreditedTokens(credited);
             setStep("success");
             onPurchase(credited);
-            toast.success("Payment confirmed!", { description: `${credited} Bit-Tokens added.` });
+            toast.success("Payment confirmed!", { description: isEntryPass ? "Your entry pass is active." : `${credited} Bit-Tokens added.` });
           }
         )
         .subscribe();
@@ -121,7 +123,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       if (pollRef.current) window.clearInterval(pollRef.current);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [step, checkout, tokens, onPurchase]);
+  }, [step, checkout, tokens, onPurchase, isEntryPass]);
 
   const logConsent = async () => {
     try {
@@ -401,7 +403,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <div className="bg-gold/5 border border-gold/20 rounded-lg p-3">
               <p className="text-[10px] text-gold font-bold tracking-wider mb-1">⚡ AUTO-VERIFICATION</p>
               <p className="text-[10px] text-muted-foreground">
-                Access and tokens activate only after verified payment. Invoice expires in 2 hours.
+                Access and tokens activate only after verified payment. Check the invoice for its expiry time.
               </p>
             </div>
 
