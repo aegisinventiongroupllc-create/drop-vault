@@ -132,20 +132,9 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   };
 
   const handleSupport = (creatorName: string) => {
-    if (balance < SUPPORT_TIP_TOKENS) {
-      toast({
-        title: "Not enough Bit-Tokens",
-        description: `Support sends 1 Bit-Token ($${SUPPORT_TIP_USD}) to @${creatorName}. Buy more to continue.`,
-        variant: "destructive",
-      });
-      setShowBuyModal(true);
-      return;
-    }
-    const split = calculateSupportTipSplit();
-    onBuyTokens(-SUPPORT_TIP_TOKENS); // deduct 1 token from balance
     toast({
-      title: `💖 Support sent to @${creatorName}`,
-      description: `1 Bit-Token ($${split.totalUsd}) — Creator gets $${split.creatorShare}, Platform $${split.platformShare}.`,
+      title: "Support checkout unavailable",
+      description: `No Bit-Token was used or sent to @${creatorName}. Support requires an approved payment connection.`,
     });
   };
 

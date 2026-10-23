@@ -1431,6 +1431,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_creator_library_count: {
+        Args: { _creator_id: string }
+        Returns: number
+      }
       get_heart_counts: {
         Args: { _creator_ids: string[] }
         Returns: {

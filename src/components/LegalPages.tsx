@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useI18n } from "@/i18n/I18nContext";
 import LanguageToggle from "@/components/LanguageToggle";
+import { TermsOfService, PrivacyPolicy } from "@/components/LegalFooter";
 
 type Page = "tos" | "privacy";
 
@@ -35,29 +36,7 @@ const LegalPages = ({ initialPage = "tos", onBack }: { initialPage?: Page; onBac
 
       <div className="px-4">
         <div className="bg-card border border-border rounded-xl p-5 text-xs text-muted-foreground space-y-4 leading-relaxed">
-          {page === "tos" ? (
-            <>
-              <h2 className="text-base font-bold text-foreground">{t.tos_title}</h2>
-              <p><span className="text-foreground font-medium">{t.tos_last_updated}</span></p>
-              {([1,2,3,4,5,6,7,8,9] as const).map(n => (
-                <div key={n}>
-                  <h3 className="text-sm font-semibold text-foreground mt-4">{t[`tos_section${n}_title` as keyof typeof t]}</h3>
-                  <p>{t[`tos_section${n}_text` as keyof typeof t]}</p>
-                </div>
-              ))}
-            </>
-          ) : (
-            <>
-              <h2 className="text-base font-bold text-foreground">{t.privacy_title}</h2>
-              <p><span className="text-foreground font-medium">{t.tos_last_updated}</span></p>
-              {([1,2,3,4,5,6] as const).map(n => (
-                <div key={n}>
-                  <h3 className="text-sm font-semibold text-foreground mt-4">{t[`privacy_section${n}_title` as keyof typeof t]}</h3>
-                  <p>{t[`privacy_section${n}_text` as keyof typeof t]}</p>
-                </div>
-              ))}
-            </>
-          )}
+          {page === "tos" ? <TermsOfService /> : <PrivacyPolicy />}
         </div>
       </div>
     </div>

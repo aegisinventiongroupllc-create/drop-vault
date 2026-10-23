@@ -6,6 +6,7 @@ import { teaserGateTime } from "@/lib/teaserGate";
 import { rankByInterest, readBrowsePosition, readInterests, recordInterest, saveBrowsePosition, teaserTapAction } from "@/lib/teaserBrowse";
 import dttCoin from "@/assets/dtt-reward-coin.png";
 import { supabase } from "@/integrations/supabase/client";
+import { isPlaybackInterruption } from "@/lib/teaserPlayback";
 
 export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: {
   item: VideoItem; active: boolean; onPlay: () => void; onCreatorClick: (name: string) => void; unlocked: boolean;
@@ -16,19 +17,20 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
   const [gate, setGate] = useState(false);
   const [error, setError] = useState(false);
   const [url, setUrl] = useState(item.videoUrl);
+  useEffect(() => { setUrl(item.videoUrl); setGate(false); setError(false); }, [item.id, item.videoUrl]);
   useEffect(() => {
     if (!active || !item.storagePath) return;
     let cancelled = false;
     const refresh = async () => {
       const { data, error: signingError } = await supabase.storage.from("teasers").createSignedUrl(item.storagePath ?? "", 3600);
-      if (!cancelled) { setUrl(data?.signedUrl); if (signingError) setError(true); }
+      if (!cancelled) { if (data?.signedUrl && !signingError) setUrl(data.signedUrl); else setError(true); }
     };
     void refresh();
     const timer = setInterval(() => void refresh(), 50 * 60 * 1000);
     return () => { cancelled = true; clearInterval(timer); };
   }, [active, item.storagePath]);
   useEffect(() => {
-    if (active && !gate) video.current?.play().catch(() => setError(true));
+    if (active && !gate && url) video.current?.play().catch(e => { if (!isPlaybackInterruption(e)) setError(true); });
     else video.current?.pause();
   }, [active, gate, url]);
   useEffect(() => {
@@ -48,15 +50,15 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
       lastTap.current = now;
       setError(false);
       onPlay();
-      if (active && !gate) video.current?.play().catch(() => setError(true));
+      if (active && !gate) video.current?.play().catch(e => { if (!isPlaybackInterruption(e)) setError(true); });
     }
   };
   return <article className="w-44 shrink-0 snap-start sm:w-56">
     <div ref={tile} className={`relative aspect-[3/4] overflow-hidden rounded-lg border bg-card ${active ? "border-primary" : "border-border"}`}>
       <Button variant="ghost" aria-label={`Play ${item.title} by @${item.creator}`} onClick={tap} className="absolute inset-0 h-full w-full p-0 rounded-none touch-manipulation">
-        {item.mediaType === "photo" ? <img loading="lazy" src={item.videoUrl} alt={item.title} className="h-full w-full object-cover" /> : <>
+        {item.mediaType === "photo" ? <img loading="lazy" src={url} onError={() => setError(true)} alt={item.title} className="h-full w-full object-cover" /> : <>
           <div className="absolute inset-0 flex items-center justify-center bg-secondary"><ProfileAvatar config={item.creatorAvatar} creatorPhotoPath={item.creatorPhotoPath} label={item.creator} className="h-28 w-28" /></div>
-          <video ref={video} src={active ? url : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
+          <video ref={video} src={active ? url : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active && !error ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
             const current = video.current;
             if (!current || unlocked) return;
             const stop = teaserGateTime(current.duration);
@@ -68,6 +70,7 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
       </Button>
       {(gate || error) && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/90 px-3 text-center">
         <p className="text-sm font-semibold">{error ? "Teaser unavailable" : item.vault === "men" ? "UNLOCK HIS LIBRARY" : "UNLOCK HER LIBRARY"}</p>
+        {error && <><p className="text-xs text-muted-foreground">Try again or use a browser that supports MP4 video.</p><Button variant="outline" size="sm" onClick={() => { setError(false); video.current?.load(); onPlay(); video.current?.play().catch(e => { if (!isPlaybackInterruption(e)) setError(true); }); }}>TRY AGAIN</Button></>}
         {!error && <p className="text-xs text-muted-foreground">1 Bit-Token · 14-day access</p>}
         <Button variant="neon" size="sm" className="h-auto whitespace-normal py-2" onClick={() => onCreatorClick(item.creator)}>VIEW LIBRARY</Button>
       </div>}

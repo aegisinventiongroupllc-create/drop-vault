@@ -35,3 +35,5 @@
 
 - Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
 - Discovery renders category shelves from the paginated authorized teaser feed; persist only bounded account/market-scoped scroll coordinates and interest counts, never signed links, and require explicit playback gestures. Why: preserve privacy and prevent autoplay.
+- Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
+- Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.

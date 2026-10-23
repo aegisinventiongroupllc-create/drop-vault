@@ -400,6 +400,13 @@
       "when": 1792434405730,
       "tag": "0056_founding_creators",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1792762889212,
+      "tag": "0057_prevent_empty_creator_library_unlocks",
+      "breakpoints": true
     }
   ]
 }

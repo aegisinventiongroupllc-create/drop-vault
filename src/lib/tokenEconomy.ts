@@ -9,6 +9,7 @@ export const TOKEN_INVOICE_USD = 25; // Price per token before the transaction f
 export const TRANSACTION_FEE_USD = 0; // No extra fee: a straight $25 per token for crypto and card
 export const tokenInvoiceTotal = (quantity: number) => quantity * TOKEN_INVOICE_USD + TRANSACTION_FEE_USD;
 export const BUNDLE_TOKENS = 5;
+export const DEFAULT_PURCHASE_TOKENS = 1;
 export const BUNDLE_BASE_USD = 100; // 5 × $20
 export const BUNDLE_INVOICE_USD = 125; // $100 + $1 admin fee + $24 processing allowance
 export const ENTRY_PASS_PRICE_USD = 20; // $20/year Vault Entry Pass (goes to the platform vault)
