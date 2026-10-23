@@ -18,7 +18,7 @@ const en = {
   safety_age_h: "Age Verification:",
   safety_age: "You confirm you are at least 18. Before uploading, every creator completes a secure ID and face check with Yoti, a trusted independent age-verification provider, plus DTT approval.",
   safety_rev_h: "Revenue & Payouts:",
-  safety_rev: "Creators keep 90% (90/10 split). Founding Creators — the first 10 women and first 10 men approved in each supported country — keep 92% (92/8) for their first year, then 90/10. Refunds follow the Refund Policy. Card payments via CCBill are planned and will appear once approved.",
+  safety_rev: "Creators keep 90% (90/10 split). Founding Creators — the first 10 women and first 10 men approved in each supported country — keep 92% (92/8) for their first year, then 90/10. Refunds follow the Refund Policy. Crypto payments and Litecoin (LTC) creator payouts are planned through TryBit, and card payments through CCBill; each will turn on only after that provider approves DTT. Until then, payouts are sent manually in LTC.",
   safety_priv_h: "Privacy & Data:",
   safety_priv: "Your personal information is stored securely and will never be shared without consent.",
   safety_contact: "For questions or concerns, contact:",
