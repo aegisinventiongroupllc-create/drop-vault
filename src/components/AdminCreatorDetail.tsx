@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { getAdminPasscode } from "@/lib/adminSession";
+import AdminCreatorMedia from "@/components/AdminCreatorMedia";
 
 interface AdminCreatorDetailProps {
   creator: {
@@ -205,6 +206,8 @@ const AdminCreatorDetail = ({ creator, onBack }: AdminCreatorDetailProps) => {
             <div className="bg-secondary/50 rounded-lg p-3"><p className="text-muted-foreground">Vault Videos</p><p className="text-xl font-bold">{media.filter((m) => m.bucket === "vault").length}</p></div>
           </div>
         </div>
+
+        <AdminCreatorMedia creatorId={creator.user_id} />
 
         {/* Legal */}
         <div className="bg-card border border-border rounded-xl p-4">
