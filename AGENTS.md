@@ -38,3 +38,4 @@
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
+- Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
