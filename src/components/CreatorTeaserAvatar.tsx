@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Minimize2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileAvatar from "@/components/ProfileAvatar";
@@ -52,7 +53,7 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
       </Button>
       <style>{`@keyframes coin-spin{0%{transform:rotateY(0)}45%{transform:rotateY(1080deg)}100%{transform:rotateY(1080deg)}}`}</style>
 
-      {full && url && (
+      {full && url && createPortal(
         <div className="fixed inset-0 z-[130] bg-background flex items-center justify-center">
           <video ref={fullRef} src={url} playsInline controls={unlocked} onLoadedData={() => fullRef.current?.play().catch(e => { if (!isPlaybackInterruption(e)) setFailed(true); })} onError={() => setFailed(true)} onTimeUpdate={onTime} className="h-full w-full object-contain" />
           <button onClick={() => { setFull(false); setGate(false); }} aria-label="Minimize"
@@ -73,7 +74,7 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
               <button className="text-xs text-muted-foreground underline" onClick={() => { setFull(false); setGate(false); }}>Not now</button>
             </div>
           )}
-        </div>
+        </div>, document.body
       )}
     </>
   );
