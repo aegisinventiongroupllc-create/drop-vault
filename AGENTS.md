@@ -37,3 +37,4 @@
 - Discovery renders category shelves from the paginated authorized teaser feed; persist only bounded account/market-scoped scroll coordinates and interest counts, never signed links, and require explicit playback gestures. Why: preserve privacy and prevent autoplay.
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
+- Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
