@@ -1,4 +1,5 @@
 import { allowedVaults } from "@/lib/customerPreference";
+import { previewNeedsSignIn } from "@/lib/adminSession";
 import { Button } from "@/components/ui/button";
 import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
@@ -207,7 +208,7 @@ const Index = () => {
   // --- Admin "View as Creator" preview ---
   // A passcode opens admin tools, but private customer/creator media still needs
   // an account session. Never send protected discovery requests as a visitor.
-  if (adminCreatorPreview && verified && authReady && !authedUserId) {
+  if (previewNeedsSignIn(adminCreatorPreview, verified, authReady, authedUserId)) {
     return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
   }
   if (adminCreatorPreview && verified && authReady) {
@@ -234,7 +235,7 @@ const Index = () => {
     typeof window !== "undefined" && localStorage.getItem("dtt_admin_view_as_customer") === "1";
 
   // --- Admin "View as Customer" preview ---
-  if (adminCustomerPreview && verified && authReady && !authedUserId) {
+  if (previewNeedsSignIn(adminCustomerPreview, verified, authReady, authedUserId)) {
     return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
   }
   if (adminCustomerPreview && verified && authReady) {
