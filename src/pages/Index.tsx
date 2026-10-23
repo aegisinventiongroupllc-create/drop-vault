@@ -1,4 +1,5 @@
 import { allowedVaults } from "@/lib/customerPreference";
+import { previewNeedsSignIn } from "@/lib/adminSession";
 import { Button } from "@/components/ui/button";
 import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
@@ -205,6 +206,11 @@ const Index = () => {
     typeof window !== "undefined" && localStorage.getItem("dtt_admin_view_as_creator") === "1";
 
   // --- Admin "View as Creator" preview ---
+  // A passcode opens admin tools, but private customer/creator media still needs
+  // an account session. Never send protected discovery requests as a visitor.
+  if (previewNeedsSignIn(adminCreatorPreview, verified, authReady, authedUserId)) {
+    return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
+  }
   if (adminCreatorPreview && verified && authReady) {
     return (
       <div className="min-h-[100dvh]">
@@ -229,6 +235,9 @@ const Index = () => {
     typeof window !== "undefined" && localStorage.getItem("dtt_admin_view_as_customer") === "1";
 
   // --- Admin "View as Customer" preview ---
+  if (previewNeedsSignIn(adminCustomerPreview, verified, authReady, authedUserId)) {
+    return <AuthScreen onAdmin={() => navigate("/admin-portal")} />;
+  }
   if (adminCustomerPreview && verified && authReady) {
     const previewVault = vault ?? "women";
     return (
