@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
 export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster" | "blueMeteor" | "crescent" | "cosmicGold" | "violetWorld" | "celestialStorm" | "goldenMoon";
 export const DEFAULT_STAR_STYLE: StarStyle = "cluster";
-export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean; starStyle?: StarStyle; brbStyle?: StarStyle; brbTone?: string; dashboardSky?: boolean };
+export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean; starStyle?: StarStyle; brbStyle?: StarStyle; brbTone?: string; dashboardSky?: boolean; dashboardStars?: boolean; dashboardStarTone?: string };
 
 export const STAR_STYLES: { id: StarStyle; label: string }[] = [
   { id: "living", label: "Living stars" },
@@ -64,6 +64,8 @@ export function validateTheme(t: unknown): UserTheme {
   if (typeof values.brbStyle === "string" && STAR_STYLES.some((s) => s.id === values.brbStyle)) out.brbStyle = values.brbStyle as StarStyle;
   if (typeof values.brbTone === "string" && HEX.test(values.brbTone)) out.brbTone = values.brbTone;
   if (typeof values.dashboardSky === "boolean") out.dashboardSky = values.dashboardSky;
+  if (typeof values.dashboardStars === "boolean") out.dashboardStars = values.dashboardStars;
+  if (typeof values.dashboardStarTone === "string" && HEX.test(values.dashboardStarTone)) out.dashboardStarTone = values.dashboardStarTone;
   return out;
 }
 

@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_STAR_STYLE, activeTheme, loadTheme, previewTheme, resolveIdleSky, saveTheme, validateTheme } from "@/lib/userTheme";
 
 describe("personal globe preferences", () => {
+  it("saves optional twinkling dashboard stars and the chosen wheel color without changing the galaxy", () => {
+    saveTheme({ dashboardStars: true, dashboardStarTone: "#14b8a6", galaxy: "#ff0080" });
+    expect(loadTheme()).toEqual({ dashboardStars: true, dashboardStarTone: "#14b8a6", galaxy: "#ff0080" });
+    saveTheme({});
+  });
+  it("rejects unsafe star colors and requires explicit dashboard star opt-in", () => {
+    expect(validateTheme({ dashboardStars: "true", dashboardStarTone: "url(unsafe)" })).toEqual({});
+    expect(validateTheme({ dashboardStars: false }).dashboardStars).toBe(false);
+  });
   it("uses the customer's or creator's main galaxy and color on idle when no separate sky was saved", () => {
     expect(resolveIdleSky({ starStyle: "blueMeteor", galaxy: "#14b8a6" })).toEqual({ style: "blueMeteor", tone: "#14b8a6" });
   });

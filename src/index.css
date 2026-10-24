@@ -40,6 +40,8 @@
     --reward-shadow: 0 24px 100px hsl(var(--gold) / 0.16);
     --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
+    --star-core: hsl(var(--foreground));
+    --vip-smoke-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .014' numOctaves='4' seed='9'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.8 0 0 0 -.65'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
     --globe-tone: #4db8ff;
     --vault-blue: 210 80% 55%;
@@ -168,7 +170,7 @@ body { top: 0 !important; }
 .vip-neon { position: absolute; left: -10%; right: -10%; height: 2px; background: hsl(var(--primary)); box-shadow: 0 0 12px 3px hsl(var(--primary) / .8), 0 0 40px 10px hsl(var(--primary) / .45); animation: vip-flicker 4s ease-in-out infinite; }
 .vip-neon-a { top: 10%; transform: rotate(-4deg); }
 .vip-neon-b { bottom: 12%; transform: rotate(3deg); animation-delay: -1.7s; }
-.vip-fog { position: absolute; width: 160%; height: 160%; top: -30%; left: -30%; border-radius: 50%; filter: blur(30px); opacity: .55;
+.vip-fog { position: absolute; width: 160%; height: 160%; top: -30%; left: -30%; mask-image: var(--vip-smoke-texture); mask-size: 100% 100%; filter: blur(3px); opacity: .55;
   background: radial-gradient(closest-side, hsl(var(--primary) / .45), transparent 70%); animation: vip-drift 14s ease-in-out infinite alternate; }
 .vip-fog-b { animation-duration: 19s; animation-direction: alternate-reverse; background: radial-gradient(closest-side, hsl(var(--foreground) / .12), transparent 70%); }
 @keyframes vip-drift { 0% { transform: translate(-20%, -10%) scale(.8); } 50% { transform: translate(15%, 10%) scale(1.1); } 100% { transform: translate(-5%, 20%) scale(.9); } }
@@ -178,8 +180,8 @@ body { top: 0 !important; }
 /* Fog machine: smoke drifting across the whole screen */
 .vip-fog-machine { z-index: 40; opacity: var(--vip-fog-intensity, .5); }
 .vip-backdrop .vip-fog { opacity: var(--vip-fog-intensity, .5); }
-.vip-smoke { position: absolute; bottom: -40vh; width: 70vmax; height: 50vmax; border-radius: 50%; filter: blur(40px); opacity: 0;
-  background: radial-gradient(closest-side, hsl(var(--primary) / .30), hsl(var(--foreground) / .08) 55%, transparent 75%);
+.vip-smoke { position: absolute; bottom: -40vh; width: 90vmax; height: 45vmax; mask-image: var(--vip-smoke-texture); mask-size: 100% 100%; filter: blur(2px); opacity: 0;
+  background: radial-gradient(ellipse at 45% 60%, hsl(var(--foreground) / .15), hsl(var(--primary) / .18) 38%, transparent 72%);
   animation: vip-smoke-rise 22s linear infinite; }
 .vip-smoke-0 { left: -20%; animation-delay: 0s; }
 .vip-smoke-1 { left: 30%; animation-delay: -3s; animation-duration: 26s; }

@@ -26,6 +26,7 @@
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
 - Personal colors use validated ui_theme and blended renderers; idle skies inherit the galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report sync failures. Why: invalid handles must not block colors.
+- Dashboard twinkling stars use separate validated ui_theme opt-in and tone with bounded canvas particles and reduced-motion support. Why: private dashboard effects must not replace globe/idle defaults or flash the whole screen.
 - Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
