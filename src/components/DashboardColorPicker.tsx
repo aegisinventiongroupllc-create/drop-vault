@@ -10,6 +10,7 @@ import SkyGalleryPicker from "@/components/SkyGalleryPicker";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 import { toast } from "@/hooks/use-toast";
 import FoldBox from "@/components/FoldBox";
+import DashboardStarsPicker from "@/components/DashboardStarsPicker";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -173,6 +174,7 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
           <FoldBox title="Globe preview"><div data-testid="globe-preview" className="relative h-48 w-full overflow-hidden rounded-md border border-border bg-background"><GalaxyReel /><div className="absolute inset-0 flex items-center justify-center"><MiniGlobe size={140} lights speed={0.25} backdrop={false} /></div><span className="absolute left-2 top-2 rounded bg-background/70 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-foreground">{previewing ? "Example — not saved" : "Your galaxy"}</span></div>
             {previewing && <div className="mt-2 flex gap-2"><Button type="button" onClick={() => void commitPreview()} className="flex-1 whitespace-normal text-xs font-black uppercase tracking-widest">Save galaxy</Button><Button variant="outline" type="button" onClick={cancelPreview} className="flex-1 text-xs font-black uppercase tracking-widest text-muted-foreground">Keep previous</Button></div>}</FoldBox>
           <FoldBox title="Be Right Back sky gallery"><SkyGalleryPicker /></FoldBox>
+          <FoldBox title="Twinkling dashboard stars"><DashboardStarsPicker /></FoldBox>
           <button type="button" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))} className="dtt-panel w-full p-3 text-xs font-black uppercase tracking-widest text-primary">Preview be right back screen</button>
           <label className="dtt-panel flex items-center justify-between gap-3 p-3 text-xs font-bold text-foreground">
             <span>Multicolor neon globe sparkles</span>
