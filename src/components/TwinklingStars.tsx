@@ -25,6 +25,7 @@ export default function TwinklingStars({ color = "#ff0080" }: { color?: string }
         previous = now;
         ctx.clearRect(0, 0, width, height);
         const hue = `hsl(${hexToHsl(color)})`;
+        const core = getComputedStyle(element).getPropertyValue("--star-core").trim();
         particles.forEach((p) => {
           const x = p.x * width, y = p.y * height;
           const shimmer = media.matches ? .6 : .18 + .82 * ((1 + Math.sin(time * p.speed + p.phase)) / 2) ** 3;
@@ -34,7 +35,7 @@ export default function TwinklingStars({ color = "#ff0080" }: { color?: string }
             glow.addColorStop(0, hue); glow.addColorStop(1, "transparent");
             ctx.fillStyle = glow; ctx.fillRect(x - p.radius * 6, y - p.radius * 6, p.radius * 12, p.radius * 12);
           }
-          ctx.fillStyle = p.radius > 1.6 ? getComputedStyle(element).getPropertyValue("--star-core").trim() : hue;
+          ctx.fillStyle = p.radius > 1.6 ? core : hue;
           ctx.beginPath(); ctx.arc(x, y, p.radius, 0, Math.PI * 2); ctx.fill();
           if (p.radius > 1.9 && shimmer > .65) {
             ctx.strokeStyle = hue; ctx.lineWidth = .6;
