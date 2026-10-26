@@ -23,7 +23,9 @@ Deno.serve(async (req) => {
   const passcode = typeof body?.passcode === "string" ? body.passcode.trim() : "";
 
   if (!passcode || passcode !== ADMIN_PASSCODE) {
-    return json({ ok: false, error: "Invalid access code" }, 401);
+    // A wrong code is a normal sign-in outcome, not a server fault: answer 200
+    // with ok:false so clients never see a failed function call.
+    return json({ ok: false, error: "Invalid access code" });
   }
 
   return json({ ok: true });
