@@ -3,6 +3,7 @@ import MiniGlobe from "@/components/MiniGlobe";
 import { supabase } from "@/integrations/supabase/client";
 
 import GalaxyReel from "@/components/GalaxyReel";
+import IdleAdShips from "@/components/IdleAdShips";
 
 const IDLE_MS = 60_000;
 
@@ -56,6 +57,7 @@ const BeRightBack = () => {
         ? <GalaxyReel scope="brb" seconds={170} />
         : <GalaxyReel scope="brb" seconds={170} styleOverride="cluster" toneOverride="" />}
       <div className={`absolute inset-0 ${signedIn ? "bg-background/30" : "bg-background/55"}`} aria-hidden />
+      <IdleAdShips signedIn={signedIn} />
       <div className="relative flex flex-col items-center gap-6">
         <MiniGlobe size={signedIn ? 280 : 320} lights speed={0.2} backdrop={false} />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>

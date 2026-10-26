@@ -41,6 +41,12 @@
     --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
     --star-core: hsl(var(--foreground));
+    --ship-default-accent: 330 100% 50%;
+    --ship-default-panel: 0 0% 6%;
+    --ship-default-ink: 0 0% 100%;
+    --ship-metal-light: 210 16% 86%;
+    --ship-metal-mid: 210 12% 40%;
+    --ship-metal-dark: 210 15% 12%;
     --vip-smoke-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .014' numOctaves='4' seed='9'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.8 0 0 0 -.65'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
     --globe-tone: #4db8ff;
@@ -78,6 +84,32 @@
 }
 
 .welcome-reward { box-shadow: var(--reward-shadow); }
+.idle-ad-flight { position: absolute; left: 0; width: clamp(220px, 27vw, 380px); aspect-ratio: 5 / 2; will-change: transform; animation: idle-ad-cruise 48s linear infinite; }
+.idle-ad-flight-near { top: max(16px, calc(50% - 340px)); animation-delay: -12s; }
+.idle-ad-flight-far { bottom: max(16px, calc(50% - 340px)); width: clamp(180px, 22vw, 300px); animation-duration: 65s; animation-delay: -42s; animation-direction: reverse; }
+.idle-ad-ship { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 6px 12px hsl(var(--ship-accent) / .2)); animation: idle-ad-hover 7s ease-in-out infinite; }
+.ship-metal-light { stop-color: hsl(var(--ship-metal-light)); }
+.ship-metal-mid { stop-color: hsl(var(--ship-metal-mid)); }
+.ship-metal-dark { stop-color: hsl(var(--ship-metal-dark)); }
+.ship-glass-light { stop-color: color-mix(in srgb, hsl(var(--ship-accent)) 22%, hsl(var(--ship-panel))); }
+.ship-glass-dark { stop-color: hsl(var(--ship-panel)); }
+.ship-panel-rim { fill: hsl(var(--ship-metal-dark)); stroke: hsl(var(--ship-accent)); stroke-width: 2; }
+.ship-glass { stroke: hsl(var(--ship-accent) / .45); }
+.ship-glint { stroke: hsl(var(--ship-ink) / .6); stroke-width: 1; }
+.ship-wordmark { fill: hsl(var(--ship-ink)); font-family: var(--font-display); font-weight: 700; font-size: 38px; letter-spacing: 0; }
+.ship-ad-label { fill: hsl(var(--ship-accent)); font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0; }
+.ship-cockpit { fill: hsl(var(--ship-accent) / .65); stroke: hsl(var(--ship-ink) / .3); }
+.ship-running-light { stroke: hsl(var(--ship-accent)); stroke-width: 4; stroke-linecap: round; }
+.ship-exhaust { fill: hsl(var(--ship-accent) / .22); }
+.ship-seam { stroke: hsl(var(--ship-metal-light) / .4); stroke-width: 1.5; }
+@keyframes idle-ad-cruise { from { transform: translateX(-400px); } to { transform: translateX(calc(100vw + 400px)); } }
+@keyframes idle-ad-hover { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(9px) rotate(1deg); } }
+@media (max-width: 600px) { .idle-ad-flight-near { top: 5%; } .idle-ad-flight-far { bottom: 5%; } }
+@media (prefers-reduced-motion: reduce) {
+  .idle-ad-flight, .idle-ad-ship { animation: none; will-change: auto; }
+  .idle-ad-flight-near { left: 7%; }
+  .idle-ad-flight-far { left: auto; right: 7%; }
+}
 .dtt-token-glow { filter: drop-shadow(0 0 8px hsl(var(--gold) / .55)); }
 .teaser-frame-seasonal .teaser-decoration { border: 8px solid hsl(var(--primary) / .7); border-image: repeating-linear-gradient(45deg, hsl(var(--primary)) 0 12px, hsl(var(--foreground)) 12px 24px) 8; }
 .teaser-frame-sexy .teaser-decoration { border: 5px double hsl(var(--primary)); box-shadow: inset 0 0 32px hsl(var(--primary) / .4); }

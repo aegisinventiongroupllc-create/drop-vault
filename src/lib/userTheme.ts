@@ -120,6 +120,13 @@ export function resolveIdleSky(theme: UserTheme): { style: StarStyle; tone?: str
   };
 }
 
+/** Idle billboards use dashboard colors, never a visitor's stale account theme. */
+export function resolveIdleBillboardTheme(theme: UserTheme, signedIn: boolean): UserTheme {
+  if (!signedIn) return {};
+  const safe = validateTheme(theme);
+  return { primary: safe.primary, card: safe.card, foreground: safe.foreground };
+}
+
 export type GlobeOverride = { tone?: string; borderTone?: string; whiteLights?: boolean };
 export const GlobeOverrideContext = createContext<GlobeOverride | null>(null);
 

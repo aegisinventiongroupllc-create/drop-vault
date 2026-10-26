@@ -40,3 +40,4 @@
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
 - Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
+- Idle billboard ships are decorative SVG inventory previews using validated dashboard theme tokens and visitor defaults, with reduced-motion support; never imply booked sponsors or load external ads. Why: match private colors without inventing advertisers or tracking visitors.
