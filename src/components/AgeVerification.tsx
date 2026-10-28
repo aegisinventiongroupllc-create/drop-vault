@@ -86,9 +86,17 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
         </div>
 
         <div className="flex flex-col gap-3 w-full">
-          <Button variant="neon" size="lg" className="w-full text-base font-semibold" onClick={handleEnter} disabled={!allChecked}>
-            {t.age_enter}
-          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="neon" size="lg" className="w-full px-2 text-sm font-semibold" onClick={handleEnter} disabled={!allChecked}>
+              {t.age_enter}
+            </Button>
+            <Button variant="outline" size="lg" className="w-full px-2 text-sm font-bold tracking-wider" onClick={handleEnter} disabled={!allChecked} aria-label="LOG IN">
+              LOG IN
+            </Button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Already a member? Confirm the three statements above, then tap LOG IN to continue on any device.
+          </p>
           <Button variant="ghost" size="lg" className="w-full text-muted-foreground" onClick={() => window.location.href = "https://google.com"}>
             {t.age_leave}
           </Button>
