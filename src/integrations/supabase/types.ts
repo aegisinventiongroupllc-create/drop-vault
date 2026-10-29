@@ -343,6 +343,48 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_split_settings: {
+        Row: {
+          creator_id: string
+          creator_split_tier: Database["public"]["Enums"]["creator_split_tier"]
+          custom_request_split: number
+          custom_vault_split: number
+          power_week_active: boolean
+          power_week_expires_at: string | null
+          priority_placement_until: string | null
+          updated_at: string
+          vip_badge: boolean
+          vip_pass_purchased: Database["public"]["Enums"]["vip_pass_type"]
+          vip_pass_purchased_at: string | null
+        }
+        Insert: {
+          creator_id: string
+          creator_split_tier?: Database["public"]["Enums"]["creator_split_tier"]
+          custom_request_split?: number
+          custom_vault_split?: number
+          power_week_active?: boolean
+          power_week_expires_at?: string | null
+          priority_placement_until?: string | null
+          updated_at?: string
+          vip_badge?: boolean
+          vip_pass_purchased?: Database["public"]["Enums"]["vip_pass_type"]
+          vip_pass_purchased_at?: string | null
+        }
+        Update: {
+          creator_id?: string
+          creator_split_tier?: Database["public"]["Enums"]["creator_split_tier"]
+          custom_request_split?: number
+          custom_vault_split?: number
+          power_week_active?: boolean
+          power_week_expires_at?: string | null
+          priority_placement_until?: string | null
+          updated_at?: string
+          vip_badge?: boolean
+          vip_pass_purchased?: Database["public"]["Enums"]["vip_pass_type"]
+          vip_pass_purchased_at?: string | null
+        }
+        Relationships: []
+      }
       creator_verifications: {
         Row: {
           created_at: string
@@ -1296,6 +1338,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_pass_inventory: {
+        Row: {
+          id: boolean
+          passes_sold: number
+          total_passes_cap: number
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          passes_sold?: number
+          total_passes_cap?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          passes_sold?: number
+          total_passes_cap?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       yoti_age_checks: {
         Row: {
           created_at: string
@@ -1389,6 +1452,10 @@ export type Database = {
       claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
+      creator_request_split_percent: {
+        Args: { _creator_id: string }
+        Returns: number
+      }
       creator_split_percent: { Args: { _creator_id: string }; Returns: number }
       credit_entry_pass: {
         Args: {
@@ -1634,6 +1701,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "creator" | "customer"
+      creator_split_tier:
+        | "STANDARD"
+        | "FOUNDER"
+        | "PRO_VIP"
+        | "ELITE_VIP"
+        | "MILESTONE_100K"
+      vip_pass_type: "NONE" | "PRO_PASS" | "ELITE_PASS"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1762,6 +1836,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "creator", "customer"],
+      creator_split_tier: [
+        "STANDARD",
+        "FOUNDER",
+        "PRO_VIP",
+        "ELITE_VIP",
+        "MILESTONE_100K",
+      ],
+      vip_pass_type: ["NONE", "PRO_PASS", "ELITE_PASS"],
     },
   },
 } as const
