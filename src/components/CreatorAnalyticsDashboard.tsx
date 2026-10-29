@@ -27,6 +27,7 @@ import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery"
 import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
+import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorProfile from "@/components/CreatorProfile";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
@@ -657,6 +658,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         <div className="px-4 space-y-4">
           <CreatorFanInsights creatorId={authUserId} />
           <CreatorEarningsBreakdown creatorId={authUserId} />
+          <LifetimeUpgradeStore creatorId={authUserId} />
           <div className="grid grid-cols-2 gap-3">
             {STATS.map((stat) => (
               <div key={stat.label} className="bg-card border border-border rounded-xl p-4">
@@ -927,6 +929,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             {/* Step 3: Full Video */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-muted-foreground tracking-wider">{ct.step_full}</label>
+              <div className="flex items-start gap-2 bg-gold/10 border border-gold/40 rounded-xl px-3 py-2.5">
+                <Lightbulb className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                <p className="text-xs text-gold font-bold leading-snug">To maximize earnings and prevent content dumping, maintain an active vault of 5 high-value videos. Swap 2–3 videos every 14 days to create urgency and fresh subscriber unlocks.</p>
+              </div>
               <Button
                 variant="gold"
                 size="lg"
