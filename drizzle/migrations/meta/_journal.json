@@ -407,6 +407,13 @@
       "when": 1792762889212,
       "tag": "0057_prevent_empty_creator_library_unlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1793277913277,
+      "tag": "0058_vip_pass_split_tiers",
+      "breakpoints": true
     }
   ]
 }
