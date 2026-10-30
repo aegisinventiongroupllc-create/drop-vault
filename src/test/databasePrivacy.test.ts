@@ -68,6 +68,16 @@ describe.skipIf(!database)("live database privacy rules", () => {
     expect(reads[0].qual).toBe("(key = 'globe_style'::text)");
   });
 
+  it("limits VIP inventory reads to signed-in creators", async () => {
+    if (!database) throw new Error("Secure database connection required");
+    const reads = policies.filter(p => p.tablename === "vip_pass_inventory" && p.cmd === "SELECT");
+    expect(reads).toHaveLength(1);
+    expect(reads[0].roles).toEqual(["authenticated"]);
+    expect(reads[0].qual).toMatch(/has_role.*auth\.uid\(\).*creator/s);
+    const rows = await database`SELECT has_table_privilege('anon','public.vip_pass_inventory','SELECT') AS anonymous_read`;
+    expect(rows[0].anonymous_read).toBe(false);
+  });
+
   it("denies anonymous access to private profiles and direct writes to the public view", async () => {
     if (!database) throw new Error("Secure database connection required");
     const rows = await database`SELECT has_table_privilege('anon','public.profiles','SELECT') AS private_read, has_table_privilege('authenticated','public.public_profiles','UPDATE') AS public_write, has_table_privilege('authenticated','public.profiles','TRUNCATE') AS truncate_private`;

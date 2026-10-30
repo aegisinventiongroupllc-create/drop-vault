@@ -414,6 +414,13 @@
       "when": 1793277913277,
       "tag": "0058_vip_pass_split_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1793364641228,
+      "tag": "0059_restrict_vip_inventory_to_creators",
+      "breakpoints": true
     }
   ]
 }
