@@ -7,7 +7,7 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("applies the 92% ceiling and 95% Power Week with exact expiry", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
-      for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+      for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
       const [row] = await sql`SELECT pg_get_functiondef('public.creator_split_percent(uuid)'::regprocedure) AS d`;
       let body = row.d.replace("public.creator_split_percent(", "pg_temp.split(");
       for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) body = body.replaceAll(`public.${table}`, `pg_temp.${table}`);
@@ -25,7 +25,7 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("recomputes Elite request shares and counteroffers and rejects paid-share changes", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
-      for (const table of ["creator_split_settings", "custom_requests"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+      for (const table of ["creator_split_settings", "custom_requests"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
       const [split] = await sql`SELECT pg_get_functiondef('public.creator_request_split_percent(uuid)'::regprocedure) AS d`;
       await sql.unsafe(split.d.replace("public.creator_request_split_percent(","pg_temp.request_split(").replaceAll("public.creator_split_settings","pg_temp.creator_split_settings"));
       const [trigger] = await sql`SELECT pg_get_functiondef('public.enforce_request_revenue_split()'::regprocedure) AS d`;
@@ -53,7 +53,7 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("counts each pass once and refuses the 1001st pass", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
-      for (const table of ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+      for (const table of ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings"]) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
       const [row] = await sql`SELECT pg_get_functiondef('public.apply_verified_vip_pass(text)'::regprocedure) AS d`;
       let body = row.d.replace("public.apply_verified_vip_pass(","pg_temp.apply_pass(").replaceAll("auth.role()", "'service_role'").replace("public.has_role(r.creator_id, 'creator'::app_role)", "true").replace("public.has_role(r.creator_id,'creator')", "true");
       for (const table of ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings"]) body = body.replaceAll(`public.${table}`,`pg_temp.${table}`);
