@@ -1359,6 +1359,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_pass_payment_receipts: {
+        Row: {
+          amount_usd: number
+          applied_at: string | null
+          created_at: string
+          creator_id: string
+          currency: string
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_usd: number
+          applied_at?: string | null
+          created_at?: string
+          creator_id: string
+          currency?: string
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_usd?: number
+          applied_at?: string | null
+          created_at?: string
+          creator_id?: string
+          currency?: string
+          pass_type?: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       yoti_age_checks: {
         Row: {
           created_at: string
@@ -1436,6 +1469,10 @@ export type Database = {
     }
     Functions: {
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
+      apply_verified_vip_pass: {
+        Args: { _payment_id: string }
+        Returns: boolean
+      }
       archive_request_delivery: {
         Args: { _request_id: string }
         Returns: undefined
@@ -1502,6 +1539,7 @@ export type Database = {
         Args: { _creator_id: string }
         Returns: number
       }
+      get_creator_vip_status: { Args: { _creator_id: string }; Returns: Json }
       get_heart_counts: {
         Args: { _creator_ids: string[] }
         Returns: {
@@ -1535,6 +1573,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_my_revenue_terms: { Args: never; Returns: Json }
       get_teaser_page: {
         Args: {
           _country?: string
