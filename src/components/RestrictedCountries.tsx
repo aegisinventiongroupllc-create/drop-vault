@@ -1,6 +1,7 @@
 // Public Restricted Countries / Geo-Block List
 // Used by LegalFooter modal. Visible to both customers and creators.
 // Compliance reviewers reference this list to confirm our geo-block scope.
+import { getTargetLang } from "@/components/AutoTranslator";
 
 const OFAC_SANCTIONED = [
   "Cuba",
@@ -131,7 +132,7 @@ const RestrictedCountries = () => (
       <p className="text-[10px] text-muted-foreground/70">
         This list is non-exhaustive and subject to review as sanctions and local law change.
         Questions or appeals: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>.
-        Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}.
+        Last updated: {new Date().toLocaleDateString(getTargetLang(), { year: "numeric", month: "long" })}.
       </p>
     </div>
   </>
