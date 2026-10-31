@@ -1,5 +1,6 @@
 import AutoTranslator from "@/components/AutoTranslator";
 import LanguageTransition from "@/components/LanguageTransition";
+import SiteLanguagePicker from "@/components/SiteLanguagePicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -41,6 +42,7 @@ const App = () => (
             <AppUpdateWatcher />
             <AutoTranslator />
             <LanguageTransition />
+            <SiteLanguagePicker />
             <VipFogMachine />
             <BeRightBack />
             <GeoGate>

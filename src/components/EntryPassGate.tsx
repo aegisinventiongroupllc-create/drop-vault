@@ -5,6 +5,7 @@ import BuyTokensModal from "@/components/BuyTokensModal";
 import { ENTRY_PASS_PRICE_USD } from "@/lib/tokenEconomy";
 import MiniGlobe from "@/components/MiniGlobe";
 import { GlobeOverrideContext, type GlobeOverride } from "@/lib/userTheme";
+import { ENTRY_SUMMARY } from "@/i18n/entryCatalog";
 
 // Pink globe, medium-dark pink outlines, bright white lights.
 const PINK_GLOBE: GlobeOverride = { tone: "#ff4da6", borderTone: "#d6337f", whiteLights: true };
@@ -46,9 +47,9 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
 
         <div className="space-y-2">
           <p className="text-[11px] font-bold tracking-[0.35em] text-gold">VAULT ENTRY PASS</p>
-          <h1 className="font-display text-3xl font-bold tracking-wider">${ENTRY_PASS_PRICE_USD} / YEAR</h1>
+          <h1 className="font-display text-3xl font-bold tracking-wider">{`$${ENTRY_PASS_PRICE_USD} / YEAR`}</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Your annual key to the floor. Browse the full teaser feed, discover every creator, and step into any Vault Hub.
+            {ENTRY_SUMMARY}
           </p>
         </div>
 
@@ -73,7 +74,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
         </div>
 
         <Button variant="neon" className="w-full font-bold tracking-wider" onClick={() => setOpen(true)}>
-          GET MY ENTRY PASS — ${ENTRY_PASS_PRICE_USD}
+          {`GET MY ENTRY PASS — $${ENTRY_PASS_PRICE_USD}`}
         </Button>
 
         <a href="/pricing" className="block text-[11px] font-semibold uppercase text-primary underline">

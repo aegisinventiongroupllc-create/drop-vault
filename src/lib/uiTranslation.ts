@@ -1,6 +1,7 @@
 import catalog from '@/i18n/uiCatalog.json';
 import launchCatalog from '@/i18n/launchCatalog.json';
 import { paymentStatusTranslations } from '@/i18n/paymentStatus';
+import { savedEntryTranslations } from '@/i18n/entryCatalog';
 
 const dictionaries: Record<string, Record<string, string>> = catalog;
 const launchDictionaries: Record<string, Record<string, string>> = launchCatalog;
@@ -12,6 +13,7 @@ export function savedUiTranslations(lang: string): Record<string, string> {
     ...(fallback ? dictionaries[fallback] : {}), ...dictionaries[normalized],
     ...launchDictionaries[base], ...launchDictionaries[normalized],
     ...paymentStatusTranslations(normalized),
+    ...savedEntryTranslations(normalized),
   };
 }
 

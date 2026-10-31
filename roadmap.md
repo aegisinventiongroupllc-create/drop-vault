@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [x] Added an immediate native-name language selector above region/entry screens and across routed pages, with an upward-opening member menu away from top navigation. Saved $20 annual pricing, 365-day summary and purchase label in all 35 non-English offered languages; Russian/Arabic visitor flow, persistence, RTL and authenticated selector verified with no browser errors; 39 focused tests passed, build OK. Nothing published.
+- [ ] Complete remaining saved page translations: new creator revenue/VIP paragraphs, some entry detail/legal paragraphs and populated account flows still need full language coverage; the selector does not establish complete translation or provider readiness.
 - [x] Rotated the admin passcode securely; new access accepted and previous access rejected. Entry-pass payments unchanged; no publishing required.
 - [x] Implemented latest server split rules, capped receipt-authorized VIP grants, Elite request/counteroffer shares, safe profile badges/priority ordering, account-scoped dashboard terms, per-token $1/$4/$20 allocation and creator-only store with five-video guidance. Signed-in creator preview verified desktop/mobile store and disabled buttons; all 260 tests passed, build OK. Nothing published; no money moved.
 - [ ] Connect actual gateway processing deductions and VIP purchase/webhook flow after provider approval and verified fee evidence. Buttons remain Coming soon; live processor fees are not yet reconciled or claimed as verified. Ordinary creator walkthrough still requires existing agreement/verification, which was not bypassed.
