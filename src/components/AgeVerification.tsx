@@ -4,7 +4,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
-import LanguageToggle from "@/components/LanguageToggle";
 import LegalFooter from "@/components/LegalFooter";
 
 const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
@@ -42,11 +41,6 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-      {/* Language toggle top-right */}
-      <div className="absolute top-4 right-4 z-50">
-        <LanguageToggle />
-      </div>
-
       <div className="flex min-h-full flex-col">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
         <div className="relative">

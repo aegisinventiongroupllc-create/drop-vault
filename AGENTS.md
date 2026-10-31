@@ -18,6 +18,7 @@
 - Creator uploads require owner role, reviewed approval and latest live server-confirmed Yoti pass; exclude onboarding IDs/avatars. Why: prevent verification bypass.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
 - AutoTranslator merges source-matched ui/launch catalogs before member-only AI; bound caches/retries and coalesce misses; owner/code and input values stay unchanged. Why: protect private text and avoid repeated translation spend.
+- Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.
 - Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
 - Snapshot request country at creation; preserve on updates. Why: privacy.

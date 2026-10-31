@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Make immediate language selection available on all entry and creator pages; verify selected-language entry pricing and document remaining translation gaps without enabling payments or publishing.
 - [x] Rotated the admin passcode securely; new access accepted and previous access rejected. Entry-pass payments unchanged; no publishing required.
 - [x] Implemented latest server split rules, capped receipt-authorized VIP grants, Elite request/counteroffer shares, safe profile badges/priority ordering, account-scoped dashboard terms, per-token $1/$4/$20 allocation and creator-only store with five-video guidance. Signed-in creator preview verified desktop/mobile store and disabled buttons; all 260 tests passed, build OK. Nothing published; no money moved.
 - [ ] Connect actual gateway processing deductions and VIP purchase/webhook flow after provider approval and verified fee evidence. Buttons remain Coming soon; live processor fees are not yet reconciled or claimed as verified. Ordinary creator walkthrough still requires existing agreement/verification, which was not bypassed.
