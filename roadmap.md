@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Rotate the admin passcode before continuing monetization; verify old access is rejected and new access works, without changing entry-pass payments.
 - [ ] Complete latest monetization model: 92% permanent ceiling, 95% seven-day Power Week, Elite 90% requests enforced server-side, $1/$4/$20 checkout allocation, creator-only live capped VIP store in onboarding/settings, badge/priority support and five-video guidance; test and verify without enabling payments or publishing.
 - [x] Refresh textured dashboard fog and add optional saved, color-wheel-controlled rapidly twinkling stars in shared customer/creator controls. Twenty focused tests pass; signed-in isolated controls verified wheel input, save/reload, changing canvas frames, desktop smoke texture and mobile fit with no page errors. Full normal dashboard navigation for this account remains blocked by its pending Creator Agreement; no agreement accepted and original theme restored. Nothing published.
 - [x] Fix signed-out admin customer/creator preview loading errors: reproduced visitor RPC permission denial; previews now require account sign-in before private discovery, retaining authenticated grants and media policies. Browser verified signed-out login and signed-in @LEMONADE teaser retrieval with no loading error; five focused tests pass, build OK. Nothing published.
