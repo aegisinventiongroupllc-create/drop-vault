@@ -1,6 +1,6 @@
 import AutoTranslator from "@/components/AutoTranslator";
 import LanguageTransition from "@/components/LanguageTransition";
-import LanguageToggle from "@/components/LanguageToggle";
+import SiteLanguagePicker from "@/components/SiteLanguagePicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -42,9 +42,7 @@ const App = () => (
             <AppUpdateWatcher />
             <AutoTranslator />
             <LanguageTransition />
-            <div className="fixed right-4 top-3 z-[240] notranslate" translate="no">
-              <LanguageToggle prominent />
-            </div>
+            <SiteLanguagePicker />
             <VipFogMachine />
             <BeRightBack />
             <GeoGate>

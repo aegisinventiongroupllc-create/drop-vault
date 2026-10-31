@@ -5,7 +5,7 @@ import { EXTRA_LANGUAGES, setAutoLang } from "@/lib/siteTranslate";
 import { getTargetLang } from "@/components/AutoTranslator";
 import { Button } from '@/components/ui/button';
 
-const LanguageToggle = ({ prominent = false }: { prominent?: boolean }) => {
+const LanguageToggle = ({ prominent = false, placement = "below" }: { prominent?: boolean; placement?: "above" | "below" }) => {
   const { setLocale, locales } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ const LanguageToggle = ({ prominent = false }: { prominent?: boolean }) => {
       </Button>
 
       {open && (
-        <div role="menu" aria-label="Languages" className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md overflow-y-auto max-h-[60vh] shadow-xl z-50 w-56 max-w-[calc(100vw-2rem)]">
+        <div role="menu" aria-label="Languages" className={`absolute right-0 ${placement === "above" ? "bottom-full mb-1" : "top-full mt-1"} bg-card border border-border rounded-md overflow-y-auto max-h-[60vh] shadow-xl z-50 w-56 max-w-[calc(100vw-2rem)]`}>
           {(Object.keys(locales) as Locale[]).map((l) => (
             <Button variant="ghost"
               key={l}
