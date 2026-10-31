@@ -36,6 +36,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [tipNotification, setTipNotification] = useState<string | null>(null);
 
   const [isMen, setIsMen] = useState(false);
+  const [vipBadge, setVipBadge] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [countError, setCountError] = useState(false);
@@ -86,6 +87,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   }, [creatorId]);
 
   const heartCount = useHeartTotal(creatorId);
+  useEffect(() => {
+    let cancelled = false;
+    setVipBadge(false);
+    if (creatorId) void supabase.rpc("get_creator_vip_status", { _creator_id: creatorId }).then(({ data, error }) => {
+      if (!cancelled && !error && data && typeof data === "object" && !Array.isArray(data)) setVipBadge(data.vip_badge === true);
+    });
+    return () => { cancelled = true; };
+  }, [creatorId]);
 
   const activeSub = creatorId
     ? subs.find((s) => s.creator_id === creatorId && s.status === "active" && new Date(s.expires_at) > new Date())
@@ -181,6 +190,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       <div className="pt-16 px-4 text-center">
         <div className="flex items-center justify-center gap-2">
           <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
+          {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
         </div>
         <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
         {creatorId && <CreatorHeartButton creatorId={creatorId} />}
