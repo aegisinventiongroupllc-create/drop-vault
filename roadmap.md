@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Complete saved visitor-page translations for all offered languages, including consent/sign-in, pricing, recovery, region notices, policies and forms; verify navigation and protect original input values.
 - [x] Added an immediate native-name language selector above region/entry screens and across routed pages, with an upward-opening member menu away from top navigation. Saved $20 annual pricing, 365-day summary and purchase label in all 35 non-English offered languages; Russian/Arabic visitor flow, persistence, RTL and authenticated selector verified with no browser errors; 39 focused tests passed, build OK. Nothing published.
 - [ ] Complete remaining saved page translations: new creator revenue/VIP paragraphs, some entry detail/legal paragraphs and populated account flows still need full language coverage; the selector does not establish complete translation or provider readiness.
 - [x] Rotated the admin passcode securely; new access accepted and previous access rejected. Entry-pass payments unchanged; no publishing required.
