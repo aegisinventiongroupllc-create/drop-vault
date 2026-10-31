@@ -28,6 +28,8 @@ import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
+import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
+import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorProfile from "@/components/CreatorProfile";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
@@ -174,6 +176,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   }, [authUserId]);
 
   const liveStats = useCreatorStats();
+  const revenueTerms = useRevenueTerms(authUserId);
   const welcomeBack = useCreatorWelcomeBack(authUserId, safetyAgreed);
   const { items: mediaItems, loading: mediaLoading, hasMore: moreMedia, loadMore: loadMoreMedia, error: mediaError, refresh: refreshMedia, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
@@ -203,20 +206,26 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   );
   const [countdown, setCountdown] = useState("");
 
-  // Recompute split state whenever live follower count changes
+  // Earnings and countdown come from server-authorized terms, not a local milestone simulation.
   useEffect(() => {
-    const id = liveStats.creatorId || "creator-1";
-    setSplitState((prev) => getCreatorSplitState(id, liveStats.followerCount, prev));
-  }, [liveStats.followerCount, liveStats.creatorId]);
+    const active = revenueTerms.expires !== null && revenueTerms.expires > Date.now();
+    setSplitState({ creatorId: authUserId ?? "", followerCount: liveStats.followerCount,
+      currentSplit: { creator: revenueTerms.vault, platform: 100 - revenueTerms.vault },
+      incentiveActive: active, incentiveStartedAt: active && revenueTerms.expires ? revenueTerms.expires - 604800000 : null,
+      incentiveEndsAt: revenueTerms.expires, milestoneReached: liveStats.followerCount >= 100000,
+      lastMilestone: Math.floor(liveStats.followerCount / 100000) * 100000,
+      nextMilestone: (Math.floor(liveStats.followerCount / 100000) + 1) * 100000 });
+  }, [liveStats.followerCount, authUserId, revenueTerms]);
 
   const milestoneProgress = getMilestoneProgress(splitState.followerCount);
 
   useEffect(() => {
     if (!splitState.incentiveActive || !splitState.incentiveEndsAt) return;
+    const endsAt = splitState.incentiveEndsAt;
     const interval = setInterval(() => {
-      const remaining = splitState.incentiveEndsAt! - Date.now();
+      const remaining = endsAt - Date.now();
       if (remaining <= 0) {
-        setSplitState((prev) => getCreatorSplitState(prev.creatorId, prev.followerCount, prev));
+        setSplitState((prev) => ({ ...prev, incentiveActive: false }));
         setCountdown("");
         clearInterval(interval);
       } else {
@@ -619,7 +628,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
             <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">Returns to your standard or eligible founding split when the timer ends</p>
+            <p className="text-[10px] text-muted-foreground">Returns to your applicable 90/10 or 92/8 split when the timer ends</p>
           </div>
         )}
         {!splitState.incentiveActive && (
@@ -635,7 +644,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              Next Power Week starts at 100,000 followers — repeats every additional 100K (7-day 95/5 split)
+              100,000 customer followers unlock the 92/8 tier and a 7-day 95/5 Power Week. VIP passes bypass the growth requirement for 92/8.
             </p>
           </div>
         )}
@@ -699,14 +708,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <DollarSign className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold tracking-wider text-foreground">PAYOUT STRUCTURE</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Standard: 90% of the $20 token value — $18 per Bit-Token.</span>{" "}
-              Customers pay $25 ($20 token value + $5 service and processing fee). There is no additional $1 Bit-Token fee; the $5 fee does not reduce your share.
-              Founding creators: 92% ($18.40) for their first 365 days. Power Week: 95% ($19) for 7 days.
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-              Custom requests only: you earn 85% of the agreed base price. The customer pays a separate $1 service fee plus $4 processing cover; neither is deducted from your earnings.
-            </p>
+            <CreatorRevenueTerms />
           </div>
 
           {/* Top Fan List */}
@@ -848,15 +850,11 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             </div>
           </div>
           <CreatorPayoutMethod />
+          <LifetimeUpgradeStore creatorId={authUserId} />
 
           {/* Revenue Split Info */}
           <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-xs text-muted-foreground text-center">
-              <span className="font-bold text-foreground">Standard: $18 per Bit-Token (90% of $20 token value).</span>{" "}
-              Customer price: $25, including a separate $5 service and processing fee. No additional $1 Bit-Token fee.
-              Eligible founding creators receive $18.40 (92%) for 365 days; Power Week pays $19 (95%) for 7 days.
-              Custom requests pay you 85% of the agreed base price; customer-paid fees never reduce your share.
-            </p>
+            <CreatorRevenueTerms />
           </div>
         </div>
       )}

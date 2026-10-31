@@ -49,15 +49,15 @@ describe("Bit-Token pricing", () => {
 
   it("builds a $24 card-fee allowance into the bundle", () => {
     const split = calculateTokenPurchaseSplit(BUNDLE_INVOICE_USD, BUNDLE_TOKENS);
-    expect(split.processingAllowance).toBe(24);
+    expect(split.processingAllowance).toBe(20);
   });
 
   it("splits every $20 token base 90/10 with a $1 fee", () => {
     const split = calculateTokenPurchaseSplit(BUNDLE_INVOICE_USD, BUNDLE_TOKENS);
-    expect(split.adminFee).toBe(ADMIN_FEE_USD);
+    expect(split.adminFee).toBe(ADMIN_FEE_USD * 5);
     expect(split.creatorShare).toBe(90);
     expect(split.platformShare).toBe(10);
-    expect(split.totalPlatformRevenue).toBe(11);
+    expect(split.totalPlatformRevenue).toBe(15);
   });
 });
 

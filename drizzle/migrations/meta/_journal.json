@@ -421,6 +421,20 @@
       "when": 1793364641228,
       "tag": "0059_restrict_vip_inventory_to_creators",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1793453612622,
+      "tag": "0060_complete_vip_monetization_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1793453728530,
+      "tag": "0061_protect_vip_receipt_privileges",
+      "breakpoints": true
     }
   ]
 }

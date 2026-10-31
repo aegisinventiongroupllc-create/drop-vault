@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { earnedTokenCount } from "@/lib/creatorWelcomeBack";
 import { REVENUE_FIELDS, revenueMonthBounds, recordedSplit, type RevenueRecord } from "@/lib/monthlyRevenue";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
 
 interface MonthlyRevenue {
   month: string;
@@ -89,9 +90,7 @@ export default function CreatorEarningsBreakdown({ creatorId }: { creatorId: str
     </dl>}
     <div className="mb-4 rounded-lg border border-border bg-card p-4 text-xs leading-relaxed text-muted-foreground">
       <p className="mb-2 font-semibold text-foreground">How the money works</p>
-      <p>Customers pay <span className="font-semibold text-foreground">$25 per Bit-Token: $20 token value + $5 service and processing fee</span>. Your earnings are calculated from the $20 token value, not the $25 checkout price. At the standard split, you keep <span className="font-semibold text-gold">90% — $18 per token</span>; DTT receives the remaining $2 of token value. The $5 fee never reduces your creator share.</p>
-      <p className="mt-2">Founding creators (first 10 per country) earn <span className="font-semibold text-gold">92% — $18.40 per token</span> for their first 365 days. A Power Week pays <span className="font-semibold text-gold">95% — $19 per token</span> for exactly 7 days, then returns to your applicable standard or founding split. Each token unlock gives customers 14 days of access.</p>
-      <p className="mt-2">Custom requests only: <span className="font-semibold text-gold">85% to you</span> and 15% to the platform. The customer pays a separate $1 service fee plus $4 processing cover; neither is deducted from your earnings. This $1 fee does not apply to Bit-Token purchases. Creator payouts are sent in Litecoin (LTC).</p>
+      <CreatorRevenueTerms />
     </div>
     {loading || monthsLoading ? <p className="text-sm text-muted-foreground" role="status">Loading earnings…</p>
       : failed || monthsFailed ? <div><p className="text-sm text-destructive">Earnings couldn’t load.</p><Button variant="ghost" onClick={() => setRetry((value) => value + 1)}>Try again</Button></div>
