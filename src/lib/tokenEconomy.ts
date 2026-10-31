@@ -77,7 +77,7 @@ export function dollarsToBitTokens(usd: number): number {
  * Creator gets: 90% of base
  */
 export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: number) {
-  const adminFee = ADMIN_FEE_USD;
+  const adminFee = ADMIN_FEE_USD * tokenCount;
   const base = tokenCount * TOKEN_BASE_VALUE_USD;
   const processingAllowance = Math.max(0, invoiceAmount - adminFee - base);
   const platformShare = base * (PLATFORM_SPLIT_PERCENT / 100);
@@ -98,12 +98,12 @@ export function calculateTokenPurchaseSplit(invoiceAmount: number, tokenCount: n
  * Customer pays base + $1 DTT fee + $4 card-processing cover.
  * The base splits 85% creator / 15% platform; fees never touch the creator share.
  */
-export function calculateCustomRequestSplit(baseAmount: number) {
+export function calculateCustomRequestSplit(baseAmount: number, creatorPercent: 85 | 90 = 85) {
   const adminFee = CUSTOM_REQUEST_ADMIN_FEE_USD;
   const processingFee = CUSTOM_REQUEST_PROCESSING_FEE_USD;
   const invoiceTotal = baseAmount + adminFee + processingFee;
-  const platformShare = baseAmount * (CUSTOM_REQUEST_PLATFORM_PERCENT / 100);
-  const creatorShare = baseAmount * (CUSTOM_REQUEST_CREATOR_PERCENT / 100);
+  const creatorShare = Math.round(baseAmount * creatorPercent) / 100;
+  const platformShare = Math.round((baseAmount - creatorShare) * 100) / 100;
   return {
     invoiceTotal,
     adminFee,
