@@ -64,7 +64,7 @@ const AutoTranslator = () => {
 
     const want = (s: string) => {
       const t = s.trim();
-      return !BRAND_ONLY.test(t) && t.length > 1 && t.length <= 600 && HAS_LETTERS.test(t) && !translatedOut.has(t) && !/^[\w.+-]+@[\w.-]+$/.test(t) && !/^https?:/.test(t);
+      return !BRAND_ONLY.test(t) && t.length > 1 && (t.length <= 600 || Boolean(cache[t])) && HAS_LETTERS.test(t) && !translatedOut.has(t) && !/^[\w.+-]+@[\w.-]+$/.test(t) && !/^https?:/.test(t);
     };
 
     const applyText = (node: Text) => {
