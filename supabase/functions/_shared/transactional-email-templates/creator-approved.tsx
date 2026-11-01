@@ -9,19 +9,18 @@ interface Props {
 const Email = ({ name }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>You're verified — your DTT creator page is live</Preview>
+    <Preview>Your DTT identity submission has been approved</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={brand}>DTT</Heading>
         <Heading style={h1}>You're approved!</Heading>
         <Text style={text}>{name ? `Hi ${name},` : 'Hi there,'}</Text>
         <Text style={text}>
-          Your identity check passed and your creator account is now live on DTT.
-          You can upload teasers, fill your vault, and start earning right away.
+          Your submitted identity documents have been reviewed and approved by DTT.
+          You can upload content, subject to your account's remaining requirements.
         </Text>
         <Text style={text}>
-          Creators keep 90% of every unlock — $18 of every $20 token. Upload a short
-          teaser that ends on a hook to bring customers in the door.
+          Payment availability remains subject to provider approval. Your dashboard shows your applicable revenue terms.
         </Text>
         <Button style={button} href="https://dropthatthing.com">
           OPEN MY DASHBOARD
@@ -36,7 +35,7 @@ const Email = ({ name }: Props) => (
 
 export const template = {
   component: Email,
-  subject: "You're approved — your DTT creator page is live",
+  subject: "DTT identity submission approved",
   displayName: 'Creator approved',
   previewData: { name: 'Jane' },
 } satisfies TemplateEntry

@@ -1,0 +1,5 @@
+import * as React from 'npm:react@18.3.1'
+import { Body, Button, Container, Head, Heading, Html, Preview, Text } from 'npm:@react-email/components@0.0.22'
+import type { TemplateEntry } from './registry.ts'
+const Email = ({ name, reason }: { name?: string; reason?: string }) => <Html lang="en"><Head /><Preview>Your DTT identity submission needs corrections</Preview><Body style={{ backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }}><Container style={{ padding: '24px', maxWidth: '520px' }}><Heading>DTT identity review</Heading><Text>{name ? `Hi ${name},` : 'Hi there,'}</Text><Text>Your submission was declined. Content uploads remain locked.</Text><Text>{reason}</Text><Text>You can correct the photos or details and submit again from your dashboard.</Text><Button href="https://dropthatthing.com">OPEN MY DASHBOARD</Button></Container></Body></Html>;
+export const template = { component: Email, subject: 'DTT identity review — corrections required', displayName: 'Creator verification declined', previewData: { name: 'Creator', reason: 'Holding note missing date' } } satisfies TemplateEntry;
