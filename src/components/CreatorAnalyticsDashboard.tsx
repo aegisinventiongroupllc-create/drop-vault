@@ -143,6 +143,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
   // Live KYC status (controls upload gate)
   const [kycStatus, setKycStatus] = useState<"unsubmitted" | "pending" | "approved" | "rejected">("unsubmitted");
+  const [uploadEligible, setUploadEligible] = useState(false);
   useEffect(() => {
     if (!authUserId) return;
     let cancelled = false;
@@ -155,6 +156,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       if (!cancelled && data?.verification_status) {
         setKycStatus(data.verification_status as any);
       }
+      const eligibility = await supabase.rpc("can_upload_creator_media", { _creator_id: authUserId });
+      if (!cancelled) setUploadEligible(!eligibility.error && eligibility.data === true);
       if (!cancelled && data?.avatar_config) setProfileAvatar(parseAvatarConfig(data.avatar_config));
       const { data: publicProfile } = await supabase
         .from("public_profiles")
@@ -169,7 +172,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       .channel(`profile_kyc_${authUserId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${authUserId}` },
         (payload: any) => {
-          if (payload.new?.verification_status) setKycStatus(payload.new.verification_status);
+          if (payload.new?.verification_status) { setKycStatus(payload.new.verification_status); void load(); }
         })
       .subscribe();
     return () => { cancelled = true; clearInterval(identityRefresh); supabase.removeChannel(channel); };
@@ -520,7 +523,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   return (
     <div className="mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
-      {kycStatus !== "approved" && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
+      {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
         setActiveSection("overview");
@@ -833,7 +836,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       {/* Media Manager — Simplified 3-step Upload */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
-          {kycStatus !== "approved" && (
+          {!uploadEligible && (
             <div className="bg-card border-2 border-destructive/40 rounded-2xl p-5 text-center space-y-3">
               <Lock className="w-10 h-10 text-destructive mx-auto" />
               <h3 className="text-base font-bold text-foreground tracking-wider">UPLOADS LOCKED</h3>
@@ -849,7 +852,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               </Button>
             </div>
           )}
-          {kycStatus === "approved" && <>
+          {uploadEligible && <>
           {/* Step 1: Title */}
           <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
             <h3 className="text-base font-bold text-foreground tracking-wider">{ct.upload_video}</h3>
