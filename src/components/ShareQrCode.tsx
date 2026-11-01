@@ -12,15 +12,23 @@ export default function ShareQrCode({ value, filename, label }: { value: string;
     const namespace = "http://www.w3.org/2000/svg";
     const ink = getComputedStyle(svg).getPropertyValue("--qr-ink").trim();
     const paper = getComputedStyle(svg).getPropertyValue("--qr-surface").trim();
-    svg.querySelectorAll("[data-dtt-corners]").forEach((node) => node.remove());
-    // Keep the seven-module finder borders and their white separators intact.
+    svg.querySelectorAll("[data-dtt-brand]").forEach((node) => node.remove());
+    // Finder patterns must remain untouched; H correction protects a small central mark.
     const group = document.createElementNS(namespace, "g");
-    group.setAttribute("data-dtt-corners", "");
+    group.setAttribute("data-dtt-brand", "");
     group.setAttribute("aria-hidden", "true");
+    const panel = document.createElementNS(namespace, "rect");
+    panel.setAttribute("x", String(count / 2 - 4));
+    panel.setAttribute("y", String(count / 2 - 2));
+    panel.setAttribute("width", "8");
+    panel.setAttribute("height", "4");
+    panel.setAttribute("rx", "0.4");
+    panel.setAttribute("fill", `hsl(${paper})`);
+    group.appendChild(panel);
     const corners = [
-      { x: 7.5, y: 7.5, letter: "D" },
-      { x: count - 7.5, y: 7.5, letter: "T" },
-      { x: 7.5, y: count - 7.5, letter: "T" },
+      { x: count / 2 - 2.3, y: count / 2, letter: "D" },
+      { x: count / 2, y: count / 2, letter: "T" },
+      { x: count / 2 + 2.2, y: count / 2, letter: "T" },
     ];
     for (const { x, y, letter } of corners) {
       const text = document.createElementNS(namespace, "text");
@@ -30,8 +38,8 @@ export default function ShareQrCode({ value, filename, label }: { value: string;
       text.setAttribute("dominant-baseline", "central");
       text.setAttribute("font-family", "Arial, sans-serif");
       text.setAttribute("font-weight", "900");
-      text.setAttribute("font-size", "2.5");
-      text.setAttribute("fill", `hsl(${paper})`);
+      text.setAttribute("font-size", "3");
+      text.setAttribute("fill", `hsl(${letter === "T" && x > count / 2 ? getComputedStyle(svg).getPropertyValue("--dtt-pink").trim() : ink})`);
       text.textContent = letter;
       group.appendChild(text);
     }
