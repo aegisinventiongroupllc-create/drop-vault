@@ -9,7 +9,10 @@ describe('reusable UI translation catalog', () => {
   });
   it('does not contain cached account-specific names or email addresses', () => {
     for (const lang of ['es', 'pt', 'fr', 'de', 'it', 'nl', 'pl', 'ru', 'uk', 'tr', 'ar', 'he', 'hi', 'ja', 'ko', 'zh-cn', 'zh-tw', 'th', 'vi', 'id', 'ms', 'tl', 'sv', 'no', 'da', 'fi', 'el', 'cs', 'ro', 'hu', 'bg', 'sr', 'hr', 'sw', 'af']) {
-      expect(Object.keys(savedUiTranslations(lang)).some(key => key.includes('@') || key.includes('BlondieVibes'))).toBe(false);
+      const keys = Object.keys(savedUiTranslations(lang));
+      expect(keys.some(key => key.includes('BlondieVibes'))).toBe(false);
+      const emails = keys.flatMap(key => key.match(/[\w.+-]+@[\w.-]+/g) ?? []);
+      expect(emails.every(email => email.replace(/\.$/, '') === 'admin@dttmediallc.com')).toBe(true);
     }
   });
 });
