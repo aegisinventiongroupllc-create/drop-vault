@@ -1,5 +1,5 @@
 # Project architecture rules
-- Render share QR codes through ShareQrCode with a stationary high-contrast matrix and animated outer glow; downloads remain static with a quiet zone. Why: attention effects must not compromise scanning or motion accessibility.
+- Render share QR codes through ShareQrCode with untouched finder patterns, a small central brand mark, high error correction and animated outer glow; export the same artwork as static high-resolution PNG with a quiet zone. Why: branding and attention effects must not compromise scanning or motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
 - Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
 - Retain request deliveries in a separate private bucket; creator cleanup archives, never deletes customer media. Payment/delivery fields remain server-managed with expiring customer access. Why: agreement is not payment.

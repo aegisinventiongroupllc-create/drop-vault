@@ -42,6 +42,7 @@
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
     --star-core: hsl(var(--foreground));
     --qr-surface: 0 0% 100%;
+    --qr-ink: 0 0% 0%;
     --qr-glow-rest: 0 0 8px hsl(var(--primary) / .25);
     --qr-glow-peak: 0 0 28px hsl(var(--primary) / .65);
     --ship-default-accent: 330 100% 50%;
@@ -88,7 +89,7 @@
 
 .welcome-reward { box-shadow: var(--reward-shadow); }
 .dtt-qr-frame { background: hsl(var(--qr-surface)); border: 2px solid hsl(var(--primary)); animation: dtt-qr-pulse 2.4s ease-in-out infinite; }
-.dtt-qr-frame canvas { display: block; max-width: 100%; height: auto; }
+.dtt-qr-frame svg { display: block; max-width: 100%; height: auto; }
 @keyframes dtt-qr-pulse { 0%, 100% { box-shadow: var(--qr-glow-rest); } 50% { box-shadow: var(--qr-glow-peak); } }
 @media (prefers-reduced-motion: reduce) { .dtt-qr-frame { animation: none; box-shadow: var(--qr-glow-rest); } }
 .idle-ad-flight { position: absolute; left: 0; width: clamp(220px, 27vw, 380px); aspect-ratio: 5 / 2; will-change: transform; animation: idle-ad-cruise 48s linear infinite; }
