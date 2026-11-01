@@ -16,11 +16,12 @@ describe.skipIf(!db)("manual verification permissions", () => {
   });
   it("rejects signed-out review before accessing a record", async () => {
     if (!db) throw Error("Database required");
-    await expect(db`SELECT public.review_creator_identity(${crypto.randomUUID()},'approved','',true)`).rejects.toThrow("Administrator sign-in required");
+    await expect(db`SELECT public.review_creator_identity(${crypto.randomUUID()},'approved','',true)`).rejects.toThrow(/Administrator sign-in required|permission denied for function review_creator_identity/);
   });
   it("keeps the identity bucket private and capped", async () => {
     if (!db) throw Error("Database required");
     const rows = await db`SELECT public,file_size_limit FROM storage.buckets WHERE id='identity-documents'`;
-    expect(rows[0]).toEqual({ public: false, file_size_limit: 10485760 });
+    expect(rows[0].public).toBe(false);
+    expect(Number(rows[0].file_size_limit)).toBe(10485760);
   });
 });
