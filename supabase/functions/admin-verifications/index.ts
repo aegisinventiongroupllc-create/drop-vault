@@ -1,119 +1,56 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-passcode",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE") ?? "";
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
-  try {
-    if (!ADMIN_PASSCODE) return json({ error: "Admin access is not configured" }, 503);
-    const passcode = req.headers.get("x-admin-passcode") ?? "";
-    if (passcode !== ADMIN_PASSCODE) {
-      return json({ error: "Invalid admin passcode" }, 401);
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
-    const body = await req.json().catch(() => ({}));
-    const action = body?.action as string;
-
-    if (action === "list") {
-      const filter = (body?.filter as string) || "pending";
-      let q = supabase.from("creator_verifications").select("*").order("submitted_at", { ascending: false });
-      if (filter !== "all") q = q.eq("status", filter);
-      const { data, error } = await q;
-      if (error) return json({ error: error.message }, 500);
-
-      const userIds = Array.from(new Set((data || []).map((r: any) => r.user_id)));
-      let profMap: Record<string, { email: string | null; display_name: string | null }> = {};
-      if (userIds.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("user_id, email, display_name")
-          .in("user_id", userIds);
-        profs?.forEach((p: any) => {
-          profMap[p.user_id] = { email: p.email, display_name: p.display_name };
-        });
-      }
-      const rows = (data || []).map((r: any) => ({
-        ...r,
-        email: profMap[r.user_id]?.email ?? null,
-        display_name: profMap[r.user_id]?.display_name ?? null,
-      }));
-      return json({ rows });
-    }
-
-    if (action === "signed_urls") {
-      const paths = (body?.paths as string[]) || [];
-      const { data, error } = await supabase.storage
-        .from("id-verifications")
-        .createSignedUrls(paths, 60 * 30);
-      if (error) return json({ error: error.message }, 500);
-      const map: Record<string, string> = {};
-      data?.forEach((d: any, i: number) => {
-        if (d.signedUrl) map[paths[i]] = d.signedUrl;
-      });
-      return json({ urls: map });
-    }
-
-    if (action === "decide") {
-      const id = body?.id as string;
-      const status = body?.status as "approved" | "rejected";
-      const notes = (body?.notes as string) || null;
-      if (!id || !["approved", "rejected"].includes(status)) {
-        return json({ error: "Invalid request" }, 400);
-      }
-      const { data: row, error } = await supabase
-        .from("creator_verifications")
-        .update({
-          status,
-          reviewer_notes: notes,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq("id", id)
-        .select("user_id")
-        .single();
-      if (error) return json({ error: error.message }, 500);
-
-      // Let the creator know by email when they're approved.
-      if (status === "approved" && row?.user_id) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("email, display_name")
-          .eq("user_id", row.user_id)
-          .maybeSingle();
-        if (prof?.email) {
-          try {
-            await sendTemplateEmail("creator-approved", prof.email, {
-              templateData: { name: prof.display_name ?? undefined },
-              idempotencyKey: `creator-approved-${id}`,
-            });
-          } catch (e) {
-            console.error("Approval email failed", e);
-          }
-        }
-      }
-      return json({ ok: true });
-    }
-
-    return json({ error: "Unknown action" }, 400);
-  } catch (e: any) {
-    return json({ error: e?.message ?? "Unexpected error" }, 500);
-  }
+const json = (body: unknown, status=200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type":"application/json" } });
+const schema = z.discriminatedUnion("action", [
+ z.object({ action:z.literal("list"), filter:z.enum(["pending","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
+ z.object({ action:z.literal("signed_urls"), id:z.string().uuid() }),
+ z.object({ action:z.literal("decide"), id:z.string().uuid(), status:z.enum(["approved","rejected"]), notes:z.string().trim().max(1000).default(""), confirmed:z.boolean().default(false) })
+]);
+Deno.serve(async req => {
+ if(req.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
+ if(req.method!=="POST") return json({error:"Method not allowed"},405);
+ try {
+ const authorization=req.headers.get("authorization")??"";
+ const client=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{global:{headers:{Authorization:authorization}}});
+ const {data:{user},error:authError}=await client.auth.getUser();
+ if(authError||!user) return json({error:"Administrator account sign-in required"},401);
+ const {data:admin,error:roleError}=await client.rpc("has_role",{_user_id:user.id,_role:"admin"});
+ if(roleError||admin!==true) return json({error:"Administrator privileges required"},403);
+ const parsed=schema.safeParse(await req.json());
+ if(!parsed.success) return json({error:"Invalid review request"},400);
+ const body=parsed.data;
+ const service=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+ if(body.action==="list") {
+ let query=service.from("creator_verifications").select("*",{count:"exact"}).order("country").order("legal_first_name").order("submitted_at",{ascending:false}).order("id");
+ if(body.filter!=="all") query=query.eq("status",body.filter);
+ if(body.country) query=query.eq("country",body.country);
+ if(body.query) { const search=body.query.replace(/[^\p{L}\p{N}@ _-]/gu,""); if(search) query=query.or(`legal_first_name.ilike.%${search}%,legal_last_name.ilike.%${search}%,creator_username.ilike.%${search}%`); }
+ const {data,error,count}=await query.range(body.offset,body.offset+24);
+ if(error) return json({error:"Unable to load records"},500);
+ const ids=[...new Set((data??[]).map(row=>row.user_id))];
+ const {data:profiles}=ids.length?await service.from("profiles").select("user_id,email,display_name,country").in("user_id",ids):{data:[]};
+ const byId=new Map((profiles??[]).map(p=>[p.user_id,p]));
+ return json({rows:(data??[]).map(row=>({...row,email:byId.get(row.user_id)?.email,display_name:row.creator_username??byId.get(row.user_id)?.display_name,country:row.country??byId.get(row.user_id)?.country})),total:count??0});
+ }
+ if(body.action==="signed_urls") {
+ const {data:row,error}=await service.from("creator_verifications").select("user_id,document_bucket,id_front_path,id_back_path,selfie_path").eq("id",body.id).single();
+ if(error||!row) return json({error:"Record not found"},404);
+ if(!["identity-documents","id-verifications"].includes(row.document_bucket)) return json({error:"Invalid evidence bucket"},400);
+ const paths=[row.id_front_path,row.id_back_path,row.selfie_path].filter(path=>!!path&&path.startsWith(`${row.user_id}/`));
+ const {data,error:signError}=await service.storage.from(row.document_bucket).createSignedUrls(paths,300);
+ if(signError) return json({error:"Unable to open private images"},500);
+ return json({urls:Object.fromEntries((data??[]).filter(item=>item.signedUrl).map(item=>[item.path,item.signedUrl]))});
+ }
+ const {data:creatorId,error}=await client.rpc("review_creator_identity",{_id:body.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed});
+ if(error) return json({error:error.message},400);
+ const {data:profile}=await service.from("profiles").select("email,display_name").eq("user_id",creatorId).maybeSingle();
+ let notification="unavailable";
+ if(profile?.email) {
+ try { const result=await sendTemplateEmail(body.status==="approved"?"creator-approved":"creator-declined",profile.email,{templateData:{name:profile.display_name??undefined,reason:body.notes},idempotencyKey:`creator-review-${body.id}-${body.status}`}); notification=result.sent?"sent":"suppressed"; }
+ catch {notification="failed";}
+ }
+ return json({ok:true,notification});
+ } catch {return json({error:"Unable to process verification request"},500);}
 });
