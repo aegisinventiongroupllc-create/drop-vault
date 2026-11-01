@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import MiniGlobe from "@/components/MiniGlobe";
+import EntryPassGlobe, { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import { supabase } from "@/integrations/supabase/client";
 
 import GalaxyReel from "@/components/GalaxyReel";
@@ -13,8 +13,8 @@ const IDLE_MS = 60_000;
  * Any activity brings the app straight back.
  *
  * Visitors who haven't signed up yet always see the original DTT galaxy
- * (Star cluster, untinted). Personal skies only appear once someone is
- * signed in and has chosen their own.
+ * (Star cluster). Idle skies blend with the entry-pass pink globe, without
+ * changing members' saved dashboard colors or backdrop selections.
  */
 const BeRightBack = () => {
   const [away, setAway] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("brb"));
@@ -59,12 +59,12 @@ const BeRightBack = () => {
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
       {signedIn
-        ? <GalaxyReel scope="brb" seconds={170} />
-        : <GalaxyReel scope="brb" seconds={170} styleOverride="cluster" toneOverride="" />}
-      <div className={`absolute inset-0 ${signedIn ? "bg-background/30" : "bg-background/55"}`} aria-hidden />
+        ? <GalaxyReel scope="brb" seconds={170} toneOverride={ENTRY_GLOBE.tone} />
+        : <GalaxyReel scope="brb" seconds={170} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />}
+      <div className="absolute inset-0 bg-background/40" aria-hidden />
       <IdleAdShips signedIn={signedIn} />
       <div className="relative flex flex-col items-center gap-6">
-        <MiniGlobe size={signedIn ? 280 : 320} lights speed={0.2} backdrop={false} />
+        <EntryPassGlobe size={300} />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>
