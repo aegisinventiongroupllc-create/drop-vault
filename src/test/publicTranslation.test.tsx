@@ -24,11 +24,11 @@ describe('public translations without paid AI or account access', () => {
       expect(translation).toContain('365');
     }
   });
-  it('translates a saved policy longer than 600 characters without sending it to AI', async () => {
+  it('translates public legal paragraphs without sending them or private input to AI', async () => {
     localStorage.setItem('dtt_auto_lang', 'ar');
     const dict = savedUiTranslations('ar');
-    const source = Object.keys(dict).find(key => key.length > 600);
-    if (!source) throw Error('Long public policy missing');
+    const source = Object.keys(dict).find(key => key.startsWith('Entry is blocked for excluded country estimates'));
+    if (!source) throw Error('Public policy missing');
     const { container } = render(<><AutoTranslator /><p>{source}</p><input defaultValue="Private identity" /></>);
     await waitFor(() => expect(container.querySelector('p')?.textContent).toBe(dict[source]));
     expect(container.querySelector('input')?.value).toBe('Private identity');
