@@ -8,10 +8,10 @@ export const ENTRY_GLOBE: GlobeOverride = {
 };
 
 /** The entry-pass artwork, reused without changing anyone's saved theme. */
-export default function EntryPassGlobe({ size = 128 }: { size?: number }) {
+export default function EntryPassGlobe({ size = 128, solid = false }: { size?: number; solid?: boolean }) {
   return (
     <div className="relative inline-flex shrink-0 select-none" data-testid="entry-pass-globe">
-      <div className="opacity-90 globe-breathe">
+      <div className={solid ? "globe-breathe" : "opacity-90 globe-breathe"}>
         <GlobeOverrideContext.Provider value={ENTRY_GLOBE}>
           <MiniGlobe size={size} speed={0.15} lights backdrop={false} />
         </GlobeOverrideContext.Provider>
