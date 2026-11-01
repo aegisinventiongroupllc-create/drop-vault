@@ -435,6 +435,13 @@
       "when": 1793453728530,
       "tag": "0061_protect_vip_receipt_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1793569653642,
+      "tag": "0062_manual_creator_verification",
+      "breakpoints": true
     }
   ]
 }
