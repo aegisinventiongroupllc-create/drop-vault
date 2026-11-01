@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   const [previews, setPreviews] = useState<{ front?: string; selfie?: string }>({});
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initialized = useRef(false);
   useEffect(() => {
     let active = true;
     const load = async () => {
@@ -25,7 +26,11 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
       if (error) toast.error("Could not load identity status");
       if (data) {
         setStatus(data.verification_status as Status); setNotes(data.verification_reviewer_notes);
-        setName([data.legal_first_name, data.legal_last_name].filter(Boolean).join(" ")); setDob(data.date_of_birth ?? ""); setUsername(data.display_name ?? "");
+        if (!initialized.current) {
+          setName([data.legal_first_name, data.legal_last_name].filter(Boolean).join(" ")); setDob(data.date_of_birth ?? "");
+          initialized.current = true;
+        }
+        setUsername(data.display_name ?? "");
       }
       setLoading(false);
     };
