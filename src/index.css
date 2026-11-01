@@ -118,7 +118,7 @@
 .ship-seam { stroke: hsl(var(--ship-metal-light) / .4); stroke-width: 1.5; }
 @keyframes idle-ad-cruise { from { transform: translateX(-400px); } to { transform: translateX(calc(100vw + 400px)); } }
 @keyframes idle-ad-hover { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(9px) rotate(1deg); } }
-@media (max-width: 600px) { .idle-ad-flight-near { top: 5%; } .idle-ad-flight-far { bottom: 5%; } }
+@media (max-width: 600px) { .idle-ad-flight { width: 260px; } .idle-ad-flight-near { top: 9%; } .idle-ad-flight-far { bottom: 2%; } }
 @media (prefers-reduced-motion: reduce) {
   .idle-ad-flight, .idle-ad-ship { animation: none; will-change: auto; }
   .idle-ad-flight-near { left: 7%; }
