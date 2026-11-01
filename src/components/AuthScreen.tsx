@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-import { verifyAdminPasscode } from "@/lib/adminSession";
+import { isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 
@@ -79,6 +79,11 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     if (loading) return;
     setAdminError("");
     const trimmed = email.trim();
+    // Navigation only: the destination still requires server-verified access.
+    if (isAdminSignInShortcut(mode, trimmed)) {
+      window.location.assign("/admin-access");
+      return;
+    }
     // Owner preview code: opens the customer entry-pass page
     if (trimmed === "0524171") {
       window.location.href = "/entry-pass-preview";

@@ -2,6 +2,11 @@ export const ADMIN_SESSION_KEY = "dtt_secret_admin_ok";
 export const ADMIN_PASSCODE_KEY = "dtt_admin_passcode";
 export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
 
+/** A navigation shortcut, never an administrator credential. */
+export function isAdminSignInShortcut(mode: string, value: string): boolean {
+  return mode === "login" && value.trim() === "143";
+}
+
 /** Passcode previews must not mount private media before account sign-in. */
 export function previewNeedsSignIn(preview: boolean, verified: boolean, authReady: boolean, userId: string | null): boolean {
   return preview && verified && authReady && !userId;
