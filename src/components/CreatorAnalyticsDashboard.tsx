@@ -20,7 +20,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
-import YotiAgeCheck from "@/components/YotiAgeCheck";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
@@ -165,6 +164,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       if (!cancelled) setProfilePhotoPath(publicProfile?.profile_photo_path ?? undefined);
     };
     load();
+    const identityRefresh = window.setInterval(load, 15000);
     const channel = supabase
       .channel(`profile_kyc_${authUserId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${authUserId}` },
@@ -172,7 +172,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           if (payload.new?.verification_status) setKycStatus(payload.new.verification_status);
         })
       .subscribe();
-    return () => { cancelled = true; supabase.removeChannel(channel); };
+    return () => { cancelled = true; clearInterval(identityRefresh); supabase.removeChannel(channel); };
   }, [authUserId]);
 
   const liveStats = useCreatorStats();
@@ -285,7 +285,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const launchOndato = () => {
     setVerificationStatus("pending");
     toast("Verification in progress", {
-      description: "Use the Age Verification section in the Creator Studio to complete your Yoti check.",
+      description: "Use Identity Verification in the Creator Studio to submit your ID and holding photo for review.",
       duration: 4000,
     });
   };
@@ -520,6 +520,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   return (
     <div className="mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
+      {kycStatus !== "approved" && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
         setActiveSection("overview");
@@ -796,7 +797,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             <p className="text-xs text-muted-foreground mb-4">
               We manually review every creator before they can upload. Submit a Government ID + a verification selfie.
             </p>
-            <div className="mb-4"><YotiAgeCheck /></div>
             {authUserId && (
               <CreatorIdVerification userId={authUserId} onApproved={() => setKycStatus("approved")} />
             )}
