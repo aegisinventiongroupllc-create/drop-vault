@@ -59,12 +59,12 @@ const BeRightBack = () => {
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
       {signedIn
-        ? <GalaxyReel scope="brb" seconds={170} toneOverride={ENTRY_GLOBE.tone} />
-        : <GalaxyReel scope="brb" seconds={170} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />}
-      <div className="absolute inset-0 bg-background/40" aria-hidden />
+        ? <GalaxyReel scope="brb" seconds={240} toneOverride={ENTRY_GLOBE.tone} />
+        : <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />}
+      <div className="absolute inset-0 bg-background/25" aria-hidden />
       <IdleAdShips signedIn={signedIn} />
       <div className="relative flex flex-col items-center gap-6">
-        <EntryPassGlobe size={300} />
+        <EntryPassGlobe size={300} solid />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>
