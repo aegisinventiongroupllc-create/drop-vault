@@ -415,6 +415,7 @@ const AdminPortal = () => {
 
           {/* Creator ID Verifications */}
           <Card className="p-4">
+            <Button variant="outline" className="mb-4" onClick={() => navigate("/admin/verifications")}>OPEN VERIFICATION RECORDS</Button>
             <AdminVerifications />
           </Card>
 

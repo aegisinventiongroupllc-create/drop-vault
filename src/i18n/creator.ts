@@ -16,7 +16,7 @@ const en = {
   safety_content_h: "Content Standards:",
   safety_content: "All content must be legal, consensual, and comply with our community guidelines. No content involving minors, non-consensual acts, or illegal activities will be tolerated.",
   safety_age_h: "Age Verification:",
-  safety_age: "You confirm you are at least 18. Before uploading, every creator completes a secure ID and face check with Yoti, a trusted independent age-verification provider, plus DTT approval.",
+  safety_age: "You confirm you are at least 18. Before uploading, submit your government ID and a holding photo with a dated handwritten note for private manual review and DTT approval.",
   safety_rev_h: "Revenue & Payouts:",
   safety_rev: "Standard creators earn 90% of the $20 token value ($18). Eligible founding creators earn 92% for one year. Pro and Elite passes permanently grant 92/8; 100k customer followers qualify for 92/8 with a 7-day 95/5 Power Week. Requests pay 85% by default or 90% for Elite. The $25 token price includes $1 DTT fee and $4 processing buffer. VIP purchases remain Coming soon; TryBit and CCBill checkout require approval. Payouts remain manual in Litecoin (LTC).",
   safety_priv_h: "Privacy & Data:",

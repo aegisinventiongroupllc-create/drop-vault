@@ -57,7 +57,7 @@ const en: Translations = {
   tos_section9_text: "For questions about these Terms, contact: admin@dttmediallc.com",
 
   privacy_section1_title: "1. Data Collection",
-  privacy_section1_text: "DTT collects account information, transaction history, and IP addresses. For Creators, we collect government-issued ID and \"liveness\" selfies to ensure platform safety and 18+ compliance.",
+  privacy_section1_text: "DTT collects account information, transaction history, and IP addresses. For Creators, we collect government-issued ID and holding photos with handwritten notes for private manual identity and age review. These photos are not automated liveness checks.",
   privacy_section2_title: "2. Purpose of Processing",
   privacy_section2_text: "Verification data is used solely to confirm age and identity. Transaction data is used to facilitate payouts via the LTC network.",
   privacy_section3_title: "3. Third Parties",

@@ -387,11 +387,15 @@ export type Database = {
       }
       creator_verifications: {
         Row: {
+          country: string | null
           created_at: string
+          creator_username: string | null
           date_of_birth: string
+          document_bucket: string
           id: string
           id_back_path: string
           id_front_path: string
+          identity_confirmed: boolean
           legal_first_name: string
           legal_last_name: string
           reviewed_at: string | null
@@ -404,11 +408,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          country?: string | null
           created_at?: string
+          creator_username?: string | null
           date_of_birth: string
+          document_bucket?: string
           id?: string
           id_back_path: string
           id_front_path: string
+          identity_confirmed?: boolean
           legal_first_name: string
           legal_last_name: string
           reviewed_at?: string | null
@@ -421,11 +429,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          country?: string | null
           created_at?: string
+          creator_username?: string | null
           date_of_birth?: string
+          document_bucket?: string
           id?: string
           id_back_path?: string
           id_front_path?: string
+          identity_confirmed?: boolean
           legal_first_name?: string
           legal_last_name?: string
           reviewed_at?: string | null
@@ -1010,6 +1022,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          is_verified: boolean
           legal_first_name: string | null
           legal_last_name: string | null
           role: string
@@ -1033,6 +1046,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_verified?: boolean
           legal_first_name?: string | null
           legal_last_name?: string | null
           role?: string
@@ -1056,6 +1070,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_verified?: boolean
           legal_first_name?: string | null
           legal_last_name?: string | null
           role?: string
@@ -1638,6 +1653,15 @@ export type Database = {
         Args: { _expected_expiry: string; _subscription_id: string }
         Returns: string
       }
+      review_creator_identity: {
+        Args: {
+          _confirmed: boolean
+          _id: string
+          _notes: string
+          _status: string
+        }
+        Returns: string
+      }
       search_creator_page: {
         Args: {
           _countries?: string[]
@@ -1712,6 +1736,15 @@ export type Database = {
           _routing: string
         }
         Returns: boolean
+      }
+      submit_creator_identity: {
+        Args: {
+          _dob: string
+          _front: string
+          _full_name: string
+          _selfie: string
+        }
+        Returns: string
       }
       unlock_creator: {
         Args: { _creator_id: string }

@@ -33,24 +33,27 @@ describe.skipIf(!db)("creator upload authorization", () => {
     expect(rows[0].with_check).toContain("status = 'pending'");
     expect(rows[0].with_check).toContain("reviewed_at IS NULL");
   });
-  type Case = { name: string; profile?: string; review?: string; reviewed?: boolean; yoti?: string; environment?: string; evidence?: boolean; role?: boolean; owner?: boolean; signedOut?: boolean; banned?: boolean; missingYoti?: boolean; newerFailed?: boolean; allowed: boolean };
+  type Case = { name: string; profile?: string; review?: string; reviewed?: boolean; confirmed?: boolean; reviewer?: boolean; dob?: string; yoti?: string; environment?: string; evidence?: boolean; role?: boolean; owner?: boolean; signedOut?: boolean; banned?: boolean; missingYoti?: boolean; newerFailed?: boolean; allowed: boolean };
   const cases: Case[] = [
+    { name: "unconfirmed manual identity", confirmed: false, allowed: false },
+    { name: "missing reviewer", reviewer: false, allowed: false },
+    { name: "underage identity", dob: "2015-01-01", allowed: false },
     { name: "unverified", profile: "unsubmitted", allowed: false },
     { name: "pending approval", profile: "pending", allowed: false },
     { name: "rejected approval", profile: "rejected", allowed: false },
     { name: "forged profile approval", review: "pending", allowed: false },
     { name: "unreviewed approval", reviewed: false, allowed: false },
-    { name: "missing Yoti", missingYoti: true, allowed: false },
-    { name: "pending Yoti", yoti: "pending", allowed: false },
-    { name: "failed Yoti", yoti: "failed", allowed: false },
-    { name: "sandbox pass", environment: "sandbox", allowed: false },
-    { name: "legacy pass", environment: "unknown", allowed: false },
-    { name: "missing server evidence", evidence: false, allowed: false },
+    { name: "missing Yoti", missingYoti: true, allowed: true },
+    { name: "pending Yoti", yoti: "pending", allowed: true },
+    { name: "failed Yoti", yoti: "failed", allowed: true },
+    { name: "sandbox pass", environment: "sandbox", allowed: true },
+    { name: "legacy pass", environment: "unknown", allowed: true },
+    { name: "missing server evidence", evidence: false, allowed: true },
     { name: "not a creator", role: false, allowed: false },
     { name: "other account", owner: false, allowed: false },
     { name: "signed out", signedOut: true, allowed: false },
     { name: "banned creator", banned: true, allowed: false },
-    { name: "latest failed check", newerFailed: true, allowed: false },
+    { name: "latest failed check", newerFailed: true, allowed: true },
     { name: "approved live verified creator", allowed: true },
   ];
   it.each(cases)("$name: upload and request attachment", async test => {
@@ -58,7 +61,7 @@ describe.skipIf(!db)("creator upload authorization", () => {
     const rollback = new Error("rollback fixtures");
     await db.begin(async sql => {
       await sql.unsafe(`CREATE TEMP TABLE profiles(user_id uuid,verification_status text);
-        CREATE TEMP TABLE creator_verifications(user_id uuid,status text,reviewed_at timestamptz);
+        CREATE TEMP TABLE creator_verifications(id uuid DEFAULT gen_random_uuid(),user_id uuid,status text,reviewed_at timestamptz,reviewer_id uuid,identity_confirmed boolean,date_of_birth date,submitted_at timestamptz DEFAULT now());
         CREATE TEMP TABLE yoti_age_checks(id uuid,user_id uuid,status text,environment text,server_verified_at timestamptz,created_at timestamptz);
         CREATE TEMP TABLE account_bans(user_id uuid);
         CREATE TEMP TABLE user_roles(user_id uuid,role text);
@@ -74,7 +77,7 @@ describe.skipIf(!db)("creator upload authorization", () => {
       const uid = crypto.randomUUID(); const request = crypto.randomUUID();
       await sql`SELECT set_config('test.uid',${test.signedOut ? "" : test.owner === false ? crypto.randomUUID() : uid},true)`;
       await sql`INSERT INTO pg_temp.profiles VALUES(${uid},${test.profile ?? "approved"})`;
-      await sql`INSERT INTO pg_temp.creator_verifications VALUES(${uid},${test.review ?? "approved"},${test.reviewed === false ? null : new Date()})`;
+      await sql`INSERT INTO pg_temp.creator_verifications(user_id,status,reviewed_at,reviewer_id,identity_confirmed,date_of_birth) VALUES(${uid},${test.review ?? "approved"},${test.reviewed === false ? null : new Date()},${test.reviewer === false ? null : crypto.randomUUID()},${test.confirmed !== false},${test.dob ?? "2000-01-01"})`;
       if (test.role !== false) await sql`INSERT INTO pg_temp.user_roles VALUES(${uid},'creator')`;
       if (!test.missingYoti) await sql`INSERT INTO pg_temp.yoti_age_checks VALUES(gen_random_uuid(),${uid},${test.yoti ?? "passed"},${test.environment ?? "live"},${test.evidence === false ? null : new Date()},now())`;
       if (test.newerFailed) await sql`INSERT INTO pg_temp.yoti_age_checks VALUES(gen_random_uuid(),${uid},'failed','live',null,now()+interval '1 second')`;

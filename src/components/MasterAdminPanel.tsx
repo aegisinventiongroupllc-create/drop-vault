@@ -358,6 +358,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Creator Verification Queue */}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
+          <Button variant="outline" onClick={() => window.location.assign("/admin/verifications")}>OPEN VERIFICATION RECORDS</Button>
           <AdminVerifications />
         </div>
       )}
