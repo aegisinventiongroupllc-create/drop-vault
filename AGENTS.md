@@ -42,7 +42,7 @@
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
 - Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
-- Idle billboard ships are decorative SVG inventory previews using validated dashboard theme tokens and visitor defaults, with reduced-motion support; never imply booked sponsors or load external ads. Why: match private colors without inventing advertisers or tracking visitors.
+- Idle billboard ships use validated dashboard theme tokens and visitor defaults with reduced-motion support; inquiry links must remain keyboard/touch accessible without dismissing idle mode, never imply booked sponsors or load external ads. Why: match private colors and accept inquiries without inventing advertisers or tracking visitors.
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
 - Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
