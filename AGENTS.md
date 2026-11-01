@@ -1,4 +1,5 @@
 # Project architecture rules
+- Email-field admin shortcuts navigate to protected sign-in only; never grant privileges or replace server verification. Why: convenience must not expose administrative records.
 - Render share QR codes through ShareQrCode with untouched finder patterns, a small central brand mark, high error correction and animated outer glow; export the same artwork as static high-resolution PNG with a quiet zone. Why: branding and attention effects must not compromise scanning or motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
 - Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
