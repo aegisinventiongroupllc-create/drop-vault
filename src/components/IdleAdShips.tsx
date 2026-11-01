@@ -22,7 +22,7 @@ export default function IdleAdShips({ signedIn }: { signedIn: boolean }) {
       const metal = `${id}-${lane}-metal`;
       const glass = `${id}-${lane}-glass`;
       return <div key={lane} className={`idle-ad-flight idle-ad-flight-${lane}`}>
-        <Button asChild variant="ghost" className="idle-ad-link pointer-events-auto" data-idle-interactive>
+        <Button asChild variant="ghost" className="idle-ad-link pointer-events-auto [&_svg]:!w-full [&_svg]:!h-full" data-idle-interactive>
           <a href="mailto:admin@dttmediallc.com?subject=DTT%20advertising%20inquiry" aria-label={`Advertise here — ${lane === "near" ? "upper" : "lower"} DTT ship`} title="Email DTT about advertising">
         <svg className="idle-ad-ship" viewBox="0 0 600 240" fill="none" focusable="false" aria-hidden="true">
           <defs>
