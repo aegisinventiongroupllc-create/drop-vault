@@ -92,9 +92,14 @@
 .dtt-qr-frame svg { display: block; max-width: 100%; height: auto; }
 @keyframes dtt-qr-pulse { 0%, 100% { box-shadow: var(--qr-glow-rest); } 50% { box-shadow: var(--qr-glow-peak); } }
 @media (prefers-reduced-motion: reduce) { .dtt-qr-frame { animation: none; box-shadow: var(--qr-glow-rest); } }
-.idle-ad-flight { position: absolute; left: 0; width: clamp(220px, 27vw, 380px); aspect-ratio: 5 / 2; will-change: transform; animation: idle-ad-cruise 48s linear infinite; }
+.idle-ad-flight { position: absolute; left: 0; width: clamp(300px, 32vw, 460px); aspect-ratio: 5 / 2; will-change: transform; animation: idle-ad-cruise 48s linear infinite; }
 .idle-ad-flight-near { top: max(16px, calc(50% - 340px)); animation-delay: -12s; }
-.idle-ad-flight-far { bottom: max(16px, calc(50% - 340px)); width: clamp(180px, 22vw, 300px); animation-duration: 65s; animation-delay: -42s; animation-direction: reverse; }
+.idle-ad-flight-far { bottom: max(16px, calc(50% - 340px)); width: clamp(280px, 28vw, 400px); animation-duration: 65s; animation-delay: -42s; animation-direction: reverse; }
+.idle-ad-link { display: block; width: 100%; height: 100%; padding: 0; white-space: normal; border-radius: 8px; }
+.idle-ad-link:hover { background: transparent; }
+.idle-ad-flight:hover, .idle-ad-flight:focus-within { animation-play-state: paused; }
+.idle-ad-link:focus-visible { outline: 2px solid hsl(var(--ship-accent)); outline-offset: 2px; }
+.idle-ad-link:hover .idle-ad-ship { filter: drop-shadow(0 0 16px hsl(var(--ship-accent) / .6)); }
 .idle-ad-ship { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 6px 12px hsl(var(--ship-accent) / .2)); animation: idle-ad-hover 7s ease-in-out infinite; }
 .ship-metal-light { stop-color: hsl(var(--ship-metal-light)); }
 .ship-metal-mid { stop-color: hsl(var(--ship-metal-mid)); }
@@ -105,14 +110,15 @@
 .ship-glass { stroke: hsl(var(--ship-accent) / .45); }
 .ship-glint { stroke: hsl(var(--ship-ink) / .6); stroke-width: 1; }
 .ship-wordmark { fill: hsl(var(--ship-ink)); font-family: var(--font-display); font-weight: 700; font-size: 38px; letter-spacing: 0; }
-.ship-ad-label { fill: hsl(var(--ship-accent)); font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0; }
+.ship-ad-label { fill: hsl(var(--ship-ink)); font-family: var(--font-body); font-weight: 800; font-size: 23px; letter-spacing: 0; }
+.ship-hologram { stroke: hsl(var(--ship-accent) / .15); stroke-width: 1; }
 .ship-cockpit { fill: hsl(var(--ship-accent) / .65); stroke: hsl(var(--ship-ink) / .3); }
 .ship-running-light { stroke: hsl(var(--ship-accent)); stroke-width: 4; stroke-linecap: round; }
 .ship-exhaust { fill: hsl(var(--ship-accent) / .22); }
 .ship-seam { stroke: hsl(var(--ship-metal-light) / .4); stroke-width: 1.5; }
 @keyframes idle-ad-cruise { from { transform: translateX(-400px); } to { transform: translateX(calc(100vw + 400px)); } }
 @keyframes idle-ad-hover { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(9px) rotate(1deg); } }
-@media (max-width: 600px) { .idle-ad-flight-near { top: 5%; } .idle-ad-flight-far { bottom: 5%; } }
+@media (max-width: 600px) { .idle-ad-flight { width: 260px; } .idle-ad-flight-near { top: 9%; } .idle-ad-flight-far { bottom: 2%; } }
 @media (prefers-reduced-motion: reduce) {
   .idle-ad-flight, .idle-ad-ship { animation: none; will-change: auto; }
   .idle-ad-flight-near { left: 7%; }

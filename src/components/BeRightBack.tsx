@@ -33,8 +33,13 @@ const BeRightBack = () => {
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => setAway(true), IDLE_MS);
     };
-    const back = () => {
+    const back = (event: Event) => {
       if (Date.now() < hold.current) return;
+      // Mouse movement must not dismiss the screen before a ship can be clicked.
+      if (away && event.type === "mousemove") return;
+      if (event.target instanceof Element && event.target.closest("[data-idle-interactive]")) {
+        if (!(event instanceof KeyboardEvent && event.key === "Escape")) return;
+      }
       setAway(false);
       reset();
     };
@@ -48,7 +53,7 @@ const BeRightBack = () => {
       window.clearTimeout(timer.current);
       events.forEach((e) => window.removeEventListener(e, back));
     };
-  }, []);
+  }, [away]);
 
   if (!away) return null;
   return (
