@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DttShareQr from "@/components/DttShareQr";
 import RestrictedCountries from "@/components/RestrictedCountries";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ const LegalFooter = () => {
   return (
     <>
       <footer className="py-5 px-4 text-center border-t border-border mt-auto">
+        <DttShareQr />
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-2">
           {links.map((l, i) => (
             <span key={l.id} className="flex items-center gap-3">

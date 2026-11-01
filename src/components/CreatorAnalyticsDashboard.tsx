@@ -42,7 +42,7 @@ import {
 import { useCreatorStats } from "@/hooks/useCreatorStats";
 import TeaserCarousel from "@/components/TeaserCarousel";
 import { useCreatorMedia } from "@/hooks/useCreatorMedia";
-import { QRCodeCanvas } from "qrcode.react";
+import ShareQrCode from "@/components/ShareQrCode";
 import { useCreatorText } from "@/i18n/creator";
 
 
@@ -738,47 +738,10 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             return (
               <div className="bg-card border border-border rounded-xl p-4 text-center">
                 <h3 className="text-sm font-bold text-foreground mb-2">SHARE MY VAULT</h3>
-                <div
-                  className="w-36 h-36 mx-auto bg-white rounded-lg p-2 mb-3 flex items-center justify-center"
-                  style={{ border: "3px solid hsl(var(--primary))" }}
-                >
-                  <QRCodeCanvas
-                    id="creator-vault-qr"
-                    value={vaultUrl}
-                    size={128}
-                    level="M"
-                    includeMargin={false}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                  />
-                </div>
+                <ShareQrCode value={vaultUrl} filename={`dtt-vault-${handle || "qr"}.png`} label="Creator vault QR code" />
                 <p className="text-[10px] text-muted-foreground mb-2 break-all">
                   {handle ? `dropthatthing.com/creator/${handle}` : "Set your username to personalize this link"}
                 </p>
-                <Button
-                  variant="neon"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => {
-                    try {
-                      const canvas = document.getElementById("creator-vault-qr") as HTMLCanvasElement | null;
-                      if (!canvas) throw new Error("QR not ready");
-                      const dataUrl = canvas.toDataURL("image/png");
-                      const a = document.createElement("a");
-                      a.href = dataUrl;
-                      a.download = `dtt-vault-${handle || "qr"}.png`;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      toast.success("QR code downloaded", { description: "Share your vault link anywhere." });
-                    } catch {
-                      toast.error("Download failed. Please try again.");
-                    }
-                  }}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  DOWNLOAD QR CODE
-                </Button>
               </div>
             );
           })()}
