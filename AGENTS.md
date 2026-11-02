@@ -1,7 +1,7 @@
 # Project architecture rules
 - Email-field admin shortcuts navigate to protected sign-in only; never grant privileges or replace server verification. Why: convenience must not expose administrative records.
-- Entry and idle screens share EntryPassGlobe artwork; idle tint and fully opaque globe rendering are scoped, never saved. Why: prevent stars bleeding through the idle globe without changing entry artwork or dashboard preferences.
-- Render share QR codes through ShareQrCode with untouched finder patterns, a small central brand mark, high error correction and animated outer glow; export the same artwork as static high-resolution PNG with a quiet zone. Why: branding and attention effects must not compromise scanning or motion accessibility.
+- Entry and idle share EntryPassGlobe; idle opacity, tint and framing are scoped, never saved. Why: avoid star bleed and cropping without changing entry or dashboard choices.
+- ShareQrCode preserves finder patterns, central branding, high correction, outer glow and quiet-zone PNG exports. Why: protect scanning and motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
 - Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
 - Retain request deliveries in a separate private bucket; creator cleanup archives, never deletes customer media. Payment/delivery fields remain server-managed with expiring customer access. Why: agreement is not payment.
@@ -44,7 +44,9 @@
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
 - Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
-- Idle billboard ships use validated dashboard theme tokens and visitor defaults with reduced-motion support; inquiry links must remain keyboard/touch accessible without dismissing idle mode, never imply booked sponsors or load external ads. Why: match private colors and accept inquiries without inventing advertisers or tracking visitors.
+- Dormant idle ships retain validated themes, reduced motion and inquiry links without external ads. Why: allow safe reuse without claiming booked sponsors.
+- Public backdrop IDs use bundled allowlists in public avatar_config, not private ui_theme; saves preserve them. Why: avoid leaks and trackers.
+- Tip/request dialogs use body portals and bounded scrolling. Why: keep controls above navigation.
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
 - Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
