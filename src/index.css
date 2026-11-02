@@ -43,6 +43,10 @@
     --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
     --star-core: hsl(var(--foreground));
+    --backdrop-water: 190 80% 88%;
+    --backdrop-petal: 345 80% 85%;
+    --backdrop-leaf: 30 80% 55%;
+    --backdrop-shimmer: linear-gradient(115deg, transparent 30%, hsl(var(--foreground) / .12) 49%, transparent 66%);
     --qr-surface: 0 0% 100%;
     --qr-ink: 0 0% 0%;
     --qr-glow-rest: 0 0 8px hsl(var(--primary) / .25);
@@ -262,6 +266,41 @@ body { top: 0 !important; }
 @media (prefers-reduced-motion: reduce) { .galaxy-reel-track { animation: none; } }
 
 .dtt-auth-screen { letter-spacing: 0; }
+.living-backdrop[data-design] .living-backdrop-photo { animation: backdrop-breathe 18s ease-in-out infinite alternate; }
+.living-backdrop-light { opacity: .6; }
+.living-backdrop[data-design="beach"] .living-backdrop-light,
+.living-backdrop[data-design="summer"] .living-backdrop-light { background: var(--backdrop-shimmer); animation: backdrop-water 8s ease-in-out infinite alternate; }
+.living-backdrop[data-design="gaming"] .living-backdrop-light { background: linear-gradient(0deg, transparent 30%, hsl(var(--primary) / .12) 50%, transparent 70%); animation: backdrop-scan 7s linear infinite; }
+.living-backdrop[data-design="cars"] .living-backdrop-light,
+.living-backdrop[data-design="satin"] .living-backdrop-light { background: var(--backdrop-shimmer); animation: backdrop-glint 12s ease-in-out infinite; }
+.living-particle { position: absolute; top: -12%; left: 8%; width: 4px; height: 4px; border-radius: 50%; background: hsl(var(--foreground) / .7); opacity: 0; animation: backdrop-fall 13s linear infinite; }
+.living-particle-1 { left: 18%; animation-delay: -3s; animation-duration: 17s; }
+.living-particle-2 { left: 28%; animation-delay: -9s; }
+.living-particle-3 { left: 39%; animation-delay: -5s; animation-duration: 19s; }
+.living-particle-4 { left: 48%; animation-delay: -11s; }
+.living-particle-5 { left: 59%; animation-delay: -7s; animation-duration: 15s; }
+.living-particle-6 { left: 68%; animation-delay: -2s; }
+.living-particle-7 { left: 78%; animation-delay: -8s; animation-duration: 18s; }
+.living-particle-8 { left: 88%; animation-delay: -12s; }
+.living-particle-9 { left: 95%; animation-delay: -6s; animation-duration: 16s; }
+.living-backdrop[data-design="spring"] .living-particle { width: 7px; height: 4px; border-radius: 70% 10% 70% 10%; background: hsl(var(--backdrop-petal) / .75); }
+.living-backdrop[data-design="autumn"] .living-particle { width: 7px; height: 5px; border-radius: 0 70% 0 70%; background: hsl(var(--backdrop-leaf) / .8); }
+.living-backdrop[data-design="summer"] .living-particle { background: transparent; border: 1px solid hsl(var(--backdrop-water) / .5); width: 7px; height: 7px; animation-name: backdrop-rise; }
+.living-backdrop[data-design="gaming"] .living-particle { background: hsl(var(--primary) / .7); animation-name: backdrop-rise; border-radius: 1px; width: 2px; height: 9px; }
+.living-backdrop[data-design="cars"] .living-particle,
+.living-backdrop[data-design="beach"] .living-particle,
+.living-backdrop[data-design="satin"] .living-particle { display: none; }
+.living-backdrop[data-running="false"] *, .living-backdrop[data-running="false"] .living-backdrop-photo { animation-play-state: paused; }
+@keyframes backdrop-breathe { from { transform: scale(1.04) translateX(-.6%); } to { transform: scale(1.09) translateX(.6%); } }
+@keyframes backdrop-water { from { transform: translateX(-20%) skewY(-4deg); opacity: .3; } to { transform: translateX(20%) skewY(4deg); opacity: .65; } }
+@keyframes backdrop-scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+@keyframes backdrop-glint { 0%, 15% { transform: translateX(-100%); } 65%, 100% { transform: translateX(100%); } }
+@keyframes backdrop-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 15%, 75% { opacity: .65; } 100% { transform: translate(24px, 230px) rotate(220deg); opacity: 0; } }
+@keyframes backdrop-rise { 0% { transform: translate(0, 230px); opacity: 0; } 20%, 75% { opacity: .5; } 100% { transform: translate(16px, 0); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .living-backdrop .living-backdrop-photo, .living-backdrop .living-backdrop-light, .living-backdrop .living-particle { animation: none; transform: none; }
+  .living-backdrop-particles, .living-backdrop-control, .living-backdrop-light { display: none; }
+}
 .dtt-auth-screen h1 { line-height: 1.4; }
 
 @layer components {
