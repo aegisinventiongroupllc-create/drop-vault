@@ -456,6 +456,13 @@
       "when": 1793657998042,
       "tag": "0064_preserve_existing_profile_backdrops",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1793658134231,
+      "tag": "0065_restrict_profile_backdrop_grants",
+      "breakpoints": true
     }
   ]
 }

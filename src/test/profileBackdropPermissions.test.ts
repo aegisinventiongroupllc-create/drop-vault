@@ -11,7 +11,7 @@ describe.skipIf(!db)("profile backdrop authorization", () => {
   });
   it("denies signed-out backdrop changes", async () => {
     if (!db) throw Error("Database required");
-    await expect(db`SELECT public.set_my_profile_backdrop('spring',NULL)`).rejects.toThrow(/Sign in required/);
+    await expect(db`SELECT public.set_my_profile_backdrop('spring',NULL)`).rejects.toThrow(/Sign in required|permission denied for function/);
   });
   it("keeps images private and capped at 5 MB", async () => {
     if (!db) throw Error("Database required");
@@ -22,6 +22,7 @@ describe.skipIf(!db)("profile backdrop authorization", () => {
   it("rejects foreign-owned upload paths", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
+      await sql`SET LOCAL ROLE authenticated`;
       await sql`SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true)`;
       await expect(sql`SELECT public.set_my_profile_backdrop(NULL,'22222222-2222-4222-8222-222222222222/backdrop-33333333-3333-4333-8333-333333333333.jpg')`).rejects.toThrow(/Invalid owned image/);
     }).catch(error => { if (!String(error).includes('current transaction is aborted')) throw error; });
