@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
@@ -22,9 +23,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
   const totalDue = split.invoiceTotal;
 
 
-  return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center">
-      <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[210] bg-background/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-label="Custom request">
+      <div className="w-full min-h-0 max-w-md bg-card border border-border rounded-lg max-h-[calc(100dvh-3rem)] overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground font-display tracking-wider">CUSTOM REQUEST</h2>
@@ -57,7 +58,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
                     setCustomBidTokens(e.target.value);
                   }}
                   placeholder="e.g. 50"
-                  className="flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                  aria-label="Request Bit-Token amount"
+                  className="min-w-0 flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
                 />
                 <Button
                   variant="gold"
@@ -92,8 +94,9 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Describe your request</label>
+              <label htmlFor="custom-request-description" className="text-sm font-medium text-foreground block mb-2">Describe your request</label>
               <textarea
+                id="custom-request-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Provide details about the custom media you'd like..."
@@ -210,7 +213,7 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
           </div>
         )}
       </div>
-    </div>
+    </div>, document.body
   );
 };
 

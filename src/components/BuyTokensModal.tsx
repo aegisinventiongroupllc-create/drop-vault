@@ -232,11 +232,12 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bit-Tokens</span><span className="font-bold text-foreground">{quantity}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Price each</span><span className="text-foreground">${TOKEN_INVOICE_USD}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Base token value</span><span>${quantity * 20}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">DTT checkout fee</span><span>${quantity}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Processing buffer</span><span>${quantity * 4}</span></div>
+              <div className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">Included DTT fee ($1 per token)</span><span>${quantity}</span></div>
+              <div className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">Included processing allowance ($4 per token)</span><span>${quantity * 4}</span></div>
               {TRANSACTION_FEE_USD > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Transaction fee</span><span className="text-foreground">${TRANSACTION_FEE_USD}</span></div>}
               <div className="flex justify-between border-t border-border pt-2 text-base font-bold"><span className="text-foreground">Total</span><span className="text-primary">${invoiceAmount}</span></div>
               <p className="text-[10px] text-muted-foreground">Tokens never expire. Use them any time — each one unlocks a creator for 14 days.</p>
+              <p className="text-xs text-muted-foreground">The $5 fee per token is already included in the $25 price, not added on top. The $4 allowance is set by DTT, not a verified charge from TryBit or CCBill.</p>
             </div>
             <Button variant="neon" className="w-full" onClick={() => setStep("payment")}>CONTINUE TO PAYMENT — ${invoiceAmount}</Button>
           </div>
@@ -286,7 +287,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <span className="text-foreground">Total charged today</span>
                 <span className="text-primary">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
               </div>
-              {!isEntryPass && <><p className="text-[10px] text-muted-foreground">Includes ${quantity * 20} token value, ${quantity} DTT fee and ${quantity * 4} processing buffer. One-time charge.</p><p className="text-[10px] text-muted-foreground">{payMethod === "crypto" ? "Any actual network fee is shown by your wallet or hosted checkout; it does not reduce token value." : "Card processing comes from the included buffer, not creator earnings."}</p></>}
+              {!isEntryPass && <><p className="text-xs text-muted-foreground">Includes ${quantity * 20} token value and ${quantity * 5} in DTT fees and processing allowance. No additional DTT checkout fee.</p><p className="text-xs text-muted-foreground">The $4-per-token allowance is DTT's pricing policy, not a verified provider fee. Any separate wallet or provider charge must be shown before payment.</p></>}
             </div>
 
             {error && (

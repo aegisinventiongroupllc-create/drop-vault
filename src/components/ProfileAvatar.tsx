@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { dttColorClass, parseDttColors, type DttLetterColors } from "@/lib/dttIcon";
+import { parseCreatorBackdrop, type CreatorBackdropId } from "@/lib/creatorBackdrop";
 
 export type AvatarFace = "spark" | "rogue" | "nova" | "pixel" | "orbit" | "crown";
 export type AvatarTone = "rose" | "cyan" | "gold" | "lime" | "violet" | "silver";
@@ -38,6 +39,7 @@ export interface AvatarConfig {
   portraitPath?: string;
   useDttIcon?: boolean;
   dttLetterColors?: DttLetterColors;
+  creatorBackdrop?: CreatorBackdropId;
 }
 
 export const AVATAR_SKIN_TONES: AvatarSkinTone[] = ["light", "warm", "medium", "deep", "rich", "dark"];
@@ -81,6 +83,7 @@ export const parseAvatarConfig = (value: unknown): AvatarConfig => {
     portraitPath: typeof candidate.portraitPath === "string" && candidate.portraitPath ? candidate.portraitPath : undefined,
     useDttIcon: candidate.useDttIcon === true ? true : undefined,
     dttLetterColors: parseDttColors(candidate.dttLetterColors),
+    creatorBackdrop: parseCreatorBackdrop(candidate.creatorBackdrop),
   };
 };
 

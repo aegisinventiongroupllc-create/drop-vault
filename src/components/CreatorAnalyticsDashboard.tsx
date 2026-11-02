@@ -23,6 +23,7 @@ import CreatorIdVerification from "@/components/CreatorIdVerification";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
+import CreatorBackdropPicker from "@/components/CreatorBackdropPicker";
 import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
@@ -788,6 +789,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           {authUserId && (
             <div className="bg-card border border-border rounded-xl p-4">
               <CreatorProfilePhotoGallery creatorId={authUserId} onActiveChange={setProfilePhotoPath} />
+              <CreatorBackdropPicker />
             </div>
           )}
 
