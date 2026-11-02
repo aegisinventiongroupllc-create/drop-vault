@@ -298,7 +298,7 @@ body { top: 0 !important; }
 @keyframes backdrop-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 15%, 75% { opacity: .65; } 100% { transform: translate(24px, 230px) rotate(220deg); opacity: 0; } }
 @keyframes backdrop-rise { 0% { transform: translate(0, 230px); opacity: 0; } 20%, 75% { opacity: .5; } 100% { transform: translate(16px, 0); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .living-backdrop .living-backdrop-photo, .living-backdrop .living-backdrop-light, .living-backdrop .living-particle { animation: none; transform: none; }
+  .living-backdrop[data-design] .living-backdrop-photo, .living-backdrop[data-design] .living-backdrop-light, .living-backdrop[data-design] .living-particle { animation: none; transform: none; }
   .living-backdrop-particles, .living-backdrop-control, .living-backdrop-light { display: none; }
 }
 .dtt-auth-screen h1 { line-height: 1.4; }
