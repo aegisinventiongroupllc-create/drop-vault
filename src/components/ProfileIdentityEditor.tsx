@@ -18,6 +18,8 @@ import ProfileAvatar, {
 } from "@/components/ProfileAvatar";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { parseCreatorBackdrop } from "@/lib/creatorBackdrop";
+import ProfileBackdropPicker from "@/components/ProfileBackdropPicker";
+import { useProfileBackdrop } from "@/hooks/useProfileBackdrop";
 
 const HANDLE_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/;
 
@@ -35,6 +37,7 @@ const readDraft = (): { handle?: string; avatar?: AvatarConfig } | null => {
 };
 
 const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { compact?: boolean; creator?: boolean; onSaved?: (handle: string, avatar: AvatarConfig) => void }) => {
+  const profileBackdrop = useProfileBackdrop();
   const [handle, setHandle] = useState("");
   const [country, setCountry] = useState("GLOBAL");
   const [isCreator, setIsCreator] = useState(creator);
@@ -213,7 +216,8 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
   return (
     <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
-        <VipBackdrop />
+        <img src={profileBackdrop} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-background/50" />
         <div className="relative z-10 shrink-0 p-1">
           <ProfileAvatar config={avatar} previewUrl={portraitPreview} className={`dtt-photo-pop h-28 w-28 border-[3px] border-primary transition-all duration-200 sm:h-32 sm:w-32 ${processingPhoto && portraitPreview ? "blur-[2px]" : ""}`} label={handle || "Your"} />
           {!isCreator && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary bg-background px-2 py-0.5 text-[8px] font-black uppercase text-primary">{avatar.useDttIcon ? "DTT icon" : "Private emoji"}</span>}
@@ -225,6 +229,7 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
         </div>
       </div>
 
+      {!isCreator && <ProfileBackdropPicker />}
       <div className="text-left">
         <label htmlFor="display-handle" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Public avatar name</label>
         <Input ref={handleInput} id="display-handle" value={handle} maxLength={24} autoComplete="nickname" placeholder="neon_player" aria-invalid={!!handleError} aria-describedby={handleError ? "display-handle-error" : undefined} onChange={(event) => updateHandle(event.target.value.replace(/[^A-Za-z0-9_.]/g, ""))} />
