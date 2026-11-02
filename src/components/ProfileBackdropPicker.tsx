@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { prepareBackdrop, profileBackdropImage, saveProfileBackdrop, searchProfileBackdrops } from "@/lib/profileBackdrops";
 import { creatorBackdropImage, parseCreatorBackdrop } from "@/lib/creatorBackdrop";
+import LivingProfileBackdrop from "@/components/LivingProfileBackdrop";
 
 export default function ProfileBackdropPicker({ creator = false }: { creator?: boolean }) {
   const [query, setQuery] = useState("");
@@ -90,7 +91,7 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
   return <section className="space-y-4 border-t border-border py-5" aria-label={creator ? "Public creator backdrop" : "Private profile backdrop"}>
     <div><h3 className="font-semibold text-foreground">{creator ? "Public page backdrop" : "Private profile backdrop"}</h3><p className="text-xs text-muted-foreground">{creator ? "Visible on your creator page." : "Only you can see your customer backdrop."}</p></div>
     <div className="relative isolate flex h-40 items-end justify-center overflow-hidden rounded-md bg-card pb-3">
-      <img src={image} alt="Selected profile backdrop" className="absolute inset-0 h-full w-full object-cover" />
+      <LivingProfileBackdrop image={image} alt="Selected profile backdrop" />
       <ProfileAvatar config={avatar} creatorPhotoPath={creator ? photo : undefined} label="Your profile" className="relative z-10 h-24 w-24 border-4 border-background" />
     </div>
     <Input aria-label="Search backdrop designs" placeholder="Search interests, flowers, gaming…" value={query} onChange={event => setQuery(event.target.value)} />

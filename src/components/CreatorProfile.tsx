@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown, calculateTokenTip } from "@/lib/tokenEconomy";
 import { useProfileBackdrop } from "@/hooks/useProfileBackdrop";
+import LivingProfileBackdrop from "@/components/LivingProfileBackdrop";
 import { parseAvatarConfig } from "@/components/ProfileAvatar";
 import { createPortal } from "react-dom";
 import LegalFooter from "@/components/LegalFooter";
@@ -178,8 +179,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       {/* Header */}
       <div className="relative">
         <div className="relative h-40 overflow-hidden bg-card">
-          <img src={profileBackdrop} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-background/30" />
+          <LivingProfileBackdrop image={profileBackdrop} />
+          <div className="absolute inset-0 bg-background/30 pointer-events-none" />
         </div>
         <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
           <button onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
