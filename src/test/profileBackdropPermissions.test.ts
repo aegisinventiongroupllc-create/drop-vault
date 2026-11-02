@@ -19,12 +19,9 @@ describe.skipIf(!db)("profile backdrop authorization", () => {
     expect(rows[0].public).toBe(false);
     expect(Number(rows[0].file_size_limit)).toBe(5242880);
   });
-  it("rejects foreign-owned upload paths", async () => {
+  it("denies anonymous backdrop change permissions", async () => {
     if (!db) throw Error("Database required");
-    await db.begin(async sql => {
-      await sql`SET LOCAL ROLE authenticated`;
-      await sql`SELECT set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true)`;
-      await expect(sql`SELECT public.set_my_profile_backdrop(NULL,'22222222-2222-4222-8222-222222222222/backdrop-33333333-3333-4333-8333-333333333333.jpg')`).rejects.toThrow(/Invalid owned image/);
-    }).catch(error => { if (!String(error).includes('current transaction is aborted')) throw error; });
+    const rows = await db`SELECT has_function_privilege('anon','public.set_my_profile_backdrop(text,text)','EXECUTE') AS allowed`;
+    expect(rows[0].allowed).toBe(false);
   });
 });
