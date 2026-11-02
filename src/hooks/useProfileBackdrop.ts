@@ -8,7 +8,9 @@ export function useProfileBackdrop(userId?: string | null) {
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    setImage(profileBackdropImage("beach"));
     async function load() {
+      if (userId === null) return;
       const owner = userId ?? (await supabase.auth.getUser()).data.user?.id;
       if (!owner) return;
       const { data, error } = await supabase.from("profile_backdrop_settings").select("design_id,upload_path").eq("user_id", owner).maybeSingle();
