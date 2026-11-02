@@ -3,7 +3,6 @@ import EntryPassGlobe, { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import { supabase } from "@/integrations/supabase/client";
 
 import GalaxyReel from "@/components/GalaxyReel";
-import IdleAdShips from "@/components/IdleAdShips";
 
 const IDLE_MS = 60_000;
 
@@ -62,9 +61,8 @@ const BeRightBack = () => {
         ? <GalaxyReel scope="brb" seconds={240} toneOverride={ENTRY_GLOBE.tone} />
         : <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />}
       <div className="absolute inset-0 bg-background/25" aria-hidden />
-      <IdleAdShips signedIn={signedIn} />
-      <div className="relative flex flex-col items-center gap-6">
-        <EntryPassGlobe size={300} solid />
+      <div className="relative flex flex-col items-center gap-6 p-6">
+        <EntryPassGlobe size={220} solid />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>

@@ -17,6 +17,7 @@ import ProfileAvatar, {
   DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig,
 } from "@/components/ProfileAvatar";
 import { COUNTRIES } from "@/components/GlobalPassport";
+import { parseCreatorBackdrop } from "@/lib/creatorBackdrop";
 
 const HANDLE_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/;
 
@@ -126,6 +127,13 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
       }
       uploadedPortraitPath = portraitPath;
       avatarToSave = { ...currentAvatar, portraitPath, useDttIcon: undefined };
+    }
+    if (user && isCreator) {
+      const { data: latest, error: readError } = await supabase.from("profiles").select("avatar_config").eq("user_id", user.id).single();
+      if (readError) { setSaving(false); toast({ title: "Couldn't save profile", description: readError.message, variant: "destructive" }); return; }
+      const config = latest.avatar_config;
+      const backdrop = config && typeof config === "object" && !Array.isArray(config) ? parseCreatorBackdrop(config.creatorBackdrop) : undefined;
+      avatarToSave = { ...avatarToSave, creatorBackdrop: backdrop };
     }
     const { error } = user
       ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json, country, tags }).eq("user_id", user.id)

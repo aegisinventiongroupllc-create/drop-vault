@@ -10,7 +10,10 @@ import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
-import { formatUnlockCountdown } from "@/lib/tokenEconomy";
+import { formatUnlockCountdown, calculateTokenTip } from "@/lib/tokenEconomy";
+import { creatorBackdropImage } from "@/lib/creatorBackdrop";
+import { parseAvatarConfig } from "@/components/ProfileAvatar";
+import { createPortal } from "react-dom";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorTeaserAvatar from "@/components/CreatorTeaserAvatar";
 import TopFansSection from "@/components/TopFansSection";
@@ -156,7 +159,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     toast({ title: `Unlocked @${creatorName} ✓`, description: "14 days of full library access added." });
   };
 
-  const TIP_AMOUNTS = [5, 10, 20, 50, 100];
+  const TIP_AMOUNTS = [1, 2, 3];
+  const tipPreview = selectedTip ? calculateTokenTip(selectedTip) : null;
 
   const handleSendTip = (amount: number) => {
     toast({ title: "Tip checkout unavailable", description: "No payment has been taken. Tips need an approved payment connection." });
@@ -172,7 +176,10 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       <style>{`@keyframes coin-drop{0%{transform:translateY(-60vh) rotateY(0) scale(.6);opacity:0}40%{opacity:1}70%{transform:translateY(0) rotateY(720deg) scale(1.1)}100%{transform:translateY(0) rotateY(720deg) scale(1);opacity:0}}`}</style>
       {/* Header */}
       <div className="relative">
-        <div className="h-40 bg-gradient-to-br from-primary/20 via-card to-card" />
+        <div className="relative h-40 overflow-hidden bg-card">
+          <img src={creatorBackdropImage(parseAvatarConfig(avatarConfig).creatorBackdrop, isMen)} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-background/30" />
+        </div>
         <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
           <button onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
             <ArrowLeft className="w-5 h-5" />
@@ -233,14 +240,15 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           SEND A TIP
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Show your support — no extra fee, creator keeps 90%
+          Tips start at 1 Bit-Token ($20 value). No extra tipping fee; standard creator share is 90%.
         </p>
       </div>
 
       {/* Tip Modal */}
-      {showTipModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => { if (!tipSent) { setShowTipModal(false); setSelectedTip(null); } }}>
-          <div className="bg-card border border-border rounded-2xl p-6 mx-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+      {showTipModal && createPortal(
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-background/80 backdrop-blur-sm p-3" role="dialog" aria-modal="true" aria-label="Send a tip" onClick={() => { if (!tipSent) { setShowTipModal(false); setSelectedTip(null); } }}>
+          <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full max-h-[calc(100dvh-3rem)] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="mb-2" onClick={() => { setShowTipModal(false); setSelectedTip(null); }}>Close</Button>
             <h3 className="text-lg font-bold text-foreground text-center mb-1">
            <Heart className="w-5 h-5 inline text-primary mr-1" /> Send a Tip to {creatorName}
             </h3>
@@ -255,24 +263,25 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {TIP_AMOUNTS.map((amt) => (
-                    <button
+                    <Button variant="outline"
                       key={amt}
                       onClick={() => setSelectedTip(amt)}
-                      className={`py-3 rounded-xl text-sm font-bold transition-all border ${
+                      className={`h-auto min-w-0 whitespace-normal py-3 rounded-lg text-sm font-bold transition-all border ${
                         selectedTip === amt
                           ? "bg-primary/20 border-primary text-primary"
                           : "bg-secondary border-border text-foreground hover:border-primary/40"
                       }`}
                     >
-                      ${amt}
-                    </button>
+                      {amt} Bit-Token{amt === 1 ? "" : "s"}
+                    </Button>
                   ))}
                 </div>
-                {selectedTip && (
+                {tipPreview && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
-                    <div className="flex justify-between"><span>Tip Amount:</span><span className="text-foreground font-bold">${selectedTip}</span></div>
-                    <div className="flex justify-between"><span>Platform share (10%):</span><span className="text-foreground font-bold">${Math.round(selectedTip * 10) / 100}</span></div>
-                    <div className="flex justify-between border-t border-border pt-1"><span>Creator Receives:</span><span className="text-primary font-bold">${Math.round(selectedTip * 90) / 100}</span></div>
+                    <div className="flex justify-between"><span>Tip value:</span><span className="text-foreground font-bold">${tipPreview.tipAmount}</span></div>
+                    <div className="flex justify-between"><span>Standard platform share (10%):</span><span className="text-foreground font-bold">${tipPreview.platformShare}</span></div>
+                    <div className="flex justify-between border-t border-border pt-1"><span>Standard creator share:</span><span className="text-primary font-bold">${tipPreview.creatorShare}</span></div>
+                    <p>Tokens cost $25 each to buy, including the $5 purchase fee. No additional fee to tip with existing tokens.</p>
                   </div>
                 )}
                 <Button
@@ -288,7 +297,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               </>
             )}
           </div>
-        </div>
+        </div>, document.body
       )}
 
       {/* Full Library — unlock or watch */}
