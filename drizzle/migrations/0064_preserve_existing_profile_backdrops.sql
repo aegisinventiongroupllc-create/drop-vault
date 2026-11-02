@@ -1,0 +1,1 @@
+INSERT INTO public.profile_backdrop_settings(user_id,design_id) SELECT user_id,avatar_config->>'creatorBackdrop' FROM public.profiles WHERE avatar_config->>'creatorBackdrop' IN ('cluster','deepfield','milkyway','blueMeteor','crescent','cosmicGold','violetWorld','celestialStorm','goldenMoon') AND public.has_role(user_id,'creator') ON CONFLICT(user_id) DO NOTHING;

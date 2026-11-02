@@ -45,7 +45,7 @@
 - Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
 - Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
 - Dormant idle ships retain validated themes, reduced motion and inquiry links without external ads. Why: allow safe reuse without claiming booked sponsors.
-- Public backdrop IDs use bundled allowlists in public avatar_config, not private ui_theme; saves preserve them. Why: avoid leaks and trackers.
+- Profile backdrops use server-owned settings, allowlisted designs and private owner uploads; only selected creator files are member-readable. Decode/re-encode images, gate and brand creator uploads. Why: prevent trackers and cross-account leaks.
 - Tip/request dialogs use body portals and bounded scrolling. Why: keep controls above navigation.
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
 - Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.

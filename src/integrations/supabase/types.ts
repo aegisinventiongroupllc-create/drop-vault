@@ -1012,6 +1012,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_backdrop_settings: {
+        Row: {
+          design_id: string | null
+          updated_at: string
+          upload_path: string | null
+          user_id: string
+        }
+        Insert: {
+          design_id?: string | null
+          updated_at?: string
+          upload_path?: string | null
+          user_id: string
+        }
+        Update: {
+          design_id?: string | null
+          updated_at?: string
+          upload_path?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_config: Json
@@ -1736,6 +1757,10 @@ export type Database = {
           _routing: string
         }
         Returns: boolean
+      }
+      set_my_profile_backdrop: {
+        Args: { _design?: string; _path?: string }
+        Returns: undefined
       }
       submit_creator_identity: {
         Args: {

@@ -442,6 +442,27 @@
       "when": 1793569653642,
       "tag": "0062_manual_creator_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1793657903066,
+      "tag": "0063_profile_backdrop_gallery",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1793657998042,
+      "tag": "0064_preserve_existing_profile_backdrops",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1793658134231,
+      "tag": "0065_restrict_profile_backdrop_grants",
+      "breakpoints": true
     }
   ]
 }

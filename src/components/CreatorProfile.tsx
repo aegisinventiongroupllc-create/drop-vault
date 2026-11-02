@@ -11,7 +11,7 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toast } from "@/hooks/use-toast";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { formatUnlockCountdown, calculateTokenTip } from "@/lib/tokenEconomy";
-import { creatorBackdropImage } from "@/lib/creatorBackdrop";
+import { useProfileBackdrop } from "@/hooks/useProfileBackdrop";
 import { parseAvatarConfig } from "@/components/ProfileAvatar";
 import { createPortal } from "react-dom";
 import LegalFooter from "@/components/LegalFooter";
@@ -41,6 +41,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [isMen, setIsMen] = useState(false);
   const [vipBadge, setVipBadge] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
+  const profileBackdrop = useProfileBackdrop(creatorId);
   const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [countError, setCountError] = useState(false);
   const libraryAvailable = hasLibraryContent(vaultCount);
@@ -177,7 +178,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       {/* Header */}
       <div className="relative">
         <div className="relative h-40 overflow-hidden bg-card">
-          <img src={creatorBackdropImage(parseAvatarConfig(avatarConfig).creatorBackdrop, isMen)} alt="" className="h-full w-full object-cover" />
+          <img src={profileBackdrop} alt="" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-background/30" />
         </div>
         <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
