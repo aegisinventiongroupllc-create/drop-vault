@@ -1,8 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ADMIN_SESSION_KEY, isAdminSignInShortcut, previewNeedsSignIn, verifyAdminPasscode } from "@/lib/adminSession";
+import { ADMIN_SESSION_KEY, isAdminAccessCode, isAdminSignInShortcut, previewNeedsSignIn, verifyAdminPasscode } from "@/lib/adminSession";
 
 afterEach(() => { vi.unstubAllGlobals(); sessionStorage.clear(); localStorage.clear(); });
 describe("admin access failure handling", () => {
+  it("accepts seven-digit login codes for server verification without granting access", () => {
+    expect(isAdminAccessCode("login", "0123456")).toBe(true);
+    expect(isAdminAccessCode("login", " 0123456 ")).toBe(true);
+    expect(isAdminAccessCode("signup", "0123456")).toBe(false);
+    expect(isAdminAccessCode("forgot", "0123456")).toBe(false);
+    expect(isAdminAccessCode("login", "143")).toBe(false);
+    expect(isAdminAccessCode("login", "person@example.com")).toBe(false);
+    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
+  });
   it("routes 143 only from login without granting administrator access", () => {
     expect(isAdminSignInShortcut("login", "143")).toBe(true);
     expect(isAdminSignInShortcut("login", " 143 ")).toBe(true);

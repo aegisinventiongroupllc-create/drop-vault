@@ -7,6 +7,11 @@ export function isAdminSignInShortcut(mode: string, value: string): boolean {
   return mode === "login" && value.trim() === "143";
 }
 
+/** Numeric access codes are candidates only; the server decides validity. */
+export function isAdminAccessCode(mode: string, value: string): boolean {
+  return mode === "login" && /^\d{6,12}$/.test(value.trim());
+}
+
 /** Passcode previews must not mount private media before account sign-in. */
 export function previewNeedsSignIn(preview: boolean, verified: boolean, authReady: boolean, userId: string | null): boolean {
   return preview && verified && authReady && !userId;
