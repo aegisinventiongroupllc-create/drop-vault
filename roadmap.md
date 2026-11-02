@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Hide advertisements, shrink idle globe within pulse bounds, add searchable creator public backdrops, change tip preview to whole $20-value tokens, fix mobile request scrolling and explain checkout allocation without implying verified processor fees; Bunny support ticket sent, response pending.
 - [x] Manual verification implementation: private ID/holding-photo submission, country/name filters, administrator-only review, approval confirmation and decline emails deployed; owner explicitly authorized protected administrator access and browser verified owner filters plus signed-out denial. Dashboard upload controls now use server eligibility rather than legacy profile approval alone. 18 age/image/permission/isolated-decision tests and prior 27 upload tests pass. No real identities approved, payments enabled or publication.
 - [ ] Real identity submission-to-approval-to-upload walkthrough awaits genuine creator evidence and the owner's human ID review; never fabricate identity evidence or approve a real creator for testing. Manual review does not establish provider acceptance or legal compliance.
 - [x] Upgraded Be Right Back ships with futuristic clickable ADVERTISE HERE boards and advertising email inquiries, preserving theme resolution. Desktop/mobile clicks retain idle screen; background tap dismisses; 16 theme tests pass and build OK. No publishing, payments or booked advertisers.
