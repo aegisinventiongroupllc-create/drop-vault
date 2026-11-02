@@ -124,6 +124,11 @@ export function calculateTipSplit(tipAmount: number) {
   return { tipAmount, adminFee: 0, platformShare, creatorShare };
 }
 
+export function calculateTokenTip(tokens: number) {
+  if (!Number.isInteger(tokens) || tokens < 1) throw new Error("Tips require whole Bit-Tokens.");
+  return { tokens, ...calculateTipSplit(tokens * TOKEN_BASE_VALUE_USD) };
+}
+
 /**
  * Support Tip via 1 Bit-Token ($20 fixed value):
  * Platform Fee: 5% ($1) — Creator Revenue: 95% ($19)
