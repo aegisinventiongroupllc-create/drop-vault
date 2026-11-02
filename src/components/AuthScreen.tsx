@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-import { isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
+import { isAdminAccessCode, isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 
@@ -84,13 +84,8 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
       window.location.assign("/admin-access");
       return;
     }
-    // Owner preview code: opens the customer entry-pass page
-    if (trimmed === "0524171") {
-      window.location.href = "/entry-pass-preview";
-      return;
-    }
     // Staff access code (verified on the server, never stored in the app)
-    if (mode === "login" && /^\d{6}$/.test(trimmed)) {
+    if (isAdminAccessCode(mode, trimmed)) {
       setLoading(true);
       try {
         if (await verifyAdminPasscode(trimmed)) onAdmin();
