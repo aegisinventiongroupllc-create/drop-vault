@@ -41,6 +41,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [isMen, setIsMen] = useState(false);
   const [vipBadge, setVipBadge] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
+  const profileBackdrop = useProfileBackdrop(creatorId);
   const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [countError, setCountError] = useState(false);
   const libraryAvailable = hasLibraryContent(vaultCount);
