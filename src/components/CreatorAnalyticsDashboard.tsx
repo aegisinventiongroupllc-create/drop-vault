@@ -634,12 +634,15 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         </div>
         {splitState.incentiveActive && countdown && (
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
-            <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
+            <p className="text-xs font-bold text-primary tracking-wider">⚡ 92/8 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">You earn $19 per $20 token value during Power Week. When the timer ends, your permanent 92/8 resumes: $18.40 per token.</p>
+            <p className="text-[10px] text-muted-foreground">You earn $18.40 per $20 token value during Power Week. When the timer ends, you return to 90/10 ($18 per token).</p>
           </div>
         )}
-        {!splitState.incentiveActive && (
+        {revenueTerms.pass !== "NONE" && (
+          <p className="mt-3 text-xs font-bold text-primary text-center tracking-wider">{revenueTerms.pass === "ELITE_PASS" ? "ELITE PASS · 93/7 FOR LIFE" : "PRO PASS · 92/8 FOREVER"}</p>
+        )}
+        {!splitState.incentiveActive && revenueTerms.pass === "NONE" && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
               <span>Paid followers toward next 100K milestone</span>
@@ -652,7 +655,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              At 100,000 unique paying library customers, your regular split becomes 92/8 permanently ($18.40 per token). Power Week pays 95/5 ($19) for 7 days, then returns to 92/8; repeats at each additional 100,000. Each customer counts once for your creator library, even after access expires. Renewals, likes, hearts, tips and the DTT entry pass alone do not increase this count.
+              Every 100,000 unique paying library customers starts a 7-day Power Week at 92/8 ($18.40 per token), then you return to 90/10. Or skip the wait: PRO PASS is 92/8 forever, ELITE PASS is 93/7 for life. Each customer counts once for your creator library, even after access expires. Renewals, likes, hearts, tips and the DTT entry pass alone do not increase this count.
             </p>
           </div>
         )}

@@ -4,8 +4,8 @@ import { POWER_WEEK_SPLIT, DEFAULT_SPLIT, INCENTIVE_DURATION_MS, getCreatorSplit
 afterEach(() => vi.useRealTimers());
 
 describe("Power Week split", () => {
-  it("pays creators 95% and the platform 5%", () => {
-    expect(POWER_WEEK_SPLIT).toEqual({ creator: 95, platform: 5 });
+  it("pays creators 92% and the platform 8%", () => {
+    expect(POWER_WEEK_SPLIT).toEqual({ creator: 92, platform: 8 });
   });
   it("lasts exactly 7 days", () => {
     expect(INCENTIVE_DURATION_MS).toBe(7 * 24 * 60 * 60 * 1000);
@@ -14,7 +14,7 @@ describe("Power Week split", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
     const started = getCreatorSplitState("c1", 100_000);
-    expect(started.currentSplit).toEqual({ creator: 95, platform: 5 });
+    expect(started.currentSplit).toEqual({ creator: 92, platform: 8 });
     vi.setSystemTime(new Date("2026-01-08T00:00:01Z"));
     const after = getCreatorSplitState("c1", 100_000, started);
     expect(after.currentSplit).toEqual(DEFAULT_SPLIT);

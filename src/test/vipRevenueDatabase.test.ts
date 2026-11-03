@@ -4,7 +4,7 @@ import { afterAll, describe, expect, it } from "vitest";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 describe.skipIf(!db)("VIP revenue server rules", () => {
   afterAll(async () => { await db?.end(); });
-  it("applies the 92% ceiling and 95% Power Week with exact expiry", async () => {
+  it("gives Elite 93 for life and ignores Power Week for pass holders", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
       for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
@@ -15,11 +15,11 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
       const creator = crypto.randomUUID();
       const [standard] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(standard.n).toBe(90);
       await sql`INSERT INTO pg_temp.creator_split_settings(creator_id,vip_pass_purchased,custom_vault_split) VALUES(${creator},'ELITE_PASS',.92)`;
-      const [elite] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(elite.n).toBe(92);
-      await sql`INSERT INTO pg_temp.power_weeks(creator_id,milestone_followers,started_at,ends_at,split_creator,split_platform,active) VALUES(${creator},100000,now(),now()+interval '7 days',95,5,true)`;
-      const [boost] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(boost.n).toBe(95);
+      const [elite] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(elite.n).toBe(93);
+      await sql`INSERT INTO pg_temp.power_weeks(creator_id,milestone_followers,started_at,ends_at,split_creator,split_platform,active) VALUES(${creator},100000,now(),now()+interval '7 days',92,8,true)`;
+      const [boost] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(boost.n).toBe(93);
       await sql`UPDATE pg_temp.power_weeks SET ends_at=now()`;
-      const [expired] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(expired.n).toBe(92);
+      const [expired] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(expired.n).toBe(93);
     });
   });
   it("recomputes Elite request shares and counteroffers and rejects paid-share changes", async () => {

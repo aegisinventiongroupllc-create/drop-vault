@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const VIP_PASSES = [
-  { id: "PRO_PASS", name: "PRO PASS", price: 1500, perks: ["Permanent 92/8 split on all 14-day vault unlocks", "Skips the 100k follower requirement"] },
-  { id: "ELITE_PASS", name: "ELITE PASS", price: 3500, perks: ["Permanent 92/8 split on vault unlocks", "90/10 split on Request Room tips", "Verified VIP badge on your profile", "Priority discovery placement for 30 days"] },
+  { id: "PRO_PASS", name: "PRO PASS", price: 1500, perks: ["92/8 split forever on all 14-day vault unlocks", "No follower goal needed"] },
+  { id: "ELITE_PASS", name: "ELITE PASS", price: 3500, perks: ["93/7 split for life on vault unlocks", "90/10 split on Request Room tips", "Verified VIP badge on your profile", "Priority discovery placement for 30 days"] },
 ] as const;
 
 export function passesRemaining(cap: number, sold: number) {
