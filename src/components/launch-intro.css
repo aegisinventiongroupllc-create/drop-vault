@@ -21,13 +21,15 @@
   
 }
 @keyframes dtt-fly {
-  0% { transform: scale(.02); opacity: 1; filter: blur(6px) brightness(3); }
-  100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1); }
+  0% { transform: scale(.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
-@keyframes dtt-pulse {
-  0%, 100% { filter: drop-shadow(0 0 18px hsl(var(--primary) / .55)); }
-  50% { filter: drop-shadow(0 0 42px hsl(var(--primary) / .95)); }
-}
+/* Glow lives behind the globe so the 3D image itself is never filtered or blurred. */
+.dtt-intro-globe { position: relative; }
+.dtt-intro-globe::before { content: ""; position: absolute; inset: -8%; border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(circle, hsl(var(--primary) / .55) 40%, transparent 70%); opacity: .5; }
+.dtt-intro-ready .dtt-intro-globe::before { animation: dtt-pulse 2.8s ease-in-out 10.6s infinite; }
+@keyframes dtt-pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 
 .dtt-intro-title {
   font-size: clamp(1.8rem, 8vw, 3.5rem);
@@ -69,7 +71,7 @@
 }
 .dtt-intro-ready .dtt-intro-core { opacity: .9; animation: dtt-core-spin 90s linear infinite; }
 @keyframes dtt-core-spin { to { transform: rotate(360deg) scale(1.1); } }
-.dtt-intro-ready .dtt-intro-globe { animation: dtt-fly 10s cubic-bezier(.45, .05, .35, 1) .6s forwards, dtt-pulse 2.8s ease-in-out 10.6s infinite; }
+.dtt-intro-ready .dtt-intro-globe { animation: dtt-fly 10s cubic-bezier(.45, .05, .35, 1) .6s forwards; will-change: auto; }
 .dtt-intro-ready .dtt-intro-title { animation: dtt-title-in 1.2s ease-out 10.4s forwards, dtt-title-pulse 2.8s ease-in-out 11.6s infinite; }
 .dtt-intro-ready .dtt-intro-caption { animation: dtt-caption 1.2s ease-out 11.6s forwards, dtt-tap 2.4s ease-in-out 12.8s infinite; }
 @keyframes dtt-tap { 50% { opacity: .55; } }

@@ -143,7 +143,7 @@ export default function LaunchIntro() {
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
       <div className="relative flex flex-col items-center gap-6 px-6 text-center">
-        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid /></div>
+        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp /></div>
         <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing</h1>
         <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-caption notranslate text-sm font-bold uppercase tracking-[0.3em] text-foreground/85" translate="no">
           {tap}
