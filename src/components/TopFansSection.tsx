@@ -10,7 +10,7 @@ interface FanRow {
   fan_id: string;
   display_name: string;
   avatar_config: unknown;
-  total_spent: number;
+  total_spent: number | null;
 }
 
 interface FanMessage {
@@ -137,7 +137,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
       ) : (
         <div className="bg-card border border-border rounded-xl divide-y divide-border">
           {fans.map((f) => (
-            <Button key={f.fan_id} variant="ghost" disabled={!isCreator && f.fan_id !== myId} aria-label={`View messages with ${isCreator ? f.display_name : creatorName}`} onClick={() => { if (isCreator) setActiveFan(f.fan_id); setChatOpen(true); }} className={`flex h-auto w-full items-center gap-3 rounded-none px-3 py-2.5 disabled:opacity-100 ${f.fan_id === myId ? "bg-primary/10" : ""}`}>
+            <Button key={f.fan_id ?? `rank-${f.rank}`} variant="ghost" disabled={!isCreator && f.fan_id !== myId} aria-label={`View messages with ${isCreator ? f.display_name : creatorName}`} onClick={() => { if (isCreator) setActiveFan(f.fan_id); setChatOpen(true); }} className={`flex h-auto w-full items-center gap-3 rounded-none px-3 py-2.5 disabled:opacity-100 ${f.fan_id === myId ? "bg-primary/10" : ""}`}>
               <span className={`w-7 text-center text-sm font-bold ${MEDAL[f.rank - 1] ?? "text-muted-foreground"}`}>
                 {f.rank}
               </span>
@@ -146,7 +146,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
                 <span translate="no">{f.display_name}</span>
                 {f.fan_id === myId && <span className="ml-1.5 text-[10px] font-bold text-primary">YOU</span>}
               </span>
-              <span className="text-xs font-bold text-primary">${Number(f.total_spent).toFixed(2)}</span>
+              {f.total_spent != null && <span className="text-xs font-bold text-primary">${Number(f.total_spent).toFixed(2)}</span>}
             </Button>
           ))}
         </div>
