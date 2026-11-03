@@ -24,6 +24,8 @@ Deno.serve(async (req) => {
     if (!path || !path.startsWith(`${request.creator_id}/${body.request_id}/`) || path.includes("..")) return json({ error: "Video unavailable" }, 404);
     let seconds = 60;
     if (uid !== request.creator_id) {
+      const {data:cleared,error:clearanceError}=await admin.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:path});
+      if(clearanceError||cleared!==true)return json({error:'Participant review required'},403);
       const remaining = Math.floor((new Date(request.delivery_access_until || "").getTime() - Date.now()) / 1000);
       if (request.status !== "completed" || !Number.isFinite(remaining) || remaining <= 0) return json({ error: "14-day access expired or payment not confirmed" }, 403);
       seconds = Math.min(seconds, remaining);

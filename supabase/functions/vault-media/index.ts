@@ -71,11 +71,16 @@ Deno.serve(async (req) => {
     // Storage objects are namespaced under the owning creator's UUID. Never let
     // a creator_media row reference another creator's private object.
     const ownerPrefix = `${creatorId}/`;
-    const ownedMedia = (media ?? []).slice(0,24).filter((m) =>
+    let ownedMedia = (media ?? []).slice(0,24).filter((m) =>
       typeof m.storage_path === "string" &&
       m.storage_path.startsWith(ownerPrefix) &&
       !m.storage_path.includes("..")
     );
+    const {data:reviewRole}=await admin.from('user_roles').select('role').eq('user_id',uid).eq('role','admin').maybeSingle();
+    if(uid!==creatorId&&!reviewRole){
+      const results=await Promise.all(ownedMedia.map(async m=>{const {data,error}=await admin.rpc('content_is_cleared',{_bucket:'vault',_path:m.storage_path});return !error&&data===true?m:null;}));
+      ownedMedia=results.filter((m):m is NonNullable<typeof m>=>m!==null);
+    }
     const paths = ownedMedia.map((m) => m.storage_path);
     const urlMap: Record<string, string> = {};
     let accessUntil: string | null = null;

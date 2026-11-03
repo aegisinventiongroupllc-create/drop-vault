@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound.tsx";
 import SecretAdmin from "./pages/SecretAdmin.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
 import AdminVerificationDashboard from "./pages/AdminVerificationDashboard";
+import ParticipantInvite from "./pages/ParticipantInvite";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import EntryPassGate from "./components/EntryPassGate";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/admin/verifications" element={<AdminVerificationDashboard />} />
+                <Route path="/participant-invite" element={<ParticipantInvite />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/entry-pass-preview" element={<EntryPassGate onPurchased={() => { window.location.href = "/"; }} />} />

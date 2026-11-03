@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
     const { data: media } = await admin.from("creator_media")
       .select("id, creator_id, title, storage_path, media_type").in("id", page.map((r) => r.video_id)).eq("bucket", "vault");
     const { data: profiles } = await admin.from("public_profiles").select("user_id, display_name").in("user_id", page.map((r) => r.creator_id));
-    const byId = new Map((media ?? []).filter((m) => m.storage_path.startsWith(`${m.creator_id}/`) && !m.storage_path.includes("..")).map((m) => [m.id, m]));
+    const cleared=await Promise.all((media??[]).map(async m=>{const {data,error}=await admin.rpc('content_is_cleared',{_bucket:'vault',_path:m.storage_path});return !error&&data===true?m:null;}));
+    const byId = new Map(cleared.filter((m):m is NonNullable<typeof m>=>m!==null).filter((m) => m.storage_path.startsWith(`${m.creator_id}/`) && !m.storage_path.includes("..")).map((m) => [m.id, m]));
     const names = new Map((profiles ?? []).map((p: any) => [p.user_id, p.display_name]));
     const paths = [...byId.values()].map((m) => m.storage_path);
     const urls: Record<string, string> = {};
