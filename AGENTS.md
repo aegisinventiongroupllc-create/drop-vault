@@ -31,7 +31,7 @@
 - Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
 - Personal colors use validated ui_theme and blended renderers; idle skies inherit the galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report sync failures. Why: invalid handles must not block colors.
 - Dashboard twinkling stars use separate validated ui_theme opt-in and tone with bounded canvas particles and reduced-motion support. Why: private dashboard effects must not replace globe/idle defaults or flash the whole screen.
-- Only service-only mark_custom_request_paid with verified agreed-price receipt sets paid; trigger blocks other paid/completed moves. Why: agreement cannot unlock delivery.
+- Only receipt-verified service mark_custom_request_paid sets paid; block other paid/completed moves. Creator-owned calendar plans/reminders never change deadlines; agreements await payment, which starts 48-hour delivery. Why: plans cannot authorize access.
 - Page search/media reads; refresh authorized links no later than access expiry. Why: bound downloads and prevent stale access.
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
@@ -42,9 +42,9 @@
 - Discovery renders category shelves from the paginated authorized teaser feed; persist only bounded account/market-scoped scroll coordinates and interest counts, never signed links, and require explicit playback gestures. Why: preserve privacy and prevent autoplay.
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
-- Fullscreen teaser overlays mount in document.body through a portal. Why: transformed avatar ancestors otherwise confine fixed playback to the avatar.
+- Fullscreen teasers portal into document.body. Why: transformed avatars otherwise confine playback.
 - Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
-- Dormant idle ships retain validated themes, reduced motion and inquiry links without external ads. Why: allow safe reuse without claiming booked sponsors.
+- Dormant idle ships keep validated themes, reduced motion and inquiry links, no external ads. Why: safe reuse, no booked-sponsor claims.
 - Profile backdrops: server-owned choices/private uploads; selected creator files member-readable; re-encode, gate/brand creator uploads. Shared bundled motion stays behind portraits, pauses offscreen, honors reduced motion; uploads stay still. Why: privacy and bounded bandwidth.
 - Tip/request dialogs use body portals and bounded scrolling. Why: keep controls above navigation.
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.

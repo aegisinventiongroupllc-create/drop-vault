@@ -31,6 +31,7 @@ import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
 import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
 import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
+import CreatorCalendar from "@/components/CreatorCalendar";
 import CreatorProfile from "@/components/CreatorProfile";
 import { useCreatorWelcomeBack } from "@/hooks/useCreatorWelcomeBack";
 
@@ -53,7 +54,7 @@ const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
 
-type Section = "overview" | "verification" | "requests" | "media" | "messages";
+type Section = "overview" | "verification" | "requests" | "media" | "messages" | "calendar";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
   const [showMyPage, setShowMyPage] = useState(false);
@@ -309,6 +310,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     { id: "overview", label: "ANALYTICS" },
     { id: "verification", label: "VERIFY" },
     { id: "requests", label: "REQUESTS" },
+    { id: "calendar", label: "CALENDAR" },
     { id: "media", label: "MEDIA" },
   ];
 
@@ -667,6 +669,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       </div>
 
       {activeSection === "messages" && authUserId && <TopFansSection creatorId={authUserId} creatorName={profileUsername || "Creator"} initiallyOpen />}
+      {activeSection === "calendar" && authUserId && <CreatorCalendar userId={authUserId} onRequests={() => setActiveSection("requests")} onMedia={() => setActiveSection("media")} />}
       {/* Analytics Overview */}
       {activeSection === "overview" && (
         <div className="px-4 space-y-4">
