@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
     const { data: media, error: mediaErr } = await admin
       .from("creator_media")
-      .select("id, title, storage_path, media_type, created_at, views")
+      .select("id, title, storage_path, media_type, created_at, views, allow_permanent_buyout")
       .eq("creator_id", creatorId)
       .eq("bucket", "vault")
       .order("created_at", { ascending: false }).order("id",{ascending:false}).range(offset,offset+24);
@@ -95,7 +95,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const items = ownedMedia.map((m) => ({ ...m, url: urlMap[m.storage_path] ?? null }));
+    const ids = ownedMedia.map((m) => m.id);
+    const owned = new Set<string>();
+    if (ids.length) {
+      const { data: perm } = await admin.from("user_permanent_library").select("video_id").eq("customer_id", uid).in("video_id", ids);
+      perm?.forEach((p: { video_id: string }) => owned.add(p.video_id));
+    }
+    const items = ownedMedia.map(({ storage_path: _p, ...m }) => ({ ...m, owned: owned.has(m.id), url: urlMap[_p] ?? null }));
     return json({ items,has_more:(media?.length??0)>24,access_until:accessUntil,link_seconds:linkSeconds });
   } catch (e: any) {
     return json({ error: e?.message ?? "Unexpected error" }, 500);

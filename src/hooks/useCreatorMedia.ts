@@ -13,6 +13,7 @@ export interface CreatorMediaItem {
   teaser_frame: "none" | "seasonal" | "sexy" | "gothic" | "glamour";
   active_from: string | null;
   active_until: string | null;
+  allow_permanent_buyout: boolean;
 }
 
 export function useCreatorMedia(creatorId: string | null) {
@@ -53,6 +54,7 @@ export function useCreatorMedia(creatorId: string | null) {
     storage_path: string;
     title: string;
     media_type?: "video" | "photo";
+    allow_permanent_buyout?: boolean;
   }) => {
     if (!creatorId) return { error: "Not signed in" };
     const { error } = await supabase.from("creator_media").insert({
@@ -61,6 +63,7 @@ export function useCreatorMedia(creatorId: string | null) {
       storage_path: input.storage_path,
       title: input.title || "Untitled",
       media_type: input.media_type || "video",
+      allow_permanent_buyout: input.bucket === "vault" && !!input.allow_permanent_buyout,
     });
     if (error) return { error: error.message };
     await refresh();
@@ -77,14 +80,22 @@ export function useCreatorMedia(creatorId: string | null) {
     return { success: true };
   };
 
-  const deleteMedia = async (id: string, bucket: "teasers" | "vault", path: string) => {
-    const {error: removeError} = await supabase.storage.from(bucket).remove([path]);
-    if (removeError) return {error:removeError.message};
-    const { error } = await supabase.from("creator_media").delete().eq("id", id);
+  const setPermanentBuyout = async (id: string, allow: boolean) => {
+    const { error } = await supabase.from("creator_media").update({ allow_permanent_buyout: allow }).eq("id", id);
     if (error) return { error: error.message };
     await refresh();
     return { success: true };
   };
 
-  return { items, loading, error, hasMore, loadMore:()=>setOffset(n=>n+24), refresh, insertMedia, renameMedia, deleteMedia };
+  const deleteMedia = async (id: string, bucket: "teasers" | "vault", path: string) => {
+    // Remove the listing first: videos customers bought permanently cannot be deleted.
+    const { error } = await supabase.from("creator_media").delete().eq("id", id);
+    if (error) return { error: error.code === "23503" ? "Customers own this video permanently, so it can't be deleted." : error.message };
+    const {error: removeError} = await supabase.storage.from(bucket).remove([path]);
+    if (removeError) return {error:removeError.message};
+    await refresh();
+    return { success: true };
+  };
+
+  return { items, loading, error, hasMore, loadMore:()=>setOffset(n=>n+24), refresh, insertMedia, renameMedia, setPermanentBuyout, deleteMedia };
 }

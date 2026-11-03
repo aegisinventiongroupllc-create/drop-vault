@@ -20,7 +20,7 @@
 - CCBill uses signed forms, private/IP-restricted notices and idempotent catalog credits. paymentReadiness requires DTT_<PROVIDER>_LIVE_APPROVED/CHECKOUT_VERIFIED flags and credentials. Why: keys do not prove approval.
 - Creator uploads require owner role and latest audited adult-ID approval with reviewer confirmation; IDs/avatars stay separate. Why: manual review must not permit self-approval.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
-- AutoTranslator merges source-matched public/ui/launch catalogs before member-only AI; long public policies use saved translations only; bound caches/retries and coalesce misses; owner/code and input values stay unchanged. Why: protect private text and avoid repeated translation spend.
+- AutoTranslator merges saved catalogs before member-only AI; public policies use saved translations; bound/coalesce caches; never translate code or inputs. Why: privacy and spend.
 - Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.
 - Keep hearts public and paid followers owner-only; server ledger triggers deduplicate library buyers and award tiers. Why: likes cannot raise payouts or reveal buyers.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
@@ -39,7 +39,7 @@
 - Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
 
 - Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
-- Discovery renders category shelves from the paginated authorized teaser feed; persist only bounded account/market-scoped scroll coordinates and interest counts, never signed links, and require explicit playback gestures. Why: preserve privacy and prevent autoplay.
+- Discovery shelves use the paginated authorized teaser feed; persist only bounded account/market scroll and interest counts, no signed links; explicit playback gestures. Why: privacy, no autoplay.
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teasers portal into document.body. Why: transformed avatars otherwise confine playback.
@@ -50,3 +50,4 @@
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
 - Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
+- Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
