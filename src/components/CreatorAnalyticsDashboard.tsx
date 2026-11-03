@@ -635,7 +635,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
             <p className="text-xs font-bold text-primary tracking-wider">⚡ 95/5 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">Returns to your applicable 90/10 or 92/8 split when the timer ends</p>
+            <p className="text-[10px] text-muted-foreground">You earn $19 per $20 token value during Power Week. When the timer ends, your permanent 92/8 resumes: $18.40 per token.</p>
           </div>
         )}
         {!splitState.incentiveActive && (
@@ -651,7 +651,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              100,000 customer followers unlock the 92/8 tier and a 7-day 95/5 Power Week. VIP passes bypass the growth requirement for 92/8.
+              At 100,000 customer followers, your regular split becomes 92/8 permanently ($18.40 per token). For the first 7 days, Power Week pays 95/5 ($19), then returns to 92/8. Each additional 100,000-follower milestone starts another Power Week. Customer followers—not paid purchases—count toward this reward.
             </p>
           </div>
         )}
