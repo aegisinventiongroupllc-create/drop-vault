@@ -1,3 +1,4 @@
+import { defaultDeclineMessage, isDefaultDeclineMessage } from "@/lib/declineMessage";
 import { groupRequestsByCountry, requestsBelowMinimum } from "@/lib/requestCountries";
 import { countryName } from "@/lib/siteTranslate";
 import { COUNTRIES } from "@/components/GlobalPassport";
@@ -52,8 +53,8 @@ const CreatorRequestsPanel = () => {
   const [counterMsg, setCounterMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [minTokens, setMinTokens] = useState("");
-  const [declineReason, setDeclineReason] = useState("Thank you! My starting offers begin higher than this. Feel free to send a new request.");
-  useEffect(() => { if (minTokens && declineReason.startsWith("Thank you! My starting offers")) setDeclineReason(`Thank you! My starting offers begin at ${minTokens} Bit-Tokens. Feel free to send a new request.`); }, [minTokens]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [declineReason, setDeclineReason] = useState(() => defaultDeclineMessage(""));
+  useEffect(() => { setDeclineReason((cur) => (isDefaultDeclineMessage(cur) ? defaultDeclineMessage(minTokens) : cur)); }, [minTokens]);
   const [fanNames, setFanNames] = useState<Record<string, string>>({});
   useEffect(() => {
     const ids = Array.from(new Set(requests.map((request) => request.customer_id)));
@@ -140,7 +141,7 @@ const CreatorRequestsPanel = () => {
           <input
             type="number" min={1} max={500} value={minTokens}
             onChange={(e) => setMinTokens(e.target.value)}
-            placeholder="e.g. 5"
+            placeholder="5"
             className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
           <textarea
