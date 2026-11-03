@@ -378,7 +378,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
 
       {/* My Requests — real data */}
       {activeTab === "permanent" && <PermanentVault />}
-      {activeTab === "founding" && <FoundingCreatorsBoard onCreatorClick={handleCreatorClick} />}
+      {activeTab === "founding" && <FoundingCreatorsBoard onCreatorClick={handleCreatorClick} vaults={visibleVaults} />}
       {activeTab === "messages" && <div className="px-4 flex-1"><PrivateMessages /></div>}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">

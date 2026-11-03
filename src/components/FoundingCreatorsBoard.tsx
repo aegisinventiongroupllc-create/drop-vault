@@ -9,7 +9,7 @@ type Row = { country: string; vault_side: string; slot: number; display_name: st
 const name = (code: string) => translatedCountryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? code);
 
 /** Customer-facing list of founding creators per country (usernames only). */
-const FoundingCreatorsBoard = ({ onCreatorClick }: { onCreatorClick?: (name: string) => void }) => {
+const FoundingCreatorsBoard = ({ onCreatorClick, vaults = ["women", "men"] }: { onCreatorClick?: (name: string) => void; vaults?: string[] }) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -18,9 +18,9 @@ const FoundingCreatorsBoard = ({ onCreatorClick }: { onCreatorClick?: (name: str
   }, []);
   const groups = useMemo(() => {
     const m = new Map<string, Row[]>();
-    for (const r of rows) m.set(r.country, [...(m.get(r.country) ?? []), r]);
+    for (const r of rows.filter((x) => vaults.includes(x.vault_side))) m.set(r.country, [...(m.get(r.country) ?? []), r]);
     return [...m.entries()].filter(([c]) => name(c).toLowerCase().includes(query.toLowerCase()) || c.toLowerCase().includes(query.toLowerCase()));
-  }, [rows, query]);
+  }, [rows, query, vaults]);
   const side = (list: Row[], s: string, label: string) => (
     <div className="space-y-1">
       <p className="text-[11px] font-bold tracking-wider text-primary">{label}</p>
@@ -44,7 +44,7 @@ const FoundingCreatorsBoard = ({ onCreatorClick }: { onCreatorClick?: (name: str
       {groups.map(([code, list]) => (
         <div key={code} className="rounded-lg border border-border bg-card p-4 space-y-3">
           <p className="text-sm font-bold">{name(code).toUpperCase()}</p>
-          <div className="grid gap-3 sm:grid-cols-2">{side(list, "women", "WOMEN")}{side(list, "men", "MEN")}</div>
+          <div className="grid gap-3 sm:grid-cols-2">{vaults.includes("women") && side(list, "women", "WOMEN")}{vaults.includes("men") && side(list, "men", "MEN")}</div>
         </div>
       ))}
     </div>
