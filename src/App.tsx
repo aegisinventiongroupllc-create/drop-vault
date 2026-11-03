@@ -12,6 +12,7 @@ import GeoGate from "@/components/GeoGate";
 import { VipFogMachine } from "@/components/VipBackdrop";
 import AppUpdateWatcher from "@/components/AppUpdateWatcher";
 import BeRightBack from "@/components/BeRightBack";
+import LaunchIntro from "@/components/LaunchIntro";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SecretAdmin from "./pages/SecretAdmin.tsx";
@@ -46,6 +47,7 @@ const App = () => (
             <SiteLanguagePicker />
             <VipFogMachine />
             <BeRightBack />
+            <LaunchIntro />
             <GeoGate>
               <Routes>
                 <Route path="/" element={<Index />} />
