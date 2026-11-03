@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
+import CreatorParticipants from "@/components/CreatorParticipants";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
@@ -808,6 +809,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           </div>
 
           {/* Payout Wallet Address (LTC) */}
+          {authUserId && <CreatorParticipants userId={authUserId} />}
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="w-5 h-5 text-primary" />

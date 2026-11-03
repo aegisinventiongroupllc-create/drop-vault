@@ -14,11 +14,10 @@
 - Validate avatar colors; use iro wheels/SVG fills. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
 - Creator still/5-second video portraits use private owned galleries and branding; pause offscreen/reduced motion; chats use emoji. Why: privacy and bounded motion.
-- Bound in-page selfies, release tracks, skip scans. Why: avoid handoffs/WASM.
-- Prebundle pickers with deduped React. Why: avoid mixed hooks.
+- Bound selfies, release tracks, skip scans; prebundle pickers with deduped React. Why: avoid handoffs/WASM/mixed hooks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
 - CCBill uses signed forms, private/IP-restricted notices and idempotent catalog credits. paymentReadiness requires DTT_<PROVIDER>_LIVE_APPROVED/CHECKOUT_VERIFIED flags and credentials. Why: keys do not prove approval.
-- Creator uploads require owner role and latest audited adult-ID approval with reviewer confirmation; IDs/avatars stay separate. Why: manual review must not permit self-approval.
+- Creator uploads require audited adult-ID approval; customer access also needs version-bound participant IDs, recording-age evidence and direct consent. Why: uploader approval cannot clear guests or old media.
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
 - AutoTranslator merges saved catalogs before member-only AI; public policies use saved translations; bound/coalesce caches; never translate code or inputs. Why: privacy and spend.
 - Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.

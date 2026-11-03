@@ -35,6 +35,12 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
       setProgress("Saving private request video…");
       const { error } = await uploadBrandedFile('request-deliveries',stagedPath,branded,(message,percent)=>setProgress(`${message} ${percent}%`),uploadAbort.current.signal);
       if (error) throw error;
+      const {data:cleared,error:clearanceError}=await supabase.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:stagedPath});
+      if(clearanceError||cleared!==true){
+        stagedPath=null;
+        toast({title:'Private video staged for participant review',description:'Open Verify → Participants & Content Review. Attach the cleared video here after administrator approval.'});
+        onChange();return;
+      }
       const result = await supabase.rpc("attach_request_delivery", { _request_id: request.id, _path: stagedPath });
       if (result.error) throw result.error;
       stagedPath = null;
@@ -73,6 +79,15 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
     <div className="mt-3 border border-dashed border-primary/40 rounded-lg p-3 space-y-2">
       <input ref={input} type="file" accept="video/*" aria-label="Request video" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); }} />
       <Button variant="neon" className="w-full whitespace-normal" disabled={busy} onClick={() => input.current?.click()}>UPLOAD REQUEST VIDEO</Button>
+      <Button variant="outline" className="w-full whitespace-normal" disabled={busy} onClick={async()=>{
+        setBusy(true);
+        try{
+          const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error('Sign in required');
+          const {data:objects,error}=await supabase.storage.from('request-deliveries').list(`${user.id}/${request.id}`,{limit:100});if(error)throw error;
+          for(const object of objects??[]){const path=`${user.id}/${request.id}/${object.name}`;const {data}=await supabase.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:path});if(data===true){const attached=await supabase.rpc('attach_request_delivery',{_request_id:request.id,_path:path});if(attached.error)throw attached.error;onChange();return;}}
+          throw new Error('No approved staged video found. Complete participant review first.');
+        }catch(e){toast({title:'Not attached',description:e instanceof Error?e.message:'Please retry',variant:'destructive'});}finally{setBusy(false);}
+      }}>ATTACH APPROVED STAGED VIDEO</Button>
       {busy && <Button variant="outline" onClick={()=>uploadAbort.current?.abort()}>Cancel upload</Button>}
       <p className="text-xs text-muted-foreground" role="status">{progress || (request.status === "accepted" ? "Private draft — customer access starts only after confirmed payment." : "Customer receives 14 days of private access on delivery.")}</p>
     </div>

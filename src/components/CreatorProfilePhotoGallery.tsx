@@ -78,13 +78,9 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
         .single();
       if (insertError || !inserted) throw insertError ?? new Error("Couldn't register this photo.");
       insertedPhotoId = inserted.id;
-      if (photos.length === 0) {
-        const { error: activeError } = await supabase.rpc("set_active_creator_profile_photo", { _photo_id: inserted.id });
-        if (activeError) throw activeError;
-      }
       await loadPhotos();
       window.dispatchEvent(new Event("dtt-creator-photo-changed"));
-      toast({ title: photos.length === 0 ? "Public profile photo saved" : "Photo added", description: photos.length === 0 ? "Members can now recognize your creator profile." : "Tap a photo to make it public." });
+      toast({ title: "Private portrait added", description: "Submit participant and content records in Verify before making it public." });
     } catch (error) {
       if (insertedPhotoId) void supabase.from("creator_profile_photos").delete().eq("id", insertedPhotoId).eq("creator_id", creatorId);
       if (storagePath) void supabase.storage.from("creator-profile-photos").remove([storagePath]);
@@ -147,7 +143,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
       </Button>
 
       {photos.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-5 text-center text-xs text-muted-foreground">Add a clear photo of yourself. Your first photo becomes your public creator picture.</p>
+        <p className="rounded-lg border border-dashed border-border p-5 text-center text-xs text-muted-foreground">Add a clear photo of yourself. Participant review is required before it becomes public.</p>
       ) : (
         <div className="grid grid-cols-3 gap-3">
           {photos.map((photo) => (

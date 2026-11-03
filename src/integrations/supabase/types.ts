@@ -119,6 +119,180 @@ export type Database = {
         }
         Relationships: []
       }
+      content_manifests: {
+        Row: {
+          age_at_recording_confirmed: boolean
+          bucket: string
+          complete_declaration: boolean
+          created_at: string
+          creator_id: string
+          id: string
+          identity_confirmed: boolean
+          includes_uploader: boolean
+          object_updated_at: string
+          participant_ids: string[]
+          participants_confirmed: boolean
+          production_evidence_path: string | null
+          recorded_on: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          rights_confirmed: boolean
+          rights_evidence_path: string | null
+          status: string
+          storage_path: string
+          title: string
+        }
+        Insert: {
+          age_at_recording_confirmed?: boolean
+          bucket: string
+          complete_declaration?: boolean
+          created_at?: string
+          creator_id: string
+          id?: string
+          identity_confirmed?: boolean
+          includes_uploader?: boolean
+          object_updated_at: string
+          participant_ids: string[]
+          participants_confirmed?: boolean
+          production_evidence_path?: string | null
+          recorded_on: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          rights_confirmed?: boolean
+          rights_evidence_path?: string | null
+          status?: string
+          storage_path: string
+          title: string
+        }
+        Update: {
+          age_at_recording_confirmed?: boolean
+          bucket?: string
+          complete_declaration?: boolean
+          created_at?: string
+          creator_id?: string
+          id?: string
+          identity_confirmed?: boolean
+          includes_uploader?: boolean
+          object_updated_at?: string
+          participant_ids?: string[]
+          participants_confirmed?: boolean
+          production_evidence_path?: string | null
+          recorded_on?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          rights_confirmed?: boolean
+          rights_evidence_path?: string | null
+          status?: string
+          storage_path?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      content_participants: {
+        Row: {
+          aliases: string | null
+          country: string | null
+          created_at: string
+          creator_id: string
+          date_of_birth: string | null
+          id: string
+          id_path: string | null
+          identity_confirmed: boolean
+          label: string
+          legal_name: string | null
+          linked_user_id: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          selfie_path: string | null
+          status: string
+        }
+        Insert: {
+          aliases?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id: string
+          date_of_birth?: string | null
+          id?: string
+          id_path?: string | null
+          identity_confirmed?: boolean
+          label: string
+          legal_name?: string | null
+          linked_user_id?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path?: string | null
+          status?: string
+        }
+        Update: {
+          aliases?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id?: string
+          date_of_birth?: string | null
+          id?: string
+          id_path?: string | null
+          identity_confirmed?: boolean
+          label?: string
+          legal_name?: string | null
+          linked_user_id?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      content_review_events: {
+        Row: {
+          actor_id: string
+          created_at: string
+          decision: string
+          id: string
+          manifest_id: string | null
+          participant_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          manifest_id?: string | null
+          participant_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          manifest_id?: string | null
+          participant_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_review_events_manifest_id_fkey"
+            columns: ["manifest_id"]
+            isOneToOne: false
+            referencedRelation: "content_manifests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_review_events_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "content_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_calendar_items: {
         Row: {
           completed_at: string | null
@@ -945,6 +1119,99 @@ export type Database = {
         }
         Relationships: []
       }
+      participant_consents: {
+        Row: {
+          consent_text: string
+          consented_at: string
+          id: string
+          manifest_id: string
+          participant_id: string
+          release_path: string
+          revoked_at: string | null
+          signed_name: string
+        }
+        Insert: {
+          consent_text: string
+          consented_at?: string
+          id?: string
+          manifest_id: string
+          participant_id: string
+          release_path: string
+          revoked_at?: string | null
+          signed_name: string
+        }
+        Update: {
+          consent_text?: string
+          consented_at?: string
+          id?: string
+          manifest_id?: string
+          participant_id?: string
+          release_path?: string
+          revoked_at?: string | null
+          signed_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_consents_manifest_id_fkey"
+            columns: ["manifest_id"]
+            isOneToOne: false
+            referencedRelation: "content_manifests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participant_consents_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "content_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participant_invitations: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          manifest_id: string | null
+          participant_id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          manifest_id?: string | null
+          participant_id: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          manifest_id?: string | null
+          participant_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_invitations_manifest_id_fkey"
+            columns: ["manifest_id"]
+            isOneToOne: false
+            referencedRelation: "content_manifests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participant_invitations_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "content_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_batches: {
         Row: {
           admin_user_id: string | null
@@ -1657,6 +1924,14 @@ export type Database = {
       claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
+      content_is_cleared: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
+      content_review_access: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
       creator_request_split_percent: {
         Args: { _creator_id: string }
         Returns: number
@@ -1803,6 +2078,20 @@ export type Database = {
         Args: { _payment_id: string; _request_id: string }
         Returns: boolean
       }
+      participant_object_evidence: {
+        Args: { _bucket: string; _path: string }
+        Returns: {
+          name: string
+          updated_at: string
+        }[]
+      }
+      participant_staged_objects: {
+        Args: { _offset?: number; _owner: string }
+        Returns: {
+          bucket: string
+          name: string
+        }[]
+      }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
@@ -1816,6 +2105,17 @@ export type Database = {
           _status: string
         }
         Returns: string
+      }
+      review_participant_content: {
+        Args: {
+          _confirmed: boolean
+          _id: string
+          _kind: string
+          _notes: string
+          _reviewer: string
+          _status: string
+        }
+        Returns: undefined
       }
       search_creator_page: {
         Args: {
