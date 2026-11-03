@@ -2085,6 +2085,13 @@ export type Database = {
           updated_at: string
         }[]
       }
+      participant_staged_objects: {
+        Args: { _offset?: number; _owner: string }
+        Returns: {
+          bucket: string
+          name: string
+        }[]
+      }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }

@@ -1,0 +1,4 @@
+CREATE OR REPLACE FUNCTION public.participant_staged_objects(_owner uuid,_offset integer DEFAULT 0) RETURNS TABLE(bucket text,name text) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT o.bucket_id,o.name FROM storage.objects o WHERE auth.role()='service_role' AND split_part(o.name,'/',1)=_owner::text AND o.bucket_id IN ('vault','teasers','creator-profile-photos','request-deliveries','profile-backdrops') ORDER BY o.created_at DESC,o.name LIMIT 25 OFFSET GREATEST(0,_offset) $$;
+REVOKE ALL ON FUNCTION public.participant_staged_objects(uuid,integer) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.participant_staged_objects(uuid,integer) TO service_role;
+CREATE POLICY "Retain referenced participant evidence" ON storage.objects AS RESTRICTIVE FOR DELETE TO authenticated USING(bucket_id<>'participant-evidence');
