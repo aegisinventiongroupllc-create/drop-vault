@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Add private co-performer identity/consent review and per-content clearance for new and existing media, including non-account participants and age at recording; qualified legal/provider review and genuine evidence remain required.
 - [x] Cleaned repeated creator revenue/VIP sections: Analytics owns split/status, one collapsed detailed explanation and VIP store; Verify keeps identity/payout setup; Media owns teaser tip. Creator Top 10 is neutral and customer prompts remain customer-only. Twelve focused earnings/VIP/viewer tests pass, build OK; signed-in isolated disclosure and own-board checks verified desktop/mobile without page errors. Normal entry remains at legal consent, so full tab walkthrough is unverified; no agreements accepted, prices/access changed or publication.
 - [x] Added optional five-second recorded smile portraits to the private gallery, preserving still photos and a two-sided portrait/teaser coin flip. Browser confirms signed-in isolated picker, muted five-second playback and reduced-motion pause; 48 duration/branding/privacy/approval tests pass, build OK. Not published; no account portrait changed.
 - [ ] Verify genuine approved creator portrait upload/select/reload through the normal dashboard; awaits eligible creator evidence and human approval. Browser duration checks are not trusted server media validation; no broadcast or provider approval claimed.
