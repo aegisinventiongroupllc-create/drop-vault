@@ -94,6 +94,7 @@ Deno.serve(async req => {
    if(!admin)return json({error:'Administrator required'},403);
    const table=body.kind==='participant'?'content_participants':'content_manifests';const {data:r}=await db.from(table).select('*').eq('id',body.id).single();if(!r)throw new Error('Record unavailable');
    const paths=body.kind==='participant'?[r.id_path,r.selfie_path]:[r.production_evidence_path,r.rights_evidence_path];
+   if(body.kind==='participant'&&r.linked_user_id){const {data:v}=await db.from('creator_verifications').select('id_front_path,selfie_path,document_bucket').eq('user_id',r.linked_user_id).order('submitted_at',{ascending:false}).limit(1).maybeSingle();if(v){const signed=await db.storage.from(v.document_bucket).createSignedUrls([v.id_front_path,v.selfie_path],120);check(signed);return json({documents:signed.data});}}
    const {data:consents}=body.kind==='content'?await db.from('participant_consents').select('*').eq('manifest_id',r.id):{data:[]};
    const evidence=[...paths,...(consents??[]).map(c=>c.release_path)].filter(Boolean);
    const signed=await db.storage.from('participant-evidence').createSignedUrls(evidence,120);check(signed);

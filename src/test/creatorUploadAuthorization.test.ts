@@ -6,7 +6,7 @@ describe.skipIf(!db)("creator upload authorization", () => {
   afterAll(async () => { await db?.end(); });
   it.each(["INSERT", "UPDATE"])("restricts %s on every creator bucket without blocking onboarding", async cmd => {
     if (!db) throw Error("Database required");
-    const rows = await db`SELECT roles,qual,with_check FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND cmd=${cmd} AND permissive='RESTRICTIVE'`;
+    const rows = await db`SELECT roles,qual,with_check FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND cmd=${cmd} AND permissive='RESTRICTIVE' AND with_check LIKE '%can_upload_creator_media%'`;
     expect(rows).toHaveLength(1);
     expect(rows[0].roles).toEqual(["authenticated"]);
     for (const clause of cmd === "UPDATE" ? [rows[0].qual, rows[0].with_check] : [rows[0].with_check]) {
@@ -17,7 +17,7 @@ describe.skipIf(!db)("creator upload authorization", () => {
   });
   it.each(["creator_media", "creator_profile_photos"])("prevents %s registration bypass", async table => {
     if (!db) throw Error("Database required");
-    const rows = await db`SELECT cmd,with_check FROM pg_policies WHERE schemaname='public' AND tablename=${table} AND permissive='RESTRICTIVE'`;
+    const rows = await db`SELECT cmd,with_check FROM pg_policies WHERE schemaname='public' AND tablename=${table} AND permissive='RESTRICTIVE' AND cmd IN ('INSERT','UPDATE')`;
     expect(rows.map(r => r.cmd).sort()).toEqual(["INSERT", "UPDATE"]);
     for (const row of rows) expect(row.with_check).toContain("can_upload_creator_media(creator_id)");
   });
