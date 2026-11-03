@@ -5,6 +5,8 @@ import { earnedTokenCount } from "@/lib/creatorWelcomeBack";
 import { REVENUE_FIELDS, revenueMonthBounds, recordedSplit, type RevenueRecord } from "@/lib/monthlyRevenue";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 interface MonthlyRevenue {
   month: string;
@@ -88,10 +90,15 @@ export default function CreatorEarningsBreakdown({ creatorId }: { creatorId: str
       <div><dt className="text-muted-foreground">Commission recorded</dt><dd>{usd(summary?.commission_usd ?? 0)}</dd></div>
       <div><dt className="text-muted-foreground">Completed transactions</dt><dd>{summary?.transaction_count ?? 0}</dd></div>
     </dl>}
-    <div className="mb-4 rounded-lg border border-border bg-card p-4 text-xs leading-relaxed text-muted-foreground">
-      <p className="mb-2 font-semibold text-foreground">How the money works</p>
-      <CreatorRevenueTerms />
-    </div>
+    <Collapsible className="mb-4 border-y border-border py-2">
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" className="group w-full justify-between whitespace-normal text-left">
+          How the money works
+          <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3 pt-2"><CreatorRevenueTerms /></CollapsibleContent>
+    </Collapsible>
     {loading || monthsLoading ? <p className="text-sm text-muted-foreground" role="status">Loading earnings…</p>
       : failed || monthsFailed ? <div><p className="text-sm text-destructive">Earnings couldn’t load.</p><Button variant="ghost" onClick={() => setRetry((value) => value + 1)}>Try again</Button></div>
       : rows.length === 0 ? <p className="text-sm text-muted-foreground">No completed earnings for {monthLabel(month)}.</p>

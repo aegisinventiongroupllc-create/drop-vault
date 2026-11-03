@@ -29,7 +29,6 @@ import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
-import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
 import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorCalendar from "@/components/CreatorCalendar";
@@ -614,7 +613,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       </div>
 
       {/* Payment Split Banner */}
-      <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">
+      {activeSection === "overview" && <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold tracking-wider text-foreground">REVENUE SPLIT</span>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -658,14 +657,14 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              Every 100,000 unique paying library customers starts a 7-day Power Week at 92/8 ($18.40 per token), then you return to 90/10. Or skip the wait: PRO PASS is 92/8 forever, ELITE PASS is 93/7 for life. Each customer counts once for your creator library, even after access expires. Renewals, likes, hearts, tips and the DTT entry pass alone do not increase this count.
+              Each paying library customer counts once. Renewals, likes, hearts, tips and entry passes do not count toward this milestone.
             </p>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Strategy Tip */}
-      <div className="mx-4 mb-4">
+      {activeSection === "media" && <div className="mx-4 mb-4">
         <div className="bg-gradient-to-r from-primary/10 to-gold/10 border border-primary/30 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <Lightbulb className="w-4 h-4 text-gold" />
@@ -673,7 +672,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           </div>
           <p className="text-[10px] text-muted-foreground">Upload a teaser up to 1 minute. Customers watch the first half free, then unlock you with 1 Bit-Token to see the rest.</p>
         </div>
-      </div>
+      </div>}
 
       {activeSection === "messages" && authUserId && <TopFansSection creatorId={authUserId} creatorName={profileUsername || "Creator"} initiallyOpen />}
       {activeSection === "calendar" && authUserId && <CreatorCalendar userId={authUserId} onRequests={() => setActiveSection("requests")} onMedia={() => setActiveSection("media")} />}
@@ -715,15 +714,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-primary/80" /><span className="text-[10px] text-muted-foreground">Earned</span></div>
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-gold/60" /><span className="text-[10px] text-muted-foreground">Withdrawn</span></div>
             </div>
-          </div>
-
-          {/* Revenue Split Info Box */}
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold tracking-wider text-foreground">PAYOUT STRUCTURE</span>
-            </div>
-            <CreatorRevenueTerms />
           </div>
 
           {/* Top Fan List */}
@@ -828,12 +818,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             </div>
           </div>
           <CreatorPayoutMethod />
-          <LifetimeUpgradeStore creatorId={authUserId} />
-
-          {/* Revenue Split Info */}
-          <div className="bg-card border border-border rounded-xl p-4">
-            <CreatorRevenueTerms />
-          </div>
         </div>
       )}
 

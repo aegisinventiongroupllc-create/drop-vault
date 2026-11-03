@@ -121,14 +121,16 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
         Top 10 Fans
       </h3>
       <p className="text-[11px] text-muted-foreground mb-3">
-        The top 10 supporters by total spent unlock private messaging with @{creatorName}. Rankings update automatically — outspend someone to take their spot.
+        {isCreator || !myId
+          ? "Your top 10 supporters by total spent can message you privately. Rankings update automatically as supporter spending changes."
+          : `The top 10 supporters by total spent unlock private messaging with @${creatorName}. Rankings update automatically — outspend someone to take their spot.`}
       </p>
 
       {loading ? (
         <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
       ) : fans.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-4 text-center">
-          <p className="text-xs text-muted-foreground">No fans ranked yet. Be the first to unlock and claim the #1 spot.</p>
+          <p className="text-xs text-muted-foreground">{isCreator || !myId ? "No supporters are ranked yet." : "No fans ranked yet. Be the first to unlock and claim the #1 spot."}</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl divide-y divide-border">
@@ -203,7 +205,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
               </div>
             )}
           </>
-        ) : (
+        ) : myId && !isCreator ? (
           <div className="bg-card border border-border rounded-xl p-4 text-center">
             <Lock className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm font-bold text-foreground">Messaging is for the Top 10</p>
@@ -215,7 +217,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
               REFRESH RANKINGS
             </Button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
