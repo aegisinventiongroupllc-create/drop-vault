@@ -391,7 +391,7 @@ const AdminPortal = () => {
           <nav aria-label="Country administration" className="flex flex-wrap gap-2">
             <Button variant={countrySection === null ? "default" : "outline"} onClick={() => setCountrySection(null)}>OVERVIEW</Button>
             <Button variant={countrySection === "countries" ? "default" : "outline"} onClick={() => setCountrySection("countries")}>COUNTRIES</Button>
-            <Button variant={countrySection === "founding" ? "gold" : "outline"} onClick={() => setCountrySection("founding")}>FOUNDING 10</Button>
+            <Button variant={countrySection === "founding" ? "gold" : "outline"} onClick={() => setCountrySection("founding")}>FOUNDING 5</Button>
           </nav>
           {countrySection === "countries" && <section className="py-4 border-y border-border"><AdminCountries onOpenCreator={setSelectedCreator} /></section>}
           {countrySection === "founding" && <section className="py-4 border-y border-border"><AdminFoundingCreators /></section>}
