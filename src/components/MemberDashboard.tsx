@@ -2,6 +2,7 @@ import DttToken from "@/components/DttToken";
 import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import RequestDelivery from "@/components/RequestDelivery";
 import PrivateMessages from "@/components/PrivateMessages";
+import PermanentVault from "@/components/PermanentVault";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
 import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
@@ -51,7 +52,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"library" | "requests" | "messages">("library");
+  const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages">("library");
   const [, setTick] = useState(0);
   useEffect(() => {
     if (sessionStorage.getItem("dtt_open_buy") === "1") {
@@ -173,6 +174,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
 
   const tabs = [
     { id: "library" as const, label: libraryTitle },
+    { id: "permanent" as const, label: "MY PERMANENT VAULT" },
     { id: "requests" as const, label: "MY REQUESTS" },
     { id: "messages" as const, label: "MESSAGES" },
   ];
@@ -285,7 +287,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest transition-all ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold tracking-widest transition-all ${
               activeTab === t.id
                 ? "bg-primary text-primary-foreground neon-glow-sm"
                 : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -373,6 +375,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
       )}
 
       {/* My Requests — real data */}
+      {activeTab === "permanent" && <PermanentVault />}
       {activeTab === "messages" && <div className="px-4 flex-1"><PrivateMessages /></div>}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">

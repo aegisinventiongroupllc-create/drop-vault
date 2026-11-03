@@ -183,7 +183,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const liveStats = useCreatorStats();
   const revenueTerms = useRevenueTerms(authUserId);
   const welcomeBack = useCreatorWelcomeBack(authUserId, safetyAgreed);
-  const { items: mediaItems, loading: mediaLoading, hasMore: moreMedia, loadMore: loadMoreMedia, error: mediaError, refresh: refreshMedia, insertMedia, renameMedia, deleteMedia } = useCreatorMedia(authUserId);
+  const { items: mediaItems, loading: mediaLoading, hasMore: moreMedia, loadMore: loadMoreMedia, error: mediaError, refresh: refreshMedia, insertMedia, renameMedia, setPermanentBuyout, deleteMedia } = useCreatorMedia(authUserId);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -383,6 +383,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         storage_path: result.path,
         title,
         media_type: file.type.startsWith("image/") ? "photo" : "video",
+        allow_permanent_buyout: allowBuyout,
       });
       if ("error" in dbResult) {
         const cleanup = await supabase.storage.from(bucket).remove([result.path]);
@@ -917,6 +918,13 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                 {uploading === "vault" ? ct.uploading_full : ct.upload_full}
               </Button>
               <p className="text-[10px] text-muted-foreground">{ct.full_hint}</p>
+              <label className="flex items-start gap-3 bg-secondary rounded-xl px-3 py-3 cursor-pointer">
+                <Switch checked={allowBuyout} onCheckedChange={setAllowBuyout} aria-label="Allow Permanent Buyouts (1 Bit-Token)" className="mt-0.5" />
+                <span>
+                  <span className="block text-xs font-bold text-foreground">Allow Permanent Buyouts (1 Bit-Token)</span>
+                  <span className="block text-[10px] text-muted-foreground leading-snug">Allow customers to pay 1 Bit-Token to permanently save this video to their personal vault after the 14-day rotation.</span>
+                </span>
+              </label>
             </div>
 
             {/* Progress bar */}
@@ -975,6 +983,12 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                       <>
                         <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
                         <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()} • {item.views} views</span>
+                        {item.bucket === "vault" && (
+                          <label className="flex items-center gap-2 mt-1 cursor-pointer">
+                            <Switch checked={item.allow_permanent_buyout} onCheckedChange={async (v) => { const r = await setPermanentBuyout(item.id, v); if ("error" in r) toast.error(r.error); }} aria-label="Allow Permanent Buyouts (1 Bit-Token)" className="scale-75 origin-left" />
+                            <span className="text-[10px] font-bold text-muted-foreground">Allow Permanent Buyouts (1 Bit-Token)</span>
+                          </label>
+                        )}
                       </>
                     )}
                   </div>
