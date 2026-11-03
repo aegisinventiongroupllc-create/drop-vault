@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-import { isAdminAccessCode, isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
+import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 
@@ -144,11 +144,13 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         setMode("login");
         setPassword("");
       } else {
+        clearAdminDashboardPreview();
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmed,
           password,
         });
         if (error) throw error;
+        onExitPreview?.();
         await logActivity("login", "Email + password");
         // Session listener in Index.tsx handles redirect.
       }
@@ -279,12 +281,14 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
             onClick={async () => {
               setLoading(true);
               try {
+                clearAdminDashboardPreview();
                 const result = await lovable.auth.signInWithOAuth("google", {
                   redirect_uri: googleReturnOrigin(),
                   extraParams: { prompt: "select_account" },
                 });
                 if (result.error) throw result.error;
                 if (result.redirected) return;
+                onExitPreview?.();
                 await logActivity("login", "Google");
               } catch (error) {
                 toast({ title: "Google sign-in failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });

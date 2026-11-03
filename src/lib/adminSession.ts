@@ -2,6 +2,14 @@ export const ADMIN_SESSION_KEY = "dtt_secret_admin_ok";
 export const ADMIN_PASSCODE_KEY = "dtt_admin_passcode";
 export const ADMIN_OVERRIDE_KEY = "dtt_admin_override";
 
+/** A normal account login ends dashboard previews, not staff authorization. */
+export function clearAdminDashboardPreview(): void {
+  try {
+    localStorage.removeItem("dtt_admin_view_as_creator");
+    localStorage.removeItem("dtt_admin_view_as_customer");
+  } catch { /* Storage may be unavailable. */ }
+}
+
 /** A navigation shortcut, never an administrator credential. */
 export function isAdminSignInShortcut(mode: string, value: string): boolean {
   return mode === "login" && value.trim() === "143";
