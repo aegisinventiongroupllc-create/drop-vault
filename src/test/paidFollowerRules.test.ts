@@ -61,10 +61,10 @@ describe.skipIf(!db)('paid library follower rules',()=>{
    await checkCount();
    await sql`INSERT INTO pg_temp.subscriptions(id,customer_id,creator_id,expires_at,autorenew) VALUES(${subscription},${buyer},${creator},now()-interval '1 hour',true)`;
    await sql`INSERT INTO pg_temp.token_balances(user_id,balance) VALUES(${buyer},1)`;
-   const [old]=await sql`SELECT expires_at FROM pg_temp.subscriptions WHERE id=${subscription}`;
-   const [renewal]=await sql`SELECT pg_temp.renew_subscription_atomic(${subscription},${old.expires_at}) AS outcome`;
+   await sql`CREATE TEMP TABLE follower_old_expiry ON COMMIT DROP AS SELECT expires_at FROM pg_temp.subscriptions WHERE id=${subscription}`;
+   const [renewal]=await sql`SELECT pg_temp.renew_subscription_atomic(${subscription},(SELECT expires_at FROM pg_temp.follower_old_expiry)) AS outcome`;
    expect(renewal.outcome).toBe('renewed');await checkCount();
-   const [retry]=await sql`SELECT pg_temp.renew_subscription_atomic(${subscription},${old.expires_at}) AS outcome`;
+   const [retry]=await sql`SELECT pg_temp.renew_subscription_atomic(${subscription},(SELECT expires_at FROM pg_temp.follower_old_expiry)) AS outcome`;
    expect(retry.outcome).toBe('skipped');
    await sql`DELETE FROM pg_temp.creator_hearts WHERE user_id=${buyer} AND creator_id=${creator}`;
    await checkCount();
