@@ -28,7 +28,7 @@
 - GeoGate fails closed, no local overrides; not server enforcement.
 - Search/library/feed gender visibility follows persisted explicit preferences, never infers Both from absent active vault. Why: respect filtering.
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
-- Chats reuse TopFansSection with scoped messages/safe public identities. Why: protect private threads.
+- TopFansSection scopes chats and distinguishes owner/customer views. Why: private threads and correct prompts.
 - Personal colors use validated ui_theme and blended renderers; idle skies inherit the galaxy unless overridden; dashboard skies never alter public profiles. Save galaxy independently of identity validation; report sync failures. Why: invalid handles must not block colors.
 - Dashboard twinkling stars use separate validated ui_theme opt-in and tone with bounded canvas particles and reduced-motion support. Why: private dashboard effects must not replace globe/idle defaults or flash the whole screen.
 - Only receipt-verified service mark_custom_request_paid sets paid; block other paid/completed moves. Creator-owned calendar plans/reminders never change deadlines; agreements await payment, which starts 48-hour delivery. Why: plans cannot authorize access.
@@ -48,6 +48,6 @@
 - Profile backdrops: server-owned choices/private uploads; selected creator files member-readable; re-encode, gate/brand creator uploads. Shared bundled motion stays behind portraits, pauses offscreen, honors reduced motion; uploads stay still. Why: privacy and bounded bandwidth.
 - Tip/request dialogs use body portals and bounded scrolling. Why: keep controls above navigation.
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
-- Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.
+- Revenue details/VIP store render once in Analytics; terms use scoped RPCs; triggers fix unpaid shares/freeze paid earnings. Why: no duplicate rules or client-authorized payouts.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
 - Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
