@@ -22,7 +22,7 @@
 - Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
 - AutoTranslator merges source-matched public/ui/launch catalogs before member-only AI; long public policies use saved translations only; bound caches/retries and coalesce misses; owner/code and input values stay unchanged. Why: protect private text and avoid repeated translation spend.
 - Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.
-- Publish trigger-maintained heart totals, never public fan rows; social/analytics subscribe to aggregates. Why: update counts without exposing identities.
+- Keep hearts public and paid followers owner-only; server ledger triggers deduplicate library buyers and award tiers. Why: likes cannot raise payouts or reveal buyers.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
 - Snapshot request country at creation; preserve on updates. Why: privacy.
 - GeoGate fails closed, no local overrides; not server enforcement.

@@ -277,6 +277,50 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_paid_follower_totals: {
+        Row: {
+          creator_id: string
+          followers: number
+        }
+        Insert: {
+          creator_id: string
+          followers?: number
+        }
+        Update: {
+          creator_id?: string
+          followers?: number
+        }
+        Relationships: []
+      }
+      creator_paid_followers: {
+        Row: {
+          creator_id: string
+          customer_id: string
+          first_paid_at: string
+          first_transaction_id: string
+        }
+        Insert: {
+          creator_id: string
+          customer_id: string
+          first_paid_at?: string
+          first_transaction_id: string
+        }
+        Update: {
+          creator_id?: string
+          customer_id?: string
+          first_paid_at?: string
+          first_transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_paid_followers_first_transaction_id_fkey"
+            columns: ["first_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_payout_methods: {
         Row: {
           account_holder: string | null

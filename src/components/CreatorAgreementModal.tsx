@@ -5,7 +5,7 @@ export const CREATOR_AGREEMENT_VERSION = "1.0";
 export const CREATOR_AGREEMENT_TEXT =
   "DTT Creator Agreement v1.0 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
   "standard payout is 90% of each $20 Bit-Token value; the first 10 approved women and 10 approved men creators per country receive 92% for one year from approval, then 90%; " +
-  "Pro and Elite passes grant permanent 92/8 vault splits; 100k customer followers qualify for 92/8 with a 7-day 95/5 Power Week; custom requests pay 85% by default and 90% for Elite; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
+  "Pro and Elite passes grant permanent 92/8 vault splits; 100k all-time unique customers who paid to unlock my library qualify for permanent 92/8 with a 7-day 95/5 Power Week, repeated at each additional 100k; each customer counts once, renewals and likes/hearts never count; custom requests pay 85% by default and 90% for Elite; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
   "I may leave at any time and DTT may suspend accounts that break the Creator & Purchase Rules or Terms of Service.";
 
 const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
@@ -21,8 +21,8 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
             <p>This agreement is between you and DTT Media LLC. There is no minimum term; you can stop at any time.</p>
             <p><span className="text-foreground font-medium">Your earnings.</span> You keep 90% of every $20 Bit-Token value ($18). The customer's $5 service fee never reduces your share.</p>
             <p><span className="text-foreground font-medium">Founding creators.</span> The first 10 approved women and the first 10 approved men creators in each country receive 92/8 ($18.40 per token) for one full year from approval. After that year you return to 90/10 unless you qualify for a permanent 92/8 tier.</p>
-            <p><span className="text-foreground font-medium">100,000 customer followers.</span> Your regular split becomes 92/8 permanently: you receive $18.40 of each $20 token value and DTT receives $1.60. This counts customer accounts following you, not paid purchases or outside social-media followers.</p>
-            <p><span className="text-foreground font-medium">Power Week.</span> At 100,000 customer followers, you temporarily receive 95/5 ($19 per token) for 7 days, then return to your permanent 92/8. Another 7-day Power Week starts at 200,000, 300,000, and each additional 100,000-follower milestone. The percentages do not add together.</p>
+            <p><span className="text-foreground font-medium">100,000 paid followers.</span> Your regular split becomes 92/8 permanently: you receive $18.40 of each $20 token value and DTT receives $1.60. Each unique customer who paid to unlock your library counts once, even after access expires. Renewals, likes, hearts, tips and the DTT entry pass alone do not count.</p>
+            <p><span className="text-foreground font-medium">Power Week.</span> At 100,000 paid followers, you temporarily receive 95/5 ($19 per token) for 7 days, then return to your permanent 92/8. Another 7-day Power Week starts at 200,000, 300,000, and each additional 100,000 unique paying library customers. The percentages do not add together.</p>
             <p><span className="text-foreground font-medium">VIP passes.</span> Pro and Elite passes grant permanent 92/8 without reaching the follower milestone. Pass purchases remain Coming soon.</p>
             <p><span className="text-foreground font-medium">Custom requests.</span> You earn 85% of the agreed price, or 90% with Elite, delivered only after the customer pays.</p>
             <p><span className="text-foreground font-medium">Payouts.</span> Sent manually in Litecoin (LTC). Earnings from charged-back payments are reversed.</p>
