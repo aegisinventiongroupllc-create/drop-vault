@@ -6,6 +6,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import { Button } from "@/components/ui/button";
 import { teaserGateTime } from "@/lib/teaserGate";
 import { isPlaybackInterruption } from "@/lib/teaserPlayback";
+import "./creator-portrait.css";
 
 /** Creator face that spins like a coin over their latest teaser; tap to watch full screen. */
 export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConfig, photoPath, unlocked, unlocking, onUnlock, canUnlock = false, isMen }: {
@@ -45,13 +46,15 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
     <>
       <Button variant="ghost" type="button" onClick={() => url && setFull(true)} aria-label={url ? `Play @${creatorName} teaser` : `@${creatorName}`}
         className="relative h-28 w-28 p-0 rounded-full overflow-hidden border-4 border-background neon-glow">
-        <div className="absolute inset-0 flex items-center justify-center" style={{ perspective: 600 }}>
-          <div className="animate-[coin-spin_6s_ease-in-out_infinite]" style={{ transformStyle: "preserve-3d" }}>
-            <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" />
+        <div className="creator-coin-scene absolute inset-0 flex items-center justify-center">
+          <div className="creator-coin">
+            <div className="creator-coin-face"><ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" /></div>
+            <div className="creator-coin-face creator-coin-back bg-secondary">
+              {url ? <video src={`${url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-label="Teaser preview" /> : <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" />}
+            </div>
           </div>
         </div>
       </Button>
-      <style>{`@keyframes coin-spin{0%{transform:rotateY(0)}45%{transform:rotateY(1080deg)}100%{transform:rotateY(1080deg)}}`}</style>
 
       {full && url && createPortal(
         <div className="fixed inset-0 z-[130] bg-background flex items-center justify-center">

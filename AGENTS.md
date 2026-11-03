@@ -13,7 +13,7 @@
 - Use ProfileAvatar for private identities.
 - Validate avatar colors; use iro wheels/SVG fills. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
-- Creator real photos stay in owner-owned private galleries; discovery shows selected photos, private interactions the emoji. Why: separate identities.
+- Creator still/5-second video portraits use private owned galleries and branding; pause offscreen/reduced motion; chats use emoji. Why: privacy and bounded motion.
 - Bound in-page selfies, release tracks, skip scans. Why: avoid handoffs/WASM.
 - Prebundle pickers with deduped React. Why: avoid mixed hooks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
