@@ -1,0 +1,3 @@
+REVOKE ALL ON public.creator_paid_followers,public.creator_paid_follower_totals FROM anon,authenticated;
+GRANT SELECT ON public.creator_paid_followers,public.creator_paid_follower_totals TO authenticated;
+GRANT ALL ON public.creator_paid_followers,public.creator_paid_follower_totals TO service_role;

@@ -484,6 +484,13 @@
       "when": 1793710594191,
       "tag": "0068_paid_creator_followers",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1793710667574,
+      "tag": "0069_restrict_paid_follower_writes",
+      "breakpoints": true
     }
   ]
 }
