@@ -22,6 +22,8 @@ interface FanMessage {
 
 const MEDAL = ["text-gold", "text-slate-300", "text-amber-600"];
 
+export const isOwnFanBoard = (viewerId: string | null, creatorId: string) => viewerId !== null && viewerId === creatorId;
+
 const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { creatorId: string; creatorName: string; initiallyOpen?: boolean }) => {
   const [fans, setFans] = useState<FanRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,7 @@ const TopFansSection = ({ creatorId, creatorName, initiallyOpen = false }: { cre
     return () => { supabase.removeChannel(channel); };
   }, [creatorId, loadFans]);
 
-  const isCreator = myId === creatorId;
+  const isCreator = isOwnFanBoard(myId, creatorId);
   const myRank = fans.find((f) => f.fan_id === myId)?.rank ?? null;
   const canChat = isCreator || myRank !== null;
   // Each thread is private: one fan + the creator.
