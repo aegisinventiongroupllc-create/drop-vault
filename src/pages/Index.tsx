@@ -166,6 +166,10 @@ const Index = () => {
         setAuthedUserId(userId);
         if (hydratedUserId !== userId) {
           hydratedUserId = userId;
+          setCreatorFeed(false);
+          setSelectedCreator(null);
+          setShowSearch(false);
+          setAuthPreview(false);
           setRoleHydrated(false);
           if (defer) setTimeout(() => hydrateRole(userId, userEmail), 0);
           else hydrateRole(userId, userEmail);
