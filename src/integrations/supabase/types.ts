@@ -236,6 +236,7 @@ export type Database = {
         Row: {
           active_from: string | null
           active_until: string | null
+          allow_permanent_buyout: boolean
           bucket: string
           created_at: string
           creator_id: string
@@ -250,6 +251,7 @@ export type Database = {
         Insert: {
           active_from?: string | null
           active_until?: string | null
+          allow_permanent_buyout?: boolean
           bucket: string
           created_at?: string
           creator_id: string
@@ -264,6 +266,7 @@ export type Database = {
         Update: {
           active_from?: string | null
           active_until?: string | null
+          allow_permanent_buyout?: boolean
           bucket?: string
           created_at?: string
           creator_id?: string
@@ -1439,6 +1442,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permanent_library: {
+        Row: {
+          creator_id: string
+          customer_id: string
+          id: string
+          purchased_at: string
+          transaction_id: string
+          video_id: string
+        }
+        Insert: {
+          creator_id: string
+          customer_id: string
+          id?: string
+          purchased_at?: string
+          transaction_id: string
+          video_id: string
+        }
+        Update: {
+          creator_id?: string
+          customer_id?: string
+          id?: string
+          purchased_at?: string
+          transaction_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permanent_library_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permanent_library_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "creator_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1603,6 +1648,7 @@ export type Database = {
         Args: { _path: string; _request_id: string }
         Returns: undefined
       }
+      buy_permanent_video: { Args: { _video_id: string }; Returns: string }
       can_upload_creator_media: {
         Args: { _creator_id: string }
         Returns: boolean
@@ -1639,6 +1685,7 @@ export type Database = {
         Returns: {
           active_from: string | null
           active_until: string | null
+          allow_permanent_buyout: boolean
           bucket: string
           created_at: string
           creator_id: string
@@ -1706,6 +1753,7 @@ export type Database = {
         Returns: {
           active_from: string | null
           active_until: string | null
+          allow_permanent_buyout: boolean
           bucket: string
           created_at: string
           creator_id: string

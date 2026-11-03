@@ -505,6 +505,13 @@
       "when": 1793716084730,
       "tag": "0071_unlock_creator_year",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1793717615419,
+      "tag": "0072_permanent_video_buyouts",
+      "breakpoints": true
     }
   ]
 }
