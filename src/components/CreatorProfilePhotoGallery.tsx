@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { normalizeSelfie } from "@/lib/normalizeSelfie";
 import { watermarkCreatorMedia } from "@/lib/mediaWatermark";
 import { toast } from "@/hooks/use-toast";
+import { checkPortraitVideo, isVideoPortrait } from "@/lib/creatorPortrait";
+import CreatorPortraitVideo from "@/components/CreatorPortraitVideo";
 
 type CreatorPhoto = {
   id: string;
@@ -50,21 +52,24 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
   useEffect(() => { void loadPhotos(); }, [creatorId]);
 
   const uploadPhoto = async (file: File) => {
-    if (file.type && !file.type.startsWith("image/")) {
-      toast({ title: "Choose a photo", description: "Use a JPG, PNG, or WEBP image.", variant: "destructive" });
+    const video = file.type.startsWith("video/");
+    if (!video && !file.type.startsWith("image/")) {
+      toast({ title: "Choose a portrait", description: "Use a photo or a smile video lasting five seconds or less.", variant: "destructive" });
       return;
     }
     setBusy(true);
     let storagePath: string | undefined;
     let insertedPhotoId: string | undefined;
     try {
-      const normalized = await normalizeSelfie(file, 1600);
-      const branded = await watermarkCreatorMedia(new File([normalized], "profile.jpg", { type: "image/jpeg" }));
-      if (branded.size > 8 * 1024 * 1024) throw new Error("Choose a photo under 8 MB.");
-      storagePath = `${creatorId}/profile-${crypto.randomUUID()}.jpg`;
+      if (video) await checkPortraitVideo(file);
+      const source = video ? file : new File([await normalizeSelfie(file, 1600)], "profile.jpg", { type: "image/jpeg" });
+      const branded = await watermarkCreatorMedia(source);
+      if (video) await checkPortraitVideo(branded);
+      if (branded.size > 8 * 1024 * 1024) throw new Error("Choose a portrait under 8 MB.");
+      storagePath = `${creatorId}/profile-${crypto.randomUUID()}.${video ? "mp4" : "jpg"}`;
       const { error: uploadError } = await supabase.storage
         .from("creator-profile-photos")
-        .upload(storagePath, branded, { contentType: "image/jpeg", upsert: false });
+        .upload(storagePath, branded, { contentType: branded.type, upsert: false });
       if (uploadError) throw uploadError;
       const { data: inserted, error: insertError } = await supabase
         .from("creator_profile_photos")
@@ -126,19 +131,19 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
       <div>
         <div className="flex items-center gap-2">
           <Camera className="h-5 w-5 text-primary" />
-          <h3 className="text-base font-semibold text-foreground">Public Profile Photos</h3>
+          <h3 className="text-base font-semibold text-foreground">Public Profile Portraits</h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Your selected real photo appears in the feed, creator page, and member libraries. Your emoji remains in private conversations.</p>
       </div>
 
-      <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={(event) => {
+      <input ref={inputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" className="sr-only" onChange={(event) => {
         const file = event.target.files?.[0];
         if (file) void uploadPhoto(file);
         event.target.value = "";
       }} />
       <Button type="button" variant="outline" className="w-full border-primary/50" disabled={busy} onClick={() => inputRef.current?.click()}>
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-        ADD PROFILE PHOTO
+        ADD PHOTO OR 5-SECOND SMILE
       </Button>
 
       {photos.length === 0 ? (
@@ -147,7 +152,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
         <div className="grid grid-cols-3 gap-3">
           {photos.map((photo) => (
             <div key={photo.id} className={`relative aspect-square overflow-hidden rounded-lg border-2 ${photo.is_active ? "border-primary neon-glow-sm" : "border-border"}`}>
-              {urls[photo.id] ? <img src={urls[photo.id]} alt="Creator profile option" className="h-full w-full object-cover" /> : <div className="h-full w-full animate-pulse bg-secondary" />}
+              {urls[photo.id] ? isVideoPortrait(photo.storage_path) ? <CreatorPortraitVideo src={urls[photo.id]} /> : <img src={urls[photo.id]} alt="Creator profile option" className="h-full w-full object-cover" /> : <div className="h-full w-full animate-pulse bg-secondary" />}
               <Button type="button" size="icon" variant="secondary" className="absolute bottom-1 left-1 h-8 w-8" disabled={busy || photo.is_active} onClick={() => void makeActive(photo)} aria-label={photo.is_active ? "Current public photo" : "Make this public photo"}>
                 <Check className="h-4 w-4" />
               </Button>

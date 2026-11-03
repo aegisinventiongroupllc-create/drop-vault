@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { dttColorClass, parseDttColors, type DttLetterColors } from "@/lib/dttIcon";
 import { parseCreatorBackdrop, type CreatorBackdropId } from "@/lib/creatorBackdrop";
+import { isVideoPortrait } from "@/lib/creatorPortrait";
+import CreatorPortraitVideo from "@/components/CreatorPortraitVideo";
 
 export type AvatarFace = "spark" | "rogue" | "nova" | "pixel" | "orbit" | "crown";
 export type AvatarTone = "rose" | "cyan" | "gold" | "lime" | "violet" | "silver";
@@ -166,6 +168,7 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
     return () => { active = false; };
   }, [avatar.portraitPath, previewUrl]);
   useEffect(() => {
+    setCreatorPhotoUrl(undefined);
     if (!creatorPhotoPath) { setCreatorPhotoUrl(undefined); return; }
     const cached = creatorPhotoCache.get(creatorPhotoPath);
     if (cached) { setCreatorPhotoUrl(cached); return; }
@@ -191,7 +194,7 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
   }
   return (
     <div className={cn("relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-secondary", className)} role="img" aria-label={label ? `${label}'s custom avatar` : "Custom profile avatar"}>
-      {visibleImage ? <img src={visibleImage} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
+      {creatorPhotoUrl && isVideoPortrait(creatorPhotoPath) ? <CreatorPortraitVideo src={creatorPhotoUrl} /> : visibleImage ? <img src={visibleImage} alt="" className="h-full w-full object-cover" /> : <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
         <circle cx="50" cy="50" r="50" className="fill-card" />
         <Ears style={avatar.ears} skin={skin} />
         <path d={jawPaths[avatar.jawline]} className={skin} />
