@@ -472,7 +472,9 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
                     </Button>
                   )}
                   {req.status === "declined" && (
-                    <span className="text-[10px] text-muted-foreground italic mt-2 block">Creator passed on this request</span>
+                    <span className="text-[10px] text-muted-foreground italic mt-2 block">
+                      Creator passed on this request{req.counter_message ? <> — <span translate="no">"{req.counter_message}"</span></> : null}
+                    </span>
                   )}
                 </div>
               );
