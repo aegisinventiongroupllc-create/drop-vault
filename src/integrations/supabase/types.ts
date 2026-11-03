@@ -2078,6 +2078,13 @@ export type Database = {
         Args: { _payment_id: string; _request_id: string }
         Returns: boolean
       }
+      participant_object_evidence: {
+        Args: { _bucket: string; _path: string }
+        Returns: {
+          name: string
+          updated_at: string
+        }[]
+      }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
@@ -2091,6 +2098,17 @@ export type Database = {
           _status: string
         }
         Returns: string
+      }
+      review_participant_content: {
+        Args: {
+          _confirmed: boolean
+          _id: string
+          _kind: string
+          _notes: string
+          _reviewer: string
+          _status: string
+        }
+        Returns: undefined
       }
       search_creator_page: {
         Args: {
