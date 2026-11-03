@@ -188,7 +188,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const [editingTitle, setEditingTitle] = useState("");
 
   const STATS = [
-    { label: "Hearts", value: liveStats.followerCount.toLocaleString(), change: "+0%", icon: Users },
+    { label: "Hearts", value: liveStats.heartCount.toLocaleString(), change: "+0%", icon: Users },
+    { label: "Paid Followers", value: liveStats.followerCount.toLocaleString(), change: "All-time unique customers", icon: Users },
     { label: "Total Views", value: liveStats.totalViews.toLocaleString(), change: "+0%", icon: Eye },
     { label: "Bit-Token Revenue", value: `${liveStats.bitTokenRevenue.toFixed(1)} BT`, change: `$${liveStats.totalEarnedUsd.toFixed(0)}`, icon: BarChart3 },
     { label: "Growth Rate", value: `${liveStats.growthRate >= 0 ? "+" : ""}${liveStats.growthRate}%`, change: "vs last month", icon: TrendingUp },
@@ -641,7 +642,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         {!splitState.incentiveActive && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>Progress to next 100K milestone</span>
+              <span>Paid followers toward next 100K milestone</span>
               <span>{splitState.followerCount.toLocaleString()} / {splitState.nextMilestone.toLocaleString()}</span>
             </div>
             <div className="w-full h-3 rounded-full bg-secondary overflow-hidden">
@@ -651,7 +652,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center">
-              At 100,000 customer followers, your regular split becomes 92/8 permanently ($18.40 per token). For the first 7 days, Power Week pays 95/5 ($19), then returns to 92/8. Each additional 100,000-follower milestone starts another Power Week. Customer followers—not paid purchases—count toward this reward.
+              At 100,000 unique paying library customers, your regular split becomes 92/8 permanently ($18.40 per token). Power Week pays 95/5 ($19) for 7 days, then returns to 92/8; repeats at each additional 100,000. Each customer counts once for your creator library, even after access expires. Renewals, likes, hearts, tips and the DTT entry pass alone do not increase this count.
             </p>
           </div>
         )}
