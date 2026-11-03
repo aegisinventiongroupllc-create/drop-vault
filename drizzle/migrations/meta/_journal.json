@@ -533,6 +533,13 @@
       "when": 1793727814552,
       "tag": "0075_participant_staged_content_listing",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1793727901582,
+      "tag": "0076_revoke_participant_default_grants",
+      "breakpoints": true
     }
   ]
 }
