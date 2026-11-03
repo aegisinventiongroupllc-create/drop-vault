@@ -97,9 +97,13 @@ Deno.serve(async req => {
    if(body.kind==='participant'&&r.linked_user_id){const {data:v}=await db.from('creator_verifications').select('id_front_path,selfie_path,document_bucket').eq('user_id',r.linked_user_id).order('submitted_at',{ascending:false}).limit(1).maybeSingle();if(v){const signed=await db.storage.from(v.document_bucket).createSignedUrls([v.id_front_path,v.selfie_path],120);check(signed);return json({documents:signed.data});}}
    const {data:consents}=body.kind==='content'?await db.from('participant_consents').select('*').eq('manifest_id',r.id):{data:[]};
    const evidence=[...paths,...(consents??[]).map(c=>c.release_path)].filter(Boolean);
+   let participantDetails=[];
+   if(body.kind==='content'&&r.participant_ids.length){const {data:ps}=await db.from('content_participants').select('id,label,legal_name,date_of_birth,status,id_path,selfie_path,linked_user_id').in('id',r.participant_ids);participantDetails=ps??[];for(const p of participantDetails){if(p.id_path)evidence.push(p.id_path);if(p.selfie_path)evidence.push(p.selfie_path);}}
    const signed=await db.storage.from('participant-evidence').createSignedUrls(evidence,120);check(signed);
    const media=body.kind==='content'?await db.storage.from(r.bucket).createSignedUrl(r.storage_path,120):{data:null};
-   return json({documents:signed.data,media:media.data?.signedUrl,consents});
+   const {data:uploader}=body.kind==='content'?await db.from('creator_verifications').select('legal_first_name,legal_last_name,date_of_birth,id_front_path,selfie_path,document_bucket').eq('user_id',r.creator_id).order('submitted_at',{ascending:false}).limit(1).maybeSingle():{data:null};
+   const uploaderDocs=uploader?await db.storage.from(uploader.document_bucket).createSignedUrls([uploader.id_front_path,uploader.selfie_path],120):{data:[]};
+   return json({documents:[...(signed.data??[]),...(uploaderDocs.data??[])],media:media.data?.signedUrl,consents,participants:participantDetails.map(({id_path,selfie_path,...p})=>p),uploader:uploader?{name:[uploader.legal_first_name,uploader.legal_last_name].join(' '),dob:uploader.date_of_birth}:null});
   }
   if(body.action==='decide'){
    if(!admin)return json({error:'Administrator required'},403);

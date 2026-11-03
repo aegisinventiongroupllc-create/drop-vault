@@ -4,14 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription } from '@/components/ui/dialog';
 import { participantCall } from '@/lib/participantReview';
+import { supabase } from '@/integrations/supabase/client';
 type Row={id:string;label?:string;title?:string;legal_name?:string;date_of_birth?:string;recorded_on?:string;status:string;country?:string;creator_id:string;reviewer_notes?:string};
 export default function AdminParticipantReview(){
+ const [admin,setAdmin]=useState(false);
+ useEffect(()=>{void(async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return;const {data}=await supabase.rpc('has_role',{_user_id:user.id,_role:'admin'});setAdmin(data===true);})();},[]);
  const [participants,setParticipants]=useState<Row[]>([]),[manifests,setManifests]=useState<Row[]>([]),[status,setStatus]=useState('pending'),[country,setCountry]=useState(''),[query,setQuery]=useState(''),[offset,setOffset]=useState(0);
  const [open,setOpen]=useState<{row:Row;kind:'participant'|'content'}>(),[documents,setDocuments]=useState<{signedUrl:string;path:string}[]>([]),[media,setMedia]=useState(''),[notes,setNotes]=useState(''),[checks,setChecks]=useState<boolean[]>([false,false,false,false]),[error,setError]=useState(''),[busy,setBusy]=useState(false);
- const load=async()=>{try{const r=await participantCall({action:'list',status,country,query,offset});setParticipants(r.participants);setManifests(r.manifests);setError('');}catch(e){setError(e instanceof Error?e.message:'Administrator sign-in required');}};
- useEffect(()=>{const timer=setTimeout(load,300);return()=>clearTimeout(timer);},[status,country,query,offset]);
+ const load=async()=>{if(!admin)return;try{const r=await participantCall({action:'list',status,country,query,offset});setParticipants(r.participants);setManifests(r.manifests);setError('');}catch(e){setError(e instanceof Error?e.message:'Administrator sign-in required');}};
+ useEffect(()=>{const timer=setTimeout(load,300);return()=>clearTimeout(timer);},[admin,status,country,query,offset]);
  const view=async(row:Row,kind:'participant'|'content')=>{setOpen({row,kind});setChecks([false,false,false,false]);setNotes('');setDocuments([]);setMedia('');try{const d=await participantCall({action:'documents',id:row.id,kind});setDocuments(d.documents??[]);setMedia(d.media??'');}catch(e){setError(e instanceof Error?e.message:'Private previews unavailable');}};
  const decide=async(decision:string)=>{if(!open)return;setBusy(true);try{await participantCall({action:'decide',id:open.row.id,kind:open.kind,status:decision,notes,confirmed:checks.every(Boolean)});setOpen(undefined);await load();}catch(e){setError(e instanceof Error?e.message:'Decision failed');}finally{setBusy(false);}};
+ if(!admin)return <p className="text-muted-foreground">Administrator sign-in is required for participant and content reviews.</p>;
  return <section className="space-y-5 border-t border-border py-6"><h2 className="text-lg font-bold">PARTICIPANT & CONTENT REVIEWS</h2>
  <div className="flex flex-wrap gap-2">{['invited','pending','approved','rejected','held','all'].map(s=><Button key={s} variant={status===s?'neon':'outline'} onClick={()=>{setStatus(s);setOffset(0);}}>{s.toUpperCase()}</Button>)}</div>
  <div className="grid sm:grid-cols-2 gap-3"><label>Participant country<Input value={country} maxLength={2} onChange={e=>{setCountry(e.target.value.toUpperCase());setOffset(0);}}/></label><label>Participant legal name<Input value={query} maxLength={100} onChange={e=>{setQuery(e.target.value);setOffset(0);}}/></label></div>
