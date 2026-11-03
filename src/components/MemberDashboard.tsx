@@ -1,3 +1,4 @@
+import FoundingCreatorsBoard from "@/components/FoundingCreatorsBoard";
 import DttToken from "@/components/DttToken";
 import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import RequestDelivery from "@/components/RequestDelivery";
@@ -52,7 +53,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages">("library");
+  const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages" | "founding">("library");
   const [, setTick] = useState(0);
   useEffect(() => {
     if (sessionStorage.getItem("dtt_open_buy") === "1") {
@@ -177,6 +178,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
     { id: "permanent" as const, label: "MY PERMANENT VAULT" },
     { id: "requests" as const, label: "MY REQUESTS" },
     { id: "messages" as const, label: "MESSAGES" },
+    { id: "founding" as const, label: "FOUNDING CREATORS" },
   ];
 
   const handleRenew = (creatorName: string) => {
@@ -376,6 +378,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
 
       {/* My Requests — real data */}
       {activeTab === "permanent" && <PermanentVault />}
+      {activeTab === "founding" && <FoundingCreatorsBoard onCreatorClick={handleCreatorClick} />}
       {activeTab === "messages" && <div className="px-4 flex-1"><PrivateMessages /></div>}
       {activeTab === "requests" && (
         <div className="px-4 space-y-3 flex-1">

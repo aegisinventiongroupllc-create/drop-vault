@@ -1984,6 +1984,15 @@ export type Database = {
         Returns: number
       }
       get_creator_vip_status: { Args: { _creator_id: string }; Returns: Json }
+      get_founding_creators_public: {
+        Args: never
+        Returns: {
+          country: string
+          display_name: string
+          slot: number
+          vault_side: string
+        }[]
+      }
       get_heart_counts: {
         Args: { _creator_ids: string[] }
         Returns: {
