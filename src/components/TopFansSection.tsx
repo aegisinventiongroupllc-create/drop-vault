@@ -7,7 +7,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 
 interface FanRow {
   rank: number;
-  fan_id: string;
+  fan_id: string | null;
   display_name: string;
   avatar_config: unknown;
   total_spent: number | null;
