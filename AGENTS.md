@@ -43,7 +43,7 @@
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
 - Fullscreen teasers portal into document.body. Why: transformed avatars otherwise confine playback.
-- Admin customer/creator previews require an account session before mounting private media; a passcode is not a media credential. Why: prevent anonymous discovery errors without weakening media policies.
+- Admin previews require an account session for media, never just a passcode. Normal login clears previews; account changes reset navigation. Why: protect media and prevent wrong dashboards.
 - Dormant idle ships keep validated themes, reduced motion and inquiry links, no external ads. Why: safe reuse, no booked-sponsor claims.
 - Profile backdrops: server-owned choices/private uploads; selected creator files member-readable; re-encode, gate/brand creator uploads. Shared bundled motion stays behind portraits, pauses offscreen, honors reduced motion; uploads stay still. Why: privacy and bounded bandwidth.
 - Tip/request dialogs use body portals and bounded scrolling. Why: keep controls above navigation.
