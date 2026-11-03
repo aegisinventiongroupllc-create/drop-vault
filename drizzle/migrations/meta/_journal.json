@@ -477,6 +477,13 @@
       "when": 1793668222010,
       "tag": "0067_restrict_creator_calendar_anonymous_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1793710594191,
+      "tag": "0068_paid_creator_followers",
+      "breakpoints": true
     }
   ]
 }
