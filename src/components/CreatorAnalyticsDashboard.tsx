@@ -14,6 +14,7 @@ import WalletIndicator from "@/components/WalletIndicator";
 import SuggestionBox from "@/components/SuggestionBox";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
+import { Switch } from "@/components/ui/switch";
 import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
 import { readVideoDuration, isTeaserTooLong, MAX_TEASER_SECONDS } from "@/lib/teaserGate";
 import { supabase } from "@/integrations/supabase/client";
@@ -202,6 +203,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
   // Upload page state
   const [uploadTitle, setUploadTitle] = useState("");
+  const [allowBuyout, setAllowBuyout] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // LTC help guide modal

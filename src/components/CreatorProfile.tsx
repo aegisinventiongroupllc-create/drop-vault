@@ -46,7 +46,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [countError, setCountError] = useState(false);
   const libraryAvailable = hasLibraryContent(vaultCount);
-  const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string }[]>([]);
+  const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string; allow_permanent_buyout?: boolean; owned?: boolean }[]>([]);
   const [vaultOffset,setVaultOffset]=useState(0);
   const [moreVault,setMoreVault]=useState(false);
   const [vaultError,setVaultError]=useState("");
@@ -160,6 +160,24 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     window.setTimeout(() => setCoinDrop(false), 1800);
     await Promise.all([refreshBalance(), refreshSubs()]);
     toast({ title: `Unlocked @${creatorName} ✓`, description: year ? "A full year (364 days) of library access added." : "14 days of full library access added." });
+  };
+
+  const [buyingId, setBuyingId] = useState<string | null>(null);
+  const rotatingSoon = !!activeSub && new Date(activeSub.expires_at).getTime() - Date.now() <= 72 * 3600 * 1000;
+  const handleBuyout = async (videoId: string) => {
+    if (balance < 1) { toast({ title: "Need 1 Bit-Token", description: "Buy a Bit-Token ($25 checkout) to save this video permanently." }); setShowBuyModal(true); return; }
+    setBuyingId(videoId);
+    const { error } = await supabase.rpc("buy_permanent_video", { _video_id: videoId });
+    setBuyingId(null);
+    if (error) {
+      if (error.message?.includes("INSUFFICIENT_TOKENS")) { setShowBuyModal(true); return; }
+      const msg = error.message?.includes("ALREADY_OWNED") ? "This video is already in your permanent vault." : error.message?.includes("BUYOUT_UNAVAILABLE") ? "This creator doesn't offer permanent saves for this video." : error.message?.includes("LIBRARY_ACCESS_REQUIRED") ? "Unlock this creator's library first." : error.message;
+      toast({ title: "Couldn't save video", description: msg, variant: "destructive" });
+      return;
+    }
+    setVaultItems((prev) => prev.map((v) => (v.id === videoId ? { ...v, owned: true } : v)));
+    await refreshBalance();
+    toast({ title: "Saved to your Permanent Vault ✓", description: "Find it anytime under MY PERMANENT VAULT in your dashboard." });
   };
 
   const TIP_AMOUNTS = [1, 2, 3];
@@ -337,6 +355,16 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
                     )}
                     <p className="text-xs font-semibold text-foreground p-2 truncate">{v.title}</p>
+                    {v.allow_permanent_buyout && (v.owned ? (
+                      <p className="text-[10px] font-bold text-gold px-2 pb-2">✓ IN YOUR PERMANENT VAULT</p>
+                    ) : (
+                      <div className="px-2 pb-2 space-y-1.5">
+                        {rotatingSoon && <p role="status" className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/40 rounded-md px-2 py-1 leading-snug">Rotating soon! Purchase to keep permanently in your account.</p>}
+                        <Button variant="gold" size="sm" className="w-full h-auto py-1.5 text-[10px] font-bold whitespace-normal leading-tight" disabled={buyingId === v.id} onClick={() => handleBuyout(v.id)}>
+                          {buyingId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save to Permanent Vault — 1 Bit-Token"}
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
