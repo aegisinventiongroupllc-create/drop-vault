@@ -18,6 +18,20 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
   const [gate, setGate] = useState(false);
   const [failed, setFailed] = useState(false);
   const fullRef = useRef<HTMLVideoElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry?.isIntersecting ?? false));
+    observer.observe(scene);
+    const onVisibility = () => setPageVisible(!document.hidden);
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { observer.disconnect(); document.removeEventListener("visibilitychange", onVisibility); };
+  }, []);
 
   useEffect(() => {
     setUrl(null); setFull(false); setGate(false); setFailed(false);
@@ -45,12 +59,12 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
   return (
     <>
       <Button variant="ghost" type="button" onClick={() => url && setFull(true)} aria-label={url ? `Play @${creatorName} teaser` : `@${creatorName}`}
-        className="relative h-28 w-28 p-0 rounded-full overflow-hidden border-4 border-background neon-glow">
-        <div className="creator-coin-scene absolute inset-0 flex items-center justify-center">
+        className="relative h-40 w-40 sm:h-48 sm:w-48 shrink-0 p-0 rounded-full overflow-hidden border-4 border-background neon-glow">
+        <div ref={sceneRef} data-paused={!visible || !pageVisible || full} className="creator-coin-scene absolute inset-0 flex items-center justify-center">
           <div className="creator-coin">
-            <div className="creator-coin-face"><ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" /></div>
+            <div className="creator-coin-face"><ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-full w-full" /></div>
             <div className="creator-coin-face creator-coin-back bg-secondary">
-              {url ? <video src={`${url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-label="Teaser preview" /> : <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" />}
+              {url ? <video src={`${url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-label="Teaser preview" /> : <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-full w-full" />}
             </div>
           </div>
         </div>
