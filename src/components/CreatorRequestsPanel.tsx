@@ -102,11 +102,12 @@ const CreatorRequestsPanel = () => {
     refresh();
   };
 
+  const [confirmBulk, setConfirmBulk] = useState(false);
   const minValid = Number(minTokens) >= 1;
   const lowOffers = minValid ? requestsBelowMinimum(requests, Number(minTokens) * TOKEN_BASE_VALUE_USD) : [];
   const handleBulkDecline = async () => {
     if (!lowOffers.length) return;
-    if (!window.confirm(`Decline ${lowOffers.length} offer(s) below ${minTokens} Bit-Tokens? Each fan will see your message.`)) return;
+    setConfirmBulk(false);
     setBusy(true);
     const { count, error } = await declineRequestsBelow(lowOffers.map((r) => r.id), declineReason.trim().slice(0, 300));
     setBusy(false);
@@ -148,9 +149,19 @@ const CreatorRequestsPanel = () => {
             maxLength={300}
             className="w-full bg-secondary rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 h-14 resize-none"
           />
-          <Button variant="outline" size="sm" className="w-full text-destructive border-destructive/30" disabled={busy || lowOffers.length === 0} onClick={handleBulkDecline}>
-            DECLINE {lowOffers.length} OFFER{lowOffers.length === 1 ? "" : "S"} BELOW {minValid ? `${minTokens} BT` : "MINIMUM"}
-          </Button>
+          {confirmBulk && lowOffers.length > 0 ? (
+            <div className="border border-destructive/30 rounded-lg p-2 space-y-2">
+              <p className="text-xs text-foreground">Decline {lowOffers.length} offer(s) below {minTokens} Bit-Tokens? Each fan will see your message.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 text-destructive border-destructive/30" disabled={busy} onClick={handleBulkDecline}>YES, DECLINE</Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmBulk(false)}>CANCEL</Button>
+              </div>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" className="w-full text-destructive border-destructive/30" disabled={busy || lowOffers.length === 0} onClick={() => setConfirmBulk(true)}>
+              DECLINE {lowOffers.length} OFFER{lowOffers.length === 1 ? "" : "S"} BELOW {minValid ? `${minTokens} BT` : "MINIMUM"}
+            </Button>
+          )}
         </div>
 
 
