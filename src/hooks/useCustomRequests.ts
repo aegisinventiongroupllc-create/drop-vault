@@ -74,6 +74,22 @@ export async function declineRequest(id: string) {
     .eq("id", id);
 }
 
+/** Creator declines every pending offer below a minimum, with one reason message. */
+export async function declineRequestsBelow(ids: string[], reason: string) {
+  let count = 0;
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await supabase
+      .from("custom_requests")
+      .update({ status: "declined", counter_message: reason })
+      .in("id", ids.slice(i, i + 200))
+      .eq("status", "pending")
+      .select("id");
+    if (error) return { count, error };
+    count += data?.length ?? 0;
+  }
+  return { count, error: null };
+}
+
 /** Creator sends a counter-offer. */
 export async function counterRequest(id: string, counterUsd: number, message: string) {
   return supabase

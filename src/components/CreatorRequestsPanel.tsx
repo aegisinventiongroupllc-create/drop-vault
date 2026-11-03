@@ -1,10 +1,10 @@
-import { groupRequestsByCountry } from "@/lib/requestCountries";
+import { groupRequestsByCountry, requestsBelowMinimum } from "@/lib/requestCountries";
 import { countryName } from "@/lib/siteTranslate";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { useState } from "react";
 import { FileText, DollarSign, Clock, Loader2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCustomRequests, acceptRequest, declineRequest, counterRequest, type CustomRequestRow } from "@/hooks/useCustomRequests";
+import { useCustomRequests, acceptRequest, declineRequest, counterRequest, declineRequestsBelow, type CustomRequestRow } from "@/hooks/useCustomRequests";
 import { TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { toast } from "@/hooks/use-toast";
 import { useEffect } from "react";
@@ -51,6 +51,9 @@ const CreatorRequestsPanel = () => {
   const [counterPrice, setCounterPrice] = useState("");
   const [counterMsg, setCounterMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [minTokens, setMinTokens] = useState("");
+  const [declineReason, setDeclineReason] = useState("Thank you! My starting offers begin higher than this. Feel free to send a new request.");
+  useEffect(() => { if (minTokens && declineReason.startsWith("Thank you! My starting offers")) setDeclineReason(`Thank you! My starting offers begin at ${minTokens} Bit-Tokens. Feel free to send a new request.`); }, [minTokens]); // eslint-disable-line react-hooks/exhaustive-deps
   const [fanNames, setFanNames] = useState<Record<string, string>>({});
   useEffect(() => {
     const ids = Array.from(new Set(requests.map((request) => request.customer_id)));
@@ -99,6 +102,19 @@ const CreatorRequestsPanel = () => {
     refresh();
   };
 
+  const minValid = Number(minTokens) >= 1;
+  const lowOffers = minValid ? requestsBelowMinimum(requests, Number(minTokens) * TOKEN_BASE_VALUE_USD) : [];
+  const handleBulkDecline = async () => {
+    if (!lowOffers.length) return;
+    if (!window.confirm(`Decline ${lowOffers.length} offer(s) below ${minTokens} Bit-Tokens? Each fan will see your message.`)) return;
+    setBusy(true);
+    const { count, error } = await declineRequestsBelow(lowOffers.map((r) => r.id), declineReason.trim().slice(0, 300));
+    setBusy(false);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else toast({ title: `${count} low offer(s) declined` });
+    refresh();
+  };
+
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
@@ -117,6 +133,26 @@ const CreatorRequestsPanel = () => {
             <span className="text-foreground font-semibold">Pro tip:</span> You can reuse request videos in your library to earn more money from other fans.
           </p>
         </div>
+
+        <div className="bg-secondary/40 border border-border rounded-lg p-3 mb-4 space-y-2">
+          <label className="text-[10px] font-bold text-muted-foreground tracking-wider">MINIMUM STARTING OFFER (BIT-TOKENS)</label>
+          <input
+            type="number" min={1} max={500} value={minTokens}
+            onChange={(e) => setMinTokens(e.target.value)}
+            placeholder="e.g. 5"
+            className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <textarea
+            value={declineReason}
+            onChange={(e) => setDeclineReason(e.target.value)}
+            maxLength={300}
+            className="w-full bg-secondary rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 h-14 resize-none"
+          />
+          <Button variant="outline" size="sm" className="w-full text-destructive border-destructive/30" disabled={busy || lowOffers.length === 0} onClick={handleBulkDecline}>
+            DECLINE {lowOffers.length} OFFER{lowOffers.length === 1 ? "" : "S"} BELOW {minValid ? `${minTokens} BT` : "MINIMUM"}
+          </Button>
+        </div>
+
 
         {requests.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-6">No requests yet. They'll appear here when fans send them.</p>
