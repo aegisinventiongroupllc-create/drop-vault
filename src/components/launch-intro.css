@@ -1,0 +1,53 @@
+.dtt-intro { transition: opacity .7s ease; }
+.dtt-intro-out { opacity: 0; pointer-events: none; }
+
+.dtt-intro-nebula {
+  background:
+    radial-gradient(ellipse 60% 45% at 30% 35%, hsl(var(--primary) / .28), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 75% 70%, hsl(var(--primary) / .2), transparent 70%),
+    radial-gradient(circle at 50% 50%, transparent 40%, hsl(var(--background) / .75) 100%);
+  mix-blend-mode: screen;
+  animation: dtt-nebula 14s ease-in-out infinite alternate;
+}
+@keyframes dtt-nebula {
+  from { transform: scale(1) rotate(0deg); opacity: .75; }
+  to { transform: scale(1.18) rotate(6deg); opacity: 1; }
+}
+
+/* Globe flies in from deep space and settles at its normal size */
+.dtt-intro-globe {
+  animation: dtt-fly 3.2s cubic-bezier(.16, .8, .24, 1) both, dtt-pulse 2.4s ease-in-out 3.2s infinite;
+}
+@keyframes dtt-fly {
+  0% { transform: scale(.02); opacity: 0; filter: blur(6px) brightness(3); }
+  15% { opacity: 1; }
+  100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1); }
+}
+@keyframes dtt-pulse {
+  0%, 100% { filter: drop-shadow(0 0 18px hsl(var(--primary) / .55)); }
+  50% { filter: drop-shadow(0 0 42px hsl(var(--primary) / .95)); }
+}
+
+.dtt-intro-title {
+  font-size: clamp(1.8rem, 8vw, 3.5rem);
+  letter-spacing: .12em;
+  opacity: 0;
+  animation: dtt-title-in 1s ease-out 3.3s forwards, dtt-title-pulse 2.4s ease-in-out 4.3s infinite;
+}
+@keyframes dtt-title-in {
+  from { opacity: 0; transform: translateY(12px); letter-spacing: .5em; filter: blur(8px); }
+  to { opacity: 1; transform: none; letter-spacing: .12em; filter: blur(0); }
+}
+@keyframes dtt-title-pulse {
+  0%, 100% { text-shadow: 0 0 12px hsl(var(--primary) / .5); transform: scale(1); }
+  50% { text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); transform: scale(1.04); }
+}
+
+.dtt-intro-caption { opacity: 0; animation: dtt-caption 1.2s ease-out 4.4s forwards; }
+@keyframes dtt-caption { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+
+.dtt-intro-still *, .dtt-intro-still { animation: none !important; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .dtt-intro *, .dtt-intro { animation: none !important; }
+  .dtt-intro-title, .dtt-intro-caption { opacity: 1; }
+}
