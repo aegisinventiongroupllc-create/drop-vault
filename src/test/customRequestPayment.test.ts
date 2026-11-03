@@ -75,8 +75,9 @@ describe.skipIf(!db)("custom request payment database authorization", () => {
       const [first] = await sql`SELECT pg_temp.mark_paid(${rid},'p1') AS ok`;
       const [again] = await sql`SELECT pg_temp.mark_paid(${rid},'p1') AS ok`;
       expect(first.ok).toBe(true); expect(again.ok).toBe(false);
-      const [row] = await sql`SELECT status, payment_id, fulfillment_deadline FROM pg_temp.custom_requests WHERE id=${rid}`;
+      const [row] = await sql`SELECT status, payment_id, fulfillment_deadline, extract(epoch from (fulfillment_deadline - now())) / 3600 AS delivery_hours FROM pg_temp.custom_requests WHERE id=${rid}`;
       expect(row.status).toBe("paid"); expect(row.payment_id).toBe("p1"); expect(row.fulfillment_deadline).not.toBeNull();
+      expect(Number(row.delivery_hours)).toBe(48);
       throw rollback;
     })).rejects.toBe(rollback);
   });
