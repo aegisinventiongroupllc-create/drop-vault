@@ -195,32 +195,31 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         </div>
       )}
       <style>{`@keyframes coin-drop{0%{transform:translateY(-60vh) rotateY(0) scale(.6);opacity:0}40%{opacity:1}70%{transform:translateY(0) rotateY(720deg) scale(1.1)}100%{transform:translateY(0) rotateY(720deg) scale(1);opacity:0}}`}</style>
-      {/* Header */}
+      {/* Header — backdrop now runs down to right above the heart row */}
       <div className="relative">
-        <div className="relative h-40 overflow-hidden bg-card">
+        <div className="relative overflow-hidden bg-card">
           <LivingProfileBackdrop image={profileBackdrop} />
           <div className="absolute inset-0 bg-background/30 pointer-events-none" />
-        </div>
-        <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
-          <button onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <WalletIndicator />
+          <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
+            <button onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <WalletIndicator />
+          </div>
+
+          {/* Avatar, name and role sit on the extended backdrop */}
+          <div className="relative z-[5] flex flex-col items-center pt-14 px-4 text-center">
+            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} />
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
+              {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
+            <span aria-hidden="true" className="block h-2" />
+          </div>
         </div>
 
-        {/* Public avatar */}
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} />
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="pt-16 px-4 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
-          {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
+        {/* Heart row — sits just under the backdrop edge */}
         {creatorId && <CreatorHeartButton creatorId={creatorId} />}
 
         {/* King of the Vault — empty until first top supporter */}
