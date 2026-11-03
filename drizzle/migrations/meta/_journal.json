@@ -512,6 +512,13 @@
       "when": 1793717615419,
       "tag": "0072_permanent_video_buyouts",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1793727588362,
+      "tag": "0073_participant_content_clearance",
+      "breakpoints": true
     }
   ]
 }
