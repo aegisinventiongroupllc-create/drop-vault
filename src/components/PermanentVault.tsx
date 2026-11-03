@@ -25,7 +25,7 @@ export default function PermanentVault() {
       setError(""); setMore(!!data.has_more);
       setItems((prev) => (offset === 0 ? data.items : [...prev.filter((p) => !data.items.some((i: Item) => i.id === p.id)), ...data.items]));
       // Refresh links before they expire.
-      timer = setTimeout(() => { if (offset === 0) void load(); else { setItems([]); setOffset(0); } }, 50 * 60000);
+      timer = setTimeout(() => { if (offset === 0) void load(); else { setItems([]); setOffset(0); } }, Math.max(30, (Number(data.link_seconds) || 300) - 30) * 1000);
     };
     void load();
     return () => { cancel = true; clearTimeout(timer); };

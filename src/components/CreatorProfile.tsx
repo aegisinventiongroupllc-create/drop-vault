@@ -120,7 +120,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       setVaultError("");setMoreVault(!!data.has_more);
       setVaultItems(previous=>vaultOffset===0?data.items:[...previous.filter(p=>!data.items.some((item:{id:string})=>item.id===p.id)),...data.items]);
       const expiry=data.access_until?Date.parse(data.access_until)-Date.now():Infinity;
-      timer=setTimeout(()=>{if(data.access_until && Date.parse(data.access_until)<=Date.now()){setVaultItems([]);setVaultError("Access expired. Renew to keep watching.");}else if(vaultOffset>0){setVaultItems([]);setVaultOffset(0);}else void load();},Math.max(1000,Math.min(50*60000,expiry)));
+      timer=setTimeout(()=>{if(data.access_until && Date.parse(data.access_until)<=Date.now()){setVaultItems([]);setVaultError("Access expired. Renew to keep watching.");}else if(vaultOffset>0){setVaultItems([]);setVaultOffset(0);}else void load();},Math.max(1000,Math.min(Math.max(30,(Number(data.link_seconds)||300)-30)*1000,expiry)));
     };
     void load();
     return () => {cancel=true;clearTimeout(timer);};
