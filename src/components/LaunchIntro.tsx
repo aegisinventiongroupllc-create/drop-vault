@@ -2,34 +2,35 @@ import { useEffect, useRef, useState } from "react";
 import EntryPassGlobe, { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import GalaxyReel from "@/components/GalaxyReel";
 import { getTargetLang } from "@/components/AutoTranslator";
+import skyCluster from "@/assets/brb/stars-cluster.jpg";
 import "./launch-intro.css";
 
 /** Saved caption translations — no AI calls, readable before sign-in. */
-export const INTRO_CAPTIONS: Record<string, [string, string]> = {
-  en: ["Welcome to the galaxy", "Tap anywhere to enter"],
-  es: ["Bienvenido a la galaxia", "Toca para entrar"],
-  pt: ["Bem-vindo à galáxia", "Toque para entrar"],
-  fr: ["Bienvenue dans la galaxie", "Touchez pour entrer"],
-  de: ["Willkommen in der Galaxie", "Tippen zum Betreten"],
-  it: ["Benvenuto nella galassia", "Tocca per entrare"],
-  ru: ["Добро пожаловать в галактику", "Нажмите, чтобы войти"],
-  ar: ["مرحبًا بك في المجرة", "اضغط للدخول"],
-  hi: ["आकाशगंगा में आपका स्वागत है", "प्रवेश के लिए टैप करें"],
-  zh: ["欢迎来到银河", "轻触进入"],
-  ko: ["은하에 오신 것을 환영합니다", "탭하여 입장"],
-  tr: ["Galaksiye hoş geldiniz", "Girmek için dokunun"],
-  nl: ["Welkom in het sterrenstelsel", "Tik om binnen te gaan"],
-  pl: ["Witamy w galaktyce", "Dotknij, aby wejść"],
-  id: ["Selamat datang di galaksi", "Ketuk untuk masuk"],
-  fil: ["Maligayang pagdating sa kalawakan", "I-tap para pumasok"],
+export const INTRO_CAPTIONS: Record<string, string> = {
+  en: "Tap here to enter", es: "Toca aquí para entrar", pt: "Toque aqui para entrar",
+  fr: "Touchez ici pour entrer", de: "Hier tippen zum Betreten", it: "Tocca qui per entrare",
+  ru: "Нажмите здесь, чтобы войти", ar: "اضغط هنا للدخول", hi: "प्रवेश के लिए यहाँ टैप करें",
+  zh: "轻触此处进入", ko: "여기를 탭하여 입장", tr: "Girmek için buraya dokunun",
+  nl: "Tik hier om binnen te gaan", pl: "Dotknij tutaj, aby wejść", id: "Ketuk di sini untuk masuk",
+  fil: "I-tap dito para pumasok",
 };
 
-export function introCaptions(lang: string): [string, string] {
+export function introCaptions(lang: string): string {
   const base = lang.toLowerCase().split("-")[0];
   return INTRO_CAPTIONS[lang.toLowerCase()] ?? INTRO_CAPTIONS[base] ?? INTRO_CAPTIONS.en;
 }
 
-const DURATION_MS = 7200;
+// Start fetching the galaxy photo the moment the app loads.
+let skyReady = false;
+const skyWaiters = new Set<() => void>();
+if (typeof window !== "undefined") {
+  const img = new Image();
+  const done = () => { skyReady = true; skyWaiters.forEach((f) => f()); skyWaiters.clear(); };
+  img.onload = () => (img.decode ? img.decode().catch(() => {}).then(done) : done());
+  img.onerror = done;
+  img.src = skyCluster;
+}
+const globeSize = () => Math.round(Math.max(220, Math.min(innerWidth * 0.82, innerHeight * 0.58, 560)));
 
 function Sparkles() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -92,6 +93,20 @@ export default function LaunchIntro() {
   const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
   const [leaving, setLeaving] = useState(false);
   const [lang, setLang] = useState(() => getTargetLang());
+  const [ready, setReady] = useState(skyReady);
+  const [size, setSize] = useState(() => (typeof window !== "undefined" ? globeSize() : 300));
+  useEffect(() => {
+    if (ready) return;
+    const go = () => setReady(true);
+    skyWaiters.add(go);
+    const cap = setTimeout(go, 5000); // slow networks still get the intro
+    return () => { skyWaiters.delete(go); clearTimeout(cap); };
+  }, [ready]);
+  useEffect(() => {
+    const r = () => setSize(globeSize());
+    addEventListener("resize", r);
+    return () => removeEventListener("resize", r);
+  }, []);
   const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
@@ -103,8 +118,7 @@ export default function LaunchIntro() {
   useEffect(() => {
     if (!show) return;
     const id = setInterval(() => setLang(getTargetLang()), 500);
-    const end = setTimeout(() => setLeaving(true), reduced ? 2500 : DURATION_MS);
-    return () => { clearInterval(id); clearTimeout(end); };
+    return () => clearInterval(id);
   }, [show, reduced]);
   useEffect(() => {
     if (!leaving) return;
@@ -113,23 +127,26 @@ export default function LaunchIntro() {
   }, [leaving]);
 
   if (!show) return null;
-  const [welcome, tap] = introCaptions(lang);
+  const tap = introCaptions(lang);
   const rtl = ["ar", "he", "fa", "ur"].includes(lang.split("-")[0]);
 
   return (
     <div
-      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""}`}
+      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
       role="status" aria-label="Drop That Thing"
       onClick={(e) => { if (!(e.target as Element).closest("[data-intro-keep]")) setLeaving(true); }}
     >
-      <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />
+      <div className="dtt-intro-sky absolute inset-0" aria-hidden>
+        <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />
+      </div>
+      <div className="dtt-intro-core absolute inset-0" aria-hidden />
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
-      <div className="relative flex flex-col items-center gap-8 px-6 text-center">
-        <div className="dtt-intro-globe"><EntryPassGlobe size={220} solid /></div>
+      <div className="relative flex flex-col items-center gap-6 px-6 text-center">
+        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid /></div>
         <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing</h1>
         <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-caption notranslate text-sm font-bold uppercase tracking-[0.3em] text-foreground/85" translate="no">
-          {welcome}<span className="mt-2 block text-[10px] tracking-[0.35em] text-foreground/60">{tap}</span>
+          {tap}
         </p>
       </div>
     </div>
