@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     const paths = [...byId.values()].map((m) => m.storage_path);
     const urls: Record<string, string> = {};
     if (paths.length) {
-      const { data: signed, error: sErr } = await admin.storage.from("vault").createSignedUrls(paths, 3600);
+      const { data: signed, error: sErr } = await admin.storage.from("vault").createSignedUrls(paths, 300);
       if (sErr) return json({ error: "Playback temporarily unavailable" }, 503);
       signed?.forEach((s: any, i: number) => { if (s.signedUrl) urls[paths[i]] = s.signedUrl; });
     }
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       const m = byId.get(r.video_id);
       return m ? [{ id: m.id, title: m.title, media_type: m.media_type, creator_id: m.creator_id, creator_name: names.get(m.creator_id) ?? null, purchased_at: r.purchased_at, url: urls[m.storage_path] ?? null }] : [];
     });
-    return json({ items, has_more: (rows?.length ?? 0) > 24, link_seconds: 3600 });
+    return json({ items, has_more: (rows?.length ?? 0) > 24, link_seconds: 300 });
   } catch (e: any) {
     return json({ error: e?.message ?? "Unexpected error" }, 500);
   }
