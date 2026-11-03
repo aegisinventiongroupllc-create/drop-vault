@@ -17,11 +17,20 @@ Deno.serve(async req => {
    const {data:i}=await db.from('participant_invitations').select('*').eq('token_hash',await hash(body.token)).is('consumed_at',null).gt('expires_at',new Date().toISOString()).maybeSingle();
    if(!i)throw new Error('Invitation expired or already used'); return i;
   };
-  if(['invitation','guest-submit'].includes(body.action)){
+  if(['invitation','guest-submit','link-creator'].includes(body.action)){
    const i=await readInvitation(); const {data:p}=await db.from('content_participants').select('*').eq('id',i.participant_id).single();
    if(!p)throw new Error('Invitation unavailable');
    const {data:m}=i.manifest_id?await db.from('content_manifests').select('id,title,bucket,recorded_on,status').eq('id',i.manifest_id).single():{data:null};
    if(body.action==='invitation')return json({label:p.label,manifest:m,consent:PARTICIPANT_CONSENT,expires_at:i.expires_at});
+   if(body.action==='link-creator'){
+    const bearer=req.headers.get('Authorization')?.replace(/^Bearer /,'');if(!bearer)return json({error:'Creator sign-in required'},401);
+    const {data:claims}=await db.auth.getClaims(bearer);const linked=claims?.claims?.sub;if(typeof linked!=='string'||linked===p.creator_id)throw new Error('A different verified creator must accept this invitation');
+    const {data:role}=await db.from('user_roles').select('role').eq('user_id',linked).eq('role','creator').maybeSingle();
+    const {data:v}=await db.from('creator_verifications').select('*').eq('user_id',linked).order('submitted_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();
+    if(!role||!v||v.status!=='approved'||!v.identity_confirmed||!v.reviewed_at||m)throw new Error('Approved creator identity required; use the private form for content consent');
+    const claimed=await db.from('participant_invitations').update({consumed_at:new Date().toISOString()}).eq('id',i.id).is('consumed_at',null).select('id').maybeSingle();check(claimed);if(!claimed.data)throw new Error('Invitation already used');
+    check(await db.from('content_participants').update({linked_user_id:linked,legal_name:[v.legal_first_name,v.legal_last_name].filter(Boolean).join(' '),date_of_birth:v.date_of_birth,country:v.country,status:'pending'}).eq('id',p.id));return json({success:true});
+   }
    if(body.agreed!==true || typeof body.legal_name!=='string'||body.legal_name.trim().length<2||body.legal_name.length>160||!adultAtRecording(body.dob,new Date().toISOString().slice(0,10)))throw new Error('Valid adult identity and agreement required');
    if(m && (!adultAtRecording(body.dob,m.recorded_on)||m.status==='approved'))throw new Error('Adult at recording required; approved content cannot be changed');
    // Consume before writing files: concurrent submissions cannot reuse this invitation.
@@ -70,14 +79,14 @@ Deno.serve(async req => {
   if(body.action==='manifest'){
    const bucket=body.bucket,path=body.path;
    if(!creator||!['vault','teasers','creator-profile-photos','profile-backdrops','request-deliveries'].includes(bucket)||typeof path!=='string'||!path.startsWith(`${uid}/`)||path.includes('..'))throw new Error('Owned uploaded content required');
-   const {data:objects}=await db.schema('storage').from('objects').select('updated_at').eq('bucket_id',bucket).eq('name',path).maybeSingle();
+   const {data:objects}=await db.rpc('participant_object_evidence',{_bucket:bucket,_path:path}).maybeSingle();
    if(!objects)throw new Error('Upload the private file first');
    const {data:v}=await db.from('creator_verifications').select('date_of_birth,status,identity_confirmed').eq('user_id',uid).order('submitted_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();
    if(!v||v.status!=='approved'||!v.identity_confirmed||!adultAtRecording(v.date_of_birth,body.recorded_on))throw new Error('Uploader must be verified and adult at recording');
    const ids=Array.isArray(body.participant_ids)?[...new Set(body.participant_ids)]:[];if(ids.length>30||ids.some(id=>!uuid(id)))throw new Error('Invalid participant list');
    if(ids.length){const p=await db.from('content_participants').select('id,creator_id,date_of_birth,status').in('id',ids);check(p);if(p.data?.length!==ids.length||p.data.some(p=>p.creator_id!==uid||p.status!=='approved'||!adultAtRecording(p.date_of_birth,body.recorded_on)))throw new Error('All listed guests need approved adult identities');}
    const evidence=[body.production_path,body.rights_path];if(evidence.some(p=>typeof p!=='string'||!p.startsWith(`${uid}/`)))throw new Error('Production and distribution-rights records required');
-   const {data:docs}=await db.schema('storage').from('objects').select('name').eq('bucket_id','participant-evidence').in('name',evidence);if(docs?.length!==new Set(evidence).size)throw new Error('Evidence missing');
+   for(const path of evidence){const {data:doc}=await db.rpc('participant_object_evidence',{_bucket:'participant-evidence',_path:path}).maybeSingle();if(!doc)throw new Error('Evidence missing');}
    const result=await db.from('content_manifests').insert({creator_id:uid,bucket,storage_path:path,object_updated_at:objects.updated_at,title:String(body.title??'').slice(0,160),recorded_on:body.recorded_on,participant_ids:ids,complete_declaration:body.complete===true,production_evidence_path:body.production_path,rights_evidence_path:body.rights_path,status:'pending'}).select('id').single();check(result);return json({id:result.data?.id});
   }
   if(body.action==='documents'){
