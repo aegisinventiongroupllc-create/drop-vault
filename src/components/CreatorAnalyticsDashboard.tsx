@@ -1,3 +1,4 @@
+import FoundingCongrats from "@/components/FoundingCongrats";
 import CreatorAgreementModal, { CREATOR_AGREEMENT_TEXT, CREATOR_AGREEMENT_VERSION } from "@/components/CreatorAgreementModal";
 import { useState, useEffect, useRef } from "react";
 import TopFansSection from "@/components/TopFansSection";
@@ -531,6 +532,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     <div className="mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
       {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
+      {authUserId && <FoundingCongrats userId={authUserId} />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
         setActiveSection("overview");
