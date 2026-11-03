@@ -829,6 +829,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       {activeSection === "requests" && (
         <div className="px-4 space-y-4">
           <CreatorRequestsPanel />
+          {authUserId && <CreatorCalendar userId={authUserId} onRequests={() => setActiveSection("requests")} onMedia={() => setActiveSection("media")} />}
           <Button variant="outline" className="w-full h-auto min-h-10 whitespace-normal" onClick={() => setActiveSection("messages")}>MESSAGES — TOP 10 FANS</Button>
         </div>
       )}

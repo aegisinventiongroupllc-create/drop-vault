@@ -5,7 +5,7 @@ export default function CreatorRevenueTerms() {
     <p><strong className="text-foreground">100,000 paid followers: 7-day Power Week at 92/8.</strong> You earn $18.40 per token for 7 days; DTT receives $1.60. Then you return to 90/10. Another Power Week starts at 200,000, 300,000 and each additional 100,000. A paid follower is a unique customer who paid to unlock your library; renewals, likes, hearts, tips and DTT entry payments alone do not count.</p>
     <p><strong className="text-foreground">PRO PASS ($1,500): 92/8 forever.</strong> $18.40 per token on every unlock, no follower goal needed.</p>
     <p><strong className="text-foreground">ELITE PASS ($3,500): 93/7 for life.</strong> $18.60 per token on every unlock. Pass holders see only their pass split; Power Weeks do not apply. Pass purchases remain Coming soon.</p>
-    <p>The first 5 approved women and 5 approved men creators per country receive 91/9 for 365 days from approval, then return to 90/10.</p>
+    <p>The first 5 approved women and 5 approved men creators per country receive 91/9 for life.</p>
     <p>Custom requests: 85/15 by default, 90/10 for Elite. Customer-paid fees are separate. Card processing of $1.90–$2.50 per token comes from the $4 buffer; any actual crypto network fee is passed through separately without reducing the $20 token allocation.</p>
     <p>VIP purchases are Coming soon pending payment approval. Payouts remain manual in Litecoin (LTC).</p>
   </div>;

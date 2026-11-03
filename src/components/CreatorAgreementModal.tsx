@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export const CREATOR_AGREEMENT_VERSION = "1.0";
+export const CREATOR_AGREEMENT_VERSION = "1.1";
 export const CREATOR_AGREEMENT_TEXT =
-  "DTT Creator Agreement v1.0 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
-  "standard payout is 90% of each $20 Bit-Token value; the first 10 approved women and 10 approved men creators per country receive 92% for one year from approval, then 90%; " +
+  "DTT Creator Agreement v1.1 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
+  "standard payout is 90% of each $20 Bit-Token value; the first 5 approved women and 5 approved men creators per country receive 91% for life; " +
   "Pro Pass grants 92/8 forever and Elite Pass grants 93/7 for life; without a pass, each 100k all-time unique customers who paid to unlock my library starts a 7-day 92/8 Power Week, then 90/10 resumes; each customer counts once, renewals and likes/hearts never count; custom requests pay 85% by default and 90% for Elite; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
   "I may leave at any time and DTT may suspend accounts that break the Creator & Purchase Rules or Terms of Service.";
 
@@ -20,7 +20,7 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
           <div className="text-xs text-muted-foreground space-y-3 leading-relaxed">
             <p>This agreement is between you and DTT Media LLC. There is no minimum term; you can stop at any time.</p>
             <p><span className="text-foreground font-medium">Your earnings.</span> You keep 90% of every $20 Bit-Token value ($18). The customer's $5 service fee never reduces your share.</p>
-            <p><span className="text-foreground font-medium">Founding creators.</span> The first 5 approved women and the first 5 approved men creators in each country receive 91/9 ($18.20 per token) for one full year from approval. After that year you return to 90/10 unless you hold a Pro or Elite pass.</p>
+            <p><span className="text-foreground font-medium">Founding creators.</span> The first 5 approved women and the first 5 approved men creators in each country receive 91/9 ($18.20 per token) for life.</p>
             <p><span className="text-foreground font-medium">Power Week.</span> At 100,000 paid followers you receive 92/8 ($18.40 per token) for 7 days, then return to 90/10. Another Power Week starts at each additional 100,000. Each unique customer who paid to unlock your library counts once; renewals, likes, hearts, tips and the DTT entry pass alone do not count.</p>
             <p><span className="text-foreground font-medium">VIP passes.</span> PRO PASS ($1,500) grants 92/8 forever. ELITE PASS ($3,500) grants 93/7 for life. Pass holders keep only their pass split. Pass purchases remain Coming soon.</p>
             <p><span className="text-foreground font-medium">Custom requests.</span> You earn 85% of the agreed price, or 90% with Elite, delivered only after the customer pays.</p>

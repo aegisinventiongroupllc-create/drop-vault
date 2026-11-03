@@ -7,6 +7,13 @@ export const VIP_PASSES = [
   { id: "ELITE_PASS", name: "ELITE PASS", price: 3500, perks: ["93/7 split for life on vault unlocks", "90/10 split on Request Room tips", "Verified VIP badge on your profile", "Priority discovery placement for 30 days"] },
 ] as const;
 
+/** Next founder's-birthday batch: May 1, 00:00 New York time. */
+export function nextVipBatch(now = new Date()) {
+  const year = now.getUTCFullYear();
+  const at = (y: number) => { const d = new Date(Date.UTC(y, 4, 1, 4)); return d; }; // 00:00 EDT = 04:00 UTC
+  return now < at(year) ? at(year) : at(year + 1);
+}
+
 export function passesRemaining(cap: number, sold: number) {
   return Math.max(0, cap - sold);
 }
@@ -59,6 +66,7 @@ export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string
           </div>
         ))}
       </div>
+      <p className="text-xs font-semibold text-gold">🎂 New VIP pass batch every year on the founder's birthday — May 1 at midnight (New York time). Next batch: {nextVipBatch().toLocaleDateString(undefined, { dateStyle: "long" })}.</p>
       <p className="text-[10px] text-muted-foreground">One-time buy-in. Purchases open once DTT's payment provider is approved.</p>
     </section>
   );
