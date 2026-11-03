@@ -53,3 +53,5 @@
   .dtt-intro *, .dtt-intro { animation: none !important; }
   .dtt-intro-globe, .dtt-intro-title, .dtt-intro-caption { opacity: 1; }
 }
+.dtt-intro-caption, .dtt-intro-title { text-shadow: 0 0 10px hsl(0 0% 0% / 0.95), 0 2px 18px hsl(0 0% 0% / 0.85); }
+.dtt-intro-caption { color: hsl(var(--foreground)); }
