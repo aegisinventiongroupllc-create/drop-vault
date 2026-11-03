@@ -470,6 +470,13 @@
       "when": 1793667565183,
       "tag": "0066_creator_calendar_and_48_hour_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1793668222010,
+      "tag": "0067_restrict_creator_calendar_anonymous_grants",
+      "breakpoints": true
     }
   ]
 }
