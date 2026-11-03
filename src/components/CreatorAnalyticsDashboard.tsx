@@ -570,8 +570,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             <Play className="w-3.5 h-3.5" />
             FEED
           </button>
-          {!adminPreview && (
-            <button
+            <Button
+              variant="ghost"
               onClick={() => {
                 if (!profileUsername) {
                   toast.error("Set your display name in Profile first, then you can preview your page.");
@@ -584,8 +584,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             >
               <Eye className="w-3.5 h-3.5" />
               MY PAGE
-            </button>
-          )}
+            </Button>
           <WalletIndicator />
           <button
             onClick={handleLogout}
