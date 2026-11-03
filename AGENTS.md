@@ -35,7 +35,7 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- Founding splits use permanent approval slots; both admin views share empty-market lists. Why: vacancies never alter awards.
+- Founding splits use permanent approval slots with counts/splits set server-side; both admin views share empty-market lists. Why: vacancies never alter awards.
 
 - Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
 - Discovery shelves use the paginated authorized teaser feed; persist only bounded account/market scroll and interest counts, no signed links; explicit playback gestures. Why: privacy, no autoplay.
