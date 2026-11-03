@@ -63,7 +63,8 @@ Deno.serve(async req => {
    if(admin&&body.country)pq=pq.eq('country',String(body.country).toUpperCase().slice(0,2));
    if(admin&&body.query)pq=pq.ilike('legal_name',`%${String(body.query).replace(/[%_]/g,'').slice(0,100)}%`);
    const [p,m]=await Promise.all([pq,mq]);check(p);check(m);
-   return json({participants:p.data,manifests:m.data});
+   const {data:staged}=await db.rpc('participant_staged_objects',{_owner:uid,_offset:offset});
+   return json({participants:p.data,manifests:m.data,staged:staged??[]});
   }
   if(body.action==='invite'){
    if(!creator||typeof body.label!=='string'||body.label.trim().length<2)throw new Error('Participant name required');
