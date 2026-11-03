@@ -547,6 +547,13 @@
       "when": 1793730437024,
       "tag": "0077_founding_five_91_9",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1793731999806,
+      "tag": "0078_founding_lifetime",
+      "breakpoints": true
     }
   ]
 }
