@@ -498,6 +498,13 @@
       "when": 1793714935420,
       "tag": "0070_pass_splits_and_92_power_week",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1793716084730,
+      "tag": "0071_unlock_creator_year",
+      "breakpoints": true
     }
   ]
 }
