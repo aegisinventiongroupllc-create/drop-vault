@@ -50,3 +50,4 @@
 - VIP inventory reads require the server-verified creator role; inventory writes remain service-only. Why: dashboard previews must not expose counter records publicly.
 - Revenue terms/countdowns use account-scoped server RPCs; request-share triggers overwrite unpaid client amounts and freeze paid earnings. Why: UI estimates cannot authorize payouts or rewrite history.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
+- Permanent video buyouts go through buy_permanent_video (active library access, creator opt-in, 'buyout-' ledger ids the follower trigger ignores); owned videos block deletion and are served only by the permanent-vault function. Why: paid saves must survive rotation without inflating followers.
