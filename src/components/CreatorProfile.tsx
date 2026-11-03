@@ -126,7 +126,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     return () => {cancel=true;clearTimeout(timer);};
   }, [isUnlocked,creatorId,vaultOffset]);
 
-  const handleUnlock = async () => {
+  const handleUnlock = async (year = false) => {
+    const need = year ? 26 : 1;
     if (!creatorId) {
       toast({ title: "Creator not found", description: "We couldn't find this creator's account.", variant: "destructive" });
       return;
@@ -135,13 +136,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       toast({ title: vaultCount === 0 ? "Library coming soon" : "Library unavailable", description: "No Bit-Token has been used." });
       return;
     }
-    if (balance < 1) {
-      toast({ title: "Need Bit-Tokens", description: "Buy at least 1 Bit-Token to unlock 14 days of access." });
+    if (balance < need) {
+      toast({ title: "Need Bit-Tokens", description: year ? "A full year takes 26 Bit-Tokens ($650)." : "Buy at least 1 Bit-Token to unlock 14 days of access." });
       setShowBuyModal(true);
       return;
     }
     setUnlocking(true);
-    const { error } = await supabase.rpc("unlock_creator", { _creator_id: creatorId });
+    const { error } = year ? await supabase.rpc("unlock_creator_year", { _creator_id: creatorId }) : await supabase.rpc("unlock_creator", { _creator_id: creatorId });
     setUnlocking(false);
     if (error) {
       if (error.message?.includes("INSUFFICIENT_TOKENS")) {
@@ -158,7 +159,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     setCoinDrop(true);
     window.setTimeout(() => setCoinDrop(false), 1800);
     await Promise.all([refreshBalance(), refreshSubs()]);
-    toast({ title: `Unlocked @${creatorName} ✓`, description: "14 days of full library access added." });
+    toast({ title: `Unlocked @${creatorName} ✓`, description: year ? "A full year (364 days) of library access added." : "14 days of full library access added." });
   };
 
   const TIP_AMOUNTS = [1, 2, 3];
@@ -191,7 +192,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
         {/* Public avatar */}
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={handleUnlock} canUnlock={libraryAvailable} isMen={isMen} />
+          <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} />
         </div>
       </div>
 
@@ -342,10 +343,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             )}
 
             {moreVault && <Button variant="outline" disabled={vaultLoading} onClick={()=>setVaultOffset(n=>n+24)}>{vaultLoading ? 'Loading…' : 'More videos'}</Button>}
-            <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={handleUnlock} disabled={unlocking || !libraryAvailable}>
+            <Button variant="outline" size="lg" className="w-full mt-3 gap-2" onClick={() => handleUnlock()} disabled={unlocking || !libraryAvailable}>
               {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               EXTEND +14 DAYS — 1 BIT-TOKEN
             </Button>
+            <Button variant="outline" size="lg" className="w-full mt-2 gap-2" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
+              KEEP THIS CREATOR FOR A YEAR — 26 BIT-TOKENS
+            </Button>
+            <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
           </>
         ) : !libraryAvailable ? (
           <p role="status" className="py-6 text-center text-sm text-muted-foreground">{vaultCount === 0 ? "Library coming soon. Paid unlocks are unavailable until content is added." : countError ? "The library could not be checked. Paid unlocks are unavailable." : "Checking library availability…"}</p>
@@ -356,10 +361,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <p className="text-sm font-bold text-foreground">Drop 1 DTT Bit-Token to unlock</p>
               <p className="text-xs text-muted-foreground mt-1">14 days of full access to every long-form video from @{creatorName}.</p>
             </div>
-            <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={handleUnlock} disabled={unlocking || !creatorId}>
+            <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={() => handleUnlock()} disabled={unlocking || !creatorId}>
               {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <img src={dttCoin} alt="" className="w-6 h-6 object-contain" />}
               DROP 1 BIT-TOKEN — UNLOCK 14 DAYS
             </Button>
+            <Button variant="outline" size="lg" className="w-full mt-2 gap-2" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
+              KEEP THIS CREATOR FOR A YEAR — 26 BIT-TOKENS
+            </Button>
+            <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
             <p className="text-center text-xs text-muted-foreground mt-2">
               Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"} • 1 = 14 days
             </p>
