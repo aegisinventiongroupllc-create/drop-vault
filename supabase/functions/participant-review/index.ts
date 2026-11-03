@@ -68,8 +68,12 @@ Deno.serve(async req => {
   }
   if(body.action==='invite'){
    if(!creator||typeof body.label!=='string'||body.label.trim().length<2)throw new Error('Participant name required');
+   const {count}=await db.from('content_participants').select('id',{count:'exact',head:true}).eq('creator_id',uid).gte('created_at',new Date(Date.now()-86400000).toISOString());if((count??0)>=30)throw new Error('Daily invitation limit reached. Contact DTT support.');
    const p=await db.from('content_participants').insert({creator_id:uid,label:body.label.trim().slice(0,120)}).select('id').single();check(p);if(!p.data)throw new Error('Unable to invite');
    return json({token:await invite(p.data.id,null)});
+  }
+  if(body.action==='resend'){
+   const {data:p}=await db.from('content_participants').select('id,creator_id,status').eq('id',body.participant_id).single();if(!p||p.creator_id!==uid||p.status==='approved')throw new Error('Pending owned participant required');return json({token:await invite(p.id,null)});
   }
   if(body.action==='consent-invite'){
    const {data:p}=await db.from('content_participants').select('id,creator_id').eq('id',body.participant_id).single();
