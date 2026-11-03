@@ -95,6 +95,12 @@ export default function LaunchIntro() {
   const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
+    const replay = () => { setLeaving(false); setShow(false); requestAnimationFrame(() => setShow(true)); };
+    window.addEventListener("dtt:replay-intro", replay);
+    return () => window.removeEventListener("dtt:replay-intro", replay);
+  }, []);
+
+  useEffect(() => {
     if (!show) return;
     const id = setInterval(() => setLang(getTargetLang()), 500);
     const end = setTimeout(() => setLeaving(true), reduced ? 2500 : DURATION_MS);

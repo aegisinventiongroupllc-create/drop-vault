@@ -47,6 +47,9 @@ const SecretAdmin = () => {
           <Button type="submit" variant="neon" className="w-full" disabled={busy}>
             {busy ? "CHECKING…" : "ENTER"}
           </Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => window.dispatchEvent(new Event("dtt:replay-intro"))}>
+            PREVIEW LOADING SCREEN
+          </Button>
         </form>
       </div>
     </>
