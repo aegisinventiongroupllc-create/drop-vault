@@ -119,6 +119,45 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_calendar_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          creator_id: string
+          id: string
+          kind: string
+          notes: string
+          remind_at: string | null
+          scheduled_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          creator_id?: string
+          id?: string
+          kind?: string
+          notes?: string
+          remind_at?: string | null
+          scheduled_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          creator_id?: string
+          id?: string
+          kind?: string
+          notes?: string
+          remind_at?: string | null
+          scheduled_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_comments: {
         Row: {
           author_id: string
@@ -523,6 +562,7 @@ export type Database = {
       custom_requests: {
         Row: {
           amount_usd: number
+          calendar_agreed_at: string | null
           counter_message: string | null
           counter_offer_usd: number | null
           created_at: string
@@ -548,6 +588,7 @@ export type Database = {
         }
         Insert: {
           amount_usd?: number
+          calendar_agreed_at?: string | null
           counter_message?: string | null
           counter_offer_usd?: number | null
           created_at?: string
@@ -573,6 +614,7 @@ export type Database = {
         }
         Update: {
           amount_usd?: number
+          calendar_agreed_at?: string | null
           counter_message?: string | null
           counter_offer_usd?: number | null
           created_at?: string
