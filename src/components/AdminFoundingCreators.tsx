@@ -18,7 +18,7 @@ const flag = (code: string) =>
   /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0))) : "🌐";
 const day = (s: string) => new Date(s).toLocaleDateString(undefined, { dateStyle: "medium" });
 
-/** Owner record of the first 10 women and 10 men approved creators per country (92/8 for 365 days). */
+/** Owner record of the first 5 women and 5 men approved creators per country (91/9 for 365 days). */
 const AdminFoundingCreators = () => {
   const [rows, setRows] = useState<FoundingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ const AdminFoundingCreators = () => {
 
   const List = ({ side, list, country }: { side: "women" | "men"; list: FoundingRow[]; country: string }) => (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-bold tracking-wider text-primary">{side === "women" ? "WOMEN" : "MEN"} · {list.length}/10</p>
+      <p className="text-[11px] font-bold tracking-wider text-primary">{side === "women" ? "WOMEN" : "MEN"} · {list.length}/5</p>
       {foundingSlots(list, country, side).map(({ slot, creator: r }) => {
         const active = r && new Date(r.ends_at).getTime() > Date.now();
         return (
@@ -65,7 +65,7 @@ const AdminFoundingCreators = () => {
                   {active ? `${r.split_creator}/${r.split_platform} until ${day(r.ends_at)}` : `Ended ${day(r.ends_at)}`}
                 </span>
               </>
-            ) : <div className="flex-1"><p className="text-gold font-semibold">Claim your 92/8 split</p><p className="text-muted-foreground mt-1">On creator approval · 365 days</p></div>}
+            ) : <div className="flex-1"><p className="text-gold font-semibold">Claim your 91/9 split</p><p className="text-muted-foreground mt-1">On creator approval · 365 days</p></div>}
           </div>
         );
       })}
@@ -74,10 +74,10 @@ const AdminFoundingCreators = () => {
 
   return (
     <div className="px-4 space-y-3">
-      <div className="flex flex-wrap justify-between items-center gap-2"><h2 className="font-bold">FOUNDING 10 BY COUNTRY</h2><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>REFRESH</Button></div>
+      <div className="flex flex-wrap justify-between items-center gap-2"><h2 className="font-bold">FOUNDING 5 BY COUNTRY</h2><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>REFRESH</Button></div>
       <Input aria-label="Search founding countries" placeholder="Search country…" value={query} onChange={(e) => setQuery(e.target.value)} />
       <p className="text-xs text-muted-foreground">
-        The first 10 approved women and 10 approved men creators in each country are locked in automatically at 92/8 for one year from approval. Slots are permanent and never reshuffle.
+        The first 5 approved women and 5 approved men creators in each country are locked in automatically at 91/9 for one year from approval, then 90/10. Slots are permanent and never reshuffle; awards made before this change keep their original split.
       </p>
       {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}
@@ -86,7 +86,7 @@ const AdminFoundingCreators = () => {
         <div key={code} className="rounded-lg border border-border bg-card">
           <Button variant="ghost" aria-expanded={open === code} onClick={() => setOpen(open === code ? null : code)} className="w-full h-auto flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm font-bold text-foreground whitespace-normal text-left">
             <span>{flag(code)} {countryName(code, code).toUpperCase()}</span>
-            <span className="text-xs text-muted-foreground">W {g.women.length}/10 · M {g.men.length}/10</span>
+            <span className="text-xs text-muted-foreground">W {g.women.length}/5 · M {g.men.length}/5</span>
           </Button>
           {open === code && (
             <div className="grid gap-4 px-4 pb-4 sm:grid-cols-2">

@@ -3,16 +3,16 @@ import { foundingCountries, foundingSlots } from "@/lib/foundingCreators";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 
 describe("per-country founding slots", () => {
-  it("keeps ten places when a country has no creators", () => {
+  it("keeps five places when a country has no creators", () => {
     const slots = foundingSlots([], "US", "women");
-    expect(slots.map((s) => s.slot)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(slots.map((s) => s.slot)).toEqual([1, 2, 3, 4, 5]);
     expect(slots.every((s) => s.creator === null)).toBe(true);
   });
-  it("preserves three claimed creators and seven available positions", () => {
+  it("preserves three claimed creators and two available positions", () => {
     const rows = [1, 2, 3].map((slot) => ({ creator_id: `creator-${slot}`, country: "US", vault_side: "women" as const, slot }));
     const slots = foundingSlots(rows, "US", "women");
     expect(slots.filter((s) => s.creator).map((s) => s.creator?.creator_id)).toEqual(["creator-1", "creator-2", "creator-3"]);
-    expect(slots.filter((s) => !s.creator)).toHaveLength(7);
+    expect(slots.filter((s) => !s.creator)).toHaveLength(2);
   });
   it("keeps men and women separate", () => {
     const rows = [{ creator_id: "man", country: "US", vault_side: "men" as const, slot: 1 }];
