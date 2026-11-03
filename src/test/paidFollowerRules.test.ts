@@ -26,8 +26,8 @@ describe.skipIf(!db)('paid library follower rules',()=>{
    await add('unlock-paid'); await add('autorenew-repeat'); await add('unlock-repeat');
    [count]=await sql`SELECT count(*)::int AS n FROM pg_temp.creator_paid_followers`; expect(count.n).toBe(1);
    const [total]=await sql`SELECT followers FROM pg_temp.creator_paid_follower_totals`; expect(Number(total.followers)).toBe(100000);
-   const [award]=await sql`SELECT count(*)::int AS n,min(split_creator) AS split,min(extract(epoch from ends_at-started_at)) AS seconds FROM pg_temp.power_weeks`; expect(award.n).toBe(1);expect(award.split).toBe(95);expect(Number(award.seconds)).toBe(604800);
-   const [tier]=await sql`SELECT custom_vault_split FROM pg_temp.creator_split_settings`;expect(Number(tier.custom_vault_split)).toBe(.92);
+   const [award]=await sql`SELECT count(*)::int AS n,min(split_creator) AS split,min(extract(epoch from ends_at-started_at)) AS seconds FROM pg_temp.power_weeks`; expect(award.n).toBe(1);expect(award.split).toBe(92);expect(Number(award.seconds)).toBe(604800);
+   const [tier]=await sql`SELECT custom_vault_split FROM pg_temp.creator_split_settings`;expect(Number(tier.custom_vault_split)).toBe(.90);
    const [heart]=await sql`SELECT count(*)::int AS n FROM pg_trigger WHERE tgrelid='public.creator_hearts'::regclass AND tgfoid='public.maybe_start_power_week()'::regprocedure`;expect(heart.n).toBe(0);
   });
  });
@@ -73,9 +73,9 @@ describe.skipIf(!db)('paid library follower rules',()=>{
    const [result]=await sql`SELECT (SELECT balance FROM pg_temp.token_balances WHERE user_id=${buyer}) AS balance,(SELECT count(*)::int FROM pg_temp.transactions) AS charges,(SELECT hearts FROM pg_temp.creator_heart_totals WHERE creator_id=${creator}) AS hearts,(SELECT first_transaction_id FROM pg_temp.creator_paid_followers WHERE creator_id=${creator} AND customer_id=${buyer}) AS first_transaction,(SELECT renewal_count FROM pg_temp.subscriptions WHERE id=${subscription}) AS renewals`;
    expect(result.balance).toBe(0);expect(result.charges).toBe(2);expect(Number(result.hearts)).toBe(2);expect(result.first_transaction).toBe(unlock.id);expect(result.renewals).toBe(1);
    const [award]=await sql`SELECT split_creator,split_platform,extract(epoch FROM ends_at-started_at) AS seconds FROM pg_temp.power_weeks WHERE creator_id=${creator}`;
-   expect(award.split_creator).toBe(95);expect(award.split_platform).toBe(5);expect(Number(award.seconds)).toBe(7*86400);
+   expect(award.split_creator).toBe(92);expect(award.split_platform).toBe(8);expect(Number(award.seconds)).toBe(7*86400);
    const [tier]=await sql`SELECT custom_vault_split FROM pg_temp.creator_split_settings WHERE creator_id=${creator}`;
-   expect(Number(tier.custom_vault_split)).toBe(.92);
+   expect(Number(tier.custom_vault_split)).toBe(.90);
   });
  });
  it('denies customer ledger writes and private follower reads',async()=>{
