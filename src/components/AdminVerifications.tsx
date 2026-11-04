@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { identityAge } from "@/lib/identityVerification";
+import { validIdentityExpiry } from "@/lib/creatorDraftRules";
 import { Link } from "react-router-dom";
 interface Row { id: string; user_id: string; legal_first_name: string; legal_last_name: string; date_of_birth: string; id_front_path: string; id_back_path: string; selfie_path: string; status: string; reviewer_notes: string | null; reviewed_at: string | null; submitted_at: string; email?: string; display_name?: string; country?: string; document_expires_on?: string; document_type?: string; issuing_country?: string; document_number?: string; }
 const REASONS = ["Blurry photo", "Holding note missing date", "Holding note missing username", "ID or face does not match", "Under 18"];
