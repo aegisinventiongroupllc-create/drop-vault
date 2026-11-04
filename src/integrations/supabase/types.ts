@@ -2343,6 +2343,7 @@ export type Database = {
         }
         Returns: string
       }
+      token_bundle_total: { Args: { _tokens: number }; Returns: number }
       unlock_creator: {
         Args: { _creator_id: string }
         Returns: {

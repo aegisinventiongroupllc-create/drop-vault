@@ -596,6 +596,13 @@
       "when": 1793800514312,
       "tag": "0084_preserve_recordkeeping_evidence_and_events",
       "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1793809330771,
+      "tag": "0085_token_bundle_pricing",
+      "breakpoints": true
     }
   ]
 }
