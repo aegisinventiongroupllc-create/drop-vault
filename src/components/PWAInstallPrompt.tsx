@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Download } from "lucide-react";
+import pinkGlobe from "@/assets/dtt-pink-globe-icon-clean.png";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -45,7 +46,7 @@ const PWAInstallPrompt = () => {
     <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8.5rem)] left-4 right-4 z-[90] max-w-md mx-auto">
       <div className="bg-card border border-primary/40 rounded-2xl p-4 shadow-lg neon-glow-sm flex items-center gap-3">
         <img
-          src="/dtt-icon-192.png"
+          src={pinkGlobe}
           alt="DTT"
           className="w-12 h-12 rounded-xl shrink-0"
         />
