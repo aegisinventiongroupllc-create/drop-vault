@@ -12,7 +12,7 @@ describe("tips have no customer fee", () => {
     expect(() => calculateTokenTip(0.5)).toThrow();
     expect(() => calculateTokenTip(0)).toThrow();
   });
-  it.each([[1, 25], [2, 50], [40, 1000]])("%i purchased tokens cost $%i including fees", (tokens, total) => {
+  it.each([[1, 25], [2, 50], [40, 920]])("%i purchased tokens cost $%i including fees", (tokens, total) => {
     expect(tokenInvoiceTotal(tokens)).toBe(total);
   });
 });

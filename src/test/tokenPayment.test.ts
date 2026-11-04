@@ -5,8 +5,16 @@ const receipt = { payment_id: "ABC", order_id: "dtt-order", user_id: "buyer", to
 const paid = { uuid: "INV-ABC", order_id: "dtt-order", status: "paid", test_mode: false, fiat_currency: "USD", amount_in_fiat: 25, amount_paid: 0.3, amount_to_pay: 0.3 };
 
 describe("crypto token confirmation", () => {
-  it.each([1, 5, 100])("accepts %s tokens at exactly $25 per token", tokens => {
-    expect(verifyTokenInvoice({ ...receipt, tokens, amount_usd: tokens * 25 }, { ...paid, amount_in_fiat: tokens * 25 })).toBe(true);
+  it.each([[1,25], [5,120], [10,230], [100,2300]])("accepts %s tokens at the $%s catalog total", (tokens, amount) => {
+    expect(verifyTokenInvoice({ ...receipt, tokens, amount_usd: amount }, { ...paid, amount_in_fiat: amount })).toBe(true);
+  });
+  it("requires discounted merchant amount to match the saved receipt", () => {
+    expect(verifyTokenInvoice({ ...receipt, tokens: 10, amount_usd: 230 }, { ...paid, amount_in_fiat: 229 })).toBe(false);
+    expect(verifyTokenInvoice({ ...receipt, tokens: 10, amount_usd: 230 }, { ...paid, amount_in_fiat: 250 })).toBe(false);
+  });
+  it("honors historical full-price receipts only at their original invoice total", () => {
+    expect(verifyTokenInvoice({ ...receipt, tokens: 5, amount_usd: 125 }, { ...paid, amount_in_fiat: 125 })).toBe(true);
+    expect(verifyTokenInvoice({ ...receipt, tokens: 5, amount_usd: 125 }, { ...paid, amount_in_fiat: 120 })).toBe(false);
   });
   it.each(["created", "partial", "canceled"])("does not credit %s invoices", async status => {
     const mark = vi.fn(); const credit = vi.fn();

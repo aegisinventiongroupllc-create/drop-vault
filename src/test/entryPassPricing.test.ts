@@ -44,12 +44,12 @@ describe("Bit-Token pricing", () => {
 
   it("prices the 5-token bundle at $125 with one fee", () => {
     expect(BUNDLE_TOKENS).toBe(5);
-    expect(BUNDLE_INVOICE_USD).toBe(125);
+    expect(BUNDLE_INVOICE_USD).toBe(120);
   });
 
   it("builds a $24 card-fee allowance into the bundle", () => {
     const split = calculateTokenPurchaseSplit(BUNDLE_INVOICE_USD, BUNDLE_TOKENS);
-    expect(split.processingAllowance).toBe(20);
+    expect(split.processingAllowance).toBe(15);
   });
 
   it("splits every $20 token base 90/10 with a $1 fee", () => {
@@ -73,10 +73,10 @@ describe("Transaction fee", () => {
   });
 
   it("charges $125 for 5 tokens", () => {
-    expect(tokenInvoiceTotal(5)).toBe(125);
+    expect(tokenInvoiceTotal(5)).toBe(120);
   });
 
   it("adds $1 to any quantity: 40 tokens = $1,000 + $1 = $1,001", () => {
-    expect(tokenInvoiceTotal(40)).toBe(1000);
+    expect(tokenInvoiceTotal(40)).toBe(920);
   });
 });
