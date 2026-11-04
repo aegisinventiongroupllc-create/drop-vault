@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import IdentityDatePicker from "@/components/IdentityDatePicker";
 import { identityAge, validIdentityImage } from "@/lib/identityVerification";
 import SelfieCamera from "@/components/SelfieCamera";
+import { canContinueVerification, DTT_VERIFICATION_STEPS } from "@/lib/dttVerificationSteps";
 
 type Status = "unsubmitted" | "pending" | "flagged" | "approved" | "rejected";
 export default function CreatorIdVerification({ userId, onApproved }: { userId: string; onApproved?: () => void }) {
@@ -22,6 +23,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   const [issuingCountry, setIssuingCountry] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const initialized = useRef(false);
   useEffect(() => {
@@ -82,12 +84,17 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
       toast.error("Submission failed", { description: error instanceof Error ? error.message : "Please try again." });
     } finally { setBusy(false); }
   };
+  const details = { name, dob, expires, issuingCountry, documentNumber };
+  const canContinue = canContinueVerification(step, details, files);
   if (loading) return <p className="text-muted-foreground">Loading verification…</p>;
-  if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">Identity Verified</h3><p className="text-sm text-muted-foreground">Your documents were approved. Content uploads are available subject to account requirements.</p></div>;
+  if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">Your documents were approved by DTT. Content uploads are available subject to account requirements.</p></div>;
   return <div className="space-y-4">
-    <h3 className="font-semibold text-foreground">Legal ID Verification</h3>
+    <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">Private identity review · Final decision by DTT</p></header>
     {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} Public publishing remains locked.</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}</div> : <>
       {status === "rejected" && <div role="alert" className="border border-destructive rounded-md p-3 text-sm"><p className="font-bold text-destructive">Submission declined</p><p className="text-foreground whitespace-pre-wrap">{notes}</p></div>}
+      <ol aria-label="Verification progress" className="grid grid-cols-2 gap-2 sm:grid-cols-4">{DTT_VERIFICATION_STEPS.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined} className={`border-b-2 py-2 text-sm ${step === index ? "border-primary text-primary font-semibold" : "border-border text-muted-foreground"}`}>{index + 1}. {label}</li>)}</ol>
+      <h4 className="font-semibold" tabIndex={-1}>Step {step + 1} · {DTT_VERIFICATION_STEPS[step]}</h4>
+      {step === 0 && <div className="space-y-4">
       <label className="block text-sm text-muted-foreground">Full Legal Name<Input aria-label="Full Legal Name" value={name} maxLength={160} onChange={e => setName(e.target.value)} /></label>
       <div className="space-y-2"><p className="text-sm text-muted-foreground">Date of Birth</p><IdentityDatePicker value={dob} onChange={setDob} /></div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -96,17 +103,24 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
         <label className="text-sm">Document number<Input aria-label="Document number" maxLength={100} value={documentNumber} onChange={e => setDocumentNumber(e.target.value)} /></label>
         <label className="text-sm">Expiration date<Input aria-label="Expiration date" type="date" value={expires} onChange={e => setExpires(e.target.value)} /></label>
       </div>
-      {(["front", "back", "selfie"] as const).map(slot => <div key={slot} className="space-y-2">
+      </div>}
+      {(["front", "back", "selfie"] as const).filter(slot => step === 1 ? slot !== "selfie" : step === 2 ? slot === "selfie" : false).map(slot => <div key={slot} className="space-y-2">
         <h4 className="font-semibold text-sm">{slot === "front" ? "Front of Government ID" : slot === "back" ? "Back of Government ID" : "Holding Photo / Selfie with ID and Note"}</h4>
         {slot === "selfie" && <p className="text-xs text-muted-foreground">Hold your ID next to your face with a handwritten note displaying 'Drop That Thing', today's date, and your username{username ? ` (${username})` : ""}. Today's date: {new Date().toISOString().slice(0, 10)}.</p>}
         <label className="block cursor-pointer border border-dashed border-border rounded-md p-4 focus-within:ring-2 focus-within:ring-ring" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); pick(slot, e.dataTransfer.files[0]); }}>
-          {previews[slot] && <img src={previews[slot]} alt={slot === "front" ? "Selected government ID" : "Selected holding photo"} className="max-h-56 w-full object-contain mb-3" />}
+          {previews[slot] && <img src={previews[slot]} alt={slot === "front" ? "Selected government ID front" : slot === "back" ? "Selected government ID back" : "Selected holding photo"} className="max-h-56 w-full object-contain mb-3" />}
           <span className="text-sm text-muted-foreground">Choose or drop an image · JPG, PNG, WebP · 10 MB maximum</span>
           <input aria-label={slot === "front" ? "Front of Government ID" : slot === "back" ? "Back of Government ID" : "Holding Selfie"} type="file" accept="image/jpeg,image/png,image/webp" className="block w-full text-sm mt-2" onChange={e => pick(slot, e.target.files?.[0])} />
         </label>
         {slot === "selfie" && <Button variant="outline" onClick={() => setCameraOpen(true)}>TAKE HOLDING-ID PHOTO</Button>}
       </div>)}
-      <Button variant="neon" className="w-full" disabled={busy} onClick={submit}>{busy ? "SUBMITTING…" : "SUBMIT FOR REVIEW"}</Button>
+      {step === 3 && <div className="space-y-4">
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div><dt className="text-sm text-muted-foreground">Full legal name</dt><dd className="break-words">{name}</dd></div><div><dt className="text-sm text-muted-foreground">Date of birth</dt><dd>{dob}</dd></div><div><dt className="text-sm text-muted-foreground">Document</dt><dd>{documentType.replaceAll("_", " ")} · {issuingCountry}</dd></div><div><dt className="text-sm text-muted-foreground">Expires</dt><dd>{expires}</dd></div></dl>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(["front", "back", "selfie"] as const).map(slot => <figure key={slot}>{previews[slot] && <img src={previews[slot]} alt={`Review ${slot} photo`} className="h-40 w-full object-contain border border-border rounded-md" />}<figcaption className="text-sm text-muted-foreground mt-2">{slot === "front" ? "ID front" : slot === "back" ? "ID back" : "Holding photo"}</figcaption></figure>)}</div>
+        {expires < new Date().toISOString().slice(0, 10) && <p role="alert" className="text-gold text-sm">This document has expired. Your submission will be flagged for further review.</p>}
+        <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">Specialist checks · Not connected</h5><p className="text-sm text-muted-foreground">Automated document, face and liveness checks have not been performed. This submission goes to DTT for human review.</p></div>
+      </div>}
+      <div className="flex gap-3">{step > 0 && <Button variant="outline" disabled={busy} onClick={() => setStep(current => current - 1)}>BACK</Button>}{step < 3 ? <Button variant="neon" className="flex-1" disabled={!canContinue || busy} onClick={() => setStep(current => current + 1)}>CONTINUE</Button> : <Button variant="neon" className="flex-1" disabled={busy || !canContinue} onClick={submit}>{busy ? "SUBMITTING…" : "SUBMIT FOR DTT REVIEW"}</Button>}</div>
     </>}
     <p className="text-xs text-muted-foreground">Documents are private and accessible only to you and authorized DTT administrators.</p>
     <SelfieCamera open={cameraOpen} onOpenChange={setCameraOpen} onPhoto={file => pick("selfie",file)} title="Holding-ID Photo" description="Hold your ID and dated DTT note beside your face. This photo is retained privately for human ID review, not certified biometric liveness." />
