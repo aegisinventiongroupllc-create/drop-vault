@@ -1,0 +1,13 @@
+.portrait-toss-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+.portrait-toss-coin { position: absolute; width: 46px; height: 46px; left: calc(50% - 23px); top: calc(50% - 23px); object-fit: contain; animation: portrait-token-toss 1.15s cubic-bezier(.22,.65,.32,1) both; filter: drop-shadow(0 0 8px hsl(var(--gold) / .7)); }
+.portrait-toss-lane-0 { --toss-start: -90px; }
+.portrait-toss-lane-1 { --toss-start: 0px; }
+.portrait-toss-lane-2 { --toss-start: 90px; }
+@keyframes portrait-token-toss {
+  0% { transform: translate(var(--toss-start), 160px) rotateY(0deg) scale(.65); opacity: 0; }
+  15% { opacity: 1; }
+  55% { transform: translate(calc(var(--toss-start) * .3), -65px) rotateY(540deg) scale(1); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(0,0) rotateY(900deg) scale(.08); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .portrait-toss-coin { animation: none; display: none; } }
