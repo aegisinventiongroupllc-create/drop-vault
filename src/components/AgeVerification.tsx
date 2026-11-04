@@ -73,7 +73,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
       <div className="relative flex min-h-full flex-col">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
         <div className="consent-globe relative h-20 w-20" aria-hidden="true">
-          <EntryPassGlobe size={80} sharp bright motionless={Boolean(reducedMotion)} />
+          <EntryPassGlobe size={80} solid sharp bright motionless={Boolean(reducedMotion)} />
         </div>
 
         <div>
