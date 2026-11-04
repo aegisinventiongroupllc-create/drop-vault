@@ -85,13 +85,23 @@ export default function SiteLanguagePicker() {
     setPos(lastPosRef.current);
   };
 
-  const endDrag = () => {
+  const endDrag = (activate: boolean) => {
     const drag = dragRef.current;
     dragRef.current = null;
     setDragging(false);
-    if (!drag?.moved || !lastPosRef.current) return;
-    try { localStorage.setItem(POS_KEY, JSON.stringify(lastPosRef.current)); } catch { /* ignore */ }
+    if (!drag) return;
+    if (drag.moved) {
+      if (lastPosRef.current) {
+        try { localStorage.setItem(POS_KEY, JSON.stringify(lastPosRef.current)); } catch { /* ignore */ }
+      }
+      suppressClickRef.current = true;
+      return;
+    }
+    if (!activate) return;
+    // Pointer capture retargets the native click to this container, so a plain
+    // tap activates the language button explicitly; the stray click is suppressed.
     suppressClickRef.current = true;
+    pillRef.current?.querySelector<HTMLButtonElement>("button")?.click();
   };
 
   return (
@@ -107,8 +117,8 @@ export default function SiteLanguagePicker() {
       translate="no"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
+      onPointerUp={() => endDrag(true)}
+      onPointerCancel={() => endDrag(false)}
       onClickCapture={(e) => {
         if (!suppressClickRef.current) return;
         e.preventDefault();
