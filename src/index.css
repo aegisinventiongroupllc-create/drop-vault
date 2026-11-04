@@ -310,15 +310,17 @@ body { top: 0 !important; }
 
 /* Entry consent artwork remains pink regardless of the selected vault. */
 .dtt-consent-screen { --primary: var(--consent-pink); --ring: var(--consent-pink); }
+.consent-globe [data-testid="entry-pass-globe"] { border: 0; background: transparent; }
+.consent-globe .globe-breathe > span { overflow: hidden; border-radius: 50%; }
 .consent-globe [data-testid="entry-pass-globe"] > p { font-size: 14px; letter-spacing: 0; }
 .consent-ripple-origin { position: absolute; width: 0; height: 0; }
-.consent-ripple { position: absolute; width: 240vmax; height: 240vmax; left: -120vmax; top: -120vmax; border-radius: 50%; border: 1px solid hsl(var(--consent-pink) / .5); box-shadow: var(--consent-ripple-shadow); opacity: 0; animation: consent-pond-ripple 3s cubic-bezier(.16,.6,.3,1) both; }
-.consent-ripple-1 { animation-delay: .22s; }
-.consent-ripple-2 { animation-delay: .44s; }
+.consent-ripple { position: absolute; width: 64px; height: 64px; left: -32px; top: -32px; border-radius: 50%; border: 1px solid hsl(var(--consent-pink) / .5); box-shadow: var(--consent-ripple-shadow); opacity: 0; animation: consent-pond-ripple 1s ease-out both; }
+.consent-ripple-1 { animation-delay: .12s; }
+.consent-ripple-2 { animation-delay: .24s; }
 @keyframes consent-pond-ripple {
-  0% { transform: scale(.005); opacity: 0; }
-  10% { opacity: .7; }
-  60% { opacity: .35; }
+  0% { transform: scale(.25); opacity: 0; }
+  10% { opacity: .55; }
+  60% { opacity: .2; }
   100% { transform: scale(1); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
