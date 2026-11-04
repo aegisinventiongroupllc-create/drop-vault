@@ -1,0 +1,2 @@
+GRANT EXECUTE ON FUNCTION public.token_bundle_total(integer) TO anon, authenticated;
+COMMENT ON FUNCTION public.token_bundle_total(integer) IS 'Public immutable price calculation only; grants no payment, balance or receipt access.';

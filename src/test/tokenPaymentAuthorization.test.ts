@@ -18,14 +18,21 @@ describe.skipIf(!db)("token payment database authorization", () => {
     if (!db) throw Error("Database required");
     const rollback = new Error("rollback isolated test");
     const result = await db.begin(async sql => {
+    const catalog = await sql`SELECT pg_get_functiondef('public.token_bundle_total(integer)'::regprocedure) AS definition`;
+    await sql.unsafe(catalog[0].definition.replace('public.token_bundle_total(', 'pg_temp.token_bundle_total('));
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {
       await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`);
       await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+      if (table === "token_payment_receipts") {
+        await sql.unsafe('ALTER TABLE pg_temp.token_payment_receipts DROP CONSTRAINT token_payment_receipts_check');
+        await sql.unsafe('ALTER TABLE pg_temp.token_payment_receipts ADD CHECK (amount_usd = tokens * 25 OR amount_usd = pg_temp.token_bundle_total(tokens))');
+      }
     }
     const rows = await sql`SELECT pg_get_functiondef('public.credit_tokens(uuid,text,integer,numeric)'::regprocedure) AS definition`;
     let definition = rows[0].definition.replace("public.credit_tokens(", "pg_temp.test_credit_tokens(");
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) definition = definition.replaceAll(`public.${table}`, `pg_temp.${table}`);
     definition = definition.replaceAll("auth.role()", "(current_setting('request.jwt.claims',true)::jsonb->>'role')");
+    definition = definition.replaceAll('public.token_bundle_total(', 'pg_temp.token_bundle_total(');
     await sql.unsafe(definition);
       await sql`SELECT set_config('request.jwt.claims','{"role":"authenticated"}',true)`;
       await expect(sql.savepoint(tx => tx`SELECT pg_temp.test_credit_tokens(gen_random_uuid(),'unauthorized',1,25)`)).rejects.toMatchObject({ code: "42501" });
@@ -47,6 +54,14 @@ describe.skipIf(!db)("token payment database authorization", () => {
       expect(balances[0].balance).toBe(1);
       const purchases = await sql`SELECT tokens_credited,amount_usd FROM pg_temp.token_purchases WHERE payment_id=${id}`;
       expect(purchases).toHaveLength(1); expect(purchases[0].tokens_credited).toBe(1); expect(Number(purchases[0].amount_usd)).toBe(25);
+      const bundleId = crypto.randomUUID();
+      await sql`INSERT INTO pg_temp.token_payment_receipts(payment_id,order_id,user_id,tokens,amount_usd,verified_at) VALUES(${bundleId},${bundleId},${uid},10,230,now())`;
+      await expect(sql.savepoint(tx => tx`SELECT pg_temp.test_credit_tokens(${uid},${bundleId},10,229)`)).rejects.toMatchObject({ code: "22023" });
+      const bundle = await sql`SELECT pg_temp.test_credit_tokens(${uid},${bundleId},10,230) AS credited`;
+      const duplicate = await sql`SELECT pg_temp.test_credit_tokens(${uid},${bundleId},10,230) AS credited`;
+      expect(bundle[0].credited).toBe(true); expect(duplicate[0].credited).toBe(false);
+      const updated = await sql`SELECT balance FROM pg_temp.token_balances WHERE user_id=${uid}`;
+      expect(updated[0].balance).toBe(11);
       throw rollback;
     }).catch(error => { if (error !== rollback) throw error; return "rolled back"; });
     expect(result).toBe("rolled back");

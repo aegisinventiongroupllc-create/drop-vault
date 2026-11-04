@@ -4,11 +4,12 @@ import { crypto as stdCrypto } from "jsr:@std/crypto@1";
 import { encodeHex } from "jsr:@std/encoding@1/hex";
 import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
 import { checkoutConsentValid } from "../_shared/checkoutConsent.ts";
+import { tokenBundleTotal } from "../_shared/tokenPricing.ts";
 
 // Server-side price catalog. The browser may only pick a package, never a price.
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
   single: { price: "25.00", tokens: 1 },
-  bundle: { price: "125.00", tokens: 5 },
+  bundle: { price: tokenBundleTotal(5).toFixed(2), tokens: 5 },
   entry_pass: { price: "20.00", tokens: 0 },
 };
 const INITIAL_PERIOD = "2"; // one-time sale; access length is enforced by our own 14-day logic
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
 
     const q = Number(body?.quantity);
     const pkg = String(body?.package ?? "") === "custom"
-      ? (Number.isInteger(q) && q >= 1 && q <= 100 ? { price: (q * 25).toFixed(2), tokens: q } : undefined)
+      ? (Number.isInteger(q) && q >= 1 && q <= 100 ? { price: tokenBundleTotal(q).toFixed(2), tokens: q } : undefined)
       : TOKEN_PACKAGES[String(body?.package ?? "")];
     if (!pkg) return json({ error: "Unknown token package" }, 400);
     const isEntryPass = String(body?.package ?? "") === "entry_pass";

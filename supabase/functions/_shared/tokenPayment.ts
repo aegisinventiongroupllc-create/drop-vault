@@ -1,4 +1,5 @@
 import { invoiceKey } from "./entryPassPayment.ts";
+import { validTokenReceiptPrice } from "./tokenPricing.ts";
 
 export interface TokenReceipt {
   payment_id: string;
@@ -18,7 +19,7 @@ export function verifyTokenInvoice(receipt: TokenReceipt, value: unknown): boole
   const paid = Number(invoice.amount_paid);
   const due = Number(invoice.amount_to_pay);
   return Number.isInteger(receipt.tokens) && receipt.tokens >= 1 && receipt.tokens <= 100
-    && Number(receipt.amount_usd) === receipt.tokens * 25
+    && validTokenReceiptPrice(receipt.tokens, Number(receipt.amount_usd))
     && receipt.currency === "USD"
     && !!receipt.payment_id && !!receipt.order_id && !!receipt.user_id
     && invoiceKey(invoice.uuid) === invoiceKey(receipt.payment_id)

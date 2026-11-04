@@ -1,12 +1,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { validTokenReceiptPrice } from "../_shared/tokenPricing.ts";
 
 // CCBill webhooks are unsigned, so we (1) only accept CCBill's published IP ranges,
 // (2) re-check the billed amount against our own price catalog, and
 // (3) credit idempotently by CCBill transaction id.
 const CCBILL_RANGES = ["64.38.212.", "64.38.215.", "64.38.240.", "64.38.241."];
-const PRICE_FOR_TOKENS: Record<number, number> = Object.fromEntries(
-  Array.from({ length: 100 }, (_, i) => [i + 1, (i + 1) * 25]),
-);
 
 const ok = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -103,9 +101,8 @@ Deno.serve(async (req) => {
     return ok({ ok: true, entry_pass: true });
   }
 
-  const expected = PRICE_FOR_TOKENS[tokens];
-  if (!/^[0-9a-f-]{36}$/i.test(userId) || !expected || !transactionId) return ok({ error: "invalid sale" }, 400);
-  if (Math.abs(billed - expected) > 0.01) {
+  if (!/^[0-9a-f-]{36}$/i.test(userId) || !Number.isInteger(tokens) || tokens < 1 || tokens > 100 || !transactionId) return ok({ error: "invalid sale" }, 400);
+  if (!validTokenReceiptPrice(tokens, billed)) {
     console.error("ccbill amount mismatch", { transactionId, tokens, billed });
     return ok({ error: "amount mismatch" }, 400);
   }

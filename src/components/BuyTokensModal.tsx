@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, BUNDLE_TOKENS, DEFAULT_PURCHASE_TOKENS, ENTRY_PASS_PRICE_USD,
-  TRANSACTION_FEE_USD, TOKEN_BASE_VALUE_USD, ADMIN_FEE_USD, tokenInvoiceTotal,
+  TRANSACTION_FEE_USD, TOKEN_BASE_VALUE_USD, tokenInvoiceTotal,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
@@ -220,7 +220,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <Button key={n} variant="outline" aria-pressed={quantity === n} onClick={() => setQty(n)}
                   className={`h-auto flex-col whitespace-normal rounded-lg border-2 p-3 text-center transition-all ${quantity === n ? "border-primary bg-primary/5 neon-glow-sm" : "border-border bg-secondary/50"}`}>
                   <p className="font-semibold text-foreground">{n} Bit-Token{n !== 1 ? "s" : ""}</p>
-                  <p className="text-sm font-bold text-primary">${n * TOKEN_INVOICE_USD}</p>
+                  <p className="text-sm font-bold text-primary">${tokenInvoiceTotal(n)}</p>
+                  {n > 1 && <p className="text-[10px] text-muted-foreground">Save ${n * TOKEN_INVOICE_USD - tokenInvoiceTotal(n)}</p>}
                 </Button>
               ))}
             </div>
@@ -234,16 +235,17 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <div className="rounded-xl border border-border bg-secondary/50 p-4 space-y-2">
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bit-Tokens</span><span className="font-bold text-foreground">{quantity}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Price each</span><span className="text-foreground">${TOKEN_INVOICE_USD}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Average price each</span><span className="text-foreground">${(invoiceAmount / quantity).toFixed(2)}</span></div>
+              {invoiceAmount < quantity * TOKEN_INVOICE_USD && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bundle savings</span><span className="text-primary">${quantity * TOKEN_INVOICE_USD - invoiceAmount}</span></div>}
               {TRANSACTION_FEE_USD > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Transaction fee</span><span className="text-foreground">${TRANSACTION_FEE_USD}</span></div>}
               <div className="flex justify-between border-t border-border pt-2 text-xl font-bold"><span className="text-foreground">Total</span><span className="text-primary">${invoiceAmount.toLocaleString("en-US")}</span></div>
-              <p className="text-xs text-muted-foreground">Includes a ${TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD} service and processing fee per token. No additional DTT checkout fee.</p>
+              <p className="text-xs text-muted-foreground">Each token has $20 spending value. Service and processing are included. No additional DTT checkout fee.</p>
               <details className="text-xs text-muted-foreground">
                 <summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary>
                 <div className="space-y-2 pt-1">
                   <div className="flex justify-between gap-3"><span>Token value</span><span>${(quantity * TOKEN_BASE_VALUE_USD).toLocaleString("en-US")}</span></div>
-                  <div className="flex justify-between gap-3"><span>Included service and processing fees</span><span>${quantity * (TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD)}</span></div>
-                  <p>Per token, the included fee contains ${ADMIN_FEE_USD} for DTT and ${TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD - ADMIN_FEE_USD} as a processing allowance. This allowance is DTT's pricing policy, not a verified provider charge.</p>
+                  <div className="flex justify-between gap-3"><span>Included service and processing</span><span>${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD}</span></div>
+                  <p>Bundle pricing applies automatically: 10 for $230, then 5 for $120, then remaining tokens at $25 each. Included amounts are DTT pricing, not verified provider charges.</p>
                   <p>Any separate wallet or provider charge must be shown before payment.</p>
                 </div>
               </details>
@@ -284,8 +286,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <div className="rounded-xl border border-border bg-secondary/50 p-3 space-y-1">
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""} @ $${TOKEN_INVOICE_USD}`}</span>
-                <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : quantity * TOKEN_INVOICE_USD}</span>
+                <span className="text-muted-foreground">{isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""}`}</span>
+                <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
               </div>
               {!isEntryPass && TRANSACTION_FEE_USD > 0 && (
                 <div className="flex justify-between text-sm">
@@ -297,7 +299,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <span className="text-foreground">Total charged today</span>
                 <span className="text-primary">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
               </div>
-              {!isEntryPass && <><p className="text-xs text-muted-foreground">Includes a ${TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD} service and processing fee per token. No additional DTT checkout fee.</p><details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${quantity * (TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD)} in service and processing fees. Per token: ${ADMIN_FEE_USD} for DTT and ${TOKEN_INVOICE_USD - TOKEN_BASE_VALUE_USD - ADMIN_FEE_USD} processing allowance, not a verified provider charge. Any separate wallet or provider charge must be shown before payment.</p></details></>}
+              {!isEntryPass && <><p className="text-xs text-muted-foreground">Each token has $20 spending value. No additional DTT checkout fee.</p>{invoiceAmount < quantity * TOKEN_INVOICE_USD && <p className="text-xs text-primary">Bundle savings: ${quantity * TOKEN_INVOICE_USD - invoiceAmount}</p>}<details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD} in service and processing. Included amounts are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment.</p></details></>}
             </div>
 
             {error && (
