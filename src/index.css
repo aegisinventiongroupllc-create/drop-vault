@@ -32,6 +32,9 @@
     --success-foreground: 0 0% 100%;
 
     --border: 0 0% 18%;
+    --dashboard-outline: var(--primary);
+    --dashboard-outline-rest: 0 0 4px hsl(var(--dashboard-outline) / .95), 0 0 14px hsl(var(--dashboard-outline) / .55), inset 0 0 6px hsl(var(--dashboard-outline) / .3);
+    --dashboard-outline-peak: 0 0 7px hsl(var(--dashboard-outline)), 0 0 22px hsl(var(--dashboard-outline) / .7), inset 0 0 10px hsl(var(--dashboard-outline) / .4);
     --input: 0 0% 18%;
     --ring: 330 100% 50%;
 
@@ -302,6 +305,23 @@ body { top: 0 !important; }
   .living-backdrop-particles, .living-backdrop-control, .living-backdrop-light { display: none; }
 }
 .dtt-auth-screen h1 { line-height: 1.4; }
+
+/* Account-selected neon is confined to private dashboard boxes, not portraits,
+   buttons, public profile previews or portalled dialogs. */
+html[data-dashboard-outline] .dtt-dashboard :is(div, section).border:not(.fixed, .fixed *):is([class*="rounded"], .dtt-panel),
+html[data-dashboard-outline] .dtt-dashboard .dtt-panel:not(button, label, .fixed *) {
+  border-color: hsl(var(--dashboard-outline));
+  box-shadow: var(--dashboard-outline-rest);
+  animation: dashboard-outline-flow 5s ease-in-out infinite;
+}
+@keyframes dashboard-outline-flow {
+  0%, 100% { box-shadow: var(--dashboard-outline-rest); }
+  50% { box-shadow: var(--dashboard-outline-peak); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-dashboard-outline] .dtt-dashboard :is(div, section).border:not(.fixed, .fixed *):is([class*="rounded"], .dtt-panel),
+  html[data-dashboard-outline] .dtt-dashboard .dtt-panel:not(button, label, .fixed *) { animation: none; }
+}
 
 @layer components {
   .dtt-panel {

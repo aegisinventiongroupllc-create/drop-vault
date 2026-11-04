@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_STAR_STYLE, activeTheme, loadTheme, previewTheme, resolveIdleBillboardTheme, resolveIdleSky, saveTheme, validateTheme } from "@/lib/userTheme";
 
 describe("personal globe preferences", () => {
+  it("persists the exact box outline wheel color separately from fills and highlights", () => {
+    saveTheme({ outline: "#14b8a6", card: "#202020", primary: "#ff0080" });
+    expect(loadTheme()).toEqual({ outline: "#14b8a6", card: "#202020", primary: "#ff0080" });
+    expect(validateTheme({ outline: "url(unsafe)" }).outline).toBeUndefined();
+    saveTheme({});
+  });
   it("matches idle ships to the member's dashboard highlights, panels and text", () => {
     expect(resolveIdleBillboardTheme({ primary: "#14b8a6", card: "#202020", foreground: "#fafafa", galaxy: "#ff0080" }, true))
       .toEqual({ primary: "#14b8a6", card: "#202020", foreground: "#fafafa" });

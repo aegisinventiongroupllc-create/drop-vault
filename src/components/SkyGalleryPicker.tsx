@@ -5,8 +5,9 @@ import HexColorWheel from "@/components/HexColorWheel";
 import GalaxyReel from "@/components/GalaxyReel";
 import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 import { loadTheme, resolveIdleSky, saveTheme, saveThemeToAccount, STAR_STYLES } from "@/lib/userTheme";
+import { toast } from "@/hooks/use-toast";
 
-export default function SkyGalleryPicker() {
+export default function SkyGalleryPicker({ onSaved }: { onSaved?: () => void }) {
   const saved = loadTheme();
   const idleSky = resolveIdleSky(saved);
   const [style, setStyle] = useState(idleSky.style);
@@ -14,6 +15,7 @@ export default function SkyGalleryPicker() {
   const [tinted, setTinted] = useState(Boolean(idleSky.tone));
   const [dashboard, setDashboard] = useState(saved.dashboardSky === true);
   const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
   const keep = () => {
     const previous = loadTheme();
     const sky = resolveIdleSky(previous);
@@ -28,11 +30,15 @@ export default function SkyGalleryPicker() {
     window.addEventListener("dtt-theme", update);
     return () => window.removeEventListener("dtt-theme", update);
   }, [dirty]);
-  const save = () => {
+  const save = async () => {
+    setSaving(true);
     const next = { ...loadTheme(), brbStyle: style, brbTone: tinted ? tone : undefined, dashboardSky: dashboard };
     saveTheme(next);
-    void saveThemeToAccount(next);
+    const synced = await saveThemeToAccount(next);
     setDirty(false);
+    setSaving(false);
+    toast({ title: synced ? "Sky saved" : "Sky saved on this device", description: synced ? undefined : "Account sync is unavailable. Your choice is kept on this device." });
+    onSaved?.();
   };
   const useMainGalaxy = () => {
     const next = { ...loadTheme() };
@@ -65,7 +71,7 @@ export default function SkyGalleryPicker() {
       <input type="checkbox" aria-label="Also use this sky behind my dashboard" checked={dashboard} onChange={(e) => { setDashboard(e.target.checked); setDirty(true); }} className="h-4 w-4 shrink-0 accent-primary" />
     </label>
     <div className="flex gap-2">
-      <Button type="button" disabled={!dirty} className="flex-1 text-xs" onClick={save}>Save sky</Button>
+      <Button type="button" disabled={!dirty || saving} className="flex-1 text-xs" onClick={() => void save()}>{saving ? "Saving…" : "Save sky"}</Button>
       <Button type="button" variant="outline" disabled={!dirty} className="flex-1 text-xs" onClick={keep}>Keep previous</Button>
     </div>
     <Button variant="outline" type="button" className="w-full whitespace-normal text-xs" onClick={() => window.dispatchEvent(new Event("dtt-brb-preview"))}>Preview saved Be Right Back screen</Button>

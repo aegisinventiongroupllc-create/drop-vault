@@ -156,6 +156,7 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
       void supabase.storage.from("profile-avatars").remove([previousPortraitPath]);
     }
     dirty.current = false;
+    setWheelOpen(false);
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     void clearPortraitDraft().catch(() => undefined);
     onSaved?.(clean, avatarToSave);
@@ -215,7 +216,7 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
   if (loading) return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
 
   return (
-    <section className={compact ? "space-y-5" : "w-full max-w-md space-y-5"}>
+    <section className={compact ? "dtt-dashboard space-y-5" : "dtt-dashboard w-full max-w-md space-y-5"}>
       <div className="relative flex items-center gap-5 overflow-hidden border-b border-border bg-background/95 py-3 backdrop-blur">
         <LivingProfileBackdrop image={profileBackdrop} />
         <div className="absolute inset-0 bg-background/50 pointer-events-none" />

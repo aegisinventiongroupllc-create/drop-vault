@@ -5,7 +5,7 @@ import TwinklingStars from "@/components/TwinklingStars";
 import { loadTheme, saveTheme, saveThemeToAccount } from "@/lib/userTheme";
 import { toast } from "@/hooks/use-toast";
 
-export default function DashboardStarsPicker() {
+export default function DashboardStarsPicker({ onSaved }: { onSaved?: () => void }) {
   const [enabled, setEnabled] = useState(loadTheme().dashboardStars === true);
   const [color, setColor] = useState(loadTheme().dashboardStarTone ?? "#ff0080");
   const [dirty, setDirty] = useState(false);
@@ -22,6 +22,7 @@ export default function DashboardStarsPicker() {
     const synced = await saveThemeToAccount(next);
     setDirty(false); setSaving(false);
     toast({ title: synced ? "Dashboard stars saved" : "Stars saved on this device", description: synced ? undefined : "Account sync is unavailable. Your choice is kept on this device." });
+    onSaved?.();
   };
   return <section className="space-y-3" aria-label="Twinkling dashboard stars">
     <div className="relative h-44 overflow-hidden rounded-md border border-border bg-background"><TwinklingStars color={color} /></div>

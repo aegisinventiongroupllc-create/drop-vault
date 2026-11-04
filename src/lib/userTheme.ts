@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createContext, useContext, useEffect, useState } from "react";
 // Personal dashboard colors, saved on this device. Display-only.
-export type ThemeKey = "primary" | "background" | "card" | "foreground" | "globe" | "globeBorder" | "galaxy";
+export type ThemeKey = "primary" | "background" | "card" | "outline" | "foreground" | "globe" | "globeBorder" | "galaxy";
 export type StarStyle = "living" | "deepfield" | "milkyway" | "cluster" | "blueMeteor" | "crescent" | "cosmicGold" | "violetWorld" | "celestialStorm" | "goldenMoon";
 export const DEFAULT_STAR_STYLE: StarStyle = "cluster";
 export type UserTheme = Partial<Record<ThemeKey, string>> & { globeNeon?: boolean; globeBorderNeon?: boolean; starStyle?: StarStyle; brbStyle?: StarStyle; brbTone?: string; dashboardSky?: boolean; dashboardStars?: boolean; dashboardStarTone?: string };
@@ -29,6 +29,7 @@ export const THEME_PARTS: { key: ThemeKey; label: string; vars: string[] }[] = [
   { key: "primary", label: "Buttons & highlights", vars: ["--primary", "--accent", "--ring"] },
   { key: "background", label: "Background", vars: ["--background"] },
   { key: "card", label: "Boxes & cards", vars: ["--card", "--popover"] },
+  { key: "outline", label: "Box outlines", vars: ["--dashboard-outline"] },
   { key: "foreground", label: "Text", vars: ["--foreground", "--card-foreground"] },
   { key: "globe", label: "Globe tone", vars: ["--globe-personal-tone"] },
   { key: "globeBorder", label: "Country outlines", vars: ["--globe-border-tone"] },
@@ -78,6 +79,7 @@ export function loadTheme(): UserTheme {
 
 export function applyTheme(theme: UserTheme = loadTheme()) {
   const root = document.documentElement;
+  root.toggleAttribute("data-dashboard-outline", Boolean(theme.outline && HEX.test(theme.outline)));
   for (const p of THEME_PARTS) {
     const v = theme[p.key];
     for (const cssVar of p.vars) {

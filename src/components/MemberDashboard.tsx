@@ -244,7 +244,7 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
   };
 
   return (
-    <div className="mobile-scroll-shell relative isolate flex flex-col">
+    <div className="dtt-dashboard mobile-scroll-shell relative isolate flex flex-col">
       <PersonalSkyBackdrop />
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
