@@ -370,6 +370,39 @@ export type Database = {
           },
         ]
       }
+      creator_drafts: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: string
+          is_published: boolean
+          kind: string
+          status: string
+          storage_path: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: string
+          is_published?: boolean
+          kind?: string
+          status?: string
+          storage_path: string
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: string
+          is_published?: boolean
+          kind?: string
+          status?: string
+          storage_path?: string
+          title?: string
+        }
+        Relationships: []
+      }
       creator_heart_totals: {
         Row: {
           creator_id: string
@@ -405,6 +438,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      creator_identity_events: {
+        Row: {
+          actor_id: string
+          created_at: string
+          event: string
+          id: string
+          notes: string | null
+          verification_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          event: string
+          id?: string
+          notes?: string | null
+          verification_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          event?: string
+          id?: string
+          notes?: string | null
+          verification_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_identity_events_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "creator_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       creator_media: {
         Row: {
@@ -652,10 +720,14 @@ export type Database = {
           creator_username: string | null
           date_of_birth: string
           document_bucket: string
+          document_expires_on: string | null
+          document_number: string | null
+          document_type: string | null
           id: string
           id_back_path: string
           id_front_path: string
           identity_confirmed: boolean
+          issuing_country: string | null
           legal_first_name: string
           legal_last_name: string
           reviewed_at: string | null
@@ -673,10 +745,14 @@ export type Database = {
           creator_username?: string | null
           date_of_birth: string
           document_bucket?: string
+          document_expires_on?: string | null
+          document_number?: string | null
+          document_type?: string | null
           id?: string
           id_back_path: string
           id_front_path: string
           identity_confirmed?: boolean
+          issuing_country?: string | null
           legal_first_name: string
           legal_last_name: string
           reviewed_at?: string | null
@@ -694,10 +770,14 @@ export type Database = {
           creator_username?: string | null
           date_of_birth?: string
           document_bucket?: string
+          document_expires_on?: string | null
+          document_number?: string | null
+          document_type?: string | null
           id?: string
           id_back_path?: string
           id_front_path?: string
           identity_confirmed?: boolean
+          issuing_country?: string | null
           legal_first_name?: string
           legal_last_name?: string
           reviewed_at?: string | null
@@ -1916,6 +1996,7 @@ export type Database = {
         Returns: undefined
       }
       buy_permanent_video: { Args: { _video_id: string }; Returns: string }
+      can_stage_creator_draft: { Args: { _user: string }; Returns: boolean }
       can_upload_creator_media: {
         Args: { _creator_id: string }
         Returns: boolean
@@ -2211,6 +2292,20 @@ export type Database = {
           _front: string
           _full_name: string
           _selfie: string
+        }
+        Returns: string
+      }
+      submit_creator_identity_v2: {
+        Args: {
+          _back: string
+          _country: string
+          _dob: string
+          _expires: string
+          _front: string
+          _full_name: string
+          _number: string
+          _selfie: string
+          _type: string
         }
         Returns: string
       }
