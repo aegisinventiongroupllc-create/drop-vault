@@ -17,6 +17,11 @@ describe.skipIf(!db)("deployed private verification safeguards",()=>{
     const rows=await db`SELECT id,public FROM storage.buckets WHERE id IN ('creator-2257-records','creator-drafts') ORDER BY id`;
     expect(rows).toEqual([{id:"creator-2257-records",public:false},{id:"creator-drafts",public:false}]);
   });
+  it("keeps signed consent records service-written",async()=>{
+    if(!db)throw Error("Database required");
+    const rows=await db`SELECT has_table_privilege('anon','public.age_consent_receipts','SELECT') AS public_read,has_table_privilege('authenticated','public.age_consent_receipts','INSERT') AS owner_write`;
+    expect(rows[0]).toEqual({public_read:false,owner_write:false});
+  });
   it("denies customer/anonymous draft access and client audit mutation",async()=>{
     if(!db)throw Error("Database required");
     const rows=await db`SELECT has_table_privilege('anon','public.creator_drafts','SELECT') AS public_read,has_table_privilege('authenticated','public.creator_identity_events','UPDATE') AS audit_update,has_table_privilege('authenticated','public.creator_identity_events','DELETE') AS audit_delete`;

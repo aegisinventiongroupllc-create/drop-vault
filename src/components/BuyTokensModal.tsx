@@ -7,6 +7,7 @@ import {
   TRANSACTION_FEE_USD, tokenInvoiceTotal,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
+import { affirmAgeConsent } from "@/lib/ageConsent";
 
 const FINAL_SALE_TEXT = "I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.";
 
@@ -72,9 +73,10 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     try {
       if (!(await requireSession())) return;
       await logConsent();
+      const consentReceipt=await affirmAgeConsent("checkout");
       setError(null);
       const { data, error: fnError } = await supabase.functions.invoke("ccbill-create-checkout", {
-        body: { ...(isEntryPass ? { package: "entry_pass" } : pkgBody), savecard: rememberCard },
+        body: { ...(isEntryPass ? { package: "entry_pass" } : pkgBody), savecard: rememberCard, consent_receipt:consentReceipt },
       });
       if (fnError || !data?.checkout_url) {
         setError(fnError ? await readFunctionError(fnError) : "Card checkout failed. Please try again.");
@@ -163,8 +165,9 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     setError(null);
     try {
       await logConsent();
+      const consentReceipt=await affirmAgeConsent("checkout");
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody },
+        body: { ...(isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody }),consent_receipt:consentReceipt },
       });
       if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);

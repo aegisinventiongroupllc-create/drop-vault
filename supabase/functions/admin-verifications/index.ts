@@ -26,7 +26,8 @@ Deno.serve(async req => {
  const body=parsed.data;
  const service=createClient(url,serviceKey);
  if(body.action==="list" || body.action==="export") {
- let query=service.from("creator_verifications").select("*",{count:"exact"}).order("country").order("legal_first_name").order("submitted_at",{ascending:false}).order("id");
+ const columns="id,user_id,legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,status,reviewer_notes,reviewed_at,submitted_at,country,creator_username,document_expires_on,document_type,issuing_country";
+ let query=service.from("creator_verifications").select(body.action==="export"?`${columns},document_number,reviewer_id,identity_confirmed`:columns,{count:"exact"}).order("country").order("legal_first_name").order("submitted_at",{ascending:false}).order("id");
  if(body.filter!=="all") query=query.eq("status",body.filter);
  if(body.country) query=query.eq("country",body.country);
  if(body.query) { const search=body.query.replace(/[^\p{L}\p{N}@ _-]/gu,""); if(search) query=query.or(`legal_first_name.ilike.%${search}%,legal_last_name.ilike.%${search}%,creator_username.ilike.%${search}%`); }
@@ -52,6 +53,8 @@ Deno.serve(async req => {
  if(error||!row) return json({error:"Record not found"},404);
  if(!["identity-documents","id-verifications","creator-2257-records"].includes(row.document_bucket)) return json({error:"Invalid evidence bucket"},400);
  const paths=[row.id_front_path,row.id_back_path,row.selfie_path].filter(path=>!!path&&path.startsWith(`${row.user_id}/`));
+ const logged=await service.from("activity_logs").insert({user_id:user.id,user_role:"admin",action_type:"identity_document_view",action_detail:"Opened private creator identity evidence",metadata:{verification_id:body.id},activity_date:new Date().toISOString().slice(0,10)});
+ if(logged.error)return json({error:"Could not record private document access"},500);
  const {data,error:signError}=await service.storage.from(row.document_bucket).createSignedUrls(paths,300);
  if(signError) return json({error:"Unable to open private images"},500);
  return json({urls:Object.fromEntries((data??[]).filter(item=>item.signedUrl).map(item=>[item.path,item.signedUrl]))});
