@@ -76,7 +76,7 @@ export default function CreatorWelcomeBack({ summary, onDismiss, onAnalytics, pr
 
   return (
     <Dialog open={summary !== null} onOpenChange={(open) => { if (!open) onDismiss(); }}>
-      <DialogContent className="welcome-reward w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden rounded-lg border-gold/40 bg-card p-0">
+      <DialogContent className="welcome-reward w-[calc(100%-2rem)] max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden rounded-lg bg-card p-0">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
           {!reducedMotion && COINS.map((coin, index) => (
             <motion.img key={index} src={coinImage} alt="" width={816} height={816}
@@ -88,22 +88,22 @@ export default function CreatorWelcomeBack({ summary, onDismiss, onAnalytics, pr
           ))}
         </div>
         <div className="welcome-reward-content relative flex min-h-[540px] flex-col items-center px-6 py-10 text-center sm:px-10">
-          <p className="mb-4 text-xs font-bold uppercase text-gold">{preview ? "Admin preview — sample earnings" : "Your vault kept moving"}</p>
+          <p className="mb-4 text-xs font-bold uppercase text-primary">{preview ? "Admin preview — sample earnings" : "Your vault kept moving"}</p>
           <DialogTitle className="font-display text-2xl font-bold leading-tight tracking-normal sm:text-3xl">WELCOME BACK</DialogTitle>
-          <div className="reward-main-coin relative my-6 h-36 w-36 sm:h-44 sm:w-44" aria-hidden="true">
+          <div key={summary ? "open" : "closed"} className="reward-main-coin relative my-6 h-36 w-36 sm:h-44 sm:w-44" aria-hidden="true">
             <img src={coinImage} alt="" width={816} height={816} className="h-full w-full object-contain" />
             <span className="reward-coin-shine absolute inset-2 overflow-hidden rounded-full" />
           </div>
           <DialogDescription className="text-base text-foreground">While you were away...</DialogDescription>
           <p className="mt-3 text-sm text-muted-foreground">You earned</p>
-          <p className={`my-1 max-w-full break-all font-bold tabular-nums text-gold ${displayUsd >= 100000 ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`} aria-hidden="true">
+          <p className={`my-1 max-w-full break-all font-bold tabular-nums text-primary ${displayUsd >= 100000 ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`} aria-hidden="true">
             {displayUsd.toLocaleString("en-US", { style: "currency", currency: "USD" })}
           </p>
           <p className="sr-only">You earned {summary?.usd.toFixed(2)} US dollars.</p>
           <p className="text-base font-semibold text-foreground">({summary?.tokens.toLocaleString("en-US", { maximumFractionDigits: 2 }) ?? 0} Bit-Tokens)</p>
           <p className="mt-2 text-xs text-muted-foreground">Your earnings after the platform share</p>
           {preview && <p className="mt-2 text-xs text-muted-foreground">10 example customers unlocked 14-day access. No money or coins were added.</p>}
-          <Button variant="gold" className="mt-8 h-12 w-full" onClick={onAnalytics}>View Analytics</Button>
+          <Button variant="default" className="mt-8 h-12 w-full" onClick={onAnalytics}>View Analytics</Button>
           <Button variant="ghost" size="sm" className="mt-3 text-xs text-muted-foreground" aria-pressed={sound} onClick={() => void toggleSound()}>
             Sound {sound ? "on" : "off"}
           </Button>

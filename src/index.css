@@ -42,7 +42,7 @@
 
     --gold: 43 96% 56%;
     --gold-foreground: 0 0% 0%;
-    --reward-shadow: 0 24px 100px hsl(var(--gold) / 0.16);
+    --reward-shadow: 0 24px 100px hsl(var(--dashboard-outline) / 0.16);
     --reward-shine: linear-gradient(110deg, transparent 30%, hsl(var(--foreground) / 0.65) 48%, transparent 65%);
     --reward-content: linear-gradient(to bottom, hsl(var(--card) / 0.25), hsl(var(--card) / 0.96) 54%);
     --star-core: hsl(var(--foreground));
@@ -98,7 +98,10 @@
   }
 }
 
-.welcome-reward { box-shadow: var(--reward-shadow); }
+.welcome-reward { border-color: hsl(var(--dashboard-outline)); box-shadow: var(--reward-shadow), var(--dashboard-outline-rest); }
+.reward-main-coin { animation: reward-coin-slow-spin 12s cubic-bezier(.35, 0, .25, 1) both; }
+@keyframes reward-coin-slow-spin { from { transform: perspective(700px) rotateY(0deg); } to { transform: perspective(700px) rotateY(720deg); } }
+@media (prefers-reduced-motion: reduce) { .reward-main-coin { animation: none; } }
 .dtt-qr-frame { background: hsl(var(--qr-surface)); border: 2px solid hsl(var(--primary)); animation: dtt-qr-pulse 2.4s ease-in-out infinite; }
 .dtt-qr-frame svg { display: block; max-width: 100%; height: auto; }
 @keyframes dtt-qr-pulse { 0%, 100% { box-shadow: var(--qr-glow-rest); } 50% { box-shadow: var(--qr-glow-peak); } }
