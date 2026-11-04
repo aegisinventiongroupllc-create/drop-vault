@@ -568,6 +568,13 @@
       "when": 1793796039873,
       "tag": "0080_private_identity_review_and_draft_foundations",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1793796279156,
+      "tag": "0081_explicit_private_draft_and_identity_audit_grants",
+      "breakpoints": true
     }
   ]
 }
