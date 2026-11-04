@@ -8,12 +8,12 @@ export const ENTRY_GLOBE: GlobeOverride = {
 };
 
 /** The entry-pass artwork, reused without changing anyone's saved theme. */
-export default function EntryPassGlobe({ size = 128, solid = false, sharp = false }: { size?: number; solid?: boolean; sharp?: boolean }) {
+export default function EntryPassGlobe({ size = 128, solid = false, sharp = false, bright = false, motionless = false }: { size?: number; solid?: boolean; sharp?: boolean; bright?: boolean; motionless?: boolean }) {
   return (
     <div className="relative inline-flex shrink-0 select-none" data-testid="entry-pass-globe">
       <div className={solid ? "globe-breathe" : "opacity-90 globe-breathe"}>
         <GlobeOverrideContext.Provider value={ENTRY_GLOBE}>
-          <MiniGlobe size={size} speed={0.15} lights backdrop={false} cameraDistance={solid ? 3.8 : 3.2} sharp={sharp} />
+          <MiniGlobe size={size} speed={motionless ? 0 : 0.15} lights backdrop={false} cameraDistance={solid ? 3.8 : 3.2} sharp={sharp} dotScale={bright ? 1.4 : undefined} glintBoost={bright ? 1.5 : undefined} />
         </GlobeOverrideContext.Provider>
       </div>
       <p className="absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>

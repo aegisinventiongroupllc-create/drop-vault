@@ -66,6 +66,8 @@
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
     --dtt-pink: 330 100% 60%;
+    --consent-pink: 330 100% 50%;
+    --consent-ripple-shadow: 0 0 12px hsl(var(--consent-pink) / .25), inset 0 0 10px hsl(var(--consent-pink) / .18);
     --dtt-blue: 205 100% 65%;
     --dtt-silver: 210 15% 90%;
     --dtt-gold: 43 96% 62%;
@@ -305,6 +307,24 @@ body { top: 0 !important; }
   .living-backdrop-particles, .living-backdrop-control, .living-backdrop-light { display: none; }
 }
 .dtt-auth-screen h1 { line-height: 1.4; }
+
+/* Entry consent artwork remains pink regardless of the selected vault. */
+.dtt-consent-screen { --primary: var(--consent-pink); --ring: var(--consent-pink); }
+.consent-globe [data-testid="entry-pass-globe"] > p { font-size: 14px; letter-spacing: 0; }
+.consent-ripple-origin { position: absolute; width: 0; height: 0; }
+.consent-ripple { position: absolute; width: 240vmax; height: 240vmax; left: -120vmax; top: -120vmax; border-radius: 50%; border: 1px solid hsl(var(--consent-pink) / .5); box-shadow: var(--consent-ripple-shadow); opacity: 0; animation: consent-pond-ripple 3s cubic-bezier(.16,.6,.3,1) both; }
+.consent-ripple-1 { animation-delay: .22s; }
+.consent-ripple-2 { animation-delay: .44s; }
+@keyframes consent-pond-ripple {
+  0% { transform: scale(.005); opacity: 0; }
+  10% { opacity: .7; }
+  60% { opacity: .35; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .consent-ripple { display: none; animation: none; }
+  .consent-globe .globe-breathe { animation: none; }
+}
 
 /* Account-selected neon is confined to private dashboard boxes, not portraits,
    buttons, public profile previews or portalled dialogs. */
