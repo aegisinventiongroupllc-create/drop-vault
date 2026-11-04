@@ -46,16 +46,23 @@
   50% { text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); transform: scale(1.04); }
 }
 
+.dtt-intro-tagline, .dtt-intro-adult { opacity: 0; }
+@keyframes dtt-tagline-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.dtt-intro-ready .dtt-intro-tagline { animation: dtt-tagline-in 1.2s ease-out 10.9s forwards; }
+.dtt-intro-ready .dtt-intro-adult { animation: dtt-tagline-in 1.2s ease-out 11.2s forwards; }
+
 .dtt-intro-caption { opacity: 0; }
 @keyframes dtt-caption { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
 
 .dtt-intro-still *, .dtt-intro-still { animation: none !important; }
-.dtt-intro-still .dtt-intro-globe, .dtt-intro-still .dtt-intro-title, .dtt-intro-still .dtt-intro-caption { opacity: 1; }
+.dtt-intro-still .dtt-intro-globe, .dtt-intro-still .dtt-intro-title, .dtt-intro-still .dtt-intro-caption,
+.dtt-intro-still .dtt-intro-tagline, .dtt-intro-still .dtt-intro-adult { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .dtt-intro *, .dtt-intro { animation: none !important; }
-  .dtt-intro-globe, .dtt-intro-title, .dtt-intro-caption { opacity: 1; }
+  .dtt-intro-globe, .dtt-intro-title, .dtt-intro-caption,
+  .dtt-intro-tagline, .dtt-intro-adult { opacity: 1; }
 }
-.dtt-intro-caption, .dtt-intro-title { text-shadow: 0 0 10px hsl(0 0% 0% / 0.95), 0 2px 18px hsl(0 0% 0% / 0.85); }
+.dtt-intro-caption, .dtt-intro-title, .dtt-intro-tagline, .dtt-intro-adult { text-shadow: 0 0 10px hsl(0 0% 0% / 0.95), 0 2px 18px hsl(0 0% 0% / 0.85); }
 .dtt-intro-caption { color: hsl(var(--foreground)); }
 
 /* Everything waits until the galaxy photo is ready, so it never pops in. */
