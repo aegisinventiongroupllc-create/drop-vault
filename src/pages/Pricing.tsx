@@ -7,11 +7,13 @@ import {
   TOKEN_INVOICE_USD,
   BUNDLE_TOKENS,
   BUNDLE_INVOICE_USD,
+  tokenInvoiceTotal,
 } from "@/lib/tokenEconomy";
 
 const plans = [
   { name: "1 Bit-Token", price: TOKEN_INVOICE_USD },
-  { name: `${BUNDLE_TOKENS} Bit-Tokens`, price: BUNDLE_INVOICE_USD, best: true },
+  { name: `${BUNDLE_TOKENS} Bit-Tokens`, price: BUNDLE_INVOICE_USD },
+  { name: "10 Bit-Tokens", price: tokenInvoiceTotal(10), best: true },
 ];
 
 const Pricing = () => (
@@ -27,7 +29,7 @@ const Pricing = () => (
 
       <header className="space-y-2 text-center">
         <h1 className="font-display text-2xl font-bold tracking-wider">PRICING</h1>
-        <p className="text-sm text-muted-foreground">Simple coins. No subscriptions. $25 per Bit-Token ($20 token + $5 service fee).</p>
+        <p className="text-sm text-muted-foreground">Simple coins. No subscriptions. One for $25, five for $120, ten for $230. Each token has $20 spending value. Service and processing included; no additional DTT checkout fee.</p>
       </header>
 
       <section className="rounded-2xl border-2 border-primary neon-glow-sm bg-card p-5 space-y-2">
