@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dttCoin from "@/assets/dtt-reward-coin.png";
 import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,22 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
   const [tipSent, setTipSent] = useState(false);
   const [tipNotification, setTipNotification] = useState<string | null>(null);
+  const [toss, setToss] = useState<{id: number; count: number; preview: boolean} | null>(null);
+  const [sound, setSound] = useState(true);
+  const audioRef = useRef<AudioContext | null>(null);
+  const libraryRef = useRef<HTMLDivElement>(null);
+  const [previewTokens, setPreviewTokens] = useState(1);
+  const [sequencePending, setSequencePending] = useState(false);
+  const finishSequence = useCallback(() => { setSequencePending(false); requestAnimationFrame(() => libraryRef.current?.scrollIntoView({block: "start", behavior: "smooth"})); }, []);
+  const prepareSound = () => {
+    if (!sound) return;
+    try { audioRef.current ??= new AudioContext(); void audioRef.current.resume(); } catch { /* Optional audio unsupported. */ }
+  };
+  useEffect(() => () => { void audioRef.current?.close(); }, []);
+  const previewToss = (count: number) => {
+    prepareSound(); setShowTipModal(false);
+    setToss({id: Date.now(), count, preview: true});
+  };
 
   const [isMen, setIsMen] = useState(false);
   const [vipBadge, setVipBadge] = useState(false);
@@ -76,7 +92,6 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     })();
     return () => { cancel = true; };
   }, [creatorName]);
-  const [coinDrop, setCoinDrop] = useState(false);
 
   // Public vault count (so locked users still see how many videos are inside)
   useEffect(() => {
@@ -142,6 +157,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       return;
     }
     setUnlocking(true);
+    prepareSound();
     const { error } = year ? await supabase.rpc("unlock_creator_year", { _creator_id: creatorId }) : await supabase.rpc("unlock_creator", { _creator_id: creatorId });
     setUnlocking(false);
     if (error) {
@@ -156,8 +172,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       }
       return;
     }
-    setCoinDrop(true);
-    window.setTimeout(() => setCoinDrop(false), 1800);
+    setSequencePending(true);
+    setToss({id: Date.now(), count: need, preview: false});
     await Promise.all([refreshBalance(), refreshSubs()]);
     toast({ title: `Unlocked @${creatorName} ✓`, description: year ? "A full year (364 days) of library access added." : "14 days of full library access added." });
   };
@@ -189,12 +205,6 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
   return (
     <div className="mobile-scroll-shell">
-      {coinDrop && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center pointer-events-none bg-background/60 backdrop-blur-sm" aria-hidden="true">
-          <img src={dttCoin} alt="" className="w-40 h-40 object-contain animate-[coin-drop_1.6s_ease-out_forwards]" />
-        </div>
-      )}
-      <style>{`@keyframes coin-drop{0%{transform:translateY(-60vh) rotateY(0) scale(.6);opacity:0}40%{opacity:1}70%{transform:translateY(0) rotateY(720deg) scale(1.1)}100%{transform:translateY(0) rotateY(720deg) scale(1);opacity:0}}`}</style>
       {/* Header — backdrop now runs down to right above the heart row */}
       <div className="relative">
         <div className="relative overflow-hidden bg-card">
@@ -209,7 +219,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
           {/* Avatar, name and role sit on the extended backdrop */}
           <div className="relative z-[5] flex flex-col items-center pt-14 px-4 text-center">
-            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} />
+            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} toss={toss} audio={sound ? audioRef.current : null} onSequenceComplete={finishSequence} />
             <div className="mt-3 flex items-center justify-center gap-2">
               <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
               {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
@@ -233,6 +243,12 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       </div>
 
       {/* Custom Request Button */}
+      <div className="px-4 mt-4 flex flex-wrap items-center justify-center gap-3">
+        <label className="text-xs text-muted-foreground">Bit-Tokens <input aria-label="Preview token quantity" type="number" min={1} step={1} value={previewTokens} onChange={event => { const value = Number(event.target.value); if (Number.isSafeInteger(value) && value > 0) setPreviewTokens(value); }} className="w-20 h-9 ml-2 rounded-md border border-input bg-background text-foreground px-2" /></label>
+        <Button variant="outline" onClick={() => previewToss(previewTokens)}>PREVIEW COIN TOSS</Button>
+        <label className="text-xs text-muted-foreground flex items-center gap-2"><input type="checkbox" checked={sound} onChange={event => setSound(event.target.checked)} /> Coin sound</label>
+        <p className="w-full text-center text-xs text-muted-foreground">Preview only · No Bit-Tokens spent</p>
+      </div>
       <div className="px-4 mt-6">
         <Button
           variant="gold"
@@ -296,6 +312,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                     </Button>
                   ))}
                 </div>
+                <label className="block text-xs text-muted-foreground mb-4">Bit-Tokens
+                  <input aria-label="Tip token quantity" type="number" min={1} step={1} value={selectedTip ?? ""} onChange={event => { const value = Number(event.target.value); setSelectedTip(Number.isSafeInteger(value) && value > 0 ? value : null); }} className="w-full h-10 mt-2 rounded-md border border-input bg-background text-foreground px-3" />
+                </label>
                 {tipPreview && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
                     <div className="flex justify-between"><span>Tip value:</span><span className="text-foreground font-bold">${tipPreview.tipAmount}</span></div>
@@ -313,6 +332,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                   <DollarSign className="w-4 h-4 mr-1" />
                   TIP CHECKOUT UNAVAILABLE
                 </Button>
+                <Button variant="outline" className="w-full mt-2" disabled={!selectedTip} onClick={() => selectedTip && previewToss(selectedTip)}>PREVIEW COIN TOSS</Button>
                 <p role="status" className="mt-3 text-xs text-muted-foreground text-center">No payment has been taken. Tips need an approved payment connection.</p>
               </>
             )}
@@ -321,14 +341,14 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       )}
 
       {/* Full Library — unlock or watch */}
-      <div className="px-4 mt-8">
+      <div ref={libraryRef} className="px-4 mt-8">
         <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
           Full Library
           <span className="text-xs text-muted-foreground font-normal">{vaultCount === null ? (countError ? "Unavailable" : "Checking…") : `(${vaultCount} ${vaultCount === 1 ? "item" : "items"})`}</span>
         </h3>
 
-        {isUnlocked ? (
+        {sequencePending ? <p role="status" className="text-sm text-muted-foreground py-6">Opening library…</p> : isUnlocked ? (
           <>
             <div className="bg-primary/10 border border-primary/40 rounded-xl px-4 py-3 mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
