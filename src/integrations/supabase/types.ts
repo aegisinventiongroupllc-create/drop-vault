@@ -98,6 +98,36 @@ export type Database = {
         }
         Relationships: []
       }
+      age_consent_receipts: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          method: string
+          policy_version: string
+          revoked_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          method: string
+          policy_version?: string
+          revoked_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          method?: string
+          policy_version?: string
+          revoked_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string

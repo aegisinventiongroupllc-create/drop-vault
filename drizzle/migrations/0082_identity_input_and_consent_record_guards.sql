@@ -1,0 +1,9 @@
+CREATE FUNCTION public.validate_identity_document_details() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.document_bucket='creator-2257-records' AND (NEW.document_type IS NULL OR NEW.document_type NOT IN ('passport','national_id','drivers_license','other') OR NEW.document_expires_on IS NULL OR NEW.issuing_country IS NULL OR NEW.issuing_country !~ '^[A-Z]{2}$' OR NEW.document_number IS NULL OR length(trim(NEW.document_number)) NOT BETWEEN 1 AND 100) THEN RAISE EXCEPTION 'Document details required'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER validate_private_identity_details BEFORE INSERT OR UPDATE ON public.creator_verifications FOR EACH ROW EXECUTE FUNCTION public.validate_identity_document_details();
+CREATE TABLE public.age_consent_receipts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,method text NOT NULL,policy_version text NOT NULL DEFAULT '2.0',created_at timestamptz NOT NULL DEFAULT now(),expires_at timestamptz NOT NULL DEFAULT(now()+interval '30 days'),revoked_at timestamptz);
+REVOKE ALL ON public.age_consent_receipts FROM PUBLIC,anon,authenticated;
+GRANT SELECT ON public.age_consent_receipts TO authenticated;
+GRANT ALL ON public.age_consent_receipts TO service_role;
+ALTER TABLE public.age_consent_receipts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Owner or admin reads consent receipts" ON public.age_consent_receipts FOR SELECT TO authenticated USING(user_id=auth.uid() OR public.has_role(auth.uid(),'admin'));
+COMMENT ON TABLE public.age_consent_receipts IS 'Server-issued self-affirmation records, not identity/age assurance. Unknown trusted location or required external age assurance remain separate access gates.';
