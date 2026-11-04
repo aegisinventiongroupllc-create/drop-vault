@@ -1,7 +1,7 @@
 {
-  "name": "DTT",
+  "name": "Drop That Thing",
   "short_name": "DTT",
-  "description": "The premium creator vault platform by DTT.",
+  "description": "Drop That Thing is an adults-only creator marketplace operated by DTT Media LLC.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
