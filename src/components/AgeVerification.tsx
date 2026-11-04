@@ -11,11 +11,14 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const [ageChecked, setAgeChecked] = useState(false);
   const [tosChecked, setTosChecked] = useState(false);
   const [contractorChecked, setContractorChecked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const allChecked = ageChecked && tosChecked && contractorChecked;
 
   const handleEnter = async () => {
-    if (!allChecked) return;
+    if (!allChecked || busy) return;
+    setBusy(true); setError("");
 
     try {
       let ipAddress = "unknown";
@@ -27,16 +30,17 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
 
       const fullConsentText = `[AGE] ${t.age_consent} [TOS] ${t.tos_consent} [CONTRACTOR] ${t.contractor_consent}`;
 
-      await supabase.from("legal_consents").insert({
+      const result = await supabase.from("legal_consents").insert({
         ip_address: ipAddress,
         user_agent: navigator.userAgent,
         terms_version: "2.0",
         consent_text: fullConsentText,
         consent_type: "age_tos_contractor_gate",
       });
-    } catch {}
-
-    onVerified();
+      if (result.error) throw result.error;
+      onVerified();
+    } catch { setError("Your consent could not be saved. Please retry before entering."); }
+    finally { setBusy(false); }
   };
 
   return (
@@ -56,6 +60,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
           <p className="text-muted-foreground text-sm leading-relaxed">
             {t.age_subtitle}
           </p>
+          <p className="mt-3 text-sm text-foreground">This site contains adult material. You must be at least 18 years of age (or the age of majority in your jurisdiction) to enter.</p>
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
@@ -80,9 +85,10 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
         </div>
 
         <div className="flex flex-col gap-3 w-full">
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="neon" size="lg" className="w-full px-2 text-sm font-semibold" onClick={handleEnter} disabled={!allChecked}>
-              {t.age_enter}
+              {busy ? "SAVING…" : t.age_enter}
             </Button>
             <Button variant="outline" size="lg" className="w-full px-2 text-sm font-bold tracking-wider" onClick={handleEnter} disabled={!allChecked} aria-label="LOG IN">
               LOG IN

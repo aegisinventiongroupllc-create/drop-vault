@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -42,6 +43,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
   const [role, setRole] = useState<UserRole>("customer");
   const [loading, setLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
+  const [registrationConsent, setRegistrationConsent] = useState(false);
 
   // Triple-tap the DROPTHATTHING logo to leave the signed-in preview of this page.
   const logoTaps = useRef(0);
@@ -123,6 +125,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
 
     const err = validate();
     if (err) { toast({ title: "Hold on", description: err, variant: "destructive" }); return; }
+    if (mode === "signup" && !registrationConsent) { toast({title:"Age certification required",description:"Confirm your age and agreement to the Terms before registering.",variant:"destructive"}); return; }
 
     setLoading(true);
     try {
@@ -132,7 +135,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
           password,
           options: {
             emailRedirectTo: AUTH_REDIRECT_ORIGIN,
-            data: { role },
+            data: { role, age_terms_certified: true, age_terms_version: "2.0", age_terms_certified_at: new Date().toISOString() },
           },
         });
         if (error) throw error;
@@ -253,13 +256,14 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
           )}
         </div>
 
+        {mode === "signup" && <label className="flex items-start gap-3 text-left text-sm text-muted-foreground"><Checkbox checked={registrationConsent} onCheckedChange={value=>setRegistrationConsent(value===true)} /><span>I certify under penalty of perjury that I am at least 18 years old and agree to the Terms of Service.</span></label>}
         {adminError && <p role="alert" className="text-sm text-destructive">{adminError}</p>}
         <Button
           variant="neon"
           size="lg"
           className="h-12 w-full text-sm font-semibold"
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || (mode === "signup" && !registrationConsent)}
         >
           {loading
             ? "PLEASE WAIT…"

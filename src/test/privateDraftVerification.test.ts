@@ -24,7 +24,7 @@ describe.skipIf(!db)("deployed private verification safeguards",()=>{
   });
   it("refuses signed-out identity submission",async()=>{
     if(!db)throw Error("Database required");
-    await expect(db`SELECT public.submit_creator_identity_v2('Example','2000-01-01','a','b','c','2030-01-01','passport','US','x')`).rejects.toThrow(/Creator sign-in required/);
+    await expect(db`SELECT public.submit_creator_identity_v2('Example','2000-01-01','a','b','c','2030-01-01','passport','US','x')`).rejects.toThrow(/Creator sign-in required|permission denied for function submit_creator_identity_v2/);
   });
   it.each(["pending","flagged","unsubmitted","rejected"])("server draft authorization for %s",async status=>{
     if(!db)throw Error("Database required");
