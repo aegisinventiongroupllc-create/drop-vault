@@ -69,6 +69,7 @@ export default function SiteLanguagePicker() {
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    suppressClickRef.current = false;
     dragRef.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, sl: anchored.left, st: anchored.top, moved: false };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
@@ -100,8 +101,8 @@ export default function SiteLanguagePicker() {
     if (!activate) return;
     // Pointer capture retargets the native click to this container, so a plain
     // tap activates the language button explicitly; the stray click is suppressed.
-    suppressClickRef.current = true;
     pillRef.current?.querySelector<HTMLButtonElement>("button")?.click();
+    suppressClickRef.current = true;
   };
 
   return (
