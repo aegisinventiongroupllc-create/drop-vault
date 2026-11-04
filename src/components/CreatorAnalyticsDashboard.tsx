@@ -840,20 +840,20 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
           {!uploadEligible && (
-            <div className="bg-card border-2 border-destructive/40 rounded-2xl p-5 text-center space-y-3">
-              <Lock className="w-10 h-10 text-destructive mx-auto" />
-              <h3 className="text-base font-bold text-foreground tracking-wider">UPLOADS LOCKED</h3>
-              <p className="text-xs text-muted-foreground">
-                {kycStatus === "pending"
-                  ? "Your ID submission is under review. Uploads unlock once an admin approves you."
-                  : kycStatus === "rejected"
-                  ? "Your last submission was rejected. Re-submit your ID to unlock uploads."
-                  : "You must verify your identity before uploading content."}
-              </p>
-              <Button variant="neon" onClick={() => setActiveSection("verification")}>
-                GO TO VERIFICATION
-              </Button>
-            </div>
+            <>
+              <div className="border-b border-border pb-4 space-y-3">
+                <h3 className="text-base font-bold text-foreground">{kycStatus === "rejected" ? "PUBLISHING AND UPLOADS LOCKED" : "PRIVATE PREPARATION"}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {kycStatus === "rejected"
+                    ? "Your last submission was declined. Return to verification to correct your submission; new uploads remain unavailable."
+                    : "Prepare your profile photos, teasers and full videos privately. Customers cannot see your page or drafts before DTT approves your identity. Each video also needs participant and content approval before it can go live."}
+                </p>
+                <Button variant="outline" onClick={() => setActiveSection("verification")}>
+                  EDIT PAGE / VERIFY ID
+                </Button>
+              </div>
+              {authUserId && <CreatorDrafts userId={authUserId} approved={false} />}
+            </>
           )}
           {uploadEligible && <>
           {/* Step 1: Title */}
