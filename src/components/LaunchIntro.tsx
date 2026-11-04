@@ -15,9 +15,62 @@ export const INTRO_CAPTIONS: Record<string, string> = {
   fil: "I-tap dito para pumasok",
 };
 
+/** Tagline under the title — saved translations only, never AI. */
+export const INTRO_TAGLINES: Record<string, string> = {
+  en: "No subscriptions. No pay-per-view. Just simple Bit-Tokens.",
+  es: "Sin suscripciones. Sin pago por visión. Solo Bit-Tokens simples.",
+  pt: "Sem assinaturas. Sem pagamento por visualização. Apenas Bit-Tokens simples.",
+  fr: "Pas d'abonnements. Pas de pay-per-view. Juste de simples Bit-Tokens.",
+  de: "Keine Abos. Kein Pay-per-View. Einfach nur Bit-Tokens.",
+  it: "Nessun abbonamento. Nessun pay-per-view. Solo semplici Bit-Tokens.",
+  ru: "Без подписок. Без платы за просмотр. Только простые Bit-Tokens.",
+  ar: "بلا اشتراكات. بلا دفع عند المشاهدة. فقط رموز Bit-Tokens بسيطة.",
+  hi: "कोई सदस्यता नहीं। कोई पे-पर-व्यू नहीं। बस सरल बिट-टोकन।",
+  zh: "无订阅。无按次付费。只需简单的 Bit-Tokens。",
+  ko: "구독도, 건당 결제도 없습니다. 간단한 비트 토큰만 있으면 됩니다.",
+  tr: "Abonelik yok. İzleme başına ödeme yok. Sadece basit Bit-Tokens.",
+  nl: "Geen abonnementen. Geen pay-per-view. Gewoon eenvoudige Bit-Tokens.",
+  pl: "Bez subskrypcji. Bez opłat za obejrzenie. Po prostu proste Bit-Tokensy.",
+  id: "Tanpa langganan. Tanpa bayar per tontonan. Cukup Bit-Tokens sederhana.",
+  fil: "Walang subscription. Walang bayad kada panonood. Simpleng Bit-Tokens lang.",
+};
+
+/** Small 18+ adult-content label — includes the 18+ marker in every language. */
+export const INTRO_ADULT: Record<string, string> = {
+  en: "18+ Adult creator content",
+  es: "18+ Contenido para adultos de creadores",
+  pt: "18+ Conteúdo adulto de criadores",
+  fr: "18+ Contenu pour adultes de créateurs",
+  de: "18+ Erwachseneninhalte von Creators",
+  it: "18+ Contenuti per adulti di creator",
+  ru: "18+ Контент для взрослых от авторов",
+  ar: "18+ محتوى للبالغين من المبدعين",
+  hi: "18+ निर्माताओं की वयस्क सामग्री",
+  zh: "18+ 成人创作者内容",
+  ko: "18+ 성인 크리에이터 콘텐츠",
+  tr: "18+ Yetişkin içerik üreticilerinin içeriği",
+  nl: "18+ Volwassenencontent van makers",
+  pl: "18+ Treści dla dorosłych od twórców",
+  id: "18+ Konten dewasa dari kreator",
+  fil: "18+ Adult na nilalaman mula sa mga creator",
+};
+
+const pickCaption = (dict: Record<string, string>, lang: string): string => {
+  const lower = lang.toLowerCase();
+  const base = lower.split("-")[0];
+  return dict[lower] ?? dict[base] ?? dict.en;
+};
+
 export function introCaptions(lang: string): string {
-  const base = lang.toLowerCase().split("-")[0];
-  return INTRO_CAPTIONS[lang.toLowerCase()] ?? INTRO_CAPTIONS[base] ?? INTRO_CAPTIONS.en;
+  return pickCaption(INTRO_CAPTIONS, lang);
+}
+
+export function introTaglines(lang: string): string {
+  return pickCaption(INTRO_TAGLINES, lang);
+}
+
+export function introAdultLabels(lang: string): string {
+  return pickCaption(INTRO_ADULT, lang);
 }
 
 // Start fetching the galaxy photo the moment the app loads.
@@ -142,9 +195,17 @@ export default function LaunchIntro() {
       <div className="dtt-intro-core absolute inset-0" aria-hidden />
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
-      <div className="relative flex flex-col items-center gap-6 px-6 text-center">
+      <div className="relative flex flex-col items-center gap-5 px-6 text-center">
         <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp /></div>
-        <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing</h1>
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing</h1>
+          <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-tagline notranslate max-w-xs text-[11px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-foreground/80" translate="no">
+            {introTaglines(lang)}
+          </p>
+          <span dir={rtl ? "rtl" : "ltr"} className="dtt-intro-adult notranslate rounded-full border border-primary/40 bg-background/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/90" translate="no">
+            {introAdultLabels(lang)}
+          </span>
+        </div>
         <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-caption notranslate text-sm font-bold uppercase tracking-[0.3em] text-foreground/85" translate="no">
           {tap}
         </p>
