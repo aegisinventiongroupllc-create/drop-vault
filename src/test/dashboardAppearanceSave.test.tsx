@@ -5,7 +5,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {
   auth: { getUser: async () => ({ data: { user: { id: "appearance-owner" } } }) },
   from: () => ({ update: mocks.update }),
 } }));
-vi.mock("@/components/HexColorWheel", () => ({ default: ({ onChange }: { onChange: (hex: string) => void }) => <input aria-label="Test outline wheel" onChange={e => onChange(e.target.value)} /> }));
+vi.mock("@/components/HexColorWheel", () => ({ default: ({ onChange, label }: { onChange: (hex: string) => void; label: string }) => <input aria-label={label} onChange={e => onChange(e.target.value)} /> }));
 vi.mock("@/components/MiniGlobe", () => ({ default: () => null }));
 vi.mock("@/components/GalaxyReel", () => ({ default: () => null }));
 vi.mock("@/components/SkyGalleryPicker", () => ({ default: () => null }));
@@ -22,7 +22,7 @@ describe("dashboard appearance saving", () => {
     render(<DashboardColorPicker />);
     fireEvent.click(screen.getByRole("button", { name: "SHOW COLORS" }));
     fireEvent.click(screen.getByRole("button", { name: "Open color wheel for Box outlines" }));
-    fireEvent.change(screen.getAllByLabelText("Test outline wheel")[1], { target: { value: "#14b8a6" } });
+    fireEvent.change(screen.getByLabelText("Color wheel for Box outlines"), { target: { value: "#14b8a6" } });
     fireEvent.click(screen.getByRole("button", { name: "Save dashboard appearance" }));
     await waitFor(() => expect(mocks.update).toHaveBeenCalledWith({ ui_theme: { outline: "#14b8a6" } }));
     expect(eq).toHaveBeenCalledWith("user_id", "appearance-owner");
