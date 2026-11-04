@@ -5,6 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import LegalFooter from "@/components/LegalFooter";
+import { affirmAgeConsent } from "@/lib/ageConsent";
 
 const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const { t } = useI18n();
@@ -38,6 +39,8 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
         consent_type: "age_tos_contractor_gate",
       });
       if (result.error) throw result.error;
+      const receipt=await affirmAgeConsent("entry");
+      localStorage.setItem("dtt_age_consent_receipt",receipt);
       onVerified();
     } catch { setError("Your consent could not be saved. Please retry before entering."); }
     finally { setBusy(false); }

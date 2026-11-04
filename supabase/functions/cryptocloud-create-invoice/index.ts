@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { priceAgreedRequest } from "../_shared/customRequestPayment.ts";
 import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
+import { checkoutConsentValid } from "../_shared/checkoutConsent.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -104,6 +105,7 @@ Deno.serve(async (req) => {
     const server = createClient(SUPABASE_URL, SERVICE_ROLE, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+    if(!(await checkoutConsentValid(server,body?.consent_receipt,userId)))return json({error:"Fresh age and checkout affirmation required"},403);
     const isCustomRequest = body?.kind === "custom_request";
     let requestPrice: { base_usd: number; amount_usd: number } | null = null;
     let requestId = "";

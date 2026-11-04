@@ -1,5 +1,6 @@
 import { allowedVaults } from "@/lib/customerPreference";
 import { previewNeedsSignIn } from "@/lib/adminSession";
+import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
 import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
@@ -79,7 +80,8 @@ const Index = () => {
   const savedPrefs = loadPrefs();
 
   const isAdminOverride = typeof window !== "undefined" && localStorage.getItem("dtt_admin_override") === "1";
-  const [verified, setVerified] = useState(() => isAdminOverride || sessionStorage.getItem("dtt_verified") === "1");
+  const [verified, setVerified] = useState(false);
+  useEffect(()=>{let active=true;void verifyEntryConsent().then(valid=>{if(active)setVerified(valid);});return()=>{active=false;};},[]);
   const [role, setRole] = useState<UserRole | null>(savedPrefs?.role ?? null);
   const [email, setEmail] = useState(savedPrefs?.email ?? "");
   const [preference, setPreference] = useState<GenderPreference | null>(savedPrefs?.preference ?? savedPrefs?.vault ?? null);

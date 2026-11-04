@@ -3,6 +3,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { crypto as stdCrypto } from "jsr:@std/crypto@1";
 import { encodeHex } from "jsr:@std/encoding@1/hex";
 import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
+import { checkoutConsentValid } from "../_shared/checkoutConsent.ts";
 
 // Server-side price catalog. The browser may only pick a package, never a price.
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
@@ -51,6 +52,9 @@ Deno.serve(async (req) => {
     });
     const { data: userData, error: userErr } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
     if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+    const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!serviceKey)return json({error:"Checkout unavailable"},503);
+    if(!(await checkoutConsentValid(createClient(backendUrl,serviceKey),body?.consent_receipt,userData.user.id)))return json({error:"Fresh age and checkout affirmation required"},403);
 
     const q = Number(body?.quantity);
     const pkg = String(body?.package ?? "") === "custom"
