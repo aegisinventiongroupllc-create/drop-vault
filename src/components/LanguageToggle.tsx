@@ -5,16 +5,29 @@ import { EXTRA_LANGUAGES, setAutoLang } from "@/lib/siteTranslate";
 import { getTargetLang } from "@/components/AutoTranslator";
 import { Button } from '@/components/ui/button';
 
-const LanguageToggle = ({ prominent = false, placement = "below" }: { prominent?: boolean; placement?: "above" | "below" }) => {
+const LanguageToggle = ({
+  prominent = false,
+  placement = "below",
+  onOpenChange,
+}: {
+  prominent?: boolean;
+  placement?: "above" | "below";
+  onOpenChange?: (open: boolean) => void;
+}) => {
   const { setLocale, locales } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const target = getTargetLang();
   const label = Object.entries({ ...locales, ...EXTRA_LANGUAGES }).find(([code]) => code.toLowerCase() === target)?.[1] || target.toUpperCase();
 
+  const openMenu = (next: boolean) => {
+    setOpen(next);
+    onOpenChange?.(next);
+  };
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) openMenu(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -28,7 +41,7 @@ const LanguageToggle = ({ prominent = false, placement = "below" }: { prominent?
   return (
     <div ref={ref} className="relative notranslate" translate="no">
       <Button variant="ghost"
-        onClick={() => setOpen(!open)}
+        onClick={() => openMenu(!open)}
         className="flex items-center gap-2 px-3 py-2 rounded-md bg-card border border-border hover:border-primary/40 transition-all text-xs font-bold tracking-normal text-foreground"
         aria-label="Change language"
         aria-expanded={open}
@@ -45,7 +58,7 @@ const LanguageToggle = ({ prominent = false, placement = "below" }: { prominent?
               key={l}
               onClick={() => {
                 setLocale(l);
-                setOpen(false);
+                openMenu(false);
                 setAutoLang(null);
               }}
               className={`${itemCls(getTargetLang() === l)} justify-start h-auto whitespace-normal`}
@@ -59,7 +72,7 @@ const LanguageToggle = ({ prominent = false, placement = "below" }: { prominent?
               key={code}
               onClick={() => {
                 setLocale("en");
-                setOpen(false);
+                openMenu(false);
                 setAutoLang(code);
               }}
               className={`${itemCls(getTargetLang() === code.toLowerCase())} justify-start h-auto whitespace-normal`}
