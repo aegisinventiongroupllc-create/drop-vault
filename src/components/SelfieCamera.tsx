@@ -3,10 +3,12 @@ import { Camera, Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
-export default function SelfieCamera({ open, onOpenChange, onPhoto }: {
+export default function SelfieCamera({ open, onOpenChange, onPhoto, title = "Snap Your Face for Emoji", description = "Your photo is used only to create your emoji." }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPhoto: (file: File) => void;
+  title?: string;
+  description?: string;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -72,8 +74,8 @@ export default function SelfieCamera({ open, onOpenChange, onPhoto }: {
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-lg">
-      <DialogTitle>Snap Your Face for Emoji</DialogTitle>
-      <DialogDescription>Your photo is used only to create your emoji.</DialogDescription>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogDescription>{description}</DialogDescription>
       <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
         <video ref={video} autoPlay muted playsInline onLoadedData={() => setReady(true)} className="h-full w-full object-contain -scale-x-100" aria-label="Live selfie camera" />
         {!ready && !error && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}

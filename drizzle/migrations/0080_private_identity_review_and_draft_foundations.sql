@@ -1,0 +1,53 @@
+ALTER TABLE public.creator_verifications ADD COLUMN document_expires_on date, ADD COLUMN document_type text, ADD COLUMN issuing_country text, ADD COLUMN document_number text;
+CREATE TABLE public.creator_identity_events(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), verification_id uuid NOT NULL REFERENCES public.creator_verifications(id), actor_id uuid NOT NULL, event text NOT NULL, notes text, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.creator_identity_events TO authenticated;
+GRANT ALL ON public.creator_identity_events TO service_role;
+ALTER TABLE public.creator_identity_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Administrators read identity audit" ON public.creator_identity_events FOR SELECT TO authenticated USING(public.has_role(auth.uid(),'admin'));
+CREATE FUNCTION public.log_creator_identity_event() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF TG_OP='INSERT' OR NEW.status IS DISTINCT FROM OLD.status THEN INSERT INTO public.creator_identity_events(verification_id,actor_id,event,notes) VALUES(NEW.id,coalesce(NEW.reviewer_id,NEW.user_id),NEW.status,NEW.reviewer_notes); END IF; RETURN NEW; END $$;
+CREATE TRIGGER creator_identity_audit AFTER INSERT OR UPDATE ON public.creator_verifications FOR EACH ROW EXECUTE FUNCTION public.log_creator_identity_event();
+CREATE FUNCTION public.submit_creator_identity_v2(_full_name text,_dob date,_front text,_back text,_selfie text,_expires date,_type text,_country text,_number text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE u uuid:=auth.uid(); p public.profiles; result uuid; BEGIN
+IF u IS NULL OR NOT public.has_role(u,'creator') OR EXISTS(SELECT 1 FROM public.account_bans WHERE user_id=u) THEN RAISE EXCEPTION 'Creator sign-in required'; END IF;
+SELECT * INTO p FROM public.profiles WHERE user_id=u FOR UPDATE;
+IF NOT FOUND OR p.verification_status='approved' OR EXISTS(SELECT 1 FROM public.creator_verifications WHERE user_id=u AND status IN ('pending','flagged')) THEN RAISE EXCEPTION 'Submission unavailable'; END IF;
+IF _full_name IS NULL OR length(trim(_full_name)) NOT BETWEEN 2 AND 160 OR _dob IS NULL OR _dob>(current_date-interval '18 years')::date OR _dob<(current_date-interval '120 years')::date THEN RAISE EXCEPTION 'Valid adult identity required'; END IF;
+IF _expires IS NULL OR _type NOT IN ('passport','national_id','drivers_license','other') OR _country IS NULL OR _country !~ '^[A-Z]{2}$' OR _number IS NULL OR length(trim(_number)) NOT BETWEEN 1 AND 100 THEN RAISE EXCEPTION 'Document details required'; END IF;
+IF _front IS NULL OR _back IS NULL OR _selfie IS NULL OR _front=_back OR _front=_selfie OR _back=_selfie OR split_part(_front,'/',1)<>u::text OR split_part(_back,'/',1)<>u::text OR split_part(_selfie,'/',1)<>u::text THEN RAISE EXCEPTION 'Three distinct owned images required'; END IF;
+IF (SELECT count(*) FROM storage.objects WHERE bucket_id='creator-2257-records' AND name IN (_front,_back,_selfie) AND owner_id=u::text AND lower(metadata->>'mimetype') IN ('image/jpeg','image/png','image/webp') AND (metadata->>'size')::bigint BETWEEN 1 AND 10485760)<>3 THEN RAISE EXCEPTION 'Three valid owned images required'; END IF;
+INSERT INTO public.creator_verifications(user_id,legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,status,document_bucket,country,creator_username,document_expires_on,document_type,issuing_country,document_number) VALUES(u,trim(_full_name),'',_dob,_front,_back,_selfie,CASE WHEN _expires<current_date THEN 'flagged' ELSE 'pending' END,'creator-2257-records',upper(p.country),p.display_name,_expires,_type,_country,trim(_number)) RETURNING id INTO result; RETURN result; END $$;
+REVOKE ALL ON FUNCTION public.submit_creator_identity_v2(text,date,text,text,text,date,text,text,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.submit_creator_identity_v2(text,date,text,text,text,date,text,text,text) TO authenticated;
+CREATE OR REPLACE FUNCTION public.review_creator_identity(_id uuid,_status text,_notes text,_confirmed boolean) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE r public.creator_verifications; paths text[]; BEGIN
+IF auth.uid() IS NULL OR NOT public.has_role(auth.uid(),'admin') THEN RAISE EXCEPTION 'Administrator sign-in required'; END IF;
+SELECT * INTO r FROM public.creator_verifications WHERE id=_id FOR UPDATE;
+IF NOT FOUND OR r.status NOT IN ('pending','flagged') THEN RAISE EXCEPTION 'Submission already reviewed or unavailable'; END IF;
+IF r.user_id=auth.uid() THEN RAISE EXCEPTION 'Self review is forbidden'; END IF;
+IF _status IS NULL OR _status NOT IN ('approved','rejected','flagged') OR length(coalesce(_notes,''))>1000 OR (_status<>'approved' AND length(trim(coalesce(_notes,'')))=0) THEN RAISE EXCEPTION 'Valid decision and reason required'; END IF;
+IF _status='approved' THEN
+IF NOT coalesce(_confirmed,false) OR NOT public.has_role(r.user_id,'creator') OR r.date_of_birth IS NULL OR r.date_of_birth>(current_date-interval '18 years')::date OR r.date_of_birth<(current_date-interval '120 years')::date THEN RAISE EXCEPTION 'Confirmed adult creator identity required'; END IF;
+IF r.document_bucket NOT IN ('identity-documents','id-verifications','creator-2257-records') THEN RAISE EXCEPTION 'Invalid identity evidence'; END IF;
+paths:=ARRAY[r.id_front_path,r.selfie_path];
+IF r.document_bucket='creator-2257-records' THEN
+IF r.document_expires_on IS NULL OR r.document_expires_on<current_date OR coalesce(r.id_back_path,'')='' OR coalesce(r.document_number,'')='' THEN RAISE EXCEPTION 'Valid unexpired front/back identity evidence required'; END IF;
+paths:=array_append(paths,r.id_back_path); END IF;
+IF EXISTS(SELECT 1 FROM unnest(paths) path WHERE path IS NULL OR split_part(path,'/',1)<>r.user_id::text) OR (SELECT count(DISTINCT path) FROM unnest(paths) path)<>cardinality(paths) OR (SELECT count(*) FROM storage.objects WHERE bucket_id=r.document_bucket AND name=ANY(paths))<>cardinality(paths) THEN RAISE EXCEPTION 'Identity evidence missing'; END IF;
+END IF;
+UPDATE public.creator_verifications SET status=_status,reviewer_id=auth.uid(),reviewed_at=now(),reviewer_notes=nullif(trim(_notes),''),identity_confirmed=(_status='approved' AND _confirmed) WHERE id=_id; RETURN r.user_id; END $$;
+CREATE POLICY "Creators stage private identity records" ON storage.objects FOR INSERT TO authenticated WITH CHECK(bucket_id='creator-2257-records' AND (storage.foldername(name))[1]=auth.uid()::text AND public.has_role(auth.uid(),'creator'));
+CREATE POLICY "Owner or admin reads private identity records" ON storage.objects FOR SELECT TO authenticated USING(bucket_id='creator-2257-records' AND ((storage.foldername(name))[1]=auth.uid()::text OR public.has_role(auth.uid(),'admin')));
+CREATE POLICY "Owner cleans unattached private identity records" ON storage.objects FOR DELETE TO authenticated USING(bucket_id='creator-2257-records' AND (storage.foldername(name))[1]=auth.uid()::text AND NOT EXISTS(SELECT 1 FROM public.creator_verifications WHERE document_bucket='creator-2257-records' AND name IN(id_front_path,id_back_path,selfie_path)));
+CREATE FUNCTION public.can_stage_creator_draft(_user uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT auth.uid()=_user AND public.has_role(_user,'creator') AND EXISTS(SELECT 1 FROM public.profiles WHERE user_id=_user AND verification_status IN ('unsubmitted','pending','flagged','approved')) AND NOT EXISTS(SELECT 1 FROM public.account_bans WHERE user_id=_user) AND NOT EXISTS(SELECT 1 FROM public.creator_verifications WHERE user_id=_user AND (status='rejected' OR date_of_birth>(current_date-interval '18 years')::date)); $$;
+REVOKE ALL ON FUNCTION public.can_stage_creator_draft(uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.can_stage_creator_draft(uuid) TO authenticated,service_role;
+CREATE TABLE public.creator_drafts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),creator_id uuid NOT NULL,title text NOT NULL DEFAULT '',kind text NOT NULL DEFAULT 'video',storage_path text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),status text NOT NULL DEFAULT 'draft',is_published boolean NOT NULL DEFAULT false);
+GRANT SELECT,INSERT,UPDATE,DELETE ON public.creator_drafts TO authenticated;
+GRANT ALL ON public.creator_drafts TO service_role;
+ALTER TABLE public.creator_drafts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Owner or admin reads drafts" ON public.creator_drafts FOR SELECT TO authenticated USING(creator_id=auth.uid() OR public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Eligible owner registers drafts" ON public.creator_drafts FOR INSERT TO authenticated WITH CHECK(public.can_stage_creator_draft(creator_id) AND status='draft' AND NOT is_published AND kind IN ('photo','teaser','video') AND split_part(storage_path,'/',1)=auth.uid()::text AND EXISTS(SELECT 1 FROM storage.objects WHERE bucket_id='creator-drafts' AND name=storage_path AND owner_id=auth.uid()::text));
+CREATE POLICY "Owner updates private drafts" ON public.creator_drafts FOR UPDATE TO authenticated USING(creator_id=auth.uid()) WITH CHECK(public.can_stage_creator_draft(creator_id) AND status='draft' AND NOT is_published AND split_part(storage_path,'/',1)=auth.uid()::text);
+CREATE POLICY "Owner deletes drafts" ON public.creator_drafts FOR DELETE TO authenticated USING(creator_id=auth.uid());
+CREATE POLICY "Eligible owners upload draft objects" ON storage.objects FOR INSERT TO authenticated WITH CHECK(bucket_id='creator-drafts' AND (storage.foldername(name))[1]=auth.uid()::text AND public.can_stage_creator_draft(auth.uid()));
+CREATE POLICY "Owner or admin previews draft objects" ON storage.objects FOR SELECT TO authenticated USING(bucket_id='creator-drafts' AND ((storage.foldername(name))[1]=auth.uid()::text OR public.has_role(auth.uid(),'admin')));
+CREATE POLICY "Owner removes draft objects" ON storage.objects FOR DELETE TO authenticated USING(bucket_id='creator-drafts' AND (storage.foldername(name))[1]=auth.uid()::text);
+COMMENT ON TABLE public.creator_drafts IS 'Private preparation only. Never included in discovery, paid offers or public media; publication needs identity and version-bound participant clearance.';

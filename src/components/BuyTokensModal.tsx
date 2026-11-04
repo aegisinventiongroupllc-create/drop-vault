@@ -132,14 +132,15 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
         const r = await fetch("https://api.ipify.org?format=json");
         ip = (await r.json()).ip;
       } catch {}
-      await supabase.from("legal_consents").insert({
+      const result = await supabase.from("legal_consents").insert({
         ip_address: ip,
         user_agent: navigator.userAgent,
         terms_version: "2.0",
         consent_text: `[CHECKOUT] Agreed to Terms, Privacy, Refund, AML/KYC, Risk Disclosure. ${FINAL_SALE_TEXT}`,
         consent_type: "checkout_consent",
       });
-    } catch {}
+      if(result.error) throw result.error;
+    } catch { throw new Error("Your checkout consent could not be saved. Please retry before paying."); }
   };
 
   // Edge functions that return a non-2xx status give a generic message — dig out the real one.
@@ -158,10 +159,10 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
     if (!cryptoEnabled) { setError("TryBit checkout is unavailable."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     if (!(await requireSession())) return;
-    await logConsent();
     setStep("processing");
     setError(null);
     try {
+      await logConsent();
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
         body: isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody },
       });
