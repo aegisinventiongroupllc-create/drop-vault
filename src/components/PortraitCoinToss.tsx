@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import coin from "@/assets/dtt-reward-coin.png";
 import { coinTossCount, playCoinClink } from "@/lib/portraitCoinToss";
 import "./portrait-coin-toss.css";
@@ -30,9 +32,13 @@ export default function PortraitCoinToss({ count, audio, onComplete }: { count: 
   }, [count, audio, onComplete]);
   return <div className="portrait-toss-layer" role="status" aria-label={`${count} Bit-Tokens tossed`}>
     <span className="sr-only">{count} Bit-Tokens</span>
-    {coins.map(index => <img key={index} src={coin} alt="" className={`portrait-toss-coin portrait-toss-lane-${index % 3}`} onAnimationEnd={() => setCoins(current => current.filter(value => value !== index))} />)}
+    {coins.map(index => <div key={index} className={`portrait-toss-coin portrait-toss-lane-${index % 3}`} onAnimationEnd={() => setCoins(current => current.filter(value => value !== index))}>
+      <img src={coin} alt="" className="portrait-toss-face" />
+      <img src={coin} alt="" className="portrait-toss-face portrait-toss-back" />
+    </div>)}
     {landed && createPortal(<div className="fixed inset-0 z-[220] flex items-center justify-center pointer-events-none px-6" role="status">
-      <div className="max-w-sm w-full rounded-lg border border-gold/50 bg-background/95 p-6 text-center shadow-lg">
+      <div className="relative pointer-events-auto max-w-sm w-full rounded-lg border border-gold/50 bg-background/95 p-6 text-center shadow-lg">
+        <Button variant="ghost" size="icon" aria-label="Close Enjoy Your Creator popup" onClick={onComplete} className="absolute top-2 right-2 text-muted-foreground"><X className="w-5 h-5" /></Button>
         <img src={coin} alt="DTT Bit-Token" className="w-28 h-28 object-contain mx-auto mb-3" />
         <p className="text-xl font-bold text-gold">Enjoy Your Creator!</p>
       </div>
