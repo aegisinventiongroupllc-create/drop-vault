@@ -149,6 +149,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bunny_video_deliveries: {
+        Row: {
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          source_updated_at: string
+          state: string
+          storage_path: string
+          video_id: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          source_updated_at: string
+          state?: string
+          storage_path: string
+          video_id: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          source_updated_at?: string
+          state?: string
+          storage_path?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       content_manifests: {
         Row: {
           age_at_recording_confirmed: boolean
@@ -2025,6 +2058,7 @@ export type Database = {
         Args: { _path: string; _request_id: string }
         Returns: undefined
       }
+      bunny_source_current: { Args: { _id: string }; Returns: boolean }
       buy_permanent_video: { Args: { _video_id: string }; Returns: string }
       can_stage_creator_draft: { Args: { _user: string }; Returns: boolean }
       can_upload_creator_media: {
