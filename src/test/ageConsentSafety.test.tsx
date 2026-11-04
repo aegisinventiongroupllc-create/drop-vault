@@ -6,6 +6,8 @@ vi.mock("@/integrations/supabase/client",()=>({supabase:{from:()=>({insert:mocks
 vi.mock("@/lib/ageConsent",()=>({affirmAgeConsent:mocks.affirm}));
 vi.mock("@/i18n/I18nContext",()=>({useI18n:()=>({t:{age_title:"Drop That ",age_subtitle:"Adults only",age_consent:"Adult consent",tos_consent:"Terms consent",contractor_consent:"Independent consent",age_enter:"ENTER",age_leave:"LEAVE"}})}));
 vi.mock("@/components/LegalFooter",()=>({default:()=>null}));
+// WebGL artwork is verified in the browser; keep consent tests focused on access.
+vi.mock("@/components/EntryPassGlobe",()=>({default:()=>null}));
 afterEach(()=>{cleanup();vi.clearAllMocks();});
 describe("entry consent persistence",()=>{
   it("does not enter when consent cannot be recorded",async()=>{
