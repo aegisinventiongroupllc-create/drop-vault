@@ -12,6 +12,9 @@ vi.mock("@/components/DashboardColorPicker", async () => {
   return { default: forwardRef((_, ref) => { useImperativeHandle(ref, () => ({ saveGalaxy: mocks.galaxySave })); return null; }) };
 });
 vi.mock("@/components/VipBackdrop", () => ({ default: () => null }));
+vi.mock("@/components/LivingProfileBackdrop", () => ({ default: () => null }));
+vi.mock("@/components/ProfileBackdropPicker", () => ({ default: () => null }));
+vi.mock("@/hooks/useProfileBackdrop", () => ({ useProfileBackdrop: () => undefined }));
 vi.mock("@/components/DttColorWheel", () => ({ default: () => null }));
 vi.mock("@/components/SelfieCamera", () => ({ default: () => null }));
 vi.mock("@/lib/avatarDraft", () => ({ readPortraitDraft: async () => null, clearPortraitDraft: async () => {}, savePortraitDraft: async () => {} }));
