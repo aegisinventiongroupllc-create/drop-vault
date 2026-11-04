@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activityLog";
 import CreatorIdVerification from "@/components/CreatorIdVerification";
+import CreatorDrafts from "@/components/CreatorDrafts";
 import CreatorParticipants from "@/components/CreatorParticipants";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } from "@/components/ProfileAvatar";
@@ -56,7 +57,7 @@ const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
 
-type Section = "overview" | "verification" | "requests" | "media" | "messages" | "calendar";
+type Section = "overview" | "verification" | "requests" | "media" | "messages" | "calendar" | "drafts";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
   const [showMyPage, setShowMyPage] = useState(false);
@@ -146,7 +147,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   }, []);
 
   // Live KYC status (controls upload gate)
-  const [kycStatus, setKycStatus] = useState<"unsubmitted" | "pending" | "approved" | "rejected">("unsubmitted");
+  const [kycStatus, setKycStatus] = useState<"unsubmitted" | "pending" | "flagged" | "approved" | "rejected">("unsubmitted");
   const [uploadEligible, setUploadEligible] = useState(false);
   useEffect(() => {
     if (!authUserId) return;
@@ -316,6 +317,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     { id: "requests", label: "REQUESTS" },
     { id: "calendar", label: "CALENDAR" },
     { id: "media", label: "MEDIA" },
+    { id: "drafts", label: "DRAFTS" },
   ];
 
   const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -531,7 +533,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   return (
     <div className="dtt-dashboard mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
-      {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
+      {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">{kycStatus === "rejected" ? "Account Verification Declined — Publishing and draft uploads are unavailable." : "Account Verification Pending — You can upload and organize private drafts now, but your profile and library will remain hidden from the public until your ID is verified."}</p><div className="flex flex-wrap gap-3"><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("drafts")}>PRIVATE DRAFTS</Button></div></div>}
+      {activeSection === "drafts" && authUserId && <div className="px-4"><CreatorDrafts userId={authUserId} approved={uploadEligible} /></div>}
       {authUserId && <FoundingCongrats userId={authUserId} />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
         dismissReward();
@@ -802,7 +805,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <h3 className="text-base font-semibold text-foreground">Identity Verification</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-4">
-              We manually review every creator before they can upload. Submit a Government ID + a verification selfie.
+              We manually review every creator before publishing. Submit government ID front and back plus a holding-ID selfie. Private drafts remain separate from your public library.
             </p>
             {authUserId && (
               <CreatorIdVerification userId={authUserId} onApproved={() => setKycStatus("approved")} />
