@@ -312,6 +312,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                     </Button>
                   ))}
                 </div>
+                <label className="block text-xs text-muted-foreground mb-4">Bit-Tokens
+                  <input aria-label="Tip token quantity" type="number" min={1} step={1} value={selectedTip ?? ""} onChange={event => { const value = Number(event.target.value); setSelectedTip(Number.isSafeInteger(value) && value > 0 ? value : null); }} className="w-full h-10 mt-2 rounded-md border border-input bg-background text-foreground px-3" />
+                </label>
                 {tipPreview && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
                     <div className="flex justify-between"><span>Tip value:</span><span className="text-foreground font-bold">${tipPreview.tipAmount}</span></div>
