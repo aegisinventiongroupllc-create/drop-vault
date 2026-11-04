@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ShieldCheck } from "lucide-react";
+import { useReducedMotion } from "framer-motion";
+import EntryPassGlobe from "@/components/EntryPassGlobe";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import LegalFooter from "@/components/LegalFooter";
@@ -14,6 +15,18 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const [contractorChecked, setContractorChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const reducedMotion = useReducedMotion();
+  const rippleId = useRef(0);
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+
+  const checkWithRipple = (value: boolean | "indeterminate", setChecked: (checked: boolean) => void, elementId: string) => {
+    setChecked(value === true);
+    if (value !== true || reducedMotion) return;
+    const box = document.getElementById(elementId)?.getBoundingClientRect();
+    if (!box) return;
+    const ripple = { id: ++rippleId.current, x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    setRipples(current => [...current.slice(-3), ripple]);
+  };
 
   const allChecked = ageChecked && tosChecked && contractorChecked;
 
@@ -47,13 +60,20 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-      <div className="flex min-h-full flex-col">
-      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center neon-glow">
-            <ShieldCheck className="w-10 h-10 text-primary" />
+    <div className="dtt-consent-screen fixed inset-0 z-50 overflow-y-auto bg-background">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+        {ripples.map(ripple => (
+          <div key={ripple.id} className="consent-ripple-origin" style={{ left: ripple.x, top: ripple.y }}>
+            {[0, 1, 2].map(ring => (
+              <span key={ring} className={`consent-ripple consent-ripple-${ring}`} onAnimationEnd={ring === 2 ? () => setRipples(current => current.filter(item => item.id !== ripple.id)) : undefined} />
+            ))}
           </div>
+        ))}
+      </div>
+      <div className="relative flex min-h-full flex-col">
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
+        <div className="consent-globe relative h-20 w-20" aria-hidden="true">
+          <EntryPassGlobe size={80} sharp bright motionless={Boolean(reducedMotion)} />
         </div>
 
         <div>
@@ -67,21 +87,21 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
-          <Checkbox id="age-check" checked={ageChecked} onCheckedChange={(v) => setAgeChecked(v === true)} className="mt-0.5 shrink-0" />
+          <Checkbox id="age-check" checked={ageChecked} onCheckedChange={(v) => checkWithRipple(v, setAgeChecked, "age-check")} className="mt-0.5 shrink-0" />
           <label htmlFor="age-check" className="text-[11px] leading-relaxed text-muted-foreground cursor-pointer select-none">
             {t.age_consent}
           </label>
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
-          <Checkbox id="tos-check" checked={tosChecked} onCheckedChange={(v) => setTosChecked(v === true)} className="mt-0.5 shrink-0" />
+          <Checkbox id="tos-check" checked={tosChecked} onCheckedChange={(v) => checkWithRipple(v, setTosChecked, "tos-check")} className="mt-0.5 shrink-0" />
           <label htmlFor="tos-check" className="text-[11px] leading-relaxed text-muted-foreground cursor-pointer select-none">
             {t.tos_consent}
           </label>
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
-          <Checkbox id="contractor-check" checked={contractorChecked} onCheckedChange={(v) => setContractorChecked(v === true)} className="mt-0.5 shrink-0" />
+          <Checkbox id="contractor-check" checked={contractorChecked} onCheckedChange={(v) => checkWithRipple(v, setContractorChecked, "contractor-check")} className="mt-0.5 shrink-0" />
           <label htmlFor="contractor-check" className="text-[11px] leading-relaxed text-muted-foreground cursor-pointer select-none">
             {t.contractor_consent}
           </label>
