@@ -17,8 +17,8 @@
 - Bound selfies, release tracks, skip scans; prebundle pickers with deduped React. Why: avoid handoffs/WASM/mixed hooks.
 - Permanently watermark all new creator photos/videos through the shared encoder before storage; fail closed, excluding IDs/customer selfies. Why: display overlays do not brand downloads.
 - CCBill uses signed forms, private/IP-restricted notices and idempotent catalog credits. paymentReadiness requires DTT_<PROVIDER>_LIVE_APPROVED/CHECKOUT_VERIFIED flags and credentials. Why: keys do not prove approval.
-- Creator uploads require audited adult-ID approval; customer access also needs version-bound participant IDs, recording-age evidence and direct consent. Why: uploader approval cannot clear guests or old media.
-- Only the CCBill server webhook applies handle_chargeback bans in account_bans; admins lift through admin_lift_ban. Why: user-editable profiles cannot control lockouts.
+- Live creator uploads require audited adult-ID approval; isolated owner/admin-only drafts never feed discovery or paid access. Customer access needs version-bound participant IDs, recording-age evidence and direct consent. Why: preparation and uploader approval cannot clear content.
+- Only CCBill's server webhook applies handle_chargeback bans; admins lift through admin_lift_ban. Why: profiles cannot control lockouts.
 - AutoTranslator merges saved catalogs before member-only AI; public policies use saved translations; bound/coalesce caches; never translate code or inputs. Why: privacy and spend.
 - Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.
 - Keep hearts public and paid followers owner-only; server ledger triggers deduplicate library buyers and award tiers. Why: likes cannot raise payouts or reveal buyers.
