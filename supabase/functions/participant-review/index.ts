@@ -97,16 +97,17 @@ Deno.serve(async req => {
   if(body.action==='documents'){
    if(!admin)return json({error:'Administrator required'},403);
    const table=body.kind==='participant'?'content_participants':'content_manifests';const {data:r}=await db.from(table).select('*').eq('id',body.id).single();if(!r)throw new Error('Record unavailable');
+   check(await db.from('activity_logs').insert({user_id:uid,user_role:'admin',action_type:'participant_evidence_view',action_detail:'Opened private participant or content evidence',metadata:{record_id:r.id,kind:body.kind==='participant'?'participant':'content'},activity_date:new Date().toISOString().slice(0,10)}));
    const paths=body.kind==='participant'?[r.id_path,r.selfie_path]:[r.production_evidence_path,r.rights_evidence_path];
-   if(body.kind==='participant'&&r.linked_user_id){const {data:v}=await db.from('creator_verifications').select('id_front_path,selfie_path,document_bucket').eq('user_id',r.linked_user_id).order('submitted_at',{ascending:false}).limit(1).maybeSingle();if(v){const signed=await db.storage.from(v.document_bucket).createSignedUrls([v.id_front_path,v.selfie_path],120);check(signed);return json({documents:signed.data});}}
-   const {data:consents}=body.kind==='content'?await db.from('participant_consents').select('*').eq('manifest_id',r.id):{data:[]};
+   if(body.kind==='participant'&&r.linked_user_id){const {data:v}=await db.from('creator_verifications').select('id_front_path,id_back_path,selfie_path,document_bucket').eq('user_id',r.linked_user_id).order('submitted_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();if(v){const signed=await db.storage.from(v.document_bucket).createSignedUrls([v.id_front_path,v.id_back_path,v.selfie_path].filter(Boolean),120);check(signed);return json({documents:signed.data});}}
+   const consentResult=body.kind==='content'?await db.from('participant_consents').select('*').eq('manifest_id',r.id):{data:[],error:null};check(consentResult);const consents=consentResult.data;
    const evidence=[...paths,...(consents??[]).map(c=>c.release_path)].filter(Boolean);
    let participantDetails=[];
    if(body.kind==='content'&&r.participant_ids.length){const {data:ps}=await db.from('content_participants').select('id,label,legal_name,date_of_birth,status,id_path,selfie_path,linked_user_id').in('id',r.participant_ids);participantDetails=ps??[];for(const p of participantDetails){if(p.id_path)evidence.push(p.id_path);if(p.selfie_path)evidence.push(p.selfie_path);}}
    const signed=await db.storage.from('participant-evidence').createSignedUrls(evidence,120);check(signed);
    const media=body.kind==='content'?await db.storage.from(r.bucket).createSignedUrl(r.storage_path,120):{data:null};
-   const {data:uploader}=body.kind==='content'?await db.from('creator_verifications').select('legal_first_name,legal_last_name,date_of_birth,id_front_path,selfie_path,document_bucket').eq('user_id',r.creator_id).order('submitted_at',{ascending:false}).limit(1).maybeSingle():{data:null};
-   const uploaderDocs=uploader?await db.storage.from(uploader.document_bucket).createSignedUrls([uploader.id_front_path,uploader.selfie_path],120):{data:[]};
+   const {data:uploader}=body.kind==='content'?await db.from('creator_verifications').select('legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,document_bucket').eq('user_id',r.creator_id).order('submitted_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle():{data:null};
+   const uploaderDocs=uploader?await db.storage.from(uploader.document_bucket).createSignedUrls([uploader.id_front_path,uploader.id_back_path,uploader.selfie_path].filter(Boolean),120):{data:[],error:null};check(uploaderDocs);
    return json({documents:[...(signed.data??[]),...(uploaderDocs.data??[])],media:media.data?.signedUrl,consents,participants:participantDetails.map(({id_path,selfie_path,...p})=>p),uploader:uploader?{name:[uploader.legal_first_name,uploader.legal_last_name].join(' '),dob:uploader.date_of_birth}:null});
   }
   if(body.action==='decide'){
