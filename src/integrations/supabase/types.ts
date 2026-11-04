@@ -2189,6 +2189,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      identity_evidence_is_referenced: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
       increment_media_view: { Args: { _media_id: string }; Returns: undefined }
       is_top_fan: {
         Args: { _creator_id: string; _user_id: string }
