@@ -27,6 +27,18 @@ describe.skipIf(!db)("deployed private verification safeguards",()=>{
     const rows=await db`SELECT has_table_privilege('anon','public.creator_drafts','SELECT') AS public_read,has_table_privilege('authenticated','public.creator_identity_events','UPDATE') AS audit_update,has_table_privilege('authenticated','public.creator_identity_events','DELETE') AS audit_delete`;
     expect(rows[0]).toEqual({public_read:false,audit_update:false,audit_delete:false});
   });
+  it("keeps new uploads unpublished drafts by default",async()=>{
+    if(!db)throw Error("Database required");
+    const rows=await db`SELECT column_name,column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='creator_drafts' AND column_name IN ('status','is_published') ORDER BY column_name`;
+    expect(rows).toEqual([{column_name:"is_published",column_default:"false"},{column_name:"status",column_default:"'draft'::text"}]);
+  });
+  it.each([{status:"draft",published:true},{status:"published",published:false}])("rejects draft publication state $status/$published",async({status,published})=>{
+    if(!db)throw Error("Database required");
+    await expect(db.begin(async sql=>{
+      await sql.unsafe(`CREATE TEMP TABLE test_drafts(creator_id uuid,storage_path text,kind text,is_published boolean,status text); CREATE TRIGGER test_protect BEFORE UPDATE ON test_drafts FOR EACH ROW EXECUTE FUNCTION public.protect_draft_registration(); INSERT INTO test_drafts VALUES(gen_random_uuid(),'private/example.mp4','video',false,'draft');`);
+      await sql`UPDATE test_drafts SET status=${status},is_published=${published}`;
+    })).rejects.toThrow(/Draft ownership, media and publication are server managed/);
+  });
   it("refuses signed-out identity submission",async()=>{
     if(!db)throw Error("Database required");
     await expect(db`SELECT public.submit_creator_identity_v2('Example','2000-01-01','a','b','c','2030-01-01','passport','US','x')`).rejects.toThrow(/Creator sign-in required|permission denied for function submit_creator_identity_v2/);

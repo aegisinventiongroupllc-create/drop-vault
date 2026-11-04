@@ -36,7 +36,7 @@ export default function CreatorDrafts({ userId, approved }: { userId: string; ap
       path = `${userId}/${crypto.randomUUID()}.${branded.type.startsWith("image/") ? "jpg" : "mp4"}`;
       const saved = await uploadBrandedFile("creator-drafts",path,branded,(message,percent) => setProgress(`${message} ${percent}%`));
       if (saved.error) throw new Error(saved.error.message);
-      const registration = await supabase.from("creator_drafts").insert({creator_id:userId,title:title.trim() || file.name,kind,storage_path:path});
+      const registration = await supabase.from("creator_drafts").insert({creator_id:userId,title:title.trim() || file.name,kind,storage_path:path,status:"draft",is_published:false});
       if (registration.error) throw registration.error;
       path = undefined;
       setTitle(""); await load(); toast.success("Private draft saved");
@@ -68,7 +68,7 @@ export default function CreatorDrafts({ userId, approved }: { userId: string; ap
   return <section className="space-y-4 py-4">
     <h2 className="text-lg font-bold">PRIVATE DRAFTS</h2>
     <p className="text-sm text-muted-foreground">Private preparation only. Identity approval and participant clearance are required before publishing.</p>
-    {approved && <p className="text-sm text-success">Your identity is approved. Submit content evidence in VERIFY before moving a draft into your live library.</p>}
+    {approved && <p className="text-sm text-success">Your identity is approved. Drafts remain private; content evidence must be approved separately. Moving saved drafts into the live library is not available yet.</p>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
       <Input aria-label="Draft title" placeholder="Draft title" maxLength={160} value={title} onChange={e=>setTitle(e.target.value)} />
