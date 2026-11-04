@@ -18,14 +18,21 @@ describe.skipIf(!db)("token payment database authorization", () => {
     if (!db) throw Error("Database required");
     const rollback = new Error("rollback isolated test");
     const result = await db.begin(async sql => {
+    const catalog = await sql`SELECT pg_get_functiondef('public.token_bundle_total(integer)'::regprocedure) AS definition`;
+    await sql.unsafe(catalog[0].definition.replace('public.token_bundle_total(', 'pg_temp.token_bundle_total('));
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {
       await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`);
       await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+      if (table === "token_payment_receipts") {
+        await sql.unsafe('ALTER TABLE pg_temp.token_payment_receipts DROP CONSTRAINT token_payment_receipts_check');
+        await sql.unsafe('ALTER TABLE pg_temp.token_payment_receipts ADD CHECK (amount_usd = tokens * 25 OR amount_usd = pg_temp.token_bundle_total(tokens))');
+      }
     }
     const rows = await sql`SELECT pg_get_functiondef('public.credit_tokens(uuid,text,integer,numeric)'::regprocedure) AS definition`;
     let definition = rows[0].definition.replace("public.credit_tokens(", "pg_temp.test_credit_tokens(");
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) definition = definition.replaceAll(`public.${table}`, `pg_temp.${table}`);
     definition = definition.replaceAll("auth.role()", "(current_setting('request.jwt.claims',true)::jsonb->>'role')");
+    definition = definition.replaceAll('public.token_bundle_total(', 'pg_temp.token_bundle_total(');
     await sql.unsafe(definition);
       await sql`SELECT set_config('request.jwt.claims','{"role":"authenticated"}',true)`;
       await expect(sql.savepoint(tx => tx`SELECT pg_temp.test_credit_tokens(gen_random_uuid(),'unauthorized',1,25)`)).rejects.toMatchObject({ code: "42501" });
