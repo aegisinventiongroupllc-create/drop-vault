@@ -1,0 +1,2 @@
+CREATE OR REPLACE VIEW public.public_profiles AS SELECT user_id,display_name,country,vault_side,role,created_at,avatar_config,(SELECT cpp.storage_path FROM public.creator_profile_photos cpp WHERE cpp.creator_id=p.user_id AND cpp.is_active LIMIT 1) AS profile_photo_path,tags FROM public.profiles p WHERE p.role<>'creator' OR p.verification_status='approved';
+COMMENT ON VIEW public.public_profiles IS 'Safe public projection; unapproved creator profiles are hidden. Identity approval does not substitute for content participant clearance.';
