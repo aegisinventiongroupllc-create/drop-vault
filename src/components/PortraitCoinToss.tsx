@@ -18,23 +18,37 @@ export default function PortraitCoinToss({ count, audio, onComplete }: { count: 
       return () => { clearTimeout(popupTimer); clearTimeout(timer); };
     }
     let launched = 0;
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let popupTimer: ReturnType<typeof setTimeout> | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const launch = () => {
-      if (launched >= total) return;
+      if (cancelled || launched >= total) return;
       const index = launched++;
       setCoins(current => [...current, index]);
       if (audio && index % 3 === 0) playCoinClink(audio);
     };
-    launch();
-    const interval = setInterval(launch, 90);
-    const popupTimer = setTimeout(() => setLanded(true), total * 90 + 1300);
-    const timer = setTimeout(onComplete, total * 90 + 2900);
-    return () => { clearInterval(interval); clearTimeout(popupTimer); clearTimeout(timer); };
+    // Wait until the coin image is decoded and the page has painted, so the first coin flies smoothly instead of jumping.
+    const start = () => {
+      if (cancelled) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (cancelled) return;
+        launch();
+        interval = setInterval(launch, 120);
+        popupTimer = setTimeout(() => setLanded(true), total * 120 + 2000);
+        timer = setTimeout(onComplete, total * 120 + 3600);
+      }));
+    };
+    const preload = new Image();
+    preload.src = coin;
+    const decoded = preload.decode ? preload.decode().catch(() => undefined) : Promise.resolve();
+    void Promise.race([decoded, new Promise(resolve => setTimeout(resolve, 600))]).then(start);
+    return () => { cancelled = true; if (interval) clearInterval(interval); if (popupTimer) clearTimeout(popupTimer); if (timer) clearTimeout(timer); };
   }, [count, audio, onComplete]);
   return <div className="portrait-toss-layer" role="status" aria-label={`${count} Bit-Tokens tossed`}>
     <span className="sr-only">{count} Bit-Tokens</span>
-    {coins.map(index => <div key={index} className={`portrait-toss-coin portrait-toss-lane-${index % 3}`} onAnimationEnd={() => setCoins(current => current.filter(value => value !== index))}>
-      <img src={coin} alt="" className="portrait-toss-face" />
-      <img src={coin} alt="" className="portrait-toss-face portrait-toss-back" />
+    {coins.map(index => <div key={index} className={`portrait-toss-coin portrait-toss-lane-${index % 3}`} onAnimationEnd={event => event.target === event.currentTarget && setCoins(current => current.filter(value => value !== index))}>
+      <div className="portrait-toss-flip"><img src={coin} alt="" className="portrait-toss-face" /></div>
     </div>)}
     {landed && createPortal(<div className="fixed inset-0 z-[220] flex items-center justify-center pointer-events-none px-6" role="status">
       <div className="relative pointer-events-auto max-w-sm w-full rounded-lg border border-gold/50 bg-background/95 p-6 text-center shadow-lg">
