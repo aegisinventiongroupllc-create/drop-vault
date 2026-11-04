@@ -529,7 +529,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   );
 
   return (
-    <div className="mobile-scroll-shell relative isolate">
+    <div className="dtt-dashboard mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
       {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">Identity Verification Required to Upload Content</p><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button></div>}
       {authUserId && <FoundingCongrats userId={authUserId} />}

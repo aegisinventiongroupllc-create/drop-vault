@@ -23,6 +23,7 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
   const [photo, setPhoto] = useState<string | null>();
   const [rights, setRights] = useState(false);
   const [busy, setBusy] = useState(true);
+  const [open, setOpen] = useState(true);
   const [eligible, setEligible] = useState(!creator);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
         if (cleanup.error) toast({ title: "Backdrop saved", description: "The previous image could not be removed. Please try again later." });
       }
       toast({ title: "Profile backdrop saved" });
+      setOpen(false);
     } catch (error) {
       let cleanupFailed = false;
       if (uploaded) cleanupFailed = Boolean((await supabase.storage.from("profile-backdrops").remove([uploaded])).error);
@@ -89,7 +91,8 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
   const results = searchProfileBackdrops(query, category, season);
   const image = preview ?? profileBackdropImage(selected) ?? (parseCreatorBackdrop(selected) ? creatorBackdropImage(selected) : profileBackdropImage("beach"));
   return <section className="space-y-4 border-t border-border py-5" aria-label={creator ? "Public creator backdrop" : "Private profile backdrop"}>
-    <div><h3 className="font-semibold text-foreground">{creator ? "Public page backdrop" : "Private profile backdrop"}</h3><p className="text-xs text-muted-foreground">{creator ? "Visible on your creator page." : "Only you can see your customer backdrop."}</p></div>
+    <div className="flex items-center justify-between gap-3"><div><h3 className="font-semibold text-foreground">{creator ? "Public page backdrop" : "Private profile backdrop"}</h3><p className="text-xs text-muted-foreground">{creator ? "Visible on your creator page." : "Only you can see your customer backdrop."}</p></div><Button type="button" size="sm" variant="ghost" aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? "HIDE" : "SHOW"}</Button></div>
+    {open && <>
     <div className="relative isolate flex h-40 items-end justify-center overflow-hidden rounded-md bg-card pb-3">
       <LivingProfileBackdrop image={image} alt="Selected profile backdrop" />
       <ProfileAvatar config={avatar} creatorPhotoPath={creator ? photo : undefined} label="Your profile" className="relative z-10 h-24 w-24 border-4 border-background" />
@@ -108,5 +111,6 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
     <p className="text-xs text-muted-foreground">JPG, PNG or WebP · up to 5 MB. Non-explicit artwork only. {creator && !eligible ? "Identity approval is required for creator uploads; gallery designs are available now." : ""}</p>
     {file && <label className="flex items-start gap-2 text-xs text-muted-foreground"><Checkbox checked={rights} onCheckedChange={value => setRights(value === true)} aria-label="Image permission confirmation" /><span>I own this non-explicit image or have permission to use it, and it contains no private identity documents.</span></label>}
     <Button className="w-full" disabled={busy || (file ? !rights : selected === saved || Boolean(preview))} onClick={() => void save()}>{busy ? "Please wait…" : "Save backdrop"}</Button>
+    </>}
   </section>;
 }
