@@ -1,43 +1,83 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Download } from "lucide-react";
 import pinkGlobe from "@/assets/dtt-pink-globe-icon-clean.png";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const DISMISS_KEY = "dtt_pwa_dismissed";
+const INSTALL_KEY = "dtt_pwa_installed";
 
 const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const installed = useRef(false);
+  const dismissed = useRef(false);
 
   useEffect(() => {
-    if (localStorage.getItem(DISMISS_KEY)) return;
+    const standalone = window.matchMedia("(display-mode: standalone)");
+    const isStandalone = () => standalone.matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const confirmInstalled = () => {
+      installed.current = true;
+      setVisible(false);
+      setDeferredPrompt(null);
+      try { localStorage.setItem(INSTALL_KEY, "1"); } catch { /* Storage may be unavailable. */ }
+    };
+    try {
+      localStorage.removeItem("dtt_pwa_dismissed");
+      installed.current = localStorage.getItem(INSTALL_KEY) === "1";
+    } catch { /* Keep detection working without storage. */ }
+    if (isStandalone()) confirmInstalled();
 
     const handler = (e: Event) => {
       e.preventDefault();
+      // A fresh browser install offer means installation is available again.
+      installed.current = false;
+      try { localStorage.removeItem(INSTALL_KEY); } catch { /* Optional persistence. */ }
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setVisible(true);
+      if (!dismissed.current) setVisible(true);
     };
+    const displayChanged = () => { if (isStandalone()) confirmInstalled(); };
+    let lastUser: string | null = null;
+    const { data: auth } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") lastUser = null;
+      const userId = session?.user.id;
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && userId && userId !== lastUser) {
+        lastUser = userId;
+        dismissed.current = false;
+        if (!installed.current && !isStandalone()) setVisible(true);
+      }
+    });
 
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", confirmInstalled);
+    standalone.addEventListener("change", displayChanged);
+    return () => {
+      auth.subscription.unsubscribe();
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", confirmInstalled);
+      standalone.removeEventListener("change", displayChanged);
+    };
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    setVisible(false);
-    localStorage.setItem(DISMISS_KEY, "1");
+    try {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } finally {
+      // Accepting the browser dialog is not proof that installation finished.
+      setDeferredPrompt(null);
+    }
   };
 
   const handleDismiss = () => {
     setVisible(false);
-    localStorage.setItem(DISMISS_KEY, "1");
+    dismissed.current = true;
   };
 
   if (!visible) return null;
@@ -53,21 +93,24 @@ const PWAInstallPrompt = () => {
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-foreground tracking-wider">SAVE TO HOME SCREEN</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">Install DropThatThing for quick access</p>
+          {!deferredPrompt && <p className="text-[10px] text-muted-foreground mt-1">Use your browser’s menu or Share → Add to Home Screen.</p>}
         </div>
-        <button
-          onClick={handleInstall}
+        {deferredPrompt && <Button
+          onClick={() => void handleInstall().catch(() => undefined)}
           className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-[11px] font-bold tracking-wider hover:brightness-110 transition-all flex items-center gap-1 shrink-0"
         >
           <Download className="w-3.5 h-3.5" />
           INSTALL
-        </button>
-        <button
+        </Button>}
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleDismiss}
           className="w-8 h-8 rounded-full hover:bg-secondary flex items-center justify-center text-muted-foreground shrink-0"
           aria-label="Dismiss"
         >
           <X className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );
