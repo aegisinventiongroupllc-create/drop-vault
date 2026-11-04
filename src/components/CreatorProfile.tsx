@@ -39,19 +39,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [tipSent, setTipSent] = useState(false);
   const [tipNotification, setTipNotification] = useState<string | null>(null);
   const [toss, setToss] = useState<{id: number; count: number; preview: boolean} | null>(null);
-  const [sound, setSound] = useState(true);
-  const audioRef = useRef<AudioContext | null>(null);
   const libraryRef = useRef<HTMLDivElement>(null);
-  const [previewTokens, setPreviewTokens] = useState(1);
+  const [previewTokens, setPreviewTokens] = useState("0");
   const [sequencePending, setSequencePending] = useState(false);
   const finishSequence = useCallback(() => { setSequencePending(false); requestAnimationFrame(() => libraryRef.current?.scrollIntoView({block: "start", behavior: "smooth"})); }, []);
-  const prepareSound = () => {
-    if (!sound) return;
-    try { audioRef.current ??= new AudioContext(); void audioRef.current.resume(); } catch { /* Optional audio unsupported. */ }
-  };
-  useEffect(() => () => { void audioRef.current?.close(); }, []);
   const previewToss = (count: number) => {
-    prepareSound(); setShowTipModal(false);
+    if (!Number.isSafeInteger(count) || count < 1) return;
+    setShowTipModal(false);
     setToss({id: Date.now(), count, preview: true});
   };
 
@@ -157,7 +151,6 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       return;
     }
     setUnlocking(true);
-    prepareSound();
     const { error } = year ? await supabase.rpc("unlock_creator_year", { _creator_id: creatorId }) : await supabase.rpc("unlock_creator", { _creator_id: creatorId });
     setUnlocking(false);
     if (error) {
@@ -219,7 +212,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
           {/* Avatar, name and role sit on the extended backdrop */}
           <div className="relative z-[5] flex flex-col items-center pt-14 px-4 text-center">
-            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} toss={toss} audio={sound ? audioRef.current : null} onSequenceComplete={finishSequence} />
+            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} toss={toss} onSequenceComplete={finishSequence} />
             <div className="mt-3 flex items-center justify-center gap-2">
               <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
               {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
@@ -244,9 +237,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
       {/* Custom Request Button */}
       <div className="px-4 mt-4 flex flex-wrap items-center justify-center gap-3">
-        <label className="text-xs text-muted-foreground">Bit-Tokens <input aria-label="Preview token quantity" type="number" min={1} step={1} value={previewTokens} onChange={event => { const value = Number(event.target.value); if (Number.isSafeInteger(value) && value > 0) setPreviewTokens(value); }} className="w-20 h-9 ml-2 rounded-md border border-input bg-background text-foreground px-2" /></label>
-        <Button variant="outline" onClick={() => previewToss(previewTokens)}>PREVIEW COIN TOSS</Button>
-        <label className="text-xs text-muted-foreground flex items-center gap-2"><input type="checkbox" checked={sound} onChange={event => setSound(event.target.checked)} /> Coin sound</label>
+        <label className="text-xs text-muted-foreground">Bit-Tokens <input aria-label="Preview token quantity" type="number" min={0} step={1} value={previewTokens} onChange={event => setPreviewTokens(event.target.value)} className="w-20 h-9 ml-2 rounded-md border border-input bg-background text-foreground px-2" /></label>
+        <Button variant="outline" disabled={!Number.isSafeInteger(Number(previewTokens)) || Number(previewTokens) < 1} onClick={() => previewToss(Number(previewTokens))}>PREVIEW COIN TOSS</Button>
         <p className="w-full text-center text-xs text-muted-foreground">Preview only · No Bit-Tokens spent</p>
       </div>
       <div className="px-4 mt-6">
@@ -313,7 +305,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                   ))}
                 </div>
                 <label className="block text-xs text-muted-foreground mb-4">Bit-Tokens
-                  <input aria-label="Tip token quantity" type="number" min={1} step={1} value={selectedTip ?? ""} onChange={event => { const value = Number(event.target.value); setSelectedTip(Number.isSafeInteger(value) && value > 0 ? value : null); }} className="w-full h-10 mt-2 rounded-md border border-input bg-background text-foreground px-3" />
+                  <input aria-label="Tip token quantity" type="number" min={0} step={1} value={selectedTip ?? ""} onChange={event => { const value = Number(event.target.value); setSelectedTip(event.target.value !== "" && Number.isSafeInteger(value) && value >= 0 ? value : null); }} className="w-full h-10 mt-2 rounded-md border border-input bg-background text-foreground px-3" />
                 </label>
                 {tipPreview && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
