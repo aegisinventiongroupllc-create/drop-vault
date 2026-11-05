@@ -78,5 +78,5 @@ Deno.serve(async req => {
   await bunnyApi(`/videos/${copy.video_id}`,'DELETE');
   check(await db.from('bunny_video_deliveries').delete().eq('id',copy.id));
   return json({success:true});
- }catch(e){return json({error:e instanceof Error?e.message:'Upload unavailable'},400);}
+ }catch(e){console.error('bunny-upload failed',e);return json({error:'Upload unavailable. Please try again.'},400);}
 });
