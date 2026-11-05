@@ -75,7 +75,7 @@ const AdminRetentionBackups = () => {
           <div key={r.id} className="rounded border border-border p-2 text-xs space-y-0.5">
             <p className="text-foreground font-semibold">{new Date(r.requested_at).toUTCString()} · {r.kind === "delete_account" ? "DELETE ACCOUNT" : "WITHDRAW"} · {r.status.toUpperCase()}</p>
             <p className="text-muted-foreground break-all">Creator {r.creator_id}</p>
-            <p className="text-muted-foreground">Media {r.media_count} · stream copies removed {r.provider_removed} · failed {r.provider_failed} · account deletion {r.account_deletion_status}</p>
+            <p className="text-muted-foreground">Media {r.media_count} · stream copies disabled {r.provider_removed} · unconfirmed {r.provider_failed} · account deletion {r.account_deletion_status}</p>
           </div>
         ))}
       </div>

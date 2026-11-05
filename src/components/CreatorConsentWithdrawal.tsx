@@ -29,7 +29,7 @@ const CreatorConsentWithdrawal = () => {
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("creator-withdraw", { body: { kind, reason: reason.trim() || undefined, confirm } });
     setBusy(false);
-    if (error || !data?.success) { toast({ title: "Request not completed", description: "Please try again or contact admin@dttmediallc.com." }); return; }
+    if (error || !data?.success) { toast({ title: "Request not fully completed", description: "We kept your request on file and an administrator will review it. Questions: admin@dttmediallc.com." }); load(); return; }
     toast({ title: "Consent withdrawn", description: "Your media is no longer available to customers." });
     setOpen(false); setConfirm("");
     if (kind === "delete_account") { await supabase.auth.signOut(); window.location.assign("/"); return; }
@@ -57,7 +57,7 @@ const CreatorConsentWithdrawal = () => {
           </div>
           <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
             <li>All your teasers and videos stop playing for customers right away, including permanent purchases.</li>
-            <li>Video copies on our streaming provider are deleted.</li>
+            <li>Streaming copies are disabled and archived. Videos customers already bought are kept, but they can no longer be played.</li>
             <li>Identity, consent and § 2257 records are retained as the law requires and cannot be erased.</li>
             <li>This cannot be undone from your dashboard.</li>
           </ul>
