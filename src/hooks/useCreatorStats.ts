@@ -41,5 +41,5 @@ export function useCreatorStats():CreatorLiveStats {
     .subscribe(status=>{if(status==='SUBSCRIBED')schedule();});
   };
   void start();return()=>{cancelled=true;clearTimeout(timer);if(channel)void supabase.removeChannel(channel);};
- },[]);return state;
+ },[]);return {...defaults,...state,escrowHeldUsd:Number(state.escrowHeldUsd)||0,pendingBalanceUsd:Number(state.pendingBalanceUsd)||0,nextReleaseAt:state.nextReleaseAt??null};
 }
