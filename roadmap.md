@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Current request
-- [ ] Remove duplicate movable language controls; require administrator-confirmed address-bearing current photo ID for new country founding slots and order country review queues oldest-first. Preserve existing lifetime awards.
+- [x] Hide movable language picker when an unobscured page selector exists; opening language selection verified through Spanish transition, one selector after entry. New founding slots use administrator-confirmed current address-bearing ID residence, never profile/issuing country; original awards preserved. Country queue sorted country/submission ascending/id. 27 founder/identity/privacy checks pass, build OK; review function deployed. Private administrator review walkthrough blocked by available session lacking admin access. Not published.
 - [x] Delayed intro wording and entry eligibility by three seconds; rotating globe stays in place. Exact timer test and phone entry walkthrough pass; build OK. Publication requested for dropthatthing.com; deployment completion not yet confirmed.
 - [x] Removed globe entrance effects at owner request: visitors immediately see the pink globe in its settled position, rotating, with title/captions visible. Phone check confirmed fixed position, tap exits, no runtime errors; build OK. Not published.
 - [x] Reviewed real customer reviewer entry/navigation and signed-in creator/customer previews; corrected exclusive switches, creator Feed, preview search vault, initial creator name, misleading sample activity, overview error handling and accepted-request checkout consent/readiness. All 521 tests pass in 81 files; final focused checks and build OK. No payments, identity approvals, media changes or publication.
