@@ -140,7 +140,7 @@ function Sparkles() {
 
 /**
  * Opening screen everyone sees on load: living pink galaxy, the DTT globe
- * emerges from shadow at full size as the galaxy sweeps behind it.
+ * stays at its settled size and position, rotating without an entrance effect.
  */
 export default function LaunchIntro() {
   const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
