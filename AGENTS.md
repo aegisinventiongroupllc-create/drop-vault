@@ -34,10 +34,10 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- § 2257 custodian details live in the public read-only records_custodian table, separate from DMCA agent text; performer index rows carry generated performer/content record IDs. Why: one editable source, permanent traceability.
+- § 2257 custodian lives in records_custodian, apart from DMCA text. Why: one source.
 - Founding slots/splits are server-set and permanent; admin views share empty-market lists. Why: vacancies never alter awards.
 
-- Sky photos preload with stars, retry on resume/online. Why: no broken images.
+- Sky photos preload, retry on resume/online.
 - Discovery shelves use the paginated authorized teaser feed; persist only bounded account/market scroll and interest counts, no signed links; explicit playback gestures. Why: privacy, no autoplay.
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
