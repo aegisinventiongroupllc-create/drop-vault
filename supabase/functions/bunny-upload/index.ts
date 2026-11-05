@@ -38,9 +38,13 @@ Deno.serve(async req => {
     const title=`DTT-${crypto.randomUUID()}`;
     const fetched = await bunnyApi('/videos/fetch','POST',{url:signed.data.signedUrl,title});
     if(fetched.success!==true)throw new Error('Provider did not accept the video');
-    const candidates=await bunnyApi(`/videos?search=${encodeURIComponent(title)}&itemsPerPage=10`);
-    const matches=(candidates.items??[]).filter((v:any)=>v.title===title);
-    const video=matches.length===1?matches[0]:null;
+    let video:any=null;
+    for(let attempt=0;attempt<15;attempt++){
+      const candidates=await bunnyApi(`/videos?search=${encodeURIComponent(title)}&itemsPerPage=10`);
+      const matches=(candidates.items??[]).filter((v:any)=>v.title===title);
+      if(matches.length===1){video=matches[0];break;}
+      await new Promise(resolve=>setTimeout(resolve,2000));
+    }
     if(!video)throw new Error('Provider accepted the video but identification failed. Contact support before retrying.');
     if (!UUID.test(video.guid)) throw new Error('Invalid provider video');
     const saved = await db.from('bunny_video_deliveries').insert({creator_id:uid,bucket,storage_path:path,source_updated_at:evidence.updated_at,video_id:video.guid,state:'processing'}).select('*').single();
