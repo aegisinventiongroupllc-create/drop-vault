@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { playbackLifetime } from '../_shared/mediaAccess.ts';
+import { deliveryUrl } from '../_shared/bunnyStream.ts';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -98,6 +99,10 @@ Deno.serve(async (req) => {
       signed?.forEach((s: any, i: number) => {
         if (s.signedUrl) urlMap[paths[i]] = s.signedUrl;
       });
+      await Promise.all(paths.map(async path => {
+        try { const url=await deliveryUrl(admin,'vault',path,linkSeconds);if(url)urlMap[path]=url; }
+        catch { delete urlMap[path]; }
+      }));
     }
 
     const ids = ownedMedia.map((m) => m.id);

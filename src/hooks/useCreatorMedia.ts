@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { bunnyUploadAction } from '@/lib/bunnyUpload';
 
 export interface CreatorMediaItem {
   id: string;
@@ -88,6 +89,8 @@ export function useCreatorMedia(creatorId: string | null) {
   };
 
   const deleteMedia = async (id: string, bucket: "teasers" | "vault", path: string) => {
+    try { await bunnyUploadAction('delete', bucket, path, id); }
+    catch (error) { return { error: error instanceof Error ? error.message : 'Video deletion failed.' }; }
     // Remove the listing first: videos customers bought permanently cannot be deleted.
     const { error } = await supabase.from("creator_media").delete().eq("id", id);
     if (error) return { error: error.code === "23503" ? "Customers own this video permanently, so it can't be deleted." : error.message };

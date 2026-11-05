@@ -40,7 +40,7 @@ Deno.serve(async req => {
    if(!copy || copy.state!=='uploading' || copy.source_updated_at!==evidence.updated_at) return json({error:'Upload version unavailable'},409);
    return json(await uploadAuthorization(copy.video_id));
   }
-  if(!copy) return json({error:'Upload unavailable'},404);
+  if(!copy) return action==='cancel'||action==='delete'?json({success:true,legacy:true}):json({error:'Upload unavailable'},404);
   if(action==='complete') {
    const video = await bunnyApi(`/videos/${copy.video_id}`);
    if([5,6].includes(video.status)) {check(await db.from('bunny_video_deliveries').update({state:'failed'}).eq('id',copy.id));return json({error:'Bunny could not process this video'},400);}

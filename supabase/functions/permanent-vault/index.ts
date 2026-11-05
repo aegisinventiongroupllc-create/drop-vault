@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { deliveryUrl } from '../_shared/bunnyStream.ts';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -39,6 +40,7 @@ Deno.serve(async (req) => {
       const { data: signed, error: sErr } = await admin.storage.from("vault").createSignedUrls(paths, 300);
       if (sErr) return json({ error: "Playback temporarily unavailable" }, 503);
       signed?.forEach((s: any, i: number) => { if (s.signedUrl) urls[paths[i]] = s.signedUrl; });
+      await Promise.all(paths.map(async path=>{try{const url=await deliveryUrl(admin,'vault',path,300);if(url)urls[path]=url;}catch{delete urls[path];}}));
     }
     const items = page.flatMap((r) => {
       const m = byId.get(r.video_id);
