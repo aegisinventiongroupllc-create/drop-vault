@@ -52,4 +52,11 @@ describe.skipIf(!db)('fifth video rules',()=>{
     await expect(s.savepoint(t=>t`select pg_temp.buy_fifth_video(${v})`)).rejects.toThrow('LIBRARY_ACCESS_REQUIRED');
     expect(Number((await s`select bit_cents from pg_temp.token_balances`)[0].bit_cents)).toBe(500);
   }));
+  it('keeps fifth access separately paid after a week and preserves purchased media',()=>isolated(async(s,u,c,v)=>{
+    await s`select pg_temp.unlock_creator(${c})`;
+    await s`update pg_temp.creator_media set created_at=now()-interval '8 days' where id=${v}`;
+    expect((await s`select pg_temp.fifth_video_storage_access('vault',${c+'/fifth'}) ok`)[0].ok).toBe(false);
+    await s`select pg_temp.buy_fifth_video(${v})`;
+    await expect(s.savepoint(t=>t`update pg_temp.creator_media set library_slot='regular' where id=${v}`)).rejects.toThrow('PURCHASED_VIDEO_IMMUTABLE');
+  }));
 });
