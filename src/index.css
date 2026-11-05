@@ -62,7 +62,7 @@
     --ship-metal-dark: 210 15% 12%;
     --vip-smoke-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .014' numOctaves='4' seed='9'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.8 0 0 0 -.65'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
-    --globe-tone: #4db8ff;
+    --globe-tone: #ff4da6;
     --vault-blue: 210 80% 55%;
     --vault-silver: 210 10% 70%;
     --dtt-pink: 330 100% 60%;
