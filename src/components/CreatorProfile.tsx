@@ -453,7 +453,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         )}
       </div>
 
-      {fifth && <div className="mx-4 mt-6 mb-6 overflow-hidden rounded-lg border-2 border-primary bg-card neon-glow">
+      {fifth && <div className="fifth-video-frame mx-4 mt-6 mb-6 overflow-hidden rounded-lg border-2 bg-card">
         <div className="aspect-video bg-secondary flex items-center justify-center">
           {isUnlocked && fifth.purchased && vaultItems.find(v => v.id === fifth.id)?.url ? <ProtectedVideo src={vaultItems.find(v => v.id === fifth.id)?.url ?? ""} className="w-full aspect-video object-contain" controls playsInline preload="none" /> : <Lock className="h-8 w-8 text-primary" />}
         </div>

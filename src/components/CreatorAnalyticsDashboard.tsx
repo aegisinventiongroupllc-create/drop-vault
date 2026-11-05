@@ -973,7 +973,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             const renderRow = (item: typeof mediaItems[number], accent: string) => {
               const isEditing = editingMediaId === item.id;
               return (
-                <div key={item.id} className={`bg-card border rounded-lg p-3 flex items-center gap-3 ${item.library_slot === "early_access" ? "border-primary neon-glow" : "border-border"}`}>
+                <div key={item.id} className={`bg-card border rounded-lg p-3 flex items-center gap-3 ${item.library_slot === "early_access" ? "fifth-video-frame" : "border-border"}`}>
                   <div className={`w-12 h-12 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 ${accent}`}>
                     {item.media_type === "video" ? <Video className="w-5 h-5" /> : <Image className="w-5 h-5" />}
                   </div>
