@@ -673,6 +673,13 @@
       "when": 1793893476325,
       "tag": "0095_biweekly_escrow_and_bit_cent_spending",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1793893602998,
+      "tag": "0096_serialize_withdrawal_with_access_vesting",
+      "breakpoints": true
     }
   ]
 }
