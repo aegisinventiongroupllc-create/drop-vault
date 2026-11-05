@@ -617,6 +617,13 @@
       "when": 1793820462272,
       "tag": "0087_bunny_video_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1793839009498,
+      "tag": "0088_lock_bunny_service_records",
+      "breakpoints": true
     }
   ]
 }
