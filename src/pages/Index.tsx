@@ -229,6 +229,7 @@ const Index = () => {
         <div className="pt-9">
           <CreatorAnalyticsDashboard onBack={exitCreatorPreview} adminPreview onFeed={() => {
             startAdminDashboardPreview("customer");
+            setCreatorFeed(true);
             navigateToTab("home");
             setSelectedCreator(null);
             setShowSearch(false);
