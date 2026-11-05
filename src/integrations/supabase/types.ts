@@ -471,6 +471,66 @@ export type Database = {
           },
         ]
       }
+      creator_access_escrow: {
+        Row: {
+          created_at: string
+          creator_id: string
+          creator_usd: number
+          customer_id: string
+          ends_at: string
+          forfeited_usd: number
+          id: string
+          released_usd: number
+          settled_at: string | null
+          starts_at: string
+          subscription_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          creator_usd: number
+          customer_id: string
+          ends_at: string
+          forfeited_usd?: number
+          id?: string
+          released_usd?: number
+          settled_at?: string | null
+          starts_at: string
+          subscription_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          creator_usd?: number
+          customer_id?: string
+          ends_at?: string
+          forfeited_usd?: number
+          id?: string
+          released_usd?: number
+          settled_at?: string | null
+          starts_at?: string
+          subscription_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_access_escrow_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_access_escrow_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_calendar_items: {
         Row: {
           completed_at: string | null
@@ -1118,6 +1178,8 @@ export type Database = {
           created_at: string
           creator_id: string
           deducted_usd: number
+          escrow_earned_released_usd: number
+          escrow_forfeited_usd: number
           final_net_usd: number
           id: string
           pending_before: number
@@ -1129,6 +1191,8 @@ export type Database = {
           created_at?: string
           creator_id: string
           deducted_usd: number
+          escrow_earned_released_usd?: number
+          escrow_forfeited_usd?: number
           final_net_usd: number
           id?: string
           pending_before: number
@@ -1140,6 +1204,8 @@ export type Database = {
           created_at?: string
           creator_id?: string
           deducted_usd?: number
+          escrow_earned_released_usd?: number
+          escrow_forfeited_usd?: number
           final_net_usd?: number
           id?: string
           pending_before?: number
@@ -2095,6 +2161,7 @@ export type Database = {
       transactions: {
         Row: {
           amount_usd: number
+          bit_cents_spent: number
           buyer_id: string | null
           created_at: string
           creator_id: string
@@ -2110,6 +2177,7 @@ export type Database = {
         }
         Insert: {
           amount_usd: number
+          bit_cents_spent?: number
           buyer_id?: string | null
           created_at?: string
           creator_id: string
@@ -2125,6 +2193,7 @@ export type Database = {
         }
         Update: {
           amount_usd?: number
+          bit_cents_spent?: number
           buyer_id?: string | null
           created_at?: string
           creator_id?: string
@@ -2509,6 +2578,7 @@ export type Database = {
           hearts: number
         }[]
       }
+      get_my_access_escrow: { Args: never; Returns: Json }
       get_my_creator_metrics: { Args: never; Returns: Json }
       get_my_monthly_revenue: {
         Args: never
@@ -2626,6 +2696,7 @@ export type Database = {
         Args: { _creator: string; _kind: string; _reason: string }
         Returns: string
       }
+      release_creator_access_escrow: { Args: never; Returns: number }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
@@ -2749,6 +2820,7 @@ export type Database = {
         Args: { _creator: string; _withdrawal: string }
         Returns: number
       }
+      spend_access_token: { Args: { _user: string }; Returns: string }
       submit_creator_identity: {
         Args: {
           _dob: string

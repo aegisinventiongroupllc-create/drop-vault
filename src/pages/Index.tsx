@@ -94,7 +94,7 @@ const Index = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
-  const { balance: tokenBalance, refresh: refreshTokenBalance } = useTokenBalance();
+  const { balance: tokenBalance, bitCents, refresh: refreshTokenBalance } = useTokenBalance();
   const [countryFilter, setCountryFilterState] = useState(() => {
     // The globe pick lasts for the day, then resets to GLOBAL.
     try {
@@ -288,6 +288,7 @@ const Index = () => {
               {activeTab === "vaults" && (
                 <MemberDashboard
                   balance={tokenBalance}
+                  bitCents={bitCents}
                   onBuyTokens={() => { void refreshTokenBalance(); }}
                   vault={previewVault}
                   onNavigateHome={() => navigateToTab("home")}
@@ -548,6 +549,7 @@ const Index = () => {
       {activeTab === "vaults" && (
         <MemberDashboard
           balance={tokenBalance}
+          bitCents={bitCents}
           onBuyTokens={handleBuyTokens}
           vault={vault ?? undefined}
           preference={preference ?? undefined}
