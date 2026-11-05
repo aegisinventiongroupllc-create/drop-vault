@@ -34,6 +34,7 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
+- § 2257 custodian details live in the public read-only records_custodian table, separate from DMCA agent text; performer index rows carry generated performer/content record IDs. Why: one editable source, permanent traceability.
 - Founding slots/splits are server-set and permanent; admin views share empty-market lists. Why: vacancies never alter awards.
 
 - Sky photos preload with stars, retry on resume/online. Why: no broken images.
