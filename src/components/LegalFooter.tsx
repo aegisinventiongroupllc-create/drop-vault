@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DttShareQr from "@/components/DttShareQr";
 import RestrictedCountries from "@/components/RestrictedCountries";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,10 +129,30 @@ const Statement2257 = () => (
     <p>DTT prohibits depictions involving minors. Every person appearing in adult creator content must have been at least 18 when that content was made, with the applicable identity, age and consent records maintained by the responsible producer.</p>
     <p><strong className="text-foreground">DTT Media LLC</strong> operates Drop That Thing. Independent creators must supply genuine age-at-production and identity records. The applicable primary- or secondary-producer duties of each party require legal review; calling DTT a technology platform does not remove recordkeeping obligations.</p>
     <p>Creator uploads require server-recorded manual approval of adult-ID evidence and a holding photo. Manual approval does not itself satisfy all 18 U.S.C. § 2257 recordkeeping obligations or establish automated liveness or document authenticity.</p>
-    <p><strong className="text-foreground">Recordkeeping status</strong><br/>The legally appropriate custodian, records inspection location and retention process require confirmation before sexually explicit content is offered. The Pittsburgh address on the DMCA page is the registered copyright agent's address; it has not been confirmed as a § 2257 records inspection location. Compliance questions: admin@dttmediallc.com.</p>
-    <p className="text-muted-foreground/60 text-[10px]">Compliance inquiries: admin@dttmediallc.com</p>
+    <CustodianBlock />
   </SectionShell>
 );
+
+const CUSTODIAN_FALLBACK = {
+  custodian_name: "DTT Media LLC (Custodian of Records)",
+  inspection_address: "606 Liberty Avenue, Suite 300, Pittsburgh, PA",
+  compliance_email: "admin@dttmediallc.com",
+};
+
+const CustodianBlock = () => {
+  const [c, setC] = useState(CUSTODIAN_FALLBACK);
+  useEffect(() => {
+    supabase.from("records_custodian").select("custodian_name,inspection_address,compliance_email").maybeSingle()
+      .then(({ data }) => { if (data) setC(data); });
+  }, []);
+  return (
+    <p><strong className="text-foreground">Custodian of Records</strong><br/>
+      {c.custodian_name}<br/>
+      {c.inspection_address}<br/>
+      Compliance contact: <a href={`mailto:${c.compliance_email}`} className="text-primary underline">{c.compliance_email}</a>
+    </p>
+  );
+};
 
 export const TermsOfService = () => (
   <SectionShell title="Terms of Service">
