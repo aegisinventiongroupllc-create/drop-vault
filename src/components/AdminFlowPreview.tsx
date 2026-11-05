@@ -69,7 +69,7 @@ const VerifyScreen = () => (
     <p className="text-xs font-bold tracking-widest text-foreground">18+ ID CHECK</p>
     <FakeInput text="Legal name + date of birth" />
     <FakeInput text="ID front, ID back, dated selfie" />
-    <p className="text-[10px] text-muted-foreground">Private. You approve it in VERIFY before they can upload.</p>
+    <p className="text-[10px] text-muted-foreground">Private drafts may be prepared first. Identity and content approval are required before publishing.</p>
   </div>
 );
 
@@ -107,7 +107,7 @@ const STEPS: Record<Path, Step[]> = {
   customer: [
     { label: "Who are you?", note: "The first screen asks Creator or Customer.", screen: <RoleScreen picked="customer" /> },
     { label: "Make an account", note: "Email and password, saved so they stay signed in.", screen: <AccountScreen /> },
-    { label: "Pay the entry fee", note: `The $${ENTRY_PASS_PRICE_USD} yearly pass, by card or crypto. The feed stays locked until it's paid.`, screen: <PassScreen /> },
+    { label: "Pay the entry fee", note: `The $${ENTRY_PASS_PRICE_USD} yearly pass uses an approved payment connection. Checkout stays unavailable until provider approval and verification; the feed requires an active pass.`, screen: <PassScreen /> },
     { label: "Next time they open the app", note: "Straight to the teaser feed. Their pass and login are remembered.", screen: <CustomerReturnScreen /> },
   ],
 };
