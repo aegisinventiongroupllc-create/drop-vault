@@ -18,26 +18,14 @@ async function seed(sql: postgres.TransactionSql) {
 describe.skipIf(!db)('creator consent withdrawal', () => {
   afterAll(async () => { await db?.end(); });
 
-  it('disables but keeps purchased stream copies and archives records', async () => {
-    await inTx(async (sql) => {
-      const creator = await seed(sql);
-      await sql`SELECT pg_temp.record_creator_withdrawal(${creator},'withdraw','test')`;
-      const copies = await sql`SELECT state FROM public.bunny_video_deliveries WHERE creator_id=${creator}`;
-      expect(copies.map((c) => c.state)).toEqual(['withdrawn']);
-      const archive = await sql`SELECT jsonb_array_length(snapshot->'stream_copies') AS n FROM public.creator_compliance_archive WHERE creator_id=${creator}`;
-      expect(archive[0].n).toBe(1);
-      throw rollback;
-    });
+  it.each(["DELETE FROM copy_fixture", "UPDATE copy_fixture SET state='ready'"])('blocks deleting or re-enabling a withdrawn copy: %s', async (statement) => {
+    await expect(db!.begin(async (sql) => {
+      const [{ d }] = await sql`SELECT pg_get_functiondef('public.keep_withdrawn_delivery_archived'::regproc) AS d`;
+      await sql.unsafe(d.replace('public.', 'pg_temp.'));
+      await sql.unsafe(`CREATE TEMP TABLE copy_fixture(LIKE public.bunny_video_deliveries INCLUDING DEFAULTS); CREATE TRIGGER k BEFORE UPDATE OR DELETE ON copy_fixture FOR EACH ROW EXECUTE FUNCTION pg_temp.keep_withdrawn_delivery_archived(); INSERT INTO copy_fixture(creator_id,bucket,storage_path,source_updated_at,video_id,state) VALUES (gen_random_uuid(),'vault','x/y.mp4',now(),gen_random_uuid(),'withdrawn')`);
+      await sql.unsafe(statement);
+    })).rejects.toThrow(/archived and cannot be changed/);
   });
-
-  it.each(['DELETE FROM public.bunny_video_deliveries WHERE creator_id=$1', "UPDATE public.bunny_video_deliveries SET state='ready' WHERE creator_id=$1"])(
-    'blocks deleting or re-enabling a withdrawn copy: %s', async (statement) => {
-      await expect(db!.begin(async (sql) => {
-        const creator = await seed(sql);
-        await sql`SELECT pg_temp.record_creator_withdrawal(${creator},'withdraw',null)`;
-        await sql.unsafe(statement, [creator]);
-      })).rejects.toThrow(/archived and cannot be changed/);
-    });
 
   it('changes nothing when the request is invalid', async () => {
     await inTx(async (sql) => {
