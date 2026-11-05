@@ -7,6 +7,7 @@ const inTx = (fn: (sql: postgres.TransactionSql) => Promise<void>) =>
   db!.begin(fn).catch((e) => { if (e !== rollback) throw e; });
 
 async function seed(sql: postgres.TransactionSql) {
+  await sql`SET LOCAL ROLE service_role`;
   const [{ id }] = await sql`SELECT gen_random_uuid() AS id`;
   await sql`INSERT INTO public.bunny_video_deliveries(creator_id,bucket,storage_path,source_updated_at,video_id,state)
             VALUES (${id},'vault',${id + '/bought.mp4'},now(),gen_random_uuid(),'ready')`;
