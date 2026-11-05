@@ -1,3 +1,4 @@
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useEffect, useState } from "react";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export default function PermanentVault() {
             {items.map((v) => (
               <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
                 {v.url && v.media_type === "photo" ? <img src={v.url} alt={v.title} className="w-full aspect-video object-contain bg-background" />
-                  : v.url ? <video src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
+                  : v.url ? <ProtectedVideo src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
                   : <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>}
                 <p className="text-xs font-semibold text-foreground px-2 pt-2 truncate">{v.title}</p>
                 <p className="text-[10px] text-muted-foreground px-2 pb-2 truncate">{v.creator_name ? `@${v.creator_name}` : ""}</p>

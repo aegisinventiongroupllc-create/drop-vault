@@ -16,7 +16,7 @@ import SuggestionBox from "@/components/SuggestionBox";
 import LegalFooter from "@/components/LegalFooter";
 import CreatorSafetyModal from "@/components/CreatorSafetyModal";
 import { Switch } from "@/components/ui/switch";
-import { uploadMedia, type MediaBucket } from "@/lib/storageUpload";
+import { uploadMedia, deleteMedia as cleanupMedia, type MediaBucket } from "@/lib/storageUpload";
 import { readVideoDuration, isTeaserTooLong, MAX_TEASER_SECONDS } from "@/lib/teaserGate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -391,7 +391,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         allow_permanent_buyout: allowBuyout,
       });
       if ("error" in dbResult) {
-        const cleanup = await supabase.storage.from(bucket).remove([result.path]);
+        const cleanup = await cleanupMedia(bucket, result.path);
         setUploadMsg(`Upload failed: ${dbResult.error}`);
         toast.error(cleanup.error ? "File saved but listing failed. Contact support before uploading again." : "Upload not completed. Please retry.", { id: uploadToastId, duration: 4000 });
       } else {
@@ -452,7 +452,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         media_type: file.type.startsWith("image/") ? "photo" : "video",
       });
       if ("error" in dbResult) {
-        const cleanup = await supabase.storage.from("teasers").remove([result.path]);
+        const cleanup = await cleanupMedia("teasers", result.path);
         setUploadMsg(`Upload failed: ${dbResult.error}`);
         toast.error(cleanup.error ? "File saved but listing failed. Contact support before uploading again." : "Upload not completed. Please retry.", { id: uploadToastId, duration: 4000 });
       } else {

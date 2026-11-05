@@ -1,3 +1,5 @@
+import { signTeaser, signTeasers } from "@/lib/teaserUrls";
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ProfileAvatar from "@/components/ProfileAvatar";
@@ -22,11 +24,11 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
     if (!active || !item.storagePath) return;
     let cancelled = false;
     const refresh = async () => {
-      const { data, error: signingError } = await supabase.storage.from("teasers").createSignedUrl(item.storagePath ?? "", 3600);
+      const { data, error: signingError } = await signTeaser(item.storagePath ?? "");
       if (!cancelled) { if (data?.signedUrl && !signingError) setUrl(data.signedUrl); else setError(true); }
     };
     void refresh();
-    const timer = setInterval(() => void refresh(), 50 * 60 * 1000);
+    const timer = setInterval(() => void refresh(), 240 * 1000);
     return () => { cancelled = true; clearInterval(timer); };
   }, [active, item.storagePath]);
   useEffect(() => {
@@ -58,7 +60,7 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
       <Button variant="ghost" aria-label={`Play ${item.title} by @${item.creator}`} onClick={tap} className="absolute inset-0 h-full w-full p-0 rounded-none touch-manipulation">
         {item.mediaType === "photo" ? <img loading="lazy" src={url} onError={() => setError(true)} alt={item.title} className="h-full w-full object-cover" /> : <>
           <div className="absolute inset-0 flex items-center justify-center bg-secondary"><ProfileAvatar config={item.creatorAvatar} creatorPhotoPath={item.creatorPhotoPath} label={item.creator} className="h-28 w-28" /></div>
-          <video ref={video} src={active ? url : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active && !error ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
+          <ProtectedVideo ref={video} src={active ? url : undefined} playsInline preload="none" className={`absolute inset-0 h-full w-full object-cover ${active && !error ? "opacity-100" : "opacity-0"}`} onTimeUpdate={() => {
             const current = video.current;
             if (!current || unlocked) return;
             const stop = teaserGateTime(current.duration);

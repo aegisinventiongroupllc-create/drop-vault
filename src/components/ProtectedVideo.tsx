@@ -4,7 +4,8 @@ import Hls from 'hls.js';
 const ProtectedVideo=forwardRef<HTMLVideoElement,VideoHTMLAttributes<HTMLVideoElement>>(function ProtectedVideo({src,...props},forwardedRef){
  const ref=useRef<HTMLVideoElement|null>(null);
  useEffect(()=>{
-  const video=ref.current;if(!video||!src)return;
+  const video=ref.current;if(!video)return;
+  if(!src){video.pause();video.removeAttribute('src');video.load();return;}
   const time=video.currentTime,playing=!video.paused;
   const restore=()=>{if(time>0)video.currentTime=time;if(playing)void video.play().catch(()=>{});};
   video.addEventListener('loadedmetadata',restore,{once:true});

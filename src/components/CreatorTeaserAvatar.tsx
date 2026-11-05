@@ -1,3 +1,5 @@
+import { signTeaser, signTeasers } from "@/lib/teaserUrls";
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PortraitCoinToss from "@/components/PortraitCoinToss";
 import { createPortal } from "react-dom";
@@ -59,7 +61,7 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
       const { data } = await supabase.rpc("get_active_teasers");
       const selected = data?.find(item => item.creator_id === creatorId);
       if (!selected?.storage_path || selected.media_type !== "video") return;
-      const { data: s } = await supabase.storage.from("teasers").createSignedUrl(selected.storage_path, 3600);
+      const { data: s } = await signTeaser(selected.storage_path);
       if (!cancel) setUrl(s?.signedUrl ?? null);
     })();
     return () => { cancel = true; };
@@ -83,7 +85,7 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
           <div className="creator-coin">
             <div className="creator-coin-face"><ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-full w-full" /></div>
             <div className="creator-coin-face creator-coin-back bg-secondary">
-              {url ? <video src={`${url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-label="Teaser preview" /> : <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-full w-full" />}
+              {url ? <ProtectedVideo src={`${url}#t=0.1`} muted playsInline preload="metadata" className="h-full w-full object-cover" aria-label="Teaser preview" /> : <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-full w-full" />}
             </div>
           </div>
         </div>
@@ -93,7 +95,7 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
 
       {full && url && createPortal(
         <div className="fixed inset-0 z-[130] bg-background flex items-center justify-center">
-          <video ref={fullRef} src={url} playsInline controls={unlocked} onLoadedData={() => { const video = fullRef.current; if (!video) return; if (finishing) video.currentTime = resumeTime.current; void video.play().catch(e => { if (!isPlaybackInterruption(e)) setFailed(true); }); }} onEnded={() => { if (finishing) { setFull(false); setFinishing(false); onSequenceComplete?.(); } }} onError={() => setFailed(true)} onTimeUpdate={onTime} className="h-full w-full object-contain" />
+          <ProtectedVideo ref={fullRef} src={url} playsInline controls={unlocked} onLoadedData={() => { const video = fullRef.current; if (!video) return; if (finishing) video.currentTime = resumeTime.current; void video.play().catch(e => { if (!isPlaybackInterruption(e)) setFailed(true); }); }} onEnded={() => { if (finishing) { setFull(false); setFinishing(false); onSequenceComplete?.(); } }} onError={() => setFailed(true)} onTimeUpdate={onTime} className="h-full w-full object-contain" />
           <Button variant="ghost" onClick={() => { setFull(false); setGate(false); if (finishing) { setFinishing(false); onSequenceComplete?.(); } }} aria-label="Minimize"
             className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/70 backdrop-blur flex items-center justify-center text-foreground">
             <Minimize2 className="w-5 h-5" />
