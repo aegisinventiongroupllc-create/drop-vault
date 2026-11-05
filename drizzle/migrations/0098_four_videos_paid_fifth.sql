@@ -1,0 +1,34 @@
+ALTER TABLE public.creator_media ADD COLUMN library_slot text NOT NULL DEFAULT 'regular';
+CREATE TABLE public.video_early_access(customer_id uuid NOT NULL,video_id uuid NOT NULL REFERENCES public.creator_media(id),transaction_id uuid NOT NULL REFERENCES public.transactions(id),purchased_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(customer_id,video_id));
+GRANT SELECT ON public.video_early_access TO authenticated; GRANT ALL ON public.video_early_access TO service_role;
+ALTER TABLE public.video_early_access ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Read own early access" ON public.video_early_access FOR SELECT TO authenticated USING(customer_id=auth.uid());
+CREATE FUNCTION public.guard_library_video_slots() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE cap integer; BEGIN
+ IF NEW.library_slot NOT IN ('regular','early_access') THEN RAISE EXCEPTION 'INVALID_LIBRARY_SLOT'; END IF;
+ IF NEW.library_slot='early_access' AND (NEW.bucket<>'vault' OR NEW.media_type<>'video' OR NEW.allow_permanent_buyout) THEN RAISE EXCEPTION 'EARLY_ACCESS_VIDEO_ONLY'; END IF;
+ IF TG_OP='UPDATE' AND EXISTS(SELECT 1 FROM public.video_early_access WHERE video_id=OLD.id) AND (NEW.library_slot<>OLD.library_slot OR NEW.creator_id<>OLD.creator_id OR NEW.bucket<>OLD.bucket OR NEW.storage_path<>OLD.storage_path OR NEW.media_type<>OLD.media_type) THEN RAISE EXCEPTION 'PURCHASED_VIDEO_IMMUTABLE'; END IF;
+ IF NEW.bucket='vault' AND NEW.media_type='video' THEN
+ PERFORM pg_advisory_xact_lock(hashtextextended(NEW.creator_id::text,0)); cap:=CASE WHEN NEW.library_slot='regular' THEN 4 ELSE 1 END;
+ IF (SELECT count(*) FROM public.creator_media WHERE creator_id=NEW.creator_id AND bucket='vault' AND media_type='video' AND library_slot=NEW.library_slot AND id<>NEW.id)>=cap THEN RAISE EXCEPTION 'LIBRARY_VIDEO_LIMIT'; END IF; END IF; RETURN NEW; END $$;
+CREATE TRIGGER guard_library_video_slots BEFORE INSERT OR UPDATE ON public.creator_media FOR EACH ROW EXECUTE FUNCTION public.guard_library_video_slots();
+CREATE FUNCTION public.fifth_video_storage_access(_bucket text,_path text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT NOT EXISTS(SELECT 1 FROM public.creator_media WHERE bucket=_bucket AND storage_path=_path AND library_slot='early_access') OR EXISTS(SELECT 1 FROM public.creator_media m WHERE m.bucket=_bucket AND m.storage_path=_path AND m.library_slot='early_access' AND (m.creator_id=auth.uid() OR public.has_role(auth.uid(),'admin') OR (EXISTS(SELECT 1 FROM public.video_early_access WHERE customer_id=auth.uid() AND video_id=m.id) AND EXISTS(SELECT 1 FROM public.subscriptions WHERE customer_id=auth.uid() AND creator_id=m.creator_id AND status='active' AND expires_at>now())))) $$;
+REVOKE ALL ON FUNCTION public.fifth_video_storage_access(text,text) FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.fifth_video_storage_access(text,text) TO authenticated,service_role;
+CREATE POLICY "Fifth video requires purchase" ON storage.objects AS RESTRICTIVE FOR SELECT TO authenticated USING(public.fifth_video_storage_access(bucket_id,name));
+CREATE POLICY "Fifth video metadata access" ON public.creator_media AS RESTRICTIVE FOR SELECT TO authenticated USING(public.fifth_video_storage_access(bucket,storage_path));
+CREATE FUNCTION public.get_creator_fifth_video(_creator_id uuid) RETURNS TABLE(id uuid,title text,purchased boolean) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT m.id,m.title,EXISTS(SELECT 1 FROM public.video_early_access e WHERE e.customer_id=auth.uid() AND e.video_id=m.id) FROM public.creator_media m WHERE m.creator_id=_creator_id AND m.bucket='vault' AND m.library_slot='early_access' AND auth.uid() IS NOT NULL AND (public.has_active_entry_pass(auth.uid()) OR public.has_role(auth.uid(),'creator') OR public.has_role(auth.uid(),'admin')) AND public.content_is_cleared(m.bucket,m.storage_path) LIMIT 1 $$;
+REVOKE ALL ON FUNCTION public.get_creator_fifth_video(uuid) FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.get_creator_fifth_video(uuid) TO authenticated,service_role;
+CREATE OR REPLACE FUNCTION public.get_creator_library_count(_creator_id uuid) RETURNS bigint LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT count(*) FROM public.creator_media m WHERE m.creator_id=_creator_id AND m.bucket='vault' AND m.library_slot='regular' AND public.content_is_cleared(m.bucket,m.storage_path) AND auth.uid() IS NOT NULL AND (public.has_active_entry_pass(auth.uid()) OR public.has_role(auth.uid(),'creator') OR public.has_role(auth.uid(),'admin')) $$;
+DO $do$ DECLARE d text; BEGIN SELECT pg_get_functiondef(oid) INTO d FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname='unlock_creator'; d:=replace(d,'m.bucket=''vault'' AND public.content_is_cleared','m.bucket=''vault'' AND m.library_slot=''regular'' AND public.content_is_cleared'); EXECUTE d; END $do$;
+CREATE FUNCTION public.buy_fifth_video(_video_id uuid) RETURNS public.subscriptions LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE u uuid:=auth.uid(); m public.creator_media; r public.subscriptions; tx uuid; BEGIN
+ IF u IS NULL THEN RAISE EXCEPTION 'Sign in required'; END IF;
+ SELECT * INTO m FROM public.creator_media WHERE id=_video_id;
+ IF m.id IS NULL THEN RAISE EXCEPTION 'EARLY_ACCESS_UNAVAILABLE'; END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(m.creator_id::text,0)); SELECT * INTO m FROM public.creator_media WHERE id=_video_id FOR SHARE;
+ IF m.id IS NULL OR m.library_slot<>'early_access' OR m.bucket<>'vault' OR m.media_type<>'video' OR NOT public.content_is_cleared(m.bucket,m.storage_path) THEN RAISE EXCEPTION 'EARLY_ACCESS_UNAVAILABLE'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.subscriptions WHERE customer_id=u AND creator_id=m.creator_id AND status='active' AND expires_at>now()) THEN RAISE EXCEPTION 'LIBRARY_ACCESS_REQUIRED'; END IF;
+ IF EXISTS(SELECT 1 FROM public.video_early_access WHERE customer_id=u AND video_id=m.id) THEN RAISE EXCEPTION 'ALREADY_OWNED'; END IF;
+ r:=public.unlock_creator(m.creator_id);
+ SELECT transaction_id INTO tx FROM public.creator_access_escrow WHERE subscription_id=r.id AND ends_at=r.expires_at ORDER BY created_at DESC,id DESC LIMIT 1;
+ INSERT INTO public.video_early_access(customer_id,video_id,transaction_id) VALUES(u,m.id,tx); RETURN r; END $$;
+REVOKE ALL ON FUNCTION public.buy_fifth_video(uuid) FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.buy_fifth_video(uuid) TO authenticated,service_role;
+CREATE OR REPLACE FUNCTION public.require_buyout_clearance() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NOT EXISTS(SELECT 1 FROM public.creator_media m WHERE m.id=NEW.video_id AND m.library_slot='regular' AND public.content_is_cleared(m.bucket,m.storage_path)) THEN RAISE EXCEPTION 'Regular cleared library video required before purchase'; END IF; RETURN NEW; END $$;
