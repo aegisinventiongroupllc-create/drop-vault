@@ -22,8 +22,8 @@
 - Keep a native-name language selector above entry, region checks, and every routed page. Why: visitors must be able to select a readable language before paying or signing in.
 - Keep hearts public and paid followers owner-only; server ledger triggers deduplicate library buyers and award tiers. Why: likes cannot raise payouts or reveal buyers.
 - Account-owned teasers retain frames/activation windows; select one active item atomically through an owner-validated function, falling back to latest after expiry. Why: consistent selection and permanent branding.
-- Snapshot request country at creation; preserve on updates. Why: privacy.
-- GeoGate fails closed, no local overrides; not server enforcement.
+- Snapshot request country at creation. Why: privacy.
+- GeoGate fails closed, no overrides.
 - Search/library/feed gender visibility uses saved explicit preferences, never inferring Both. Why: respect filtering.
 - Share studio/feed artwork and persist language countdown across reloads. Why: continuous transitions.
 - TopFansSection scopes chats and distinguishes owner/customer views. Why: private threads and correct prompts.
@@ -49,4 +49,4 @@
 - Revenue details/VIP store render once in Analytics; terms use scoped RPCs; triggers fix unpaid shares/freeze paid earnings. Why: no duplicate rules or client-authorized payouts.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
 - Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
-- Manifest approval writes append-only service-only performer index rows (ID names, DOB, aliases); fails without approved identities. Why: permanent traceability.
+- Manifest approval writes permanent service-only performer index rows or fails. Why: traceability.
