@@ -67,7 +67,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [unlocking, setUnlocking] = useState(false);
   const [accessAck, setAccessAck] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const { balance, refresh: refreshBalance } = useTokenBalance();
+  const { balance, bitCents, refresh: refreshBalance } = useTokenBalance();
   const { subs, refresh: refreshSubs } = useSubscriptions();
 
   // Resolve creator by display_name
@@ -423,7 +423,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             </Button>
             <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
             <p className="text-center text-xs text-muted-foreground mt-2">
-              Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"} • 1 = 14 days
+              Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"}{bitCents > 0 ? ` + ${bitCents} Bit-cents` : ""} • 1 = 14 days
             </p>
           </>
         )}
