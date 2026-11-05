@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
 
     const { data: media, error: mediaErr } = await admin
       .from("creator_media")
-      .select("id, title, storage_path, media_type, created_at, views, allow_permanent_buyout")
+      .select("id, title, storage_path, media_type, created_at, views, allow_permanent_buyout, library_slot")
       .eq("creator_id", creatorId)
       .eq("bucket", "vault")
       .order("created_at", { ascending: false }).order("id",{ascending:false}).range(offset,offset+24);
@@ -79,6 +79,10 @@ Deno.serve(async (req) => {
     );
     const {data:reviewRole}=await admin.from('user_roles').select('role').eq('user_id',uid).eq('role','admin').maybeSingle();
     if(uid!==creatorId&&!reviewRole){
+      const {data: purchases,error: purchaseError}=await admin.from('video_early_access').select('video_id').eq('customer_id',uid);
+      if(purchaseError)return json({error:'Playback temporarily unavailable'},503);
+      const earlyIds=new Set((purchases??[]).map(p=>p.video_id));
+      ownedMedia=ownedMedia.filter(m=>m.library_slot!=='early_access'||earlyIds.has(m.id));
       const results=await Promise.all(ownedMedia.map(async m=>{const {data,error}=await admin.rpc('content_is_cleared',{_bucket:'vault',_path:m.storage_path});return !error&&data===true?m:null;}));
       ownedMedia=results.filter((m):m is NonNullable<typeof m>=>m!==null);
     }

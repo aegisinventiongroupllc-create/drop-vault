@@ -130,6 +130,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const teaserInputRef = useRef<HTMLInputElement>(null);
   const mediaTargetRef = useRef<MediaBucket>("teasers");
+  const [librarySlot, setLibrarySlot] = useState<"regular" | "early_access">("regular");
 
   // Loyalty gift state
   const [showLoyaltyModal, setShowLoyaltyModal] = useState(false);
@@ -359,6 +360,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     const file = e.target.files?.[0];
     if (!file) return;
     const bucket = mediaTargetRef.current;
+    if (bucket === "vault" && librarySlot === "early_access" && !file.type.startsWith("video/")) {
+      toast.error("The fifth slot is for a video only."); e.target.value = ""; return;
+    }
     const title = requireTitle();
     if (!title) { e.target.value = ""; return; }
     if (!authUserId) {
@@ -392,7 +396,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         storage_path: result.path,
         title,
         media_type: file.type.startsWith("image/") ? "photo" : "video",
-        allow_permanent_buyout: allowBuyout,
+        allow_permanent_buyout: librarySlot === "regular" && allowBuyout,
+        library_slot: bucket === "vault" ? librarySlot : "regular",
       });
       if ("error" in dbResult) {
         const cleanup = await cleanupMedia(bucket, result.path);
@@ -904,8 +909,14 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
               <label className="text-xs font-bold text-muted-foreground tracking-wider">{ct.step_full}</label>
               <div className="flex items-start gap-2 bg-gold/10 border border-gold/40 rounded-xl px-3 py-2.5">
                 <Lightbulb className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <p className="text-xs text-gold font-bold leading-snug">To maximize earnings and prevent content dumping, maintain an active vault of 5 high-value videos. Swap 2–3 videos every 14 days to create urgency and fresh subscriber unlocks.</p>
+                <p className="text-xs text-gold font-bold leading-snug">Your library includes up to four long videos. The separate fifth video stays behind its own paywall: one Bit-Token unlocks it early and adds another 14 days.</p>
               </div>
+              <label className="block text-xs text-muted-foreground">Video placement
+                <select aria-label="Video placement" value={librarySlot} onChange={e => setLibrarySlot(e.target.value === "early_access" ? "early_access" : "regular")} className="mt-2 w-full rounded-md border border-input bg-background text-foreground p-3">
+                  <option value="regular">Regular library — up to 4 videos</option>
+                  <option value="early_access">Fifth video — Coming next week</option>
+                </select>
+              </label>
               <Button
                 variant="gold"
                 size="lg"
@@ -917,13 +928,13 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                 {uploading === "vault" ? ct.uploading_full : ct.upload_full}
               </Button>
               <p className="text-[10px] text-muted-foreground">{ct.full_hint}</p>
-              <label className="flex items-start gap-3 bg-secondary rounded-xl px-3 py-3 cursor-pointer">
+              {librarySlot === "regular" && <label className="flex items-start gap-3 bg-secondary rounded-xl px-3 py-3 cursor-pointer">
                 <Switch checked={allowBuyout} onCheckedChange={setAllowBuyout} aria-label="Allow Permanent Buyouts (1 Bit-Token)" className="mt-0.5" />
                 <span>
                   <span className="block text-xs font-bold text-foreground">Allow Permanent Buyouts (1 Bit-Token)</span>
                   <span className="block text-[10px] text-muted-foreground leading-snug">Allow customers to pay 1 Bit-Token to permanently save this video to their personal vault after the 14-day rotation.</span>
                 </span>
-              </label>
+              </label>}
             </div>
 
             {/* Progress bar */}
@@ -962,7 +973,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             const renderRow = (item: typeof mediaItems[number], accent: string) => {
               const isEditing = editingMediaId === item.id;
               return (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+                <div key={item.id} className={`bg-card border rounded-lg p-3 flex items-center gap-3 ${item.library_slot === "early_access" ? "border-primary neon-glow" : "border-border"}`}>
                   <div className={`w-12 h-12 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 ${accent}`}>
                     {item.media_type === "video" ? <Video className="w-5 h-5" /> : <Image className="w-5 h-5" />}
                   </div>
@@ -981,8 +992,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                     ) : (
                       <>
                         <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                        {item.library_slot === "early_access" && <p className="text-xs text-primary">Fifth video · Coming next week · Separately paid</p>}
                         <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()} • {item.views} views</span>
-                        {item.bucket === "vault" && (
+                        {item.bucket === "vault" && item.library_slot !== "early_access" && (
                           <label className="flex items-center gap-2 mt-1 cursor-pointer">
                             <Switch checked={item.allow_permanent_buyout} onCheckedChange={async (v) => { const r = await setPermanentBuyout(item.id, v); if ("error" in r) toast.error(r.error); }} aria-label="Allow Permanent Buyouts (1 Bit-Token)" className="scale-75 origin-left" />
                             <span className="text-[10px] font-bold text-muted-foreground">Allow Permanent Buyouts (1 Bit-Token)</span>

@@ -59,7 +59,17 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [vaultCount, setVaultCount] = useState<number | null>(null);
   const [countError, setCountError] = useState(false);
   const libraryAvailable = hasLibraryContent(vaultCount);
-  const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string; allow_permanent_buyout?: boolean; owned?: boolean }[]>([]);
+  const [vaultItems, setVaultItems] = useState<{ id: string; title: string; url: string | null; media_type: string; allow_permanent_buyout?: boolean; owned?: boolean; library_slot?: string }[]>([]);
+  const [fifth, setFifth] = useState<{id: string; title: string; purchased: boolean} | null>(null);
+  const [fifthBusy, setFifthBusy] = useState(false);
+  const [mediaRevision, setMediaRevision] = useState(0);
+  useEffect(() => {
+    setFifth(null);
+    if (!creatorId) return;
+    let cancelled = false;
+    void supabase.rpc("get_creator_fifth_video", {_creator_id: creatorId}).then(({data}) => {if (!cancelled) setFifth(data?.[0] ?? null);});
+    return () => {cancelled = true;};
+  }, [creatorId, mediaRevision]);
   const [vaultOffset,setVaultOffset]=useState(0);
   const [moreVault,setMoreVault]=useState(false);
   const [vaultError,setVaultError]=useState("");
@@ -137,7 +147,20 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     };
     void load();
     return () => {cancel=true;clearTimeout(timer);};
-  }, [isUnlocked,creatorId,vaultOffset]);
+  }, [isUnlocked,creatorId,vaultOffset,mediaRevision]);
+
+  const buyFifth = async () => {
+    if (!fifth || fifthBusy) return;
+    if (!accessAck) {toast({title: "Please confirm the access notice"}); return;}
+    if (spendableTokens(balance, bitCents) < 1) {setShowBuyModal(true); return;}
+    setFifthBusy(true);
+    const {error} = await supabase.rpc("buy_fifth_video", {_video_id: fifth.id});
+    setFifthBusy(false);
+    if (error) {toast({title: "Early access unavailable", description: error.message.includes("ALREADY_OWNED") ? "You already purchased this video. No additional token was used." : "No Bit-Token was used. Please check your library access and try again.", variant: "destructive"}); return;}
+    await Promise.all([refreshBalance(), refreshSubs()]);
+    setMediaRevision(n => n + 1);
+    toast({title: "Fifth video unlocked", description: "Another 14 days added to your existing access."});
+  };
 
   const handleUnlock = async (year = false) => {
     const need = year ? 26 : 1;
@@ -373,7 +396,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                {vaultItems.map((v) => (
+                {vaultItems.filter(v => v.library_slot !== "early_access").map((v) => (
                   <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
                      {v.url && v.media_type === "photo" ? <img src={v.url} alt={v.title} className="w-full aspect-video object-contain bg-background" /> : v.url ? (
                       <ProtectedVideo src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
@@ -413,7 +436,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">
               <DttToken className="w-20 h-20 mx-auto mb-2" />
               <p className="text-sm font-bold text-foreground">Drop 1 DTT Bit-Token to unlock</p>
-              <p className="text-xs text-muted-foreground mt-1">14 days of full access to every long-form video from @{creatorName}.</p>
+              <p className="text-xs text-muted-foreground mt-1">14 days of access to up to four regular long videos from @{creatorName}. The fifth video is purchased separately.</p>
             </div>
             <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={() => handleUnlock()} disabled={unlocking || !creatorId}>
               {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <img src={dttCoin} alt="" className="w-6 h-6 object-contain" />}
@@ -429,6 +452,18 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           </>
         )}
       </div>
+
+      {fifth && <div className="mx-4 mt-6 mb-6 overflow-hidden rounded-lg border-2 border-primary bg-card neon-glow">
+        <div className="aspect-video bg-secondary flex items-center justify-center">
+          {isUnlocked && fifth.purchased && vaultItems.find(v => v.id === fifth.id)?.url ? <ProtectedVideo src={vaultItems.find(v => v.id === fifth.id)?.url ?? ""} className="w-full aspect-video object-contain" controls playsInline preload="none" /> : <Lock className="h-8 w-8 text-primary" />}
+        </div>
+        <div className="p-4 space-y-3">
+          <p className="text-xs font-bold text-primary">COMING NEXT WEEK · FIFTH VIDEO</p>
+          <h3 className="font-semibold text-foreground break-words">{fifth.title}</h3>
+          <p className="text-sm text-muted-foreground">Separately paid. Watch early for 1 Bit-Token and add 14 days to your current access. Playback requires active creator access; this is not a permanent buyout.</p>
+          {fifth.purchased ? <p className="text-sm text-primary">Purchased{!isUnlocked ? " · Renew library access to watch" : " · Early access unlocked"}</p> : <Button variant="neon" className="w-full h-auto py-3 whitespace-normal" disabled={!isUnlocked || fifthBusy} onClick={() => void buyFifth()}>{fifthBusy ? "Unlocking…" : isUnlocked ? "EARLY ACCESS +14 DAYS — 1 BIT-TOKEN" : "UNLOCK THE REGULAR LIBRARY FIRST"}</Button>}
+        </div>
+      </div>}
 
       {/* Top 10 Fans leaderboard + gated messaging */}
       {creatorId && <TopFansSection creatorId={creatorId} creatorName={creatorName} />}

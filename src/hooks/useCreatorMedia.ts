@@ -15,6 +15,7 @@ export interface CreatorMediaItem {
   active_from: string | null;
   active_until: string | null;
   allow_permanent_buyout: boolean;
+  library_slot: "regular" | "early_access";
 }
 
 export function useCreatorMedia(creatorId: string | null) {
@@ -56,6 +57,7 @@ export function useCreatorMedia(creatorId: string | null) {
     title: string;
     media_type?: "video" | "photo";
     allow_permanent_buyout?: boolean;
+    library_slot?: "regular" | "early_access";
   }) => {
     if (!creatorId) return { error: "Not signed in" };
     const { error } = await supabase.from("creator_media").insert({
@@ -65,6 +67,7 @@ export function useCreatorMedia(creatorId: string | null) {
       title: input.title || "Untitled",
       media_type: input.media_type || "video",
       allow_permanent_buyout: input.bucket === "vault" && !!input.allow_permanent_buyout,
+      library_slot: input.library_slot ?? "regular",
     });
     if (error) return { error: error.message };
     await refresh();
