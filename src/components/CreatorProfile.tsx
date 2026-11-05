@@ -23,6 +23,7 @@ import CreatorHeartButton from "@/components/CreatorHeartButton";
 import DttToken from "@/components/DttToken";
 import { useHeartTotal } from "@/hooks/useHearts";
 import { hasLibraryContent } from "@/lib/teaserPlayback";
+import { PurchaseAccessNotice } from "@/components/PurchaseAccessNotice";
 
 interface Vault {
   name: string;
@@ -64,8 +65,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [vaultLoading,setVaultLoading]=useState(false);
   useEffect(()=>{setVaultItems([]);setVaultOffset(0);},[creatorId]);
   const [unlocking, setUnlocking] = useState(false);
+  const [accessAck, setAccessAck] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const { balance, refresh: refreshBalance } = useTokenBalance();
+  const { balance, bitCents, refresh: refreshBalance } = useTokenBalance();
   const { subs, refresh: refreshSubs } = useSubscriptions();
 
   // Resolve creator by display_name
@@ -146,6 +148,11 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       toast({ title: vaultCount === 0 ? "Library coming soon" : "Library unavailable", description: "No Bit-Token has been used." });
       return;
     }
+    if (!accessAck) {
+      toast({ title: "Please confirm the access notice", description: "Tick the notice above the library before using a Bit-Token." });
+      libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     if (balance < need) {
       toast({ title: "Need Bit-Tokens", description: year ? "A full year takes 26 Bit-Tokens ($650)." : "Buy at least 1 Bit-Token to unlock 14 days of access." });
       setShowBuyModal(true);
@@ -175,6 +182,11 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const [buyingId, setBuyingId] = useState<string | null>(null);
   const rotatingSoon = !!activeSub && new Date(activeSub.expires_at).getTime() - Date.now() <= 72 * 3600 * 1000;
   const handleBuyout = async (videoId: string) => {
+    if (!accessAck) {
+      toast({ title: "Please confirm the access notice", description: "Tick the notice above the library before using a Bit-Token." });
+      libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     if (balance < 1) { toast({ title: "Need 1 Bit-Token", description: "Buy a Bit-Token ($25 checkout) to save this video permanently." }); setShowBuyModal(true); return; }
     setBuyingId(videoId);
     const { error } = await supabase.rpc("buy_permanent_video", { _video_id: videoId });
@@ -340,6 +352,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           Full Library
           <span className="text-xs text-muted-foreground font-normal">{vaultCount === null ? (countError ? "Unavailable" : "Checking…") : `(${vaultCount} ${vaultCount === 1 ? "item" : "items"})`}</span>
         </h3>
+        {!sequencePending && libraryAvailable && <div className="mb-3"><PurchaseAccessNotice checked={accessAck} onChange={setAccessAck} /></div>}
 
         {sequencePending ? <p role="status" className="text-sm text-muted-foreground py-6">Opening library…</p> : isUnlocked ? (
           <>
@@ -410,7 +423,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             </Button>
             <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
             <p className="text-center text-xs text-muted-foreground mt-2">
-              Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"} • 1 = 14 days
+              Your balance: <span className="text-foreground font-bold">{balance}</span> Bit-Token{balance === 1 ? "" : "s"}{bitCents > 0 ? ` + ${bitCents} Bit-cents` : ""} • 1 = 14 days
             </p>
           </>
         )}

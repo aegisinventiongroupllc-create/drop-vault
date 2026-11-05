@@ -1,3 +1,4 @@
+import { PURCHASE_ACCESS_NOTICE } from "@/components/PurchaseAccessNotice";
 import { signTeaser, signTeasers } from "@/lib/teaserUrls";
 import ProtectedVideo from "@/components/ProtectedVideo";
 import { useState, useEffect, useRef, useCallback, memo } from "react";
@@ -269,6 +270,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
             DROP THAT THING IN YOUR LIBRARY
           </h3>
           <p className="text-sm text-muted-foreground">1 Bit-Token adds @{video.creator} to your library, finishes this teaser and opens their full vault for 14 days.</p>
+          <p className="text-[11px] leading-snug text-muted-foreground">{PURCHASE_ACCESS_NOTICE} You'll confirm this before paying.</p>
           <Button variant="neon" size="lg" className="text-base px-8" disabled={unlocking} onClick={() => { setGateOpen(false); onCreatorClick(video.creator); }}>
             {unlocking ? "UNLOCKING..." : `UNLOCK @${video.creator.toUpperCase()} CONTENT`}
           </Button>
