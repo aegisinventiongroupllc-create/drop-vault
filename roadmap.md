@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [ ] Review both admin customer/creator dashboards with a real authorized session, run regression checks, and fix confirmed reviewer-facing defects without changing payment modes, balances, approvals or publishing.
+- [ ] Produce a TryBit readiness checklist separating verified controls from blocked paid/media/legal/provider walkthroughs; merchant acceptance remains TryBit's decision.
 - [x] Add DTT™ and Drop That Thing™ to shared page branding, intro, entry/idle globe, sign-in, onboarding, discovery, recovery, sharing and footer; preserve legal company names, existing media and backend records. Not published.
 - [x] Fixed missing escrow amounts in preserved pre-update dashboard state: stats boundary supplies defaults and new payout amounts format defensively. Regression reproduces old state and passes; signed-in isolated creator screen renders its pending agreement on desktop/phone with no runtime errors. No agreement accepted or account data changed.
 - [x] Keep stacking and 26-token/364-day annual access; new unlocks and automatic renewals create per-14-day original-split escrow, scheduled five-minute bounded releases (288 checks/day), and withdrawal forfeits future funds while releasing accrued earnings without double deductions. Cent-first spending supports unlocks/year bundles/buyouts, keeping sub-100 remainders. 27 focused tests pass, including isolated deployed purchase/stacking/364-day/release/retry/forfeiture/credit/renewal authorization flows; build OK. Real signed-in zero-balance wallet verified desktop/phone in isolation. No existing active passes found; no real balances altered, cash refunds, LTC transfer, provider enablement or publication.
