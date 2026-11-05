@@ -4,6 +4,7 @@ import GalaxyReel from "@/components/GalaxyReel";
 import { getTargetLang } from "@/components/AutoTranslator";
 import skyCluster from "@/assets/brb/stars-cluster.jpg";
 import "./launch-intro.css";
+import { useIntroEntryReady } from "@/hooks/useIntroEntryReady";
 
 /** Saved caption translations — no AI calls, readable before sign-in. */
 export const INTRO_CAPTIONS: Record<string, string> = {
@@ -145,6 +146,7 @@ function Sparkles() {
 export default function LaunchIntro() {
   const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
   const [leaving, setLeaving] = useState(false);
+  const entryReady = useIntroEntryReady(show);
   const [lang, setLang] = useState(() => getTargetLang());
   const [ready, setReady] = useState(skyReady);
   const [size, setSize] = useState(() => (typeof window !== "undefined" ? globeSize() : 300));
@@ -185,9 +187,9 @@ export default function LaunchIntro() {
 
   return (
     <div
-      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
+      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${entryReady ? "dtt-intro-entry-ready" : ""} ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
       role="status" aria-label="Drop That Thing™"
-      onClick={(e) => { if (!(e.target as Element).closest("[data-intro-keep]")) setLeaving(true); }}
+      onClick={(e) => { if (entryReady && !(e.target as Element).closest("[data-intro-keep]")) setLeaving(true); }}
     >
       <div className="dtt-intro-sky absolute inset-0" aria-hidden>
         <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />

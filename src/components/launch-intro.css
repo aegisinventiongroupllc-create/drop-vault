@@ -78,3 +78,9 @@
 .dtt-intro-still .dtt-intro-nebula { opacity: .75; }
 
 @media (prefers-reduced-motion: reduce) { .dtt-intro-nebula { opacity: .75; } }
+
+/* Reserve all text space so the globe never shifts during the three-second wait. */
+.dtt-intro:not(.dtt-intro-entry-ready) :is(.dtt-intro-title, .dtt-intro-tagline, .dtt-intro-adult, .dtt-intro-caption) {
+  visibility: hidden;
+  pointer-events: none;
+}
