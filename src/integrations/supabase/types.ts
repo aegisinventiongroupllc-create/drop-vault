@@ -314,6 +314,7 @@ export type Database = {
       content_performer_index: {
         Row: {
           bucket: string
+          content_record_id: string | null
           creator_id: string
           date_of_birth: string
           id: string
@@ -324,6 +325,7 @@ export type Database = {
           object_updated_at: string
           participant_id: string | null
           performer_kind: string
+          performer_record_id: string | null
           recorded_on: string
           reviewer_id: string
           stage_aliases: string[]
@@ -332,6 +334,7 @@ export type Database = {
         }
         Insert: {
           bucket: string
+          content_record_id?: string | null
           creator_id: string
           date_of_birth: string
           id?: string
@@ -342,6 +345,7 @@ export type Database = {
           object_updated_at: string
           participant_id?: string | null
           performer_kind: string
+          performer_record_id?: string | null
           recorded_on: string
           reviewer_id: string
           stage_aliases?: string[]
@@ -350,6 +354,7 @@ export type Database = {
         }
         Update: {
           bucket?: string
+          content_record_id?: string | null
           creator_id?: string
           date_of_birth?: string
           id?: string
@@ -360,6 +365,7 @@ export type Database = {
           object_updated_at?: string
           participant_id?: string | null
           performer_kind?: string
+          performer_record_id?: string | null
           recorded_on?: string
           reviewer_id?: string
           stage_aliases?: string[]
@@ -1683,6 +1689,30 @@ export type Database = {
           verification_reviewer_notes?: string | null
           verification_status?: string
           verification_submitted_at?: string | null
+        }
+        Relationships: []
+      }
+      records_custodian: {
+        Row: {
+          compliance_email: string
+          custodian_name: string
+          id: boolean
+          inspection_address: string
+          updated_at: string
+        }
+        Insert: {
+          compliance_email: string
+          custodian_name: string
+          id?: boolean
+          inspection_address: string
+          updated_at?: string
+        }
+        Update: {
+          compliance_email?: string
+          custodian_name?: string
+          id?: boolean
+          inspection_address?: string
+          updated_at?: string
         }
         Relationships: []
       }
