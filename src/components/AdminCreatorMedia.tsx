@@ -1,3 +1,5 @@
+import { signTeaser, signTeasers } from "@/lib/teaserUrls";
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -20,7 +22,7 @@ export default function AdminCreatorMedia({ creatorId }: { creatorId: string }) 
       const { data: teasers } = await supabase.from("creator_media").select("id,title,media_type,storage_path")
         .eq("creator_id", creatorId).eq("bucket", "teasers").order("created_at", { ascending: false }).limit(24);
       for (const t of teasers ?? []) {
-        const { data: s } = await supabase.storage.from("teasers").createSignedUrl(t.storage_path, 3600);
+        const { data: s } = await signTeaser(t.storage_path);
         out.push({ id: t.id, title: t.title, media_type: t.media_type, url: s?.signedUrl ?? null, bucket: "teasers" });
       }
       const { data: vault, error: vErr } = await supabase.functions.invoke("vault-media", { body: { creator_id: creatorId, offset: 0 } });
@@ -42,7 +44,7 @@ export default function AdminCreatorMedia({ creatorId }: { creatorId: string }) 
               {items.map((m) => (
                 <div key={m.id} className="space-y-1">
                   {m.url ? (m.media_type === "video"
-                    ? <video src={m.url} controls playsInline preload="metadata" className="w-full rounded-lg bg-secondary aspect-[3/4] object-cover" />
+                    ? <ProtectedVideo src={m.url} controls playsInline preload="metadata" className="w-full rounded-lg bg-secondary aspect-[3/4] object-cover" />
                     : <img src={m.url} alt={m.title} className="w-full rounded-lg aspect-[3/4] object-cover" />)
                     : <div className="aspect-[3/4] rounded-lg bg-secondary flex items-center justify-center text-[10px] text-muted-foreground">Unavailable</div>}
                   <p className="text-[10px] text-muted-foreground truncate">{m.bucket === "vault" ? "VAULT" : "TEASER"} · {m.title}</p>

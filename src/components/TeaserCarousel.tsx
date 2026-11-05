@@ -1,3 +1,5 @@
+import { signTeaser, signTeasers } from "@/lib/teaserUrls";
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +22,7 @@ export default function TeaserCarousel({ items, onRefresh, onDelete }: { items: 
     let cancelled = false;
     const load = async () => {
       if (!items.length) return;
-      const { data } = await supabase.storage.from("teasers").createSignedUrls(items.map((item) => item.storage_path), 3600);
+      const { data } = await signTeasers(items.map((item) => item.storage_path));
       const map: Record<string, string> = {};
       data?.forEach((row) => { if (row.path && row.signedUrl) map[row.path] = row.signedUrl; });
       if (!cancelled) setUrls(map);
@@ -49,7 +51,7 @@ export default function TeaserCarousel({ items, onRefresh, onDelete }: { items: 
         const url = urls[item.storage_path];
         return <article key={item.id} className="w-60 shrink-0 snap-start border border-border rounded-lg overflow-hidden bg-card">
           <Button variant="ghost" aria-label={`Preview ${item.title}`} className={`relative w-full h-56 p-0 teaser-viewport teaser-frame-${item.teaser_frame}`} disabled={!url} onClick={() => open(item, false)}>
-            {url && (item.media_type === "photo" ? <img src={url} alt={item.title} className="h-full w-full object-cover" /> : <video src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />)}
+            {url && (item.media_type === "photo" ? <img src={url} alt={item.title} className="h-full w-full object-cover" /> : <ProtectedVideo src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />)}
             <span className="absolute inset-0 flex items-center justify-center bg-background/20"><Play className="h-8 w-8 text-foreground" /></span>
             <span className="teaser-decoration absolute inset-0 pointer-events-none" />
           </Button>

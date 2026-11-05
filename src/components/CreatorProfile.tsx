@@ -1,3 +1,4 @@
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useState, useEffect, useCallback, useRef } from "react";
 import dttCoin from "@/assets/dtt-reward-coin.png";
 import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
@@ -361,7 +362,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {vaultItems.map((v) => (
                   <div key={v.id} className="bg-card border border-border rounded-xl overflow-hidden">
                      {v.url && v.media_type === "photo" ? <img src={v.url} alt={v.title} className="w-full aspect-video object-contain bg-background" /> : v.url ? (
-                      <video src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
+                      <ProtectedVideo src={v.url} className="w-full aspect-video object-cover bg-background" controls playsInline preload="none" />
                     ) : (
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
                     )}

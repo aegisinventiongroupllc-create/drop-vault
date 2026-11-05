@@ -1,3 +1,5 @@
+import { signTeaser, signTeasers } from "@/lib/teaserUrls";
+import ProtectedVideo from "@/components/ProtectedVideo";
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { Heart, MessageCircle, Share2, Lock, Volume2, VolumeX, X, Send, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -84,11 +86,11 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     if (!isVisible || !video.storagePath) return;
     let cancelled = false;
     const refresh = async () => {
-      const {data, error} = await supabase.storage.from("teasers").createSignedUrl(video.storagePath ?? "", 3600);
+      const {data, error} = await signTeaser(video.storagePath ?? "");
       if (!cancelled) setPlaybackUrl(error ? undefined : data?.signedUrl);
     };
     void refresh();
-    const timer = setInterval(() => void refresh(), 50 * 60 * 1000);
+    const timer = setInterval(() => void refresh(), 240 * 1000);
     return () => {cancelled=true;clearInterval(timer);};
   }, [isVisible, video.storagePath]);
 
@@ -212,7 +214,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
       <div className={`absolute inset-0 bg-gradient-to-b ${video.color} bg-card`} />
       {isRealTeaser && video.mediaType === "photo" && <img loading="lazy" src={playbackUrl} alt={video.title} className="absolute inset-0 w-full h-full object-cover" />}
       {isRealTeaser && video.mediaType !== "photo" && (
-        <video
+        <ProtectedVideo
           ref={videoRef}
           src={isVisible ? playbackUrl : undefined}
           className="absolute inset-0 w-full h-full object-cover"
@@ -435,7 +437,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       });
       // Teaser files are private: only pass holders, creators and admins get short-lived links.
       const { data: signed, error: signingError } = media.length
-        ? await supabase.storage.from("teasers").createSignedUrls(media.map((m) => m.storage_path), 60 * 60)
+        ? await signTeasers(media.map((m) => m.storage_path))
         : { data: [] as { path: string | null; signedUrl: string }[], error:null };
       if (signingError && !cancelled) setLoadError("Some teasers couldn’t load. Please try again.");
       const urlMap: Record<string, string> = {};
