@@ -39,10 +39,21 @@ export function useCreatorCalendar(userId: string, start: string, end: string) {
   useEffect(() => {
     setItems([]); setRequests([]); void refresh();
     const onFocus = () => void refresh();
+    let pending: number | undefined;
+    const onRequestChange = () => {
+      window.clearTimeout(pending);
+      pending = window.setTimeout(() => void refresh(), 300);
+    };
+    const channel = supabase.channel(`creator-calendar-${userId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'custom_requests', filter: `creator_id=eq.${userId}` }, onRequestChange)
+      .subscribe();
     window.addEventListener('focus', onFocus);
     const interval = window.setInterval(onFocus, 60000);
-    return () => { window.removeEventListener('focus', onFocus); window.clearInterval(interval); };
-  }, [refresh]);
+    return () => {
+      window.removeEventListener('focus', onFocus); window.clearInterval(interval);
+      window.clearTimeout(pending); void supabase.removeChannel(channel);
+    };
+  }, [refresh, userId]);
   const save = async (draft: CalendarDraft, id?: string) => {
     const result = id
       ? await supabase.from('creator_calendar_items').update(draft).eq('id', id).eq('creator_id', userId)

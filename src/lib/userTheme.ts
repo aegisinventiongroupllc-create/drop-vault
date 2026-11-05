@@ -77,11 +77,17 @@ export function loadTheme(): UserTheme {
   } catch { return {}; }
 }
 
+/** Unsaved account defaults never replace explicitly saved colors. */
+export function resolveDashboardTheme(theme: UserTheme): UserTheme {
+  return { primary: "#ff0080", outline: "#ff0080", ...validateTheme(theme) };
+}
+
 export function applyTheme(theme: UserTheme = loadTheme()) {
   const root = document.documentElement;
-  root.toggleAttribute("data-dashboard-outline", Boolean(theme.outline && HEX.test(theme.outline)));
+  const appearance = resolveDashboardTheme(theme);
+  root.toggleAttribute("data-dashboard-outline", true);
   for (const p of THEME_PARTS) {
-    const v = theme[p.key];
+    const v = appearance[p.key];
     for (const cssVar of p.vars) {
       if (v && HEX.test(v)) root.style.setProperty(cssVar, hexToHsl(v));
       else root.style.removeProperty(cssVar);
