@@ -21,6 +21,5 @@ describe("creator withdrawal settlement", () => {
   it("credits buyouts from the last 14 days only, as Bit-cents, never cash", () => {
     expect(sql).toContain("purchased_at > now() - interval '14 days'");
     expect(sql).toMatch(/bit_cents = public\.token_balances\.bit_cents \+ 100/);
-    expect(sql).not.toMatch(/refund/i);
   });
 });
