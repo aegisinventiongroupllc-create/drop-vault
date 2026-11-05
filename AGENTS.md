@@ -34,7 +34,7 @@
 - Shared resumable uploads accept already-watermarked files; failed registration cleans staging or reports failure. Why: interruptions cannot silently succeed.
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
-- 2257 custodian via get_records_custodian, not DMCA text. Withdrawals archive records service-side and block clearance.
+- 2257 custodian via get_records_custodian; withdrawals archive and block clearance.
 - Founding slots/splits are server-set and permanent; admin views share empty-market lists. Why: vacancies never alter awards.
 
 - Sky photos preload, retry on resume/online.
