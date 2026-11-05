@@ -29,6 +29,7 @@ import ProfileAvatar, { DEFAULT_AVATAR, parseAvatarConfig, type AvatarConfig } f
 import CreatorProfilePhotoGallery from "@/components/CreatorProfilePhotoGallery";
 import CreatorBackdropPicker from "@/components/CreatorBackdropPicker";
 import CreatorPayoutMethod from "@/components/CreatorPayoutMethod";
+import CreatorConsentWithdrawal from "@/components/CreatorConsentWithdrawal";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
@@ -824,6 +825,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             </div>
           </div>
           <CreatorPayoutMethod />
+          <CreatorConsentWithdrawal />
         </div>
       )}
 

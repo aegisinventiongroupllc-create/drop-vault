@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 import AdminVerifications from "@/components/AdminVerifications";
 import AdminPerformerSearch from "@/components/AdminPerformerSearch";
+import AdminRetentionBackups from "@/components/AdminRetentionBackups";
 import AdminPowerWeeks from "@/components/AdminPowerWeeks";
 import AdminFlowPreview from "@/components/AdminFlowPreview";
 import {
@@ -58,7 +59,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention";
 
 interface FinanceWallet {
   user_id: string;
@@ -314,6 +315,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
     { id: "legal", label: "LEGAL LOGS" },
+    { id: "retention", label: "BACKUPS & RETENTION" },
   ];
 
   if (selectedCreator) {
@@ -655,6 +657,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {activeSection === "suggestions" && <AdminSuggestions />}
       {activeSection === "countries" && <AdminCountries onOpenCreator={(c) => setSelectedCreator(c as any)} />}
       {activeSection === "globe" && <AdminGlobeStyle />}
+      {activeSection === "retention" && <AdminRetentionBackups />}
 
       {/* Customer → Creator dollar requests */}
       {activeSection === "requests" && (
