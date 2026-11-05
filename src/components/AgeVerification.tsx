@@ -78,7 +78,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
 
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-2">
-            {t.age_title}<span className="text-primary">THING</span>
+            {t.age_title}<span className="text-primary notranslate" translate="no">THING™</span>
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {t.age_subtitle}

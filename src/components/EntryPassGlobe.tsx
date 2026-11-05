@@ -16,7 +16,7 @@ export default function EntryPassGlobe({ size = 128, solid = false, sharp = fals
           <MiniGlobe size={size} speed={motionless ? 0 : 0.15} lights backdrop={false} cameraDistance={solid ? 3.8 : 3.2} sharp={sharp} dotScale={bright ? 1.4 : undefined} glintBoost={bright ? 1.5 : undefined} />
         </GlobeOverrideContext.Provider>
       </div>
-      <p className="absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>
+      <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT<sup className="self-center text-[10px] tracking-normal -translate-y-2">™</sup></p>
     </div>
   );
 }
