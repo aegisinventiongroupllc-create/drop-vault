@@ -50,3 +50,4 @@
 - Revenue details/VIP store render once in Analytics; terms use scoped RPCs; triggers fix unpaid shares/freeze paid earnings. Why: no duplicate rules or client-authorized payouts.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
 - Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
+- Approved content manifests snapshot uploader/participant legal names, birth dates and stage aliases into an append-only, service-only performer index; approval fails if any performer lacks an approved identity. Why: every cleared upload stays permanently traceable to verified performers.
