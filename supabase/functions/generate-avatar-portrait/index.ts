@@ -73,6 +73,11 @@ Deno.serve(async (req) => {
       return json({ error: "Too many emoji requests right now. Please wait a minute and try again.", unavailable: true }, 200);
     }
 
+    if (!upstream.ok) {
+      console.error("Avatar portrait upstream error", upstream.status, await upstream.text().catch(() => ""));
+      return json({ error: "Portrait creation failed. Please try again." }, 502);
+    }
+
     const headers = new Headers(corsHeaders);
     headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "application/json");
     headers.set("Cache-Control", "no-store");
@@ -83,6 +88,6 @@ Deno.serve(async (req) => {
     return new Response(upstream.body, { status: upstream.status, headers });
   } catch (error) {
     console.error("Avatar portrait generation failed", error);
-    return json({ error: error instanceof Error ? error.message : "Portrait creation failed." }, 500);
+    return json({ error: "Portrait creation failed." }, 500);
   }
 });
