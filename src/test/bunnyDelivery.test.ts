@@ -12,10 +12,11 @@ describe.skipIf(!db)('Bunny private delivery records',()=>{
  });
  it('enforces owner and exact original version',async()=>{
   if(!db)throw new Error('Database required');
-  await db.begin(async sql=>{
+  const rollback=new Error('rollback synthetic fixtures');
+  try { await db.begin(async sql=>{
    const [row]=await sql`select pg_get_functiondef('public.bunny_source_current(uuid)'::regprocedure) as definition`;
-   await sql`create temp table bunny_copies (like public.bunny_video_deliveries including defaults)`;
-   await sql`create temp table source_objects(bucket_id text,name text,updated_at timestamptz)`;
+   await sql`create temp table if not exists bunny_copies (like public.bunny_video_deliveries including defaults) on commit drop`;
+   await sql`create temp table if not exists source_objects(bucket_id text,name text,updated_at timestamptz) on commit drop`;
    await sql.unsafe(row.definition.replace('public.bunny_source_current','pg_temp.source_current').replaceAll('public.bunny_video_deliveries','pg_temp.bunny_copies').replaceAll('storage.objects','pg_temp.source_objects'));
    const id=crypto.randomUUID(),owner=crypto.randomUUID(),video=crypto.randomUUID(),path=owner+'/video.mp4',stamp=new Date();
    await sql`insert into pg_temp.bunny_copies(id,creator_id,bucket,storage_path,source_updated_at,video_id) values(${id},${owner},'vault',${path},${stamp},${video})`;
@@ -23,7 +24,8 @@ describe.skipIf(!db)('Bunny private delivery records',()=>{
    expect((await sql`select pg_temp.source_current(${id}) as allowed`)[0].allowed).toBe(true);
    await sql`update pg_temp.source_objects set updated_at=updated_at+interval '1 second'`;
    expect((await sql`select pg_temp.source_current(${id}) as allowed`)[0].allowed).toBe(false);
-  });
+   throw rollback;
+  }); }catch(error){if(error!==rollback)throw error;}
  });
 });
 describe('Bunny playback boundaries',()=>{
