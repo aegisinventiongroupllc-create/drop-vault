@@ -1112,6 +1112,50 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_withdrawal_settlements: {
+        Row: {
+          clawback_usd: number
+          created_at: string
+          creator_id: string
+          deducted_usd: number
+          final_net_usd: number
+          id: string
+          pending_before: number
+          platform_covered_usd: number
+          withdrawal_id: string
+        }
+        Insert: {
+          clawback_usd: number
+          created_at?: string
+          creator_id: string
+          deducted_usd: number
+          final_net_usd: number
+          id?: string
+          pending_before: number
+          platform_covered_usd: number
+          withdrawal_id: string
+        }
+        Update: {
+          clawback_usd?: number
+          created_at?: string
+          creator_id?: string
+          deducted_usd?: number
+          final_net_usd?: number
+          id?: string
+          pending_before?: number
+          platform_covered_usd?: number
+          withdrawal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_withdrawal_settlements_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "creator_consent_withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_request_payment_receipts: {
         Row: {
           amount_usd: number
@@ -1958,16 +2002,19 @@ export type Database = {
       token_balances: {
         Row: {
           balance: number
+          bit_cents: number
           updated_at: string
           user_id: string
         }
         Insert: {
           balance?: number
+          bit_cents?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           balance?: number
+          bit_cents?: number
           updated_at?: string
           user_id?: string
         }
@@ -2238,6 +2285,53 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      withdrawal_customer_credits: {
+        Row: {
+          bit_cents: number
+          created_at: string
+          creator_clawback_usd: number
+          creator_id: string
+          customer_id: string
+          days_remaining: number
+          id: string
+          source: string
+          source_id: string
+          withdrawal_id: string
+        }
+        Insert: {
+          bit_cents: number
+          created_at?: string
+          creator_clawback_usd: number
+          creator_id: string
+          customer_id: string
+          days_remaining: number
+          id?: string
+          source: string
+          source_id: string
+          withdrawal_id: string
+        }
+        Update: {
+          bit_cents?: number
+          created_at?: string
+          creator_clawback_usd?: number
+          creator_id?: string
+          customer_id?: string
+          days_remaining?: number
+          id?: string
+          source?: string
+          source_id?: string
+          withdrawal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_customer_credits_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "creator_consent_withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       yoti_age_checks: {
         Row: {
@@ -2650,6 +2744,10 @@ export type Database = {
       set_my_profile_backdrop: {
         Args: { _design?: string; _path?: string }
         Returns: undefined
+      }
+      settle_creator_withdrawal: {
+        Args: { _creator: string; _withdrawal: string }
+        Returns: number
       }
       submit_creator_identity: {
         Args: {
