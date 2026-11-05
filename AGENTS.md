@@ -52,4 +52,3 @@
 - Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
 - Manifest approval writes permanent service-only performer index rows or fails. Why: traceability.
 
-- Intro entrance motion stays scoped to launch-intro.css; reduced motion shows the unobscured globe immediately. Why: opening effects must not alter shared entry, idle or saved themes.
