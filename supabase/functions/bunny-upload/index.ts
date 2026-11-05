@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
-import { bunnyApi, uploadAuthorization, UUID } from '../_shared/bunnyStream.ts';
+import { bunnyApi, UUID } from '../_shared/bunnyStream.ts';
 const schema = z.object({ action: z.enum(['start','complete','cancel','delete']), bucket: z.enum(['vault','teasers']), path: z.string().min(1).max(300), media_id: z.string().uuid().optional() });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type':'application/json', 'Cache-Control':'no-store' } });
 Deno.serve(async req => {
@@ -31,14 +31,18 @@ Deno.serve(async req => {
   if(copyError) throw new Error('Upload record unavailable');
   if(action==='start') {
    if (!copy) {
-    const video = await bunnyApi('/videos','POST',{title:'DTT private watermarked video'});
+    // Only the server-selected original can populate the delivery copy. Never
+    // hand out TUS signatures permitting a client to replace reviewed content.
+    const signed = await db.storage.from(bucket).createSignedUrl(path,3600);
+    if(signed.error || !signed.data?.signedUrl) throw new Error('Original unavailable');
+    const video = await bunnyApi('/videos/fetch','POST',{url:signed.data.signedUrl,title:'DTT private watermarked video'});
     if (!UUID.test(video.guid)) throw new Error('Invalid provider video');
-    const saved = await db.from('bunny_video_deliveries').insert({creator_id:uid,bucket,storage_path:path,source_updated_at:evidence.updated_at,video_id:video.guid}).select('*').single();
+    const saved = await db.from('bunny_video_deliveries').insert({creator_id:uid,bucket,storage_path:path,source_updated_at:evidence.updated_at,video_id:video.guid,state:'processing'}).select('*').single();
     if(saved.error){await bunnyApi(`/videos/${video.guid}`,'DELETE');throw new Error('Unable to save upload record');}
     copy=saved.data;
    }
-   if(!copy || copy.state!=='uploading' || copy.source_updated_at!==evidence.updated_at) return json({error:'Upload version unavailable'},409);
-   return json(await uploadAuthorization(copy.video_id));
+   if(!copy || !['processing','ready'].includes(copy.state) || copy.source_updated_at!==evidence.updated_at) return json({error:'Upload version unavailable'},409);
+   return json({success:true,processing:copy.state!=='ready'});
   }
   if(!copy) return action==='cancel'||action==='delete'?json({success:true,legacy:true}):json({error:'Upload unavailable'},404);
   if(action==='complete') {

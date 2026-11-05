@@ -4,12 +4,17 @@ const mocks = vi.hoisted(() => ({
   watermark: vi.fn(),
   upload: vi.fn(),
   activity: vi.fn(),
+  bunny: vi.fn(),
+  cancel: vi.fn(),
+  remove: vi.fn(),
 }));
+vi.mock('@/lib/bunnyUpload',()=>({uploadBunnyCopy:mocks.bunny,bunnyUploadAction:mocks.cancel}));
 vi.mock("@/lib/mediaWatermark", () => ({ watermarkCreatorMedia: mocks.watermark }));
 vi.mock("@/lib/activityLog", () => ({ logActivity: mocks.activity }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { storage: { from: () => ({
     upload: mocks.upload,
+    remove: mocks.remove,
     getPublicUrl: () => ({ data: { publicUrl: "https://example.test/branded" } }),
   }) } },
 }));
@@ -17,7 +22,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 import { uploadMedia } from "@/lib/storageUpload";
 
 describe("permanent creator watermark uploads", () => {
-  beforeEach(() => { vi.clearAllMocks(); mocks.upload.mockResolvedValue({ error: null }); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.upload.mockResolvedValue({ error: null });mocks.bunny.mockResolvedValue(undefined);mocks.cancel.mockResolvedValue({success:true});mocks.remove.mockResolvedValue({error:null}); });
 
   it("stores only the processed video with the correct extension and type", async () => {
     const original = new File(["original"], "clip.mov", { type: "video/quicktime" });
@@ -26,6 +31,7 @@ describe("permanent creator watermark uploads", () => {
     const result = await uploadMedia(original, "vault", "creator");
     expect(result).toHaveProperty("path", expect.stringMatching(/^creator\/.*\.mp4$/));
     expect(mocks.upload).toHaveBeenCalledWith(expect.any(String), branded, expect.objectContaining({ contentType: "video/mp4",upsert:false }));
+    expect(mocks.bunny).toHaveBeenCalledWith('vault',expect.stringMatching(/^creator\//),branded,undefined);
   });
 
   it("never uploads an unmarked file if watermarking fails", async () => {
@@ -33,6 +39,7 @@ describe("permanent creator watermark uploads", () => {
     const result = await uploadMedia(new File(["original"], "photo.jpg", { type: "image/jpeg" }), "teasers", "creator");
     expect(result).toEqual({ error: "Watermark failed" });
     expect(mocks.upload).not.toHaveBeenCalled();
+    expect(mocks.bunny).not.toHaveBeenCalled();
   });
   it('reports storage failure without returning a false success',async()=>{
     mocks.watermark.mockResolvedValue(new File(['DTT'],'photo-dtt.jpg',{type:'image/jpeg'}));
@@ -42,5 +49,17 @@ describe("permanent creator watermark uploads", () => {
   it('does not expose a public URL for a private object',async()=>{
     mocks.watermark.mockResolvedValue(new File(['DTT'],'photo-dtt.jpg',{type:'image/jpeg'}));
     expect(await uploadMedia(new File(['original'],'photo.jpg'),'vault','creator')).not.toHaveProperty('url');
+  });
+  it('leaves photo delivery unchanged',async()=>{
+    mocks.watermark.mockResolvedValue(new File(['DTT'],'photo.jpg',{type:'image/jpeg'}));
+    await uploadMedia(new File(['photo'],'photo.jpg',{type:'image/jpeg'}),'vault','creator');
+    expect(mocks.bunny).not.toHaveBeenCalled();
+  });
+  it('fails closed and removes new staging after Bunny failure',async()=>{
+    mocks.watermark.mockResolvedValue(new File(['DTT'],'video.mp4',{type:'video/mp4'}));
+    mocks.bunny.mockRejectedValueOnce(new Error('Provider unavailable'));
+    expect(await uploadMedia(new File(['original'],'video.mp4',{type:'video/mp4'}),'vault','creator')).toEqual({error:'Provider unavailable'});
+    expect(mocks.cancel).toHaveBeenCalledWith('cancel','vault',expect.any(String));
+    expect(mocks.remove).toHaveBeenCalledOnce();
   });
 });

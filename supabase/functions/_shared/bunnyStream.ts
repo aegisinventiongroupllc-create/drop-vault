@@ -15,14 +15,6 @@ export async function bunnyApi(path: string, method = 'GET', body?: unknown) {
   }
   return response.status === 204 ? null : response.json();
 }
-export async function uploadAuthorization(videoId: string) {
-  const key = Deno.env.get('BUNNY_STREAM_LIBRARY_API_KEY');
-  if (!key || !UUID.test(videoId)) throw new Error('Video authorization unavailable');
-  const expires = Math.floor(Date.now() / 1000) + 24 * 3600;
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${BUNNY_LIBRARY}${key}${expires}${videoId}`));
-  const signature = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
-  return { video_id: videoId, library_id: BUNNY_LIBRARY, expires, signature };
-}
 export async function bunnyPlaybackUrl(videoId: string, seconds: number) {
   const key = Deno.env.get('BUNNY_STREAM_TOKEN_KEY');
   if (!key || !UUID.test(videoId) || seconds < 1 || seconds > 300) throw new Error('Protected playback unavailable');
