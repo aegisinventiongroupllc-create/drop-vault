@@ -3,6 +3,7 @@ import { X, Download } from "lucide-react";
 import pinkGlobe from "@/assets/dtt-pink-globe-icon-clean.png";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -65,7 +66,12 @@ const PWAInstallPrompt = () => {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      toast.info(/iPad|iPhone|iPod/.test(navigator.userAgent)
+        ? "Apple requires Safari’s Share menu → Add to Home Screen. This website cannot open Apple’s install dialog."
+        : "This browser has not offered installation. Open dropthatthing.com directly in Chrome or Edge; if available, use its Install app menu.");
+      return;
+    }
     try {
       await deferredPrompt.prompt();
       await deferredPrompt.userChoice;
@@ -91,17 +97,16 @@ const PWAInstallPrompt = () => {
           className="w-12 h-12 rounded-xl shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-foreground tracking-wider">SAVE TO HOME SCREEN</p>
+          <Button variant="ghost" onClick={() => void handleInstall().catch(() => toast.error("Installation could not open. Please try again."))} className="h-auto justify-start whitespace-normal p-0 text-left text-xs font-bold text-foreground">SAVE TO HOME SCREEN</Button>
           <p className="text-[10px] text-muted-foreground mt-0.5">Install DropThatThing for quick access</p>
-          {!deferredPrompt && <p className="text-[10px] text-muted-foreground mt-1">Use your browser’s menu or Share → Add to Home Screen.</p>}
         </div>
-        {deferredPrompt && <Button
+        <Button
           onClick={() => void handleInstall().catch(() => undefined)}
           className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-[11px] font-bold tracking-wider hover:brightness-110 transition-all flex items-center gap-1 shrink-0"
         >
           <Download className="w-3.5 h-3.5" />
           INSTALL
-        </Button>}
+        </Button>
         <Button
           variant="ghost"
           size="icon"

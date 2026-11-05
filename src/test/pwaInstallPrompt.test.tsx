@@ -23,6 +23,12 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe("installation confirmation", () => {
+  it("clicking Save to Home Screen opens the available native install prompt", async () => {
+    render(<PWAInstallPrompt />);
+    const event = offer();
+    fireEvent.click(screen.getByRole("button", { name: "SAVE TO HOME SCREEN" }));
+    await waitFor(() => expect(event.prompt).toHaveBeenCalledOnce());
+  });
   it("shows again on the next login after temporary dismissal", () => {
     render(<PWAInstallPrompt />); login();
     fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
