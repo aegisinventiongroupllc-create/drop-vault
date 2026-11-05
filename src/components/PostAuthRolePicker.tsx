@@ -21,7 +21,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
-            DROPTHAT<span className="text-primary">THING</span>
+            <span className="notranslate" translate="no">DROPTHAT<span className="text-primary">THING™</span></span>
           </h1>
           <p className="text-muted-foreground text-sm">
             {email ? ct.signed_in_as(email) : ct.signed_in}

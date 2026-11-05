@@ -12,7 +12,7 @@ interface Step {
 
 const Brand = () => (
   <h1 className="font-display text-lg font-bold tracking-wider text-foreground">
-    DROPTHAT<span className="text-primary">THING</span>
+    <span className="notranslate" translate="no">DROPTHAT<span className="text-primary">THING™</span></span>
   </h1>
 );
 
@@ -42,7 +42,7 @@ const AccountScreen = () => (
 
 const PassScreen = () => (
   <div className="space-y-3 text-center">
-    <p className="font-display text-2xl font-bold tracking-[0.35em] text-primary">DTT</p>
+    <p translate="no" className="notranslate font-display text-2xl font-bold tracking-[0.35em] text-primary">DTT™</p>
     <p className="text-[10px] font-bold tracking-[0.3em] text-gold">VAULT ENTRY PASS</p>
     <p className="font-display text-xl font-bold">${ENTRY_PASS_PRICE_USD} / YEAR</p>
     <div className="rounded-xl border border-border bg-card p-3 text-left text-[10px] text-muted-foreground space-y-1">

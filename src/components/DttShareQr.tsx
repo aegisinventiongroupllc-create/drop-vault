@@ -6,11 +6,11 @@ export default function DttShareQr() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-xs font-bold text-primary">SHARE DTT</Button>
+        <Button variant="ghost" size="sm" className="text-xs font-bold text-primary">SHARE DTT™</Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-lg">
-        <DialogTitle className="text-center">DTT</DialogTitle>
-        <DialogDescription className="text-center">DropThatThing · 18+</DialogDescription>
+        <DialogTitle className="text-center notranslate" translate="no">DTT™</DialogTitle>
+        <DialogDescription className="text-center"><span className="notranslate" translate="no">Drop That Thing™</span> · 18+</DialogDescription>
         <ShareQrCode value="https://dropthatthing.com" filename="dtt-qr.png" label="DTT website QR code" />
       </DialogContent>
     </Dialog>
