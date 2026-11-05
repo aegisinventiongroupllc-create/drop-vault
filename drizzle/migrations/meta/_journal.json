@@ -666,6 +666,13 @@
       "when": 1793891801417,
       "tag": "0094_withdrawal_token_settlement",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1793893476325,
+      "tag": "0095_biweekly_escrow_and_bit_cent_spending",
+      "breakpoints": true
     }
   ]
 }
