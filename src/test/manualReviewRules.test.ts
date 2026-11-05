@@ -10,7 +10,7 @@ describe.skipIf(!db)("isolated manual identity decisions", () => {
     { name: "approval requires matching evidence confirmation", confirmed: false, error: "Confirmed adult creator identity required" },
     { name: "underage creator cannot be approved", dob: "2015-01-01", error: "Confirmed adult creator identity required" },
     { name: "already reviewed records cannot be decided again", initial: "approved", error: "Submission already reviewed or unavailable" },
-    { name: "decline requires a reason", decision: "rejected", error: "Decline reason required" },
+    { name: "decline requires a reason", decision: "rejected", error: "Valid decision and reason required" },
     { name: "decline records a correction reason", decision: "rejected", notes: "Holding note missing date" },
     { name: "adult ID approval records reviewer confirmation", decision: "approved" },
   ];

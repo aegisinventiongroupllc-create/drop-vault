@@ -156,7 +156,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     const load = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("verification_status, avatar_config")
+        .select("verification_status, avatar_config, display_name")
         .eq("user_id", authUserId)
         .maybeSingle();
       if (!cancelled && data?.verification_status) {
@@ -165,6 +165,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       const eligibility = await supabase.rpc("can_upload_creator_media", { _creator_id: authUserId });
       if (!cancelled) setUploadEligible(!eligibility.error && eligibility.data === true);
       if (!cancelled && data?.avatar_config) setProfileAvatar(parseAvatarConfig(data.avatar_config));
+      if (!cancelled) setProfileUsername(data?.display_name ?? "");
       const { data: publicProfile } = await supabase
         .from("public_profiles")
         .select("profile_photo_path")
@@ -497,7 +498,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     f.toLowerCase().includes(loyaltySearch.toLowerCase())
   );
 
-  if (showSafetyModal && !safetyAgreed) {
+  if (!adminPreview && showSafetyModal && !safetyAgreed) {
     if (!safetyChecked) return null;
     return <CreatorSafetyModal onAgree={() => {
       setSafetyAgreed(true); setShowSafetyModal(false);
@@ -760,8 +761,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           })()}
 
           {/* Recent Activity */}
-          <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+          {adminPreview && <div className="bg-card border border-border rounded-xl p-4 space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Recent Activity</h3>
+            <p className="text-xs text-muted-foreground">Sample activity — not recorded earnings or customer purchases.</p>
             {[
               { text: "New vault unlock — Cosplay Vault", time: "2m ago", icon: CheckCircle },
               { text: "Custom request received — $500", time: "15m ago", icon: CreditCard },
@@ -775,7 +777,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                 </div>
               </div>
             ))}
-          </div>
+          </div>}
 
           <SuggestionBox />
         </div>

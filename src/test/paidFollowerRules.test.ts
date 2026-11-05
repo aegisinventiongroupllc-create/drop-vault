@@ -34,11 +34,12 @@ describe.skipIf(!db)('paid library follower rules',()=>{
  it('keeps one paid follower through actual renewal, retry and heart changes',async()=>{
   if(!db) throw Error('Database required');
   await db.begin(async sql=>{
-   const tables=['transactions','token_purchases','creator_paid_followers','creator_paid_follower_totals','power_weeks','creator_split_settings','creator_hearts','creator_heart_totals','subscriptions','token_balances','creator_wallets','account_bans'];
+   const tables=['transactions','token_purchases','creator_paid_followers','creator_paid_follower_totals','power_weeks','creator_split_settings','creator_hearts','creator_heart_totals','subscriptions','token_balances','creator_wallets','account_bans','creator_access_escrow','creator_consent_withdrawals'];
    for(const table of tables) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
-   for(const fn of ['record_paid_creator_follower','maybe_start_power_week','sync_creator_heart_total','consume_purchase_token','renew_subscription_atomic']){
+   await sql.unsafe(`CREATE FUNCTION pg_temp.get_creator_library_count(uuid) RETURNS bigint LANGUAGE sql AS 'SELECT 1'`);
+   for(const fn of ['record_paid_creator_follower','maybe_start_power_week','sync_creator_heart_total','consume_purchase_token','spend_access_token','renew_subscription_atomic']){
     const [row]=await sql`SELECT pg_get_functiondef(oid) AS definition FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname=${fn}`;
-    let definition=row.definition.replace(`public.${fn}(`,`pg_temp.${fn}(`).replaceAll('public.consume_purchase_token','pg_temp.consume_purchase_token').replaceAll('auth.role()',"(current_setting('request.jwt.claims',true)::jsonb->>'role')").replaceAll('public.creator_split_percent(s.creator_id)','95');
+    let definition=row.definition.replace(`public.${fn}(`,`pg_temp.${fn}(`).replaceAll('public.consume_purchase_token','pg_temp.consume_purchase_token').replaceAll('public.spend_access_token','pg_temp.spend_access_token').replaceAll('public.get_creator_library_count','pg_temp.get_creator_library_count').replaceAll('auth.role()',"(current_setting('request.jwt.claims',true)::jsonb->>'role')").replaceAll('public.creator_split_percent(cid)','90');
     for(const table of tables) definition=definition.replaceAll(`public.${table}`,`pg_temp.${table}`);
     if(fn==='sync_creator_heart_total') definition=definition.replaceAll('hearts=creator_heart_totals.hearts+1','hearts=pg_temp.creator_heart_totals.hearts+1');
     await sql.unsafe(definition);

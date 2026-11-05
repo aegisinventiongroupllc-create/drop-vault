@@ -10,6 +10,12 @@ export function clearAdminDashboardPreview(): void {
   } catch { /* Storage may be unavailable. */ }
 }
 
+/** Keep dashboard choices exclusive without changing account authorization. */
+export function startAdminDashboardPreview(role: "creator" | "customer"): void {
+  clearAdminDashboardPreview();
+  try { localStorage.setItem(`dtt_admin_view_as_${role}`, "1"); } catch { /* Storage may be unavailable. */ }
+}
+
 /** A navigation shortcut, never an administrator credential. */
 export function isAdminSignInShortcut(mode: string, value: string): boolean {
   return mode === "login" && value.trim() === "143";
