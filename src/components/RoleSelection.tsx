@@ -37,7 +37,7 @@ const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
       <div className="flex flex-col items-center gap-6 px-6 text-center max-w-sm w-full">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
-            DROPTHAT<span className="text-primary">THING</span>
+            <span className="notranslate" translate="no">DROPTHAT<span className="text-primary">THING™</span></span>
           </h1>
           <p className="text-muted-foreground text-sm">Welcome! Tell us who you are.</p>
         </div>
@@ -75,7 +75,7 @@ const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
         </div>
 
         <p className="text-[10px] text-muted-foreground/50">
-          © {new Date().getFullYear()} DTT. All rights reserved.
+          © {new Date().getFullYear()} DTT™. All rights reserved.
         </p>
       </div>
     </div>

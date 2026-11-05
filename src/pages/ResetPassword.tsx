@@ -62,7 +62,7 @@ const ResetPassword = () => {
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-8 text-center">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
-            DROPTHAT<span className="text-primary">THING</span>
+            <span className="notranslate" translate="no">DROPTHAT<span className="text-primary">THING™</span></span>
           </h1>
           <p className="text-muted-foreground text-sm">Set a new password.</p>
         </div>

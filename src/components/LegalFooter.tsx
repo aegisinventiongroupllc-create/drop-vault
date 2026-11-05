@@ -12,7 +12,7 @@ const LegalFooter = () => {
   const close = () => setView(null);
 
   const links: { id: Exclude<LegalView, null>; label: string }[] = [
-    { id: "about", label: "About DTT" },
+    { id: "about", label: "About DTT™" },
     { id: "rules", label: "Creator & Purchase Rules" },
     { id: "tos", label: "Terms of Service" },
     { id: "privacy", label: "Privacy Policy" },
@@ -50,7 +50,7 @@ const LegalFooter = () => {
           Payment availability is shown at checkout. Creator payouts are processed manually in Litecoin (LTC).
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
-          DropThatThing is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>
+          <span className="notranslate" translate="no">Drop That Thing™ · DTT™</span> is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>
         </p>
       </footer>
 
@@ -94,7 +94,7 @@ const LegalFooter = () => {
 
 
 const AboutDtt = () => (
-  <SectionShell title="About DropThatThing (DTT)">
+  <SectionShell title="About Drop That Thing™ (DTT™)">
     <p><strong className="text-foreground">What DTT is.</strong> DropThatThing is an adults-only (18+) creator marketplace operated by DTT Media LLC, a Pennsylvania company. Creator photos and videos are organized into the Women's Vault and the Men's Vault. Creator uploads require private manual adult-ID review and DTT approval. Content availability varies by creator; empty libraries cannot be unlocked for payment.</p>
     <p><strong className="text-foreground">Services offered.</strong> (1) Creator vault access for a fixed period. (2) Teaser discovery for entry-pass holders: teasers can be up to one minute and locked videos pause halfway. (3) Custom requests, which creators may accept or decline; payment checkout is not yet available. (4) Private messaging between creators and eligible top fans. (5) Creator tools for analytics, earnings history, uploads and profile customization. Purchases, tips and payouts have not yet been demonstrated end-to-end; live checkout remains disabled pending approval and verification.</p>
     <p><strong className="text-foreground">How payment works.</strong> Bit-Tokens cost $25 for one, $120 for five or $230 for ten, with service and processing included and no additional DTT checkout fee. Each token retains $20 spending value and gives 14 days of access to one creator's vault. Custom quantities combine ten-token bundles, then five-token bundles, then singles. Access ends automatically unless renewed. The $20 entry pass lasts 365 days; creator unlocks are purchased separately. Checkout remains unavailable until processor approval and payment verification are confirmed. Bit-Tokens are used only on DTT and cannot be withdrawn, traded or transferred.</p>

@@ -186,7 +186,7 @@ export default function LaunchIntro() {
   return (
     <div
       className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
-      role="status" aria-label="Drop That Thing"
+      role="status" aria-label="Drop That Thing™"
       onClick={(e) => { if (!(e.target as Element).closest("[data-intro-keep]")) setLeaving(true); }}
     >
       <div className="dtt-intro-sky absolute inset-0" aria-hidden>
@@ -198,7 +198,7 @@ export default function LaunchIntro() {
       <div className="relative flex flex-col items-center gap-5 px-6 text-center">
         <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp /></div>
         <div className="flex flex-col items-center gap-2">
-          <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing</h1>
+          <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing™</h1>
           <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-tagline notranslate max-w-xs text-[11px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-foreground/80" translate="no">
             {introTaglines(lang)}
           </p>

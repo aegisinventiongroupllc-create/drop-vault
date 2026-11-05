@@ -170,7 +170,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     <div className="dtt-auth-screen fixed inset-0 z-50 overflow-y-auto bg-background">
       <div className="flex min-h-full flex-col">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between border-b border-border px-6 py-5">
-        <span className="font-display text-sm font-bold text-foreground notranslate">DTT<span className="text-primary">.</span></span>
+        <span className="font-display text-sm font-bold text-foreground notranslate" translate="no">DTT™<span className="text-primary">.</span></span>
         <span className="text-xs text-muted-foreground">MEMBERS ONLY · 18+</span>
       </header>
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
@@ -179,7 +179,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
             <MiniGlobe size={124} speed={0.22} lights backdrop={false} dotScale={0.6} glintBoost={1.8} />
           </div>
           <h1 onClick={handleLogoTap} className="cursor-pointer select-none font-display text-2xl font-bold text-foreground notranslate">
-            <span className="block">DROPTHAT</span><span className="block text-primary">THING</span>
+            <span className="block">DROPTHAT</span><span className="block text-primary">THING™</span>
           </h1>
           <p className="mt-5 text-muted-foreground text-sm">
             {mode === "login" && "Welcome back. Log in to continue."}

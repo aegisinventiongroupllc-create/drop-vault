@@ -23,7 +23,7 @@ export function getTargetLang(): string {
 // Inputs have no text children: translate their labels/placeholders, never their values.
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE", "TEXTAREA", "SVG"]);
 const HAS_LETTERS = /\p{L}{2,}/u;
-const BRAND_ONLY = /^(DROP|THAT|THING|DTT|DROPTHATTHING|DROP THAT THING)$/i;
+const BRAND_ONLY = /^(DROP|THAT|THING|DTT|DROPTHATTHING|DROP THAT THING)™?$/i;
 const ATTRS = ["placeholder", "aria-label", "title"] as const;
 
 const AutoTranslator = () => {
