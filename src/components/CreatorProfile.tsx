@@ -24,6 +24,7 @@ import DttToken from "@/components/DttToken";
 import { useHeartTotal } from "@/hooks/useHearts";
 import { hasLibraryContent } from "@/lib/teaserPlayback";
 import { PurchaseAccessNotice } from "@/components/PurchaseAccessNotice";
+import { spendableTokens } from "@/lib/accessEscrow";
 
 interface Vault {
   name: string;
@@ -153,8 +154,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    if (balance < need) {
-      toast({ title: "Need Bit-Tokens", description: year ? "A full year takes 26 Bit-Tokens ($650)." : "Buy at least 1 Bit-Token to unlock 14 days of access." });
+    if (spendableTokens(balance, bitCents) < need) {
+      toast({ title: "Need wallet credit", description: year ? "364 days takes 26 Bit-Tokens or 2,600 Bit-cents." : "14 days takes 1 Bit-Token or 100 Bit-cents." });
       setShowBuyModal(true);
       return;
     }
@@ -187,7 +188,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    if (balance < 1) { toast({ title: "Need 1 Bit-Token", description: "Buy a Bit-Token ($25 checkout) to save this video permanently." }); setShowBuyModal(true); return; }
+    if (spendableTokens(balance, bitCents) < 1) { toast({ title: "Need wallet credit", description: "A video buyout takes 1 Bit-Token or 100 Bit-cents." }); setShowBuyModal(true); return; }
     setBuyingId(videoId);
     const { error } = await supabase.rpc("buy_permanent_video", { _video_id: videoId });
     setBuyingId(null);
@@ -352,7 +353,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           Full Library
           <span className="text-xs text-muted-foreground font-normal">{vaultCount === null ? (countError ? "Unavailable" : "Checking…") : `(${vaultCount} ${vaultCount === 1 ? "item" : "items"})`}</span>
         </h3>
-        {!sequencePending && libraryAvailable && <div className="mb-3"><PurchaseAccessNotice checked={accessAck} onChange={setAccessAck} /></div>}
+        {!sequencePending && libraryAvailable && <div className="mb-3"><PurchaseAccessNotice checked={accessAck} onChange={setAccessAck} /><p className="mt-2 text-xs text-muted-foreground">100 Bit-cents = 1 Bit-Token. Available Bit-cent credit is used first.</p></div>}
 
         {sequencePending ? <p role="status" className="text-sm text-muted-foreground py-6">Opening library…</p> : isUnlocked ? (
           <>

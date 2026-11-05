@@ -1,10 +1,10 @@
-import { Clock } from "lucide-react";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
 
 const WalletIndicator = () => {
+  const { balance, bitCents, loading } = useTokenBalance();
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
-      <Clock className="w-3 h-3" />
-      <span className="text-[10px]">14d</span>
+    <div aria-label="Wallet balance" className="flex flex-wrap justify-end gap-1 text-muted-foreground max-w-[180px]">
+      <span className="text-[10px]">{loading ? "…" : `${balance} Bit-Tokens · ${bitCents} Bit-cents`}</span>
     </div>
   );
 };

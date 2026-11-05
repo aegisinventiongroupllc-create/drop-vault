@@ -42,6 +42,7 @@ function saveAutorenew(map: Record<string, boolean>) {
 
 interface MemberDashboardProps {
   balance: number;
+  bitCents?: number;
   onBuyTokens: (n: number) => void;
   vault?: VaultType;
   preference?: CustomerPreference;
@@ -49,7 +50,7 @@ interface MemberDashboardProps {
   onCreatorClick?: (name: string) => void;
 }
 
-const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
+const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
@@ -274,6 +275,8 @@ const MemberDashboard = ({ balance, onBuyTokens, vault, preference, onNavigateHo
           <span className="text-3xl font-bold text-foreground">{balance}</span>
           <span className="text-sm text-muted-foreground">Bit-Tokens</span>
         </div>
+        <p className="mt-2 text-sm text-gold">{bitCents} Bit-cents</p>
+        <p className="mt-1 text-xs text-muted-foreground">100 Bit-cents = 1 Bit-Token · Credit toward unlocks and video buyouts</p>
         <Button variant="neon" className="mt-4 w-full" onClick={() => setShowBuyModal(true)}>
           FILL YOUR VAULT
         </Button>

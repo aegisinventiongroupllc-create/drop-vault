@@ -196,6 +196,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
     { label: "Paid Followers", value: liveStats.followerCount.toLocaleString(), change: "All-time unique customers", icon: Users },
     { label: "Total Views", value: liveStats.totalViews.toLocaleString(), change: "+0%", icon: Eye },
     { label: "Bit-Token Revenue", value: `${liveStats.bitTokenRevenue.toFixed(1)} BT`, change: `$${liveStats.totalEarnedUsd.toFixed(0)}`, icon: BarChart3 },
+    { label: "Access Escrow", value: `$${liveStats.escrowHeldUsd.toFixed(2)}`, change: liveStats.nextReleaseAt ? `Next release: ${new Date(liveStats.nextReleaseAt).toLocaleDateString()}` : "Releases after each 14-day period", icon: BarChart3 },
+    { label: "Available for LTC Payout", value: `$${liveStats.pendingBalanceUsd.toFixed(2)}`, change: "Earned balance · excludes held escrow", icon: BarChart3 },
     { label: "Growth Rate", value: `${liveStats.growthRate >= 0 ? "+" : ""}${liveStats.growthRate}%`, change: "vs last month", icon: TrendingUp },
   ];
 

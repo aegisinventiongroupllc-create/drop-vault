@@ -4,8 +4,8 @@ import { revenueChart, type MetricsMonth } from '@/lib/creatorMetrics';
 export interface CreatorStat {label:string;value:string;change:string}
 export interface RevenueMonth {month:string;earned:number;withdrawn:number}
 export interface TopFan {rank:number;name:string;spent:number}
-export interface CreatorLiveStats {loading:boolean;creatorId:string|null;followerCount:number;heartCount:number;totalViews:number;bitTokenRevenue:number;growthRate:number;totalEarnedUsd:number;totalPaidUsd:number;pendingBalanceUsd:number;revenueByMonth:RevenueMonth[];topFans:TopFan[]}
-const defaults:CreatorLiveStats={loading:true,creatorId:null,followerCount:0,heartCount:0,totalViews:0,bitTokenRevenue:0,growthRate:0,totalEarnedUsd:0,totalPaidUsd:0,pendingBalanceUsd:0,revenueByMonth:revenueChart([]),topFans:[]};
+export interface CreatorLiveStats {loading:boolean;creatorId:string|null;followerCount:number;heartCount:number;totalViews:number;bitTokenRevenue:number;growthRate:number;totalEarnedUsd:number;totalPaidUsd:number;pendingBalanceUsd:number;escrowHeldUsd:number;nextReleaseAt:string|null;revenueByMonth:RevenueMonth[];topFans:TopFan[]}
+const defaults:CreatorLiveStats={loading:true,creatorId:null,followerCount:0,heartCount:0,totalViews:0,bitTokenRevenue:0,growthRate:0,totalEarnedUsd:0,totalPaidUsd:0,pendingBalanceUsd:0,escrowHeldUsd:0,nextReleaseAt:null,revenueByMonth:revenueChart([]),topFans:[]};
 export function useCreatorStats():CreatorLiveStats {
  const [state,setState]=useState(defaults);
  useEffect(()=>{
@@ -17,16 +17,18 @@ export function useCreatorStats():CreatorLiveStats {
    const load=async()=>{
     if(cancelled)return;if(running){rerun=true;return;}running=true;
     try{
-     const [wallet,metrics,hearts,paid]=await Promise.all([
+     const [wallet,metrics,hearts,paid,escrow]=await Promise.all([
       supabase.from('creator_wallets').select('total_earned,total_paid,pending_balance').eq('user_id',uid).maybeSingle(),
       supabase.rpc('get_my_creator_metrics'),
       supabase.from('creator_heart_totals').select('hearts').eq('creator_id',uid).maybeSingle(),
-      supabase.from('creator_paid_follower_totals').select('followers').eq('creator_id',uid).maybeSingle()
+      supabase.from('creator_paid_follower_totals').select('followers').eq('creator_id',uid).maybeSingle(),
+      supabase.rpc('get_my_access_escrow')
      ]);
-     if(wallet.error||metrics.error||hearts.error||paid.error)throw Error('Metrics unavailable');
+     if(wallet.error||metrics.error||hearts.error||paid.error||escrow.error)throw Error('Metrics unavailable');
+     const held=escrow.data as {held_usd?:number;next_release_at?:string|null}|null;
      const result=metrics.data as unknown as {total_views:number;months:MetricsMonth[];fans:TopFan[]};
      const months=revenueChart(result.months??[]);const current=months[5].earned,previous=months[4].earned;
-     if(!cancelled)setState({loading:false,creatorId:uid,followerCount:Number(paid.data?.followers)||0,heartCount:Number(hearts.data?.hearts)||0,totalViews:Number(result.total_views)||0,bitTokenRevenue:Number(wallet.data?.total_earned||0)/20,growthRate:previous>0?Math.round((current-previous)/previous*100):0,totalEarnedUsd:Number(wallet.data?.total_earned)||0,totalPaidUsd:Number(wallet.data?.total_paid)||0,pendingBalanceUsd:Number(wallet.data?.pending_balance)||0,revenueByMonth:months,topFans:result.fans??[]});
+     if(!cancelled)setState({loading:false,creatorId:uid,followerCount:Number(paid.data?.followers)||0,heartCount:Number(hearts.data?.hearts)||0,totalViews:Number(result.total_views)||0,bitTokenRevenue:Number(wallet.data?.total_earned||0)/20,growthRate:previous>0?Math.round((current-previous)/previous*100):0,totalEarnedUsd:Number(wallet.data?.total_earned)||0,totalPaidUsd:Number(wallet.data?.total_paid)||0,pendingBalanceUsd:Number(wallet.data?.pending_balance)||0,escrowHeldUsd:Number(held?.held_usd)||0,nextReleaseAt:held?.next_release_at??null,revenueByMonth:months,topFans:result.fans??[]});
     }catch{if(!cancelled)setState(s=>({...s,loading:false}));}finally{running=false;if(rerun){rerun=false;schedule();}}
    };
    const schedule=()=>{clearTimeout(timer);timer=setTimeout(()=>void load(),400);};
