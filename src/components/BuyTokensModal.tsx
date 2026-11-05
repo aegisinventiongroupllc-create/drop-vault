@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   TOKEN_INVOICE_USD, BUNDLE_TOKENS, DEFAULT_PURCHASE_TOKENS, ENTRY_PASS_PRICE_USD,
-  TRANSACTION_FEE_USD, TOKEN_BASE_VALUE_USD, tokenInvoiceTotal,
+  TRANSACTION_FEE_USD, TOKEN_BASE_VALUE_USD, tokenInvoiceTotal, calculateCustomRequestSplit,
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
@@ -14,7 +14,8 @@ const FINAL_SALE_TEXT = "I agree to the DTT Refund Policy and understand that di
 interface BuyTokensModalProps {
   onClose: () => void;
   onPurchase: (tokens: number) => void;
-  mode?: "tokens" | "entry_pass";
+  mode?: "tokens" | "entry_pass" | "custom_request";
+  request?: { id: string; amountUsd: number };
 }
 
 interface Checkout {
@@ -23,12 +24,13 @@ interface Checkout {
   order_id: string;
 }
 
-const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModalProps) => {
+const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTokensModalProps) => {
   const isEntryPass = mode === "entry_pass";
+  const isRequest = mode === "custom_request";
   const [quantity, setQuantity] = useState<number>(DEFAULT_PURCHASE_TOKENS);
   const setQty = (n: number) => setQuantity(Math.max(1, Math.min(100, Math.round(n) || 1)));
   const pkgBody = quantity === 1 ? { package: "single" } : quantity === BUNDLE_TOKENS ? { package: "bundle" } : { package: "custom", quantity };
-  const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">("select");
+  const [step, setStep] = useState<"select" | "payment" | "processing" | "awaiting" | "success">(isRequest ? "payment" : "select");
   const [checkout, setCheckout] = useState<Checkout | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -50,7 +52,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       supabase.functions.invoke("cryptocloud-create-invoice", { body: { probe: true } }),
     ]).then(([card, crypto]) => {
       if (cancelled) return;
-      const cardReady = !card.error && card.data?.enabled === true;
+      const cardReady = !isRequest && !card.error && card.data?.enabled === true;
       const cryptoReady = !crypto.error && crypto.data?.enabled === true;
       setCardEnabled(cardReady);
       setCryptoEnabled(cryptoReady);
@@ -59,7 +61,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       if (!cancelled) { setCardEnabled(false); setCryptoEnabled(false); }
     }).finally(() => { if (!cancelled) setCheckingPayments(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [isRequest]);
 
   const requireSession = async () => {
     const { data } = await supabase.auth.getSession();
@@ -89,7 +91,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
   };
 
   const tokens = quantity;
-  const invoiceAmount = tokenInvoiceTotal(quantity);
+  const invoiceAmount = isRequest && request ? calculateCustomRequestSplit(request.amountUsd).invoiceTotal : tokenInvoiceTotal(quantity);
 
   // Poll the verifier + listen for token_purchases insert as soon as we're awaiting
   useEffect(() => {
@@ -106,8 +108,14 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
         .channel(`cc-credit-${uid}`)
         .on(
           "postgres_changes",
-          { event: "INSERT", schema: "public", table: isEntryPass ? "entry_passes" : "token_purchases", filter: `user_id=eq.${uid}` },
+          { event: isRequest ? "UPDATE" : "INSERT", schema: "public", table: isRequest ? "custom_requests" : isEntryPass ? "entry_passes" : "token_purchases", filter: isRequest ? `id=eq.${request?.id}` : `user_id=eq.${uid}` },
           (payload: any) => {
+            if (isRequest) {
+              if (payload?.new?.id !== request?.id || !["paid", "completed"].includes(payload?.new?.status)) return;
+              setStep("success");
+              onPurchase(0);
+              return;
+            }
             if (payload?.new?.payment_id !== checkout.invoice_id && payload?.new?.payment_id !== checkout.invoice_id.replace(/^INV-/, "")) return;
             if (payload?.new?.status !== (isEntryPass ? "active" : "finished")) return;
             const credited = isEntryPass ? 0 : (payload?.new?.tokens_credited ?? tokens);
@@ -125,7 +133,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       if (pollRef.current) window.clearInterval(pollRef.current);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [step, checkout, tokens, onPurchase, isEntryPass]);
+  }, [step, checkout, tokens, onPurchase, isEntryPass, isRequest, request?.id]);
 
   const logConsent = async () => {
     try {
@@ -167,7 +175,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
       await logConsent();
       const consentReceipt=await affirmAgeConsent("checkout");
       const { data, error: fnError } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-        body: { ...(isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody }),consent_receipt:consentReceipt },
+        body: { ...(isRequest ? { kind: "custom_request", request_id: request?.id } : isEntryPass ? { kind: "entry_pass" } : { kind: "token_package", ...pkgBody }),consent_receipt:consentReceipt },
       });
       if (fnError) throw new Error(await readFunctionError(fnError));
       if (data?.error) throw new Error(data.error);
@@ -189,7 +197,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <ArrowLeft className="h-4 w-4" />
             GO BACK TO DASHBOARD
           </Button>
-          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">{isEntryPass ? "VAULT ENTRY PASS" : "BUY COINS"}</h2>
+          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">{isRequest ? "REQUEST PAYMENT" : isEntryPass ? "VAULT ENTRY PASS" : "BUY COINS"}</h2>
           <a href="/pricing" className="text-[10px] font-semibold uppercase text-primary underline">Pricing</a>
         </div>
 
@@ -212,7 +220,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
           </div>
         )}
 
-        {step === "select" && !isEntryPass && (
+        {step === "select" && !isEntryPass && !isRequest && (
           <div className="p-4 space-y-4">
             <p className="text-center text-xs font-bold tracking-widest text-muted-foreground">FILL YOUR VAULT</p>
             <div className="grid grid-cols-3 gap-2">
@@ -286,10 +294,10 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             <div className="rounded-xl border border-border bg-secondary/50 p-3 space-y-1">
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""}`}</span>
+                <span className="text-muted-foreground">{isRequest ? "Accepted custom request" : isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""}`}</span>
                 <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
               </div>
-              {!isEntryPass && TRANSACTION_FEE_USD > 0 && (
+              {!isRequest && !isEntryPass && TRANSACTION_FEE_USD > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Transaction fee</span>
                   <span className="text-foreground">${TRANSACTION_FEE_USD}</span>
@@ -299,7 +307,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
                 <span className="text-foreground">Total charged today</span>
                 <span className="text-primary">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
               </div>
-              {!isEntryPass && <><p className="text-xs text-muted-foreground">Each token has $20 spending value. No additional DTT checkout fee.</p>{invoiceAmount < quantity * TOKEN_INVOICE_USD && <p className="text-xs text-primary">Bundle savings: ${quantity * TOKEN_INVOICE_USD - invoiceAmount}</p>}<details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD} in service and processing. Included amounts are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment.</p></details></>}
+              {isRequest && request && <p className="text-xs text-muted-foreground">${request.amountUsd.toFixed(2)} agreed price + $1 DTT fee + $4 processing allowance. This allowance is DTT pricing, not a verified provider charge. Delivery is due within 48 hours after verified payment; delivered media access lasts 14 days.</p>}
+              {!isRequest && !isEntryPass && <><p className="text-xs text-muted-foreground">Each token has $20 spending value. No additional DTT checkout fee.</p>{invoiceAmount < quantity * TOKEN_INVOICE_USD && <p className="text-xs text-primary">Bundle savings: ${quantity * TOKEN_INVOICE_USD - invoiceAmount}</p>}<details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD} in service and processing. Included amounts are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment.</p></details></>}
             </div>
 
             {error && (
@@ -390,7 +399,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             {payMethod === "crypto" && (
               <Button variant="neon" className="w-full" disabled={!allAgreed || !cryptoEnabled || checkingPayments} onClick={handleStartCheckout}>{cryptoEnabled ? `GENERATE PAYMENT — $${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}` : "CHECKOUT UNAVAILABLE"}</Button>
             )}
-            <Button variant="outline" className="w-full" onClick={() => { setStep("select"); setError(null); }}>BACK</Button>
+            <Button variant="outline" className="w-full" onClick={() => { if (isRequest) onClose(); else setStep("select"); setError(null); }}>BACK</Button>
           </div>
         )}
 
@@ -409,7 +418,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">COMPLETE YOUR PAYMENT</h3>
             <p className="text-xs text-muted-foreground">
-              Your TryBit checkout opened in a new tab. Your {isEntryPass ? "pass activates" : "tokens credit"} only after payment is verified. You can keep this window open.
+              Your TryBit checkout opened in a new tab. Your {isRequest ? "request is marked paid" : isEntryPass ? "pass activates" : "tokens credit"} only after payment is verified. You can keep this window open.
             </p>
 
             <a href={checkout.invoice_url} target="_blank" rel="noopener noreferrer" className="block">
@@ -433,10 +442,10 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens" }: BuyTokensModal
               <CheckCircle2 className="w-9 h-9 text-primary" />
             </div>
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">
-              {isEntryPass ? "VAULT ENTRY PASS ACTIVE!" : "PAYMENT RECEIVED!"}
+              {isRequest ? "REQUEST PAYMENT CONFIRMED!" : isEntryPass ? "VAULT ENTRY PASS ACTIVE!" : "PAYMENT RECEIVED!"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {isEntryPass
+              {isRequest ? "Your creator can now deliver the agreed request. Check MY REQUESTS for delivery." : isEntryPass
                 ? "Your Vault Entry Pass is active for a full year. Welcome to the floor."
                 : (
                   <>

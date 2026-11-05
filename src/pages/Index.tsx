@@ -1,5 +1,5 @@
 import { allowedVaults } from "@/lib/customerPreference";
-import { previewNeedsSignIn } from "@/lib/adminSession";
+import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
 import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
 import MiniGlobe from "@/components/MiniGlobe";
@@ -227,7 +227,12 @@ const Index = () => {
           </button>
         </div>
         <div className="pt-9">
-          <CreatorAnalyticsDashboard onBack={exitCreatorPreview} adminPreview />
+          <CreatorAnalyticsDashboard onBack={exitCreatorPreview} adminPreview onFeed={() => {
+            startAdminDashboardPreview("customer");
+            navigateToTab("home");
+            setSelectedCreator(null);
+            setShowSearch(false);
+          }} />
         </div>
       </div>
     );
@@ -257,7 +262,7 @@ const Index = () => {
         <div className="pt-9">
           {showSearch ? (
             <GlobalSearch
-              vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : undefined}
+              vault={previewVault}
               onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
               onClose={() => setShowSearch(false)}
             />

@@ -53,6 +53,7 @@ interface MemberDashboardProps {
 const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [payRequest, setPayRequest] = useState<CustomRequestRow | null>(null);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages" | "founding">("library");
   const [, setTick] = useState(0);
@@ -461,19 +462,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
 
                   <RequestDelivery request={req} role="customer" onChange={refreshReqs} />
                   {req.status === "accepted" && (
-                    <Button variant="neon" size="sm" className="w-full mt-2" disabled={reqBusy} onClick={async () => {
-                      setReqBusy(true);
-                      const { data, error } = await supabase.functions.invoke("cryptocloud-create-invoice", {
-                        body: { kind: "custom_request", request_id: req.id },
-                      });
-                      setReqBusy(false);
-                      if (error || data?.error || !data?.invoice_url) {
-                        toast({ title: "Couldn't start payment", description: data?.error || "Please try again.", variant: "destructive" });
-                        return;
-                      }
-                      window.open(data.invoice_url, "_blank");
-                      toast({ title: "Payment opened", description: "Your request unlocks once the payment is confirmed." });
-                    }}>
+                    <Button variant="neon" size="sm" className="w-full mt-2" disabled={reqBusy} onClick={() => setPayRequest(req)}>
                       PAY ${(Number(req.amount_usd) + 5).toFixed(2)} WITH CRYPTO
                     </Button>
                   )}
@@ -492,6 +481,8 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
       <div className="px-4 py-4"><SuggestionBox role="customer" /></div>
 
       <LegalFooter />
+
+      {payRequest && <BuyTokensModal mode="custom_request" request={{ id: payRequest.id, amountUsd: Number(payRequest.amount_usd) }} onClose={() => setPayRequest(null)} onPurchase={() => { void refreshReqs(); }} />}
 
       {showBuyModal && (
         <BuyTokensModal onClose={() => { setShowBuyModal(false); setRenewCreator(null); }} onPurchase={onBuyTokens} />

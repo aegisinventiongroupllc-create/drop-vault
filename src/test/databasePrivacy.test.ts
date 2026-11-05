@@ -54,12 +54,15 @@ describe.skipIf(!database)("live database privacy rules", () => {
   });
 
   it("allows other members to read only selected photos with matching registered ownership", () => {
-    const reads = policies.filter(p => p.tablename === "objects" && p.cmd === "SELECT" && p.qual?.includes("creator-profile-photos"));
+    const reads = policies.filter(p => p.tablename === "objects" && p.cmd === "SELECT" && p.permissive === "PERMISSIVE" && p.qual?.includes("creator-profile-photos"));
     expect(reads).toHaveLength(1);
     expect(reads[0].roles).toEqual(["authenticated"]);
     expect(reads[0].qual).toMatch(/cpp\.is_active/);
     expect(reads[0].qual).toMatch(/objects\.owner_id.*cpp\.creator_id/s);
     expect(reads[0].qual).toMatch(/cpp\.creator_id.*foldername\(objects\.name\)/s);
+    const clearance = policies.filter(p => p.tablename === "objects" && p.cmd === "SELECT" && p.permissive === "RESTRICTIVE" && p.qual?.includes("creator-profile-photos"));
+    expect(clearance).toHaveLength(1);
+    expect(clearance[0].qual).toMatch(/content_review_access\(bucket_id, name\)/);
   });
 
   it("exposes only the allowlisted globe setting to visitors", () => {

@@ -14,7 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 
-import { getAdminPasscode, isAdminUnlocked } from "@/lib/adminSession";
+import { getAdminPasscode, isAdminUnlocked, startAdminDashboardPreview } from "@/lib/adminSession";
 
 const ADMIN_ENTRY_PATH = "/admin-access";
 
@@ -208,6 +208,8 @@ const AdminPortal = () => {
         })),
         media,
       });
+    } catch (err) {
+      toast({ title: "Failed to load overview", description: err instanceof Error ? err.message : "Please retry.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -359,7 +361,7 @@ const AdminPortal = () => {
                 variant="outline"
                 title="Preview the creator dashboard"
                 onClick={() => {
-                  try { localStorage.setItem("dtt_admin_view_as_creator", "1"); } catch {}
+                  startAdminDashboardPreview("creator");
                   navigate("/");
                 }}
               >
@@ -370,7 +372,7 @@ const AdminPortal = () => {
                 variant="outline"
                 title="Preview the customer experience"
                 onClick={() => {
-                  try { localStorage.setItem("dtt_admin_view_as_customer", "1"); } catch {}
+                  startAdminDashboardPreview("customer");
                   navigate("/");
                 }}
               >
