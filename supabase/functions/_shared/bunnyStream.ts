@@ -1,8 +1,9 @@
 export const BUNNY_LIBRARY = 799618;
 export const BUNNY_HOST = 'vz-2138444b-8e3.b-cdn.net';
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const secret=(name:string)=>(globalThis as typeof globalThis & {Deno?:{env:{get:(name:string)=>string|undefined}}}).Deno?.env.get(name);
 export async function bunnyApi(path: string, method = 'GET', body?: unknown) {
-  const apiKey = Deno.env.get('BUNNY_STREAM_LIBRARY_API_KEY');
+  const apiKey = secret('BUNNY_STREAM_LIBRARY_API_KEY');
   if (!apiKey) throw new Error('Video upload configuration unavailable');
   const response = await fetch(`https://video.bunnycdn.com/library/${BUNNY_LIBRARY}${path}`, {
     method, headers: { AccessKey: apiKey, 'Content-Type': 'application/json' },
@@ -16,7 +17,7 @@ export async function bunnyApi(path: string, method = 'GET', body?: unknown) {
   return response.status === 204 ? null : response.json();
 }
 export async function bunnyPlaybackUrl(videoId: string, seconds: number) {
-  const key = Deno.env.get('BUNNY_STREAM_TOKEN_KEY');
+  const key = secret('BUNNY_STREAM_TOKEN_KEY');
   if (!key || !UUID.test(videoId) || seconds < 1 || seconds > 300) throw new Error('Protected playback unavailable');
   const path = `/${videoId}/`;
   const expires = Math.floor(Date.now() / 1000) + seconds;
