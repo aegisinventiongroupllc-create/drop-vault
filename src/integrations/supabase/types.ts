@@ -2409,6 +2409,21 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      search_performer_index: {
+        Args: { _offset?: number; _query: string }
+        Returns: {
+          content_record_id: string
+          creator_id: string
+          date_of_birth: string
+          indexed_at: string
+          legal_name: string
+          performer_kind: string
+          performer_record_id: string
+          recorded_on: string
+          stage_aliases: string[]
+          storage_path: string
+        }[]
+      }
       set_active_creator_profile_photo: {
         Args: { _photo_id: string }
         Returns: {

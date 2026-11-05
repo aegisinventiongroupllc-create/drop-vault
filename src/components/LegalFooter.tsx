@@ -134,8 +134,8 @@ const Statement2257 = () => (
 );
 
 const CUSTODIAN_FALLBACK = {
-  custodian_name: "DTT Media LLC (Custodian of Records)",
-  inspection_address: "606 Liberty Avenue, Suite 300, Pittsburgh, PA",
+  custodian_name: "DTT Media LLC",
+  inspection_address: "606 Liberty Avenue, Suite 300, Pittsburgh, PA 15222",
   compliance_email: "admin@dttmediallc.com",
 };
 

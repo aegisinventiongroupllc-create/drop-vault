@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 import AdminVerifications from "@/components/AdminVerifications";
+import AdminPerformerSearch from "@/components/AdminPerformerSearch";
 import AdminPowerWeeks from "@/components/AdminPowerWeeks";
 import AdminFlowPreview from "@/components/AdminFlowPreview";
 import {
@@ -360,6 +361,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
         <div className="px-4 space-y-4">
           <Button variant="outline" onClick={() => window.location.assign("/admin/verifications")}>OPEN VERIFICATION RECORDS</Button>
           <AdminVerifications />
+          <AdminPerformerSearch />
         </div>
       )}
 
