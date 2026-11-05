@@ -7,7 +7,7 @@ const schema = z.discriminatedUnion("action", [
  z.object({ action:z.literal("list"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
  z.object({ action:z.literal("export"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
  z.object({ action:z.literal("signed_urls"), id:z.string().uuid() }),
- z.object({ action:z.literal("decide"), id:z.string().uuid(), status:z.enum(["approved","rejected","flagged"]), notes:z.string().trim().max(1000).default(""), confirmed:z.boolean().default(false) })
+ z.object({ action:z.literal("decide"), id:z.string().uuid(), status:z.enum(["approved","rejected","flagged"]), notes:z.string().trim().max(1000).default(""), confirmed:z.boolean().default(false), residence_country:z.string().regex(/^[A-Z]{2}$/).nullable().default(null), residence_confirmed:z.boolean().default(false) })
 ]);
 Deno.serve(async req => {
  if(req.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
@@ -26,8 +26,8 @@ Deno.serve(async req => {
  const body=parsed.data;
  const service=createClient(url,serviceKey);
  if(body.action==="list" || body.action==="export") {
- const columns="id,user_id,legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,status,reviewer_notes,reviewed_at,submitted_at,country,creator_username,document_expires_on,document_type,issuing_country";
- let query=service.from("creator_verifications").select(body.action==="export"?`${columns},document_number,reviewer_id,identity_confirmed`:columns,{count:"exact"}).order("country").order("legal_first_name").order("submitted_at",{ascending:false}).order("id");
+ const columns="id,user_id,legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,status,reviewer_notes,reviewed_at,submitted_at,country,creator_username,document_expires_on,document_type,issuing_country,residence_country,residence_id_confirmed";
+ let query=service.from("creator_verifications").select(body.action==="export"?`${columns},document_number,reviewer_id,identity_confirmed`:columns,{count:"exact"}).order("country").order("submitted_at",{ascending:true}).order("id");
  if(body.filter!=="all") query=query.eq("status",body.filter);
  if(body.country) query=query.eq("country",body.country);
  if(body.query) { const search=body.query.replace(/[^\p{L}\p{N}@ _-]/gu,""); if(search) query=query.or(`legal_first_name.ilike.%${search}%,legal_last_name.ilike.%${search}%,creator_username.ilike.%${search}%`); }
@@ -59,7 +59,7 @@ Deno.serve(async req => {
  if(signError) return json({error:"Unable to open private images"},500);
  return json({urls:Object.fromEntries((data??[]).filter(item=>item.signedUrl).map(item=>[item.path,item.signedUrl]))});
  }
- const {data:creatorId,error}=await client.rpc("review_creator_identity",{_id:body.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed});
+ const {data:creatorId,error}=await client.rpc("review_creator_identity_with_residence",{_id:body.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed,_residence_country:body.residence_country,_residence_confirmed:body.residence_confirmed});
  if(error) return json({error:error.message},400);
  const {data:profile}=await service.from("profiles").select("email,display_name").eq("user_id",creatorId).maybeSingle();
  let notification="unavailable";

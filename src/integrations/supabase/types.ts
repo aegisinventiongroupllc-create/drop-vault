@@ -1078,6 +1078,10 @@ export type Database = {
           issuing_country: string | null
           legal_first_name: string
           legal_last_name: string
+          residence_country: string | null
+          residence_id_confirmed: boolean
+          residence_reviewed_at: string | null
+          residence_reviewed_by: string | null
           reviewed_at: string | null
           reviewer_id: string | null
           reviewer_notes: string | null
@@ -1103,6 +1107,10 @@ export type Database = {
           issuing_country?: string | null
           legal_first_name: string
           legal_last_name: string
+          residence_country?: string | null
+          residence_id_confirmed?: boolean
+          residence_reviewed_at?: string | null
+          residence_reviewed_by?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_notes?: string | null
@@ -1128,6 +1136,10 @@ export type Database = {
           issuing_country?: string | null
           legal_first_name?: string
           legal_last_name?: string
+          residence_country?: string | null
+          residence_id_confirmed?: boolean
+          residence_reviewed_at?: string | null
+          residence_reviewed_by?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_notes?: string | null
@@ -2707,6 +2719,17 @@ export type Database = {
           _confirmed: boolean
           _id: string
           _notes: string
+          _status: string
+        }
+        Returns: string
+      }
+      review_creator_identity_with_residence: {
+        Args: {
+          _confirmed: boolean
+          _id: string
+          _notes: string
+          _residence_confirmed: boolean
+          _residence_country: string
           _status: string
         }
         Returns: string

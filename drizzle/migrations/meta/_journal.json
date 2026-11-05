@@ -680,6 +680,13 @@
       "when": 1793893602998,
       "tag": "0096_serialize_withdrawal_with_access_vesting",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1793906704984,
+      "tag": "0097_founder_verified_id_residence",
+      "breakpoints": true
     }
   ]
 }
