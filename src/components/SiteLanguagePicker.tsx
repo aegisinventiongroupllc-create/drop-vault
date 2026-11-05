@@ -22,6 +22,7 @@ const loadPos = (): PickerPos | null => {
 const MARGIN = 12;
 
 export default function SiteLanguagePicker() {
+  const [duplicate, setDuplicate] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [pos, setPos] = useState<PickerPos | null>(loadPos);
   const [viewport, setViewport] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
@@ -53,6 +54,18 @@ export default function SiteLanguagePicker() {
     return () => { window.removeEventListener("resize", measure); };
   }, []);
 
+  useEffect(() => {
+    const check = () => {
+      const introVisible = Boolean(document.querySelector(".dtt-intro:not(.dtt-intro-out)"));
+      const otherVisible = Array.from(document.querySelectorAll('[aria-label="Change language"]')).some((node) => !pillRef.current?.contains(node) && node instanceof HTMLElement && node.getClientRects().length > 0 && getComputedStyle(node).visibility !== "hidden");
+      setDuplicate(!introVisible && otherVisible);
+    };
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+    return () => observer.disconnect();
+  }, []);
+
   const size = sizeRef.current;
   const clamp = (left: number, top: number) => ({
     left: Math.min(Math.max(left, MARGIN), Math.max(MARGIN, viewport.w - size.w - MARGIN)),
@@ -68,6 +81,7 @@ export default function SiteLanguagePicker() {
   const openAbove = anchored.top + size.h + 320 > viewport.h;
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (menuOpen) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
     suppressClickRef.current = false;
     dragRef.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, sl: anchored.left, st: anchored.top, moved: false };
@@ -108,7 +122,7 @@ export default function SiteLanguagePicker() {
   return (
     <div
       ref={pillRef}
-      className={`fixed z-[240] notranslate ${dragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+      className={`fixed z-[240] notranslate ${duplicate ? "hidden" : ""} ${dragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
       style={{
         left: anchored.left,
         top: anchored.top,
