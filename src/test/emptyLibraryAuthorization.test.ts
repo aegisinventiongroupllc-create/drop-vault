@@ -13,6 +13,8 @@ describe.skipIf(!db)("empty library server authorization", () => {
       // Keep the deployed empty-library guard, but redirect media to an empty temporary fixture.
       await sql`CREATE TEMP TABLE creator_media (LIKE public.creator_media INCLUDING DEFAULTS)`;
       await sql`CREATE TEMP TABLE storage_objects (bucket_id text, name text)`;
+      await sql.unsafe(`CREATE FUNCTION pg_temp.content_is_cleared(text,text) RETURNS boolean LANGUAGE sql AS 'SELECT false'`);
+      definition = definition.replaceAll('public.content_is_cleared', 'pg_temp.content_is_cleared');
       definition = definition.replaceAll('public.creator_media', 'pg_temp.creator_media').replaceAll('storage.objects', 'pg_temp.storage_objects');
       await sql.unsafe(definition);
       const user = crypto.randomUUID(), creator = crypto.randomUUID();
