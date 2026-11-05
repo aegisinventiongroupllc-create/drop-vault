@@ -10,7 +10,6 @@
 - Welcome-back reads only account-scoped completed ledger rows; admin samples never write them. Why: preserve real earnings.
 - Auth callbacks use DTT; Google uses the initiating origin off live hosts, with the generated Cloud helper and owner credentials. Why: branded sign-in returns to its originating window.
 - Profiles are owner/admin-only; public_profiles is a safe read-only projection; photo writes require folder/object ownership. Why: prevent identity leaks and cross-account edits.
-- Use ProfileAvatar for private identities.
 - Validate avatar colors; use iro wheels/SVG fills. Why: safe customization.
 - Generate role-specific portraits server-side from in-memory selfies; never retain originals; portraits stay account-private. Why: protect identity.
 - Creator still/5-second video portraits use private owned galleries and branding; pause offscreen/reduced motion; chats use emoji. Why: privacy and bounded motion.
@@ -37,7 +36,7 @@
 - Subdirectories have their own AGENTS.md; read it before changing files there.
 - Founding slots/splits are server-set and permanent; admin views share empty-market lists. Why: vacancies never alter awards.
 
-- Sky photos preload with stars and resume/online retries. Why: prevent broken-image borders.
+- Sky photos preload with stars, retry on resume/online. Why: no broken images.
 - Discovery shelves use the paginated authorized teaser feed; persist only bounded account/market scroll and interest counts, no signed links; explicit playback gestures. Why: privacy, no autoplay.
 - Library availability uses an authorized aggregate backed by existing private objects; unlock_creator rejects empty libraries before charging. Why: do not sell absent content or expose storage paths.
 - Legal pages and footer reuse canonical policy sections. Why: avoid conflicting translated retention, payment and recordkeeping claims.
@@ -50,4 +49,4 @@
 - Revenue details/VIP store render once in Analytics; terms use scoped RPCs; triggers fix unpaid shares/freeze paid earnings. Why: no duplicate rules or client-authorized payouts.
 - VIP grants require service-verified receipts and a locked inventory counter; safe badge/priority RPCs expose no payment or identity details. Why: prevent unpaid upgrades, overselling and discovery data leaks.
 - Permanent buyouts use buy_permanent_video ('buyout-' ids skip followers); owned videos block deletion, served by permanent-vault. Why: survive rotation.
-- Approved content manifests snapshot uploader/participant legal names, birth dates and stage aliases into an append-only, service-only performer index; approval fails if any performer lacks an approved identity. Why: every cleared upload stays permanently traceable to verified performers.
+- Manifest approval writes append-only service-only performer index rows (ID names, DOB, aliases); fails without approved identities. Why: permanent traceability.
