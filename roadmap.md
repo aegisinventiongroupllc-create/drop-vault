@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [x] Add server-enforced four regular long videos plus one separately paid neon-pink fifth video; one-token purchase stacks 14 days using existing escrow and withdrawal protections. Creator placement selector, separate customer fifth tile, restrictive storage rule and filtered signing deployed. Isolated limits/payment/expiry tests and 49 related tests passed; no real funds changed or publication.
+- [ ] Genuine fifth-video creator-upload/customer-purchase/playback walkthrough: blocked by authentic approved creator content and funded customer access; available browser remains at consent. No fake identities, approvals or real token spending used.
 - [x] Hide movable language picker when an unobscured page selector exists; opening language selection verified through Spanish transition, one selector after entry. New founding slots use administrator-confirmed current address-bearing ID residence, never profile/issuing country; original awards preserved. Country queue sorted country/submission ascending/id. 27 founder/identity/privacy checks pass, build OK; review function deployed. Private administrator review walkthrough blocked by available session lacking admin access. Not published.
 - [x] Delayed intro wording and entry eligibility by three seconds; rotating globe stays in place. Exact timer test and phone entry walkthrough pass; build OK. Publication requested for dropthatthing.com; deployment completion not yet confirmed.
 - [x] Removed globe entrance effects at owner request: visitors immediately see the pink globe in its settled position, rotating, with title/captions visible. Phone check confirmed fixed position, tap exits, no runtime errors; build OK. Not published.

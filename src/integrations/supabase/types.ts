@@ -795,6 +795,7 @@ export type Database = {
           created_at: string
           creator_id: string
           id: string
+          library_slot: string
           media_type: string
           storage_path: string
           teaser_frame: string
@@ -810,6 +811,7 @@ export type Database = {
           created_at?: string
           creator_id: string
           id?: string
+          library_slot?: string
           media_type?: string
           storage_path: string
           teaser_frame?: string
@@ -825,6 +827,7 @@ export type Database = {
           created_at?: string
           creator_id?: string
           id?: string
+          library_slot?: string
           media_type?: string
           storage_path?: string
           teaser_frame?: string
@@ -2313,6 +2316,42 @@ export type Database = {
         }
         Relationships: []
       }
+      video_early_access: {
+        Row: {
+          customer_id: string
+          purchased_at: string
+          transaction_id: string
+          video_id: string
+        }
+        Insert: {
+          customer_id: string
+          purchased_at?: string
+          transaction_id: string
+          video_id: string
+        }
+        Update: {
+          customer_id?: string
+          purchased_at?: string
+          transaction_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_early_access_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_early_access_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "creator_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vip_pass_inventory: {
         Row: {
           id: boolean
@@ -2504,6 +2543,30 @@ export type Database = {
         Returns: undefined
       }
       bunny_source_current: { Args: { _id: string }; Returns: boolean }
+      buy_fifth_video: {
+        Args: { _video_id: string }
+        Returns: {
+          autorenew: boolean
+          created_at: string
+          creator_id: string
+          creator_name: string | null
+          customer_id: string
+          expires_at: string
+          id: string
+          last_renewed_at: string | null
+          renewal_count: number
+          started_at: string
+          status: string
+          updated_at: string
+          warned_24h: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       buy_permanent_video: { Args: { _video_id: string }; Returns: string }
       can_stage_creator_draft: { Args: { _user: string }; Returns: boolean }
       can_upload_creator_media: {
@@ -2545,6 +2608,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      fifth_video_storage_access: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
       get_active_teasers: {
         Args: never
         Returns: {
@@ -2555,6 +2622,7 @@ export type Database = {
           created_at: string
           creator_id: string
           id: string
+          library_slot: string
           media_type: string
           storage_path: string
           teaser_frame: string
@@ -2568,6 +2636,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_creator_fifth_video: {
+        Args: { _creator_id: string }
+        Returns: {
+          id: string
+          purchased: boolean
+          title: string
+        }[]
       }
       get_creator_library_count: {
         Args: { _creator_id: string }
@@ -2641,6 +2717,7 @@ export type Database = {
           created_at: string
           creator_id: string
           id: string
+          library_slot: string
           media_type: string
           storage_path: string
           teaser_frame: string

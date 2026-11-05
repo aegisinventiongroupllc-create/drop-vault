@@ -181,6 +181,7 @@
 
 @layer utilities {
   .dtt-color-pink { color: hsl(var(--dtt-pink)); }
+  .fifth-video-frame { border-color: hsl(var(--dtt-pink)); box-shadow: var(--neon-glow); }
   .dtt-color-blue { color: hsl(var(--dtt-blue)); }
   .dtt-color-silver { color: hsl(var(--dtt-silver)); }
   .dtt-color-gold { color: hsl(var(--dtt-gold)); }
