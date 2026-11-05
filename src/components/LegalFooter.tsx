@@ -142,8 +142,8 @@ const CUSTODIAN_FALLBACK = {
 const CustodianBlock = () => {
   const [c, setC] = useState(CUSTODIAN_FALLBACK);
   useEffect(() => {
-    supabase.from("records_custodian").select("custodian_name,inspection_address,compliance_email").maybeSingle()
-      .then(({ data }) => { if (data) setC(data); });
+    supabase.rpc("get_records_custodian")
+      .then(({ data }) => { if (data?.[0]) setC(data[0]); });
   }, []);
   return (
     <p><strong className="text-foreground">Custodian of Records</strong><br/>
