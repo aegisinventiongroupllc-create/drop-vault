@@ -140,7 +140,7 @@ function Sparkles() {
 
 /**
  * Opening screen everyone sees on load: living pink galaxy, the DTT globe
- * flies in from deep space and settles, then "Drop That Thing" pulses with it.
+ * emerges from shadow at full size as the galaxy sweeps behind it.
  */
 export default function LaunchIntro() {
   const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
@@ -196,7 +196,7 @@ export default function LaunchIntro() {
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
       <div className="relative flex flex-col items-center gap-5 px-6 text-center">
-        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp /></div>
+        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp motionless={reduced} /></div>
         <div className="flex flex-col items-center gap-2">
           <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing™</h1>
           <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-tagline notranslate max-w-xs text-[11px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-foreground/80" translate="no">

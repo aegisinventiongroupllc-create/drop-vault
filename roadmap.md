@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Replace distant-dot globe entrance with a full-size shadow reveal and sweeping galaxy; verify phone/desktop and reduced motion without publishing. Reference clip could not be watched; only title/still accessible.
 - [x] Reviewed real customer reviewer entry/navigation and signed-in creator/customer previews; corrected exclusive switches, creator Feed, preview search vault, initial creator name, misleading sample activity, overview error handling and accepted-request checkout consent/readiness. All 521 tests pass in 81 files; final focused checks and build OK. No payments, identity approvals, media changes or publication.
 - [ ] Complete normal creator and protected owner-admin button walkthrough: blocked by reviewer-owned unsigned Creator Agreement, genuine identity/content evidence and owner's protected admin sign-in. Previews opened Analytics/Verify/Requests/Calendar/Media and switched to customer Feed; not a substitute for ordinary approved-account transactions.
 - [x] Produced trybit-review-readiness.md separating verified controls from blocked funded/media/legal/provider walkthroughs. Customer reviewer pass active and normal discovery verified; creator reviewer has no media. Merchant acceptance remains TryBit's decision.
