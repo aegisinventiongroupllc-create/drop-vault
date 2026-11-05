@@ -149,6 +149,36 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_verification_checks: {
+        Row: {
+          checked_by: string
+          created_at: string
+          export_downloaded: boolean
+          id: string
+          newest_backup_at: string
+          notes: string | null
+          storage_downloaded: boolean
+        }
+        Insert: {
+          checked_by?: string
+          created_at?: string
+          export_downloaded?: boolean
+          id?: string
+          newest_backup_at: string
+          notes?: string | null
+          storage_downloaded?: boolean
+        }
+        Update: {
+          checked_by?: string
+          created_at?: string
+          export_downloaded?: boolean
+          id?: string
+          newest_backup_at?: string
+          notes?: string | null
+          storage_downloaded?: boolean
+        }
+        Relationships: []
+      }
       bunny_video_deliveries: {
         Row: {
           bucket: string
@@ -518,6 +548,80 @@ export type Database = {
           },
         ]
       }
+      creator_compliance_archive: {
+        Row: {
+          archived_at: string
+          creator_id: string
+          id: string
+          snapshot: Json
+          withdrawal_id: string
+        }
+        Insert: {
+          archived_at?: string
+          creator_id: string
+          id?: string
+          snapshot: Json
+          withdrawal_id: string
+        }
+        Update: {
+          archived_at?: string
+          creator_id?: string
+          id?: string
+          snapshot?: Json
+          withdrawal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_compliance_archive_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "creator_consent_withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_consent_withdrawals: {
+        Row: {
+          account_deletion_status: string
+          completed_at: string | null
+          creator_id: string
+          id: string
+          kind: string
+          media_count: number
+          provider_failed: number
+          provider_removed: number
+          reason: string | null
+          requested_at: string
+          status: string
+        }
+        Insert: {
+          account_deletion_status?: string
+          completed_at?: string | null
+          creator_id: string
+          id?: string
+          kind: string
+          media_count?: number
+          provider_failed?: number
+          provider_removed?: number
+          reason?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Update: {
+          account_deletion_status?: string
+          completed_at?: string | null
+          creator_id?: string
+          id?: string
+          kind?: string
+          media_count?: number
+          provider_failed?: number
+          provider_removed?: number
+          reason?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       creator_drafts: {
         Row: {
           created_at: string
@@ -667,6 +771,42 @@ export type Database = {
           title?: string
           updated_at?: string
           views?: number
+        }
+        Relationships: []
+      }
+      creator_media_retention: {
+        Row: {
+          bucket: string
+          creator_id: string
+          id: string
+          media_id: string
+          media_type: string
+          removed_at: string
+          storage_path: string
+          title: string
+          uploaded_at: string
+        }
+        Insert: {
+          bucket: string
+          creator_id: string
+          id?: string
+          media_id: string
+          media_type: string
+          removed_at?: string
+          storage_path: string
+          title: string
+          uploaded_at: string
+        }
+        Update: {
+          bucket?: string
+          creator_id?: string
+          id?: string
+          media_id?: string
+          media_type?: string
+          removed_at?: string
+          storage_path?: string
+          title?: string
+          uploaded_at?: string
         }
         Relationships: []
       }
@@ -1085,6 +1225,27 @@ export type Database = {
           platform_share_usd?: number
           status?: string
           tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      data_retention_policies: {
+        Row: {
+          basis: string
+          category: string
+          retention: string
+          updated_at: string
+        }
+        Insert: {
+          basis: string
+          category: string
+          retention: string
+          updated_at?: string
+        }
+        Update: {
+          basis?: string
+          category?: string
+          retention?: string
           updated_at?: string
         }
         Relationships: []
@@ -2281,6 +2442,14 @@ export type Database = {
         }[]
       }
       get_my_revenue_terms: { Args: never; Returns: Json }
+      get_records_custodian: {
+        Args: never
+        Returns: {
+          compliance_email: string
+          custodian_name: string
+          inspection_address: string
+        }[]
+      }
       get_teaser_page: {
         Args: {
           _country?: string
@@ -2358,6 +2527,10 @@ export type Database = {
           bucket: string
           name: string
         }[]
+      }
+      record_creator_withdrawal: {
+        Args: { _creator: string; _kind: string; _reason: string }
+        Returns: string
       }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
