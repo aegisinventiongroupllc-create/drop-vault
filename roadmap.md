@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [x] Delayed intro wording and entry eligibility by three seconds; rotating globe stays in place. Exact timer test and phone entry walkthrough pass; build OK. Publication requested for dropthatthing.com; deployment completion not yet confirmed.
 - [x] Removed globe entrance effects at owner request: visitors immediately see the pink globe in its settled position, rotating, with title/captions visible. Phone check confirmed fixed position, tap exits, no runtime errors; build OK. Not published.
 - [x] Reviewed real customer reviewer entry/navigation and signed-in creator/customer previews; corrected exclusive switches, creator Feed, preview search vault, initial creator name, misleading sample activity, overview error handling and accepted-request checkout consent/readiness. All 521 tests pass in 81 files; final focused checks and build OK. No payments, identity approvals, media changes or publication.
 - [ ] Complete normal creator and protected owner-admin button walkthrough: blocked by reviewer-owned unsigned Creator Agreement, genuine identity/content evidence and owner's protected admin sign-in. Previews opened Analytics/Verify/Requests/Calendar/Media and switched to customer Feed; not a substitute for ordinary approved-account transactions.
