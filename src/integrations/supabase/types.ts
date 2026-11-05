@@ -311,6 +311,85 @@ export type Database = {
         }
         Relationships: []
       }
+      content_performer_index: {
+        Row: {
+          bucket: string
+          creator_id: string
+          date_of_birth: string
+          id: string
+          indexed_at: string
+          legal_name: string
+          linked_user_id: string | null
+          manifest_id: string
+          object_updated_at: string
+          participant_id: string | null
+          performer_kind: string
+          recorded_on: string
+          reviewer_id: string
+          stage_aliases: string[]
+          storage_path: string
+          verification_id: string | null
+        }
+        Insert: {
+          bucket: string
+          creator_id: string
+          date_of_birth: string
+          id?: string
+          indexed_at?: string
+          legal_name: string
+          linked_user_id?: string | null
+          manifest_id: string
+          object_updated_at: string
+          participant_id?: string | null
+          performer_kind: string
+          recorded_on: string
+          reviewer_id: string
+          stage_aliases?: string[]
+          storage_path: string
+          verification_id?: string | null
+        }
+        Update: {
+          bucket?: string
+          creator_id?: string
+          date_of_birth?: string
+          id?: string
+          indexed_at?: string
+          legal_name?: string
+          linked_user_id?: string | null
+          manifest_id?: string
+          object_updated_at?: string
+          participant_id?: string | null
+          performer_kind?: string
+          recorded_on?: string
+          reviewer_id?: string
+          stage_aliases?: string[]
+          storage_path?: string
+          verification_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_performer_index_manifest_id_fkey"
+            columns: ["manifest_id"]
+            isOneToOne: false
+            referencedRelation: "content_manifests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_performer_index_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "content_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_performer_index_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "creator_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_review_events: {
         Row: {
           actor_id: string
