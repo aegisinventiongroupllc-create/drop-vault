@@ -7,7 +7,8 @@ const inTx = (fn: (sql: postgres.TransactionSql) => Promise<void>) =>
   db!.begin(fn).catch((e) => { if (e !== rollback) throw e; });
 
 async function seed(sql: postgres.TransactionSql) {
-  await sql`SET LOCAL ROLE service_role`;
+  const [{ d }] = await sql`SELECT pg_get_functiondef('public.record_creator_withdrawal(uuid,text,text)'::regprocedure) AS d`;
+  await sql.unsafe(d.replace('public.record_creator_withdrawal', 'pg_temp.record_creator_withdrawal'));
   const [{ id }] = await sql`SELECT gen_random_uuid() AS id`;
   await sql`INSERT INTO public.bunny_video_deliveries(creator_id,bucket,storage_path,source_updated_at,video_id,state)
             VALUES (${id},'vault',${id + '/bought.mp4'},now(),gen_random_uuid(),'ready')`;
@@ -20,7 +21,7 @@ describe.skipIf(!db)('creator consent withdrawal', () => {
   it('disables but keeps purchased stream copies and archives records', async () => {
     await inTx(async (sql) => {
       const creator = await seed(sql);
-      await sql`SELECT public.record_creator_withdrawal(${creator},'withdraw','test')`;
+      await sql`SELECT pg_temp.record_creator_withdrawal(${creator},'withdraw','test')`;
       const copies = await sql`SELECT state FROM public.bunny_video_deliveries WHERE creator_id=${creator}`;
       expect(copies.map((c) => c.state)).toEqual(['withdrawn']);
       const archive = await sql`SELECT jsonb_array_length(snapshot->'stream_copies') AS n FROM public.creator_compliance_archive WHERE creator_id=${creator}`;
@@ -33,7 +34,7 @@ describe.skipIf(!db)('creator consent withdrawal', () => {
     'blocks deleting or re-enabling a withdrawn copy: %s', async (statement) => {
       await expect(db!.begin(async (sql) => {
         const creator = await seed(sql);
-        await sql`SELECT public.record_creator_withdrawal(${creator},'withdraw',null)`;
+        await sql`SELECT pg_temp.record_creator_withdrawal(${creator},'withdraw',null)`;
         await sql.unsafe(statement, [creator]);
       })).rejects.toThrow(/archived and cannot be changed/);
     });
@@ -42,7 +43,7 @@ describe.skipIf(!db)('creator consent withdrawal', () => {
     await inTx(async (sql) => {
       const creator = await seed(sql);
       await sql`SAVEPOINT s`;
-      await expect(sql`SELECT public.record_creator_withdrawal(${creator},'bogus',null)`).rejects.toThrow(/invalid kind/);
+      await expect(sql`SELECT pg_temp.record_creator_withdrawal(${creator},'bogus',null)`).rejects.toThrow(/invalid kind/);
       await sql`ROLLBACK TO SAVEPOINT s`;
       const [{ state }] = await sql`SELECT state FROM public.bunny_video_deliveries WHERE creator_id=${creator}`;
       const w = await sql`SELECT 1 FROM public.creator_consent_withdrawals WHERE creator_id=${creator}`;
