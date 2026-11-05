@@ -850,6 +850,9 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       {/* Media Manager — Simplified 3-step Upload */}
       {activeSection === "media" && (
         <div className="px-4 space-y-6">
+          <div className="border-b border-primary/40 pb-4">
+            <p className="text-sm text-primary font-bold leading-relaxed">{ct.teaser_tip}</p>
+          </div>
           {!uploadEligible && (
             <>
               <div className="border-b border-border pb-4 space-y-3">
@@ -898,10 +901,6 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                 {uploading === "teasers" ? ct.uploading_teaser : ct.upload_teaser}
               </Button>
               <p className="text-[10px] text-muted-foreground">{ct.teaser_hint}</p>
-              <div className="flex items-start gap-2 bg-primary/10 border border-primary/40 rounded-xl px-3 py-2.5">
-                <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs text-primary font-bold leading-snug">{ct.teaser_tip}</p>
-              </div>
             </div>
 
             {/* Step 3: Full Video */}
