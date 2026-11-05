@@ -33,7 +33,7 @@ export async function deliveryUrl(db: any, bucket: string, path: string, seconds
   const { data: copy, error } = await db.from('bunny_video_deliveries').select('id,video_id,state').eq('bucket', bucket).eq('storage_path', path).maybeSingle();
   if (error) throw new Error('Video delivery unavailable');
   if (!copy) return null; // Legacy files continue using their original storage.
-  if (copy.state === 'deleting' || copy.state === 'failed') throw new Error('Video delivery unavailable');
+  if (copy.state !== 'ready' && copy.state !== 'processing') throw new Error('Video delivery unavailable'); // withdrawn copies stay archived, never signed
   const { data: current, error: sourceError } = await db.rpc('bunny_source_current', { _id: copy.id });
   if (sourceError || current !== true) throw new Error('Video version unavailable');
   const video = await bunnyApi(`/videos/${copy.video_id}`);

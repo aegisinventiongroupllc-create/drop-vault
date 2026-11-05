@@ -19,6 +19,9 @@ Deno.serve(async req => {
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return json({error:'Invalid upload request'},400);
   const {action,bucket,path,media_id} = parsed.data;
+  const {data:withdrawn,error:wErr} = await db.from('creator_consent_withdrawals').select('id').eq('creator_id',uid).maybeSingle();
+  if (wErr) return json({error:'Upload unavailable'},503);
+  if (withdrawn) return json({error:'Consent withdrawn: streaming copies are archived'},403);
   if (!path.startsWith(`${uid}/`) || path.includes('..') || path.split('/').length !== 2) return json({error:'Owned original required'},403);
   // Use the caller session for the existing audited creator gate.
   const caller = createClient(url,Deno.env.get('SUPABASE_ANON_KEY') ?? '',{global:{headers:{Authorization:`Bearer ${token}`}}});
