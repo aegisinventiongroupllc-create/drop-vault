@@ -1,0 +1,20 @@
+CREATE TABLE public.vip_pass_checkouts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), creator_id uuid NOT NULL, pass_type public.vip_pass_type NOT NULL CHECK(pass_type <> 'NONE'), amount_usd numeric NOT NULL CHECK ((pass_type='PRO_PASS' AND amount_usd=1500) OR (pass_type='ELITE_PASS' AND amount_usd=3500)), status text NOT NULL DEFAULT 'reserved' CHECK(status IN ('reserved','invoiced','completed','released')), payment_id text UNIQUE, invoice_url text, created_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz NOT NULL DEFAULT now()+interval '5 minutes');
+GRANT SELECT ON public.vip_pass_checkouts TO authenticated;
+GRANT ALL ON public.vip_pass_checkouts TO service_role;
+ALTER TABLE public.vip_pass_checkouts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Creators read their VIP checkout" ON public.vip_pass_checkouts FOR SELECT TO authenticated USING(creator_id=auth.uid() AND public.has_role(auth.uid(),'creator'));
+CREATE UNIQUE INDEX vip_one_open_checkout ON public.vip_pass_checkouts(creator_id) WHERE status IN ('reserved','invoiced');
+CREATE INDEX vip_pending_checkout ON public.vip_pass_checkouts(status,expires_at);
+CREATE OR REPLACE FUNCTION public.reserve_vip_checkout(_creator uuid,_pass public.vip_pass_type) RETURNS public.vip_pass_checkouts LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE r public.vip_pass_checkouts; cap integer; sold integer; BEGIN
+ IF auth.role() IS DISTINCT FROM 'service_role' THEN RAISE EXCEPTION 'Server authorization required' USING ERRCODE='42501'; END IF;
+ IF _pass IS NULL OR _pass NOT IN ('PRO_PASS','ELITE_PASS') OR NOT public.has_role(_creator,'creator') OR EXISTS(SELECT 1 FROM public.account_bans WHERE user_id=_creator) OR EXISTS(SELECT 1 FROM public.creator_consent_withdrawals WHERE creator_id=_creator) THEN RAISE EXCEPTION 'Eligible creator required' USING ERRCODE='42501'; END IF;
+ SELECT total_passes_cap,passes_sold INTO cap,sold FROM public.vip_pass_inventory WHERE id=true FOR UPDATE;
+ UPDATE public.vip_pass_checkouts SET status='released' WHERE status='reserved' AND payment_id IS NULL AND expires_at<=now();
+ IF EXISTS(SELECT 1 FROM public.creator_split_settings WHERE creator_id=_creator AND vip_pass_purchased<>'NONE') THEN RAISE EXCEPTION 'Creator already owns a VIP pass'; END IF;
+ SELECT * INTO r FROM public.vip_pass_checkouts WHERE creator_id=_creator AND status IN ('reserved','invoiced');
+ IF r.id IS NOT NULL THEN IF r.pass_type<>_pass THEN RAISE EXCEPTION 'Finish your existing VIP checkout first'; END IF; RETURN r; END IF;
+ IF cap IS NULL OR sold+(SELECT count(*) FROM public.vip_pass_checkouts WHERE status IN ('reserved','invoiced'))>=LEAST(cap,1000) THEN RAISE EXCEPTION 'VIP passes sold out'; END IF;
+ INSERT INTO public.vip_pass_checkouts(creator_id,pass_type,amount_usd) VALUES(_creator,_pass,CASE WHEN _pass='PRO_PASS' THEN 1500 ELSE 3500 END) RETURNING * INTO r; RETURN r;
+ END $$;
+REVOKE ALL ON FUNCTION public.reserve_vip_checkout(uuid,public.vip_pass_type) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.reserve_vip_checkout(uuid,public.vip_pass_type) TO service_role;

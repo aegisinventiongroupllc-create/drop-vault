@@ -694,6 +694,13 @@
       "when": 1793908787054,
       "tag": "0098_four_videos_paid_fifth",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1793923364274,
+      "tag": "0099_vip_checkout_holds",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [ ] Implement VIP checkout with server-priced Pro/Elite passes, shared 1,000-pass first-come reservations, verified payment grants, and sold-out/retry tests; preserve provider approval gates.
+- [ ] Verify signed-in VIP checkout states and isolated purchase/concurrency flows without real charges; report live-provider blockers.
 - [x] Agreed/paid calendar projection now refreshes on account-scoped request changes, coalescing updates with polling fallback; server agreement stamps and verified-paid 48-hour deadlines preserved. Automatic transition test passes.
 - [x] Shared missing-color defaults are pink with bright neon borders; saved personal choices preserved, unsaved globe defaults pink. 29 focused tests pass and build OK; desktop/phone entry and default renderer checked without page errors. Available session remains behind consent, so genuine paid-request/dashboard walkthrough is unverified. Not published.
 - [x] Add server-enforced four regular long videos plus one separately paid neon-pink fifth video; one-token purchase stacks 14 days using existing escrow and withdrawal protections. Creator placement selector, separate customer fifth tile, restrictive storage rule and filtered signing deployed. Isolated limits/payment/expiry tests and 49 related tests passed; no real funds changed or publication.

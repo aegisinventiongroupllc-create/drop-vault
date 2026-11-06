@@ -2352,6 +2352,42 @@ export type Database = {
           },
         ]
       }
+      vip_pass_checkouts: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          invoice_url: string | null
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          creator_id: string
+          expires_at?: string
+          id?: string
+          invoice_url?: string | null
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          creator_id?: string
+          expires_at?: string
+          id?: string
+          invoice_url?: string | null
+          pass_type?: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       vip_pass_inventory: {
         Row: {
           id: boolean
@@ -2790,6 +2826,29 @@ export type Database = {
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
         Returns: string
+      }
+      reserve_vip_checkout: {
+        Args: {
+          _creator: string
+          _pass: Database["public"]["Enums"]["vip_pass_type"]
+        }
+        Returns: {
+          amount_usd: number
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          invoice_url: string | null
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+          payment_id: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vip_pass_checkouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       review_creator_identity: {
         Args: {
