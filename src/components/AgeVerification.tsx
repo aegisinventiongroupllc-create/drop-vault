@@ -80,10 +80,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-2">
             {t.age_title}<span className="text-primary notranslate" translate="no">THING™</span>
           </h1>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {t.age_subtitle}
-          </p>
-          <p className="mt-3 text-sm text-foreground">This site contains adult material. You must be at least 18 years of age (or the age of majority in your jurisdiction) to enter.</p>
+          <p className="text-sm leading-relaxed text-foreground">This site contains adult material. You must be at least 18 years of age (or the age of majority in your jurisdiction) to enter.</p>
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
