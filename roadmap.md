@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Current request
+- [ ] Connect Persona sandbox identity checks without granting creator approval from test results; verify and request publishing.
 - [ ] Implement VIP checkout with server-priced Pro/Elite passes, shared 1,000-pass first-come reservations, verified payment grants, and sold-out/retry tests; preserve provider approval gates.
 - [ ] Verify signed-in VIP checkout states and isolated purchase/concurrency flows without real charges; report live-provider blockers.
 - [x] Agreed/paid calendar projection now refreshes on account-scoped request changes, coalescing updates with polling fallback; server agreement stamps and verified-paid 48-hour deadlines preserved. Automatic transition test passes.
