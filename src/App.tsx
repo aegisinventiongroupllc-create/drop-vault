@@ -22,6 +22,7 @@ import ParticipantInvite from "./pages/ParticipantInvite";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import EntryPassGate from "./components/EntryPassGate";
+import PersonaTest from "./pages/PersonaTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/admin-portal" element={<AdminPortal />} />
                 <Route path="/admin/verifications" element={<AdminVerificationDashboard />} />
                 <Route path="/participant-invite" element={<ParticipantInvite />} />
+                <Route path="/persona-test" element={<PersonaTest />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/entry-pass-preview" element={<EntryPassGate onPurchased={() => { window.location.href = "/"; }} />} />
