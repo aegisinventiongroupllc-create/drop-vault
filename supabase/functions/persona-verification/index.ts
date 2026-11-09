@@ -4,7 +4,7 @@ import { z } from "npm:zod@3";
 import { inquirySummary, safeOneTimeLink, PERSONA_TEMPLATE_ID } from "./personaRules.ts";
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const schema = z.object({ action: z.enum(["start", "status"]) }).strict();
-class ProviderError extends Error { constructor(public status: number) { super("Persona request failed"); } }
+class ProviderError extends Error { constructor(public status: number, public templateNotDeployed = false) { super("Persona request failed"); } }
 async function persona(path: string, method = "GET", body?: unknown, idempotency?: string) {
   const apiKey = Deno.env.get("UDC_PERSONA_2_API_KEY"), lovableKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey || !lovableKey) throw new Error("Persona connection unavailable");
@@ -13,7 +13,11 @@ async function persona(path: string, method = "GET", body?: unknown, idempotency
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   // Never log raw provider responses: they can contain IDs, selfies or session credentials.
-  if (!response.ok) throw new ProviderError(response.status);
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    const templateNotDeployed = Array.isArray(body?.errors) && body.errors.some((item: { details?: unknown }) => item.details === "Inquiry template is not deployed to this environment");
+    throw new ProviderError(response.status, templateNotDeployed);
+  }
   return response.json();
 }
 Deno.serve(async req => {
@@ -51,7 +55,7 @@ Deno.serve(async req => {
     }
     return json({ connected: true, environment: "sandbox", status: summary.status, grantsCreatorApproval: false, ...(verificationUrl ? { verificationUrl } : {}) });
   } catch (error) {
-    if (error instanceof ProviderError) return json({ error: `Persona could not process the test (HTTP ${error.status}). Check the sandbox template and API permissions in Persona.`, providerStatus: error.status }, error.status >= 500 ? 502 : 400);
+    if (error instanceof ProviderError) return json({ error: error.templateNotDeployed ? "Your Persona template is not deployed to Sandbox. Open Persona → Inquiries → Templates and deploy this template to Sandbox, then retry here." : `Persona could not process the test (HTTP ${error.status}). Check the sandbox template and API permissions in Persona.`, providerStatus: error.status }, error.status >= 500 ? 502 : 400);
     return json({ error: "Could not open Persona verification. Please retry or contact DTT support." }, 503);
   }
 });

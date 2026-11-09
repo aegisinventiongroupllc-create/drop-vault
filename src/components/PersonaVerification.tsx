@@ -19,7 +19,7 @@ export default function PersonaVerification() {
   }, []);
   const refresh = useCallback(async () => {
     setBusy(true); setError("");
-    try { await request("status"); } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not check verification."); }
+    try { await request("status"); } catch (failure) { setStatus("unavailable"); setError(failure instanceof Error ? failure.message : "Could not check verification."); }
     finally { setBusy(false); }
   }, [request]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -44,10 +44,10 @@ export default function PersonaVerification() {
   return <section className="space-y-3 border-y border-border py-4" aria-label="Persona identity test">
     <h3 className="font-semibold text-foreground">Persona · Sandbox test</h3>
     <p className="text-sm text-muted-foreground">Persona collects the documents and selfie for this test. Sandbox results do not approve your DTT account or unlock publishing. DTT’s private review remains required.</p>
-    <p className="text-sm text-foreground" role="status">{status === "loading" ? "Checking connection…" : status === "not_started" ? "Ready to test" : `Test status: ${status.replace(/_/g, " ")}`}</p>
+    <p className="text-sm text-foreground" role="status">{status === "loading" ? "Checking connection…" : status === "unavailable" ? "Verification unavailable" : status === "not_started" ? "Ready to test" : `Test status: ${status.replace(/_/g, " ")}`}</p>
     {error && <p role="alert" className="text-sm text-destructive break-words">{error}</p>}
     <div className="flex flex-wrap gap-3">
-      {!complete && <Button variant="neon" disabled={busy || status === "loading"} onClick={start}>{busy ? "PLEASE WAIT…" : status === "pending" || status === "created" ? "CONTINUE PERSONA TEST" : "TRY PERSONA VERIFICATION"}</Button>}
+      {!complete && <Button variant="neon" disabled={busy || status === "loading" || status === "unavailable"} onClick={start}>{busy ? "PLEASE WAIT…" : status === "pending" || status === "created" ? "CONTINUE PERSONA TEST" : "TRY PERSONA VERIFICATION"}</Button>}
       <Button variant="outline" disabled={busy} onClick={refresh}>CHECK TEST STATUS</Button>
     </div>
   </section>;
