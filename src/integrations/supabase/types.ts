@@ -1804,6 +1804,33 @@ export type Database = {
         }
         Relationships: []
       }
+      persona_inquiries: {
+        Row: {
+          checked_at: string
+          created_at: string
+          environment: string
+          inquiry_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          checked_at?: string
+          created_at?: string
+          environment?: string
+          inquiry_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          checked_at?: string
+          created_at?: string
+          environment?: string
+          inquiry_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       platform_suggestions: {
         Row: {
           anonymous: boolean
