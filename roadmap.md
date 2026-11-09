@@ -1,7 +1,8 @@
 # Roadmap
 
 ## Current request
-- [ ] Connect Persona sandbox identity checks without granting creator approval from test results; verify and request publishing.
+- [x] Connected Persona securely and added signed-in sandbox test at /persona-test and creator Verify; 21 identity tests pass, current app builds. Final approval unchanged. Real signed-in start reaches Persona but is rejected because supplied template is not deployed to Sandbox.
+- [ ] Complete Persona hosted test: owner must deploy supplied template to Sandbox in Persona; no inquiry or test approval created. Publishing requested separately.
 - [ ] Implement VIP checkout with server-priced Pro/Elite passes, shared 1,000-pass first-come reservations, verified payment grants, and sold-out/retry tests; preserve provider approval gates.
 - [ ] Verify signed-in VIP checkout states and isolated purchase/concurrency flows without real charges; report live-provider blockers.
 - [x] Agreed/paid calendar projection now refreshes on account-scoped request changes, coalescing updates with polling fallback; server agreement stamps and verified-paid 48-hour deadlines preserved. Automatic transition test passes.

@@ -7,6 +7,7 @@ import IdentityDatePicker from "@/components/IdentityDatePicker";
 import { identityAge, validIdentityImage } from "@/lib/identityVerification";
 import SelfieCamera from "@/components/SelfieCamera";
 import { canContinueVerification, DTT_VERIFICATION_STEPS } from "@/lib/dttVerificationSteps";
+import PersonaVerification from "@/components/PersonaVerification";
 
 type Status = "unsubmitted" | "pending" | "flagged" | "approved" | "rejected";
 export default function CreatorIdVerification({ userId, onApproved }: { userId: string; onApproved?: () => void }) {
@@ -89,6 +90,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   if (loading) return <p className="text-muted-foreground">Loading verification…</p>;
   if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">Your documents were approved by DTT. Content uploads are available subject to account requirements.</p></div>;
   return <div className="space-y-4">
+    <PersonaVerification key={userId} />
     <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">Private identity review · Final decision by DTT</p><p className="text-sm text-muted-foreground">Founding creator eligibility requires a current government photo ID showing your actual residential address and country. A passport’s issuing country or nationality alone does not qualify. DTT checks the private ID before assigning a country slot.</p></header>
     {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} Public publishing remains locked.</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}</div> : <>
       {status === "rejected" && <div role="alert" className="border border-destructive rounded-md p-3 text-sm"><p className="font-bold text-destructive">Submission declined</p><p className="text-foreground whitespace-pre-wrap">{notes}</p></div>}
@@ -118,7 +120,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div><dt className="text-sm text-muted-foreground">Full legal name</dt><dd className="break-words">{name}</dd></div><div><dt className="text-sm text-muted-foreground">Date of birth</dt><dd>{dob}</dd></div><div><dt className="text-sm text-muted-foreground">Document</dt><dd>{documentType.replace(/_/g, " ")} · {issuingCountry}</dd></div><div><dt className="text-sm text-muted-foreground">Expires</dt><dd>{expires}</dd></div></dl>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(["front", "back", "selfie"] as const).map(slot => <figure key={slot}>{previews[slot] && <img src={previews[slot]} alt={`Review ${slot} photo`} className="h-40 w-full object-contain border border-border rounded-md" />}<figcaption className="text-sm text-muted-foreground mt-2">{slot === "front" ? "ID front" : slot === "back" ? "ID back" : "Holding photo"}</figcaption></figure>)}</div>
         {expires < new Date().toISOString().slice(0, 10) && <p role="alert" className="text-gold text-sm">This document has expired. Your submission will be flagged for further review.</p>}
-        <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">Specialist checks · Not connected</h5><p className="text-sm text-muted-foreground">Automated document, face and liveness checks have not been performed. This submission goes to DTT for human review.</p></div>
+        <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">DTT human review</h5><p className="text-sm text-muted-foreground">Persona sandbox tests are separate from this submission and do not establish live identity clearance. Your documents go to DTT for a final review.</p></div>
       </div>}
       <div className="flex gap-3">{step > 0 && <Button variant="outline" disabled={busy} onClick={() => setStep(current => current - 1)}>BACK</Button>}{step < 3 ? <Button variant="neon" className="flex-1" disabled={!canContinue || busy} onClick={() => setStep(current => current + 1)}>CONTINUE</Button> : <Button variant="neon" className="flex-1" disabled={busy || !canContinue} onClick={submit}>{busy ? "SUBMITTING…" : "SUBMIT FOR DTT REVIEW"}</Button>}</div>
     </>}
