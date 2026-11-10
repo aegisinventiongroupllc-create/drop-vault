@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { publicParticipantInvitationUrl } from '@/lib/publicBranding';
 export { adultAtRecording, PARTICIPANT_CONSENT } from '../../supabase/functions/_shared/participantRules';
 export async function participantCall(body: Record<string, unknown>) {
  const {data,error}=await supabase.functions.invoke('participant-review',{body});
@@ -9,4 +10,4 @@ export async function uploadParticipantEvidence(userId:string,file:File,slot:str
  const path=`${userId}/${crypto.randomUUID()}-${slot}`;
  const {error}=await supabase.storage.from('participant-evidence').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;return path;
 }
-export const invitationUrl=(token:string)=>`${window.location.origin}/participant-invite#${token}`;
+export const invitationUrl = publicParticipantInvitationUrl;

@@ -19,6 +19,7 @@ import MiniGlobe from "@/components/MiniGlobe";
 import BuyTokensModal from "@/components/BuyTokensModal";
 import { teaserGateTime } from "@/lib/teaserGate";
 import TeaserShelves from "@/components/TeaserShelves";
+import { publicCreatorUrl } from "@/lib/publicBranding";
 
 interface VideoItem {
   id: string;
@@ -160,7 +161,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
   const formatCount = useCallback((n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(), []);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/?creator=${encodeURIComponent(video.creator)}`;
+    const url = publicCreatorUrl(video.creator);
     const shareData = { title: `DTT — @${video.creator}`, text: `Check out @${video.creator} on DTT!`, url };
     try {
       if (navigator.share) { await navigator.share(shareData); }
