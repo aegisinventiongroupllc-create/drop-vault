@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Current request
-- [ ] Check public DTT branding and camera/video presentation; replace preview-origin creator/invitation shares with DTT-domain links, preserve required connections, and verify hidden badge and public pages.
+- [x] Checked public source branding and selfie camera presentation; creator/invitation shares now use dropthatthing.com instead of preview origin. Badge already hidden; public/preview entrance visibly DTT-only, 31 focused tests pass and build OK. Browser camera prompts identify the current host, so use the custom domain rather than preview; full signed-in camera/video walkthrough and provider-hosted screens not verified. Required internal connections preserved; not published.
 - [x] Connected Persona securely and added signed-in sandbox test at /persona-test and creator Verify; 21 identity tests pass, current app builds. Final approval unchanged. Real signed-in start reaches Persona but is rejected because supplied template is not deployed to Sandbox.
 - [ ] Complete Persona hosted test: owner must deploy supplied template to Sandbox in Persona; no inquiry or test approval created. Publishing requested separately.
 - [ ] Implement VIP checkout with server-priced Pro/Elite passes, shared 1,000-pass first-come reservations, verified payment grants, and sold-out/retry tests; preserve provider approval gates.
