@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export const CREATOR_AGREEMENT_VERSION = "1.2";
+export const CREATOR_AGREEMENT_VERSION = "1.3";
 export const CREATOR_AGREEMENT_TEXT =
-  "DTT Creator Agreement v1.2 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
+  "DTT Creator Agreement v1.3 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
   "standard payout is 90% of each $20 Bit-Token value; the first 5 approved women and 5 approved men creators per country receive 91% for life; " +
-  "Pro Pass grants 92/8 forever and Elite Pass grants 93/7 for life; VIP passes are limited to 1,000 worldwide across Pro and Elite combined, on a first-come, first-served basis; pass purchases remain Coming soon; without a pass, each 100k all-time unique customers who paid to unlock my library starts a 7-day 92/8 Power Week, then 90/10 resumes; each customer counts once, renewals and likes/hearts never count; custom requests pay 85% by default and 90% for Elite; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
+  "Pro Pass grants 92/8 forever and Elite Pass grants 93/7 for life; VIP passes are limited to 1,000 worldwide across Pro and Elite combined, on a first-come, first-served basis; activation requires verified payment through available TryBit checkout; without a pass, each 100k all-time unique customers who paid to unlock my library starts a 7-day 92/8 Power Week, then 90/10 resumes; each customer counts once, renewals and likes/hearts never count; custom requests pay 85% by default and 90% for Elite; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
   "I may leave at any time and DTT may suspend accounts that break the Creator & Purchase Rules or Terms of Service.";
 
 const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
@@ -22,7 +22,7 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
             <p><span className="text-foreground font-medium">Your earnings.</span> You keep 90% of every $20 Bit-Token value ($18). The customer's $5 service fee never reduces your share.</p>
             <p><span className="text-foreground font-medium">Founding creators.</span> The first 5 approved women and the first 5 approved men creators in each country receive 91/9 ($18.20 per token) for life.</p>
             <p><span className="text-foreground font-medium">Power Week.</span> At 100,000 paid followers you receive 92/8 ($18.40 per token) for 7 days, then return to 90/10. Another Power Week starts at each additional 100,000. Each unique customer who paid to unlock your library counts once; renewals, likes, hearts, tips and the DTT entry pass alone do not count.</p>
-            <p><span className="text-foreground font-medium">VIP passes.</span> PRO PASS ($1,500) grants 92/8 forever. ELITE PASS ($3,500) grants 93/7 for life. <span className="text-primary font-medium">Limited to 1,000 VIP passes worldwide across Pro and Elite combined. First come, first served.</span> Pass holders keep only their pass split. Pass purchases remain Coming soon. <span>A new batch of VIP passes launches every year on the founder's birthday, May 1 at midnight (New York time).</span></p>
+            <p><span className="text-foreground font-medium">VIP passes.</span> PRO PASS ($1,500) grants 92/8 forever. ELITE PASS ($3,500) grants 93/7 for life. <span className="text-primary font-medium">Limited to 1,000 VIP passes worldwide across Pro and Elite combined. First come, first served.</span> Pass holders keep only their pass split. Activation requires verified payment through available TryBit checkout. <span>A new batch of VIP passes launches every year on the founder's birthday, May 1 at midnight (New York time).</span></p>
             <p><span className="text-foreground font-medium">Custom requests.</span> You earn 85% of the agreed price, or 90% with Elite, delivered only after the customer pays. <span>DTT provides a built-in calendar on your Requests page to plan your day, set reminders and keep track of agreed requests.</span></p>
             <p><span className="text-foreground font-medium">Payouts.</span> Sent manually in Litecoin (LTC). Earnings from charged-back payments are reversed.</p>
             <p><span className="text-foreground font-medium">Your content.</span> You are 18+, an independent contractor, and you own or have the rights to everything you upload, including consent from anyone shown.</p>

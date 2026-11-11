@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { confirmEntryPassInvoice, invoiceKey } from "../_shared/entryPassPayment.ts";
 import { confirmTokenInvoice } from "../_shared/tokenPayment.ts";
 import { confirmCustomRequestInvoice } from "../_shared/customRequestPayment.ts";
+import { confirmVipInvoice } from "../_shared/vipPayment.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,8 +12,8 @@ const corsHeaders = {
 const SECRET = Deno.env.get("CRYPTOCLOUD_SECRET_KEY") ?? "";
 const API_KEY = (Deno.env.get("CRYPTOCLOUD_API_KEY") ?? "").trim().replace(/^Token\s+/i, "");
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 function b64urlDecode(s: string): Uint8Array {
   s = s.replace(/-/g, "+").replace(/_/g, "/");
@@ -79,6 +80,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (orderId?.startsWith("dttvip-")) {
+      const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { autoRefreshToken: false, persistSession: false } });
+      const { data: receipt, error } = await supabase.from("vip_pass_payment_receipts").select("*").eq("payment_id", invoiceKey(invoiceId)).eq("order_id", orderId).maybeSingle();
+      if (error || !receipt || !API_KEY) return new Response(JSON.stringify({ error: "Unknown VIP checkout" }), { status: 400 });
+      const granted = await confirmVipInvoice(receipt, async () => {
+        const response = await fetch("https://api.trybit.com/v2/invoice/merchant/info", { method: "POST", headers: { Authorization: `Token ${API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ uuids: [receipt.payment_id] }) });
+        if (!response.ok) throw new Error("Payment verification unavailable");
+        const body = await response.json();
+        if (body.status !== "success" || !Array.isArray(body.result)) throw new Error("Invalid verification response");
+        return body.result.find((item: { uuid?: string }) => invoiceKey(item.uuid) === receipt.payment_id);
+      }, async () => {
+        const { error } = await supabase.from("vip_pass_payment_receipts").update({ verified_at: new Date().toISOString() }).eq("payment_id", receipt.payment_id);
+        if (error) throw error;
+      }, async () => {
+        const { data, error } = await supabase.rpc("apply_verified_vip_pass", { _payment_id: receipt.payment_id });
+        if (error) throw error;
+        return data === true;
+      });
+      return new Response(JSON.stringify({ ok: true, vip_granted: granted }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     // Vault Entry Pass orders use the dttpass-<ts>-<userId> prefix.
     if (orderId?.startsWith("dttpass-")) {
       const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {

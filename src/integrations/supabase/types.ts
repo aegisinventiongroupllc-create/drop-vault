@@ -2386,6 +2386,7 @@ export type Database = {
           creator_id: string
           expires_at: string
           id: string
+          invoice_started_at: string | null
           invoice_url: string | null
           pass_type: Database["public"]["Enums"]["vip_pass_type"]
           payment_id: string | null
@@ -2397,6 +2398,7 @@ export type Database = {
           creator_id: string
           expires_at?: string
           id?: string
+          invoice_started_at?: string | null
           invoice_url?: string | null
           pass_type: Database["public"]["Enums"]["vip_pass_type"]
           payment_id?: string | null
@@ -2408,6 +2410,7 @@ export type Database = {
           creator_id?: string
           expires_at?: string
           id?: string
+          invoice_started_at?: string | null
           invoice_url?: string | null
           pass_type?: Database["public"]["Enums"]["vip_pass_type"]
           payment_id?: string | null
@@ -2443,6 +2446,7 @@ export type Database = {
           created_at: string
           creator_id: string
           currency: string
+          order_id: string | null
           pass_type: Database["public"]["Enums"]["vip_pass_type"]
           payment_id: string
           verified_at: string | null
@@ -2453,6 +2457,7 @@ export type Database = {
           created_at?: string
           creator_id: string
           currency?: string
+          order_id?: string | null
           pass_type: Database["public"]["Enums"]["vip_pass_type"]
           payment_id: string
           verified_at?: string | null
@@ -2463,6 +2468,7 @@ export type Database = {
           created_at?: string
           creator_id?: string
           currency?: string
+          order_id?: string | null
           pass_type?: Database["public"]["Enums"]["vip_pass_type"]
           payment_id?: string
           verified_at?: string | null
@@ -2605,6 +2611,10 @@ export type Database = {
         Args: { _path: string; _request_id: string }
         Returns: undefined
       }
+      attach_vip_invoice: {
+        Args: { _checkout: string; _payment: string; _url: string }
+        Returns: undefined
+      }
       bunny_source_current: { Args: { _id: string }; Returns: boolean }
       buy_fifth_video: {
         Args: { _video_id: string }
@@ -2638,6 +2648,7 @@ export type Database = {
       }
       can_upload_request_delivery: { Args: { _name: string }; Returns: boolean }
       claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
+      claim_vip_invoice: { Args: { _checkout: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       content_is_cleared: {
@@ -2757,6 +2768,7 @@ export type Database = {
         }[]
       }
       get_my_revenue_terms: { Args: never; Returns: Json }
+      get_my_vip_store: { Args: never; Returns: Json }
       get_records_custodian: {
         Args: never
         Returns: {
@@ -2849,6 +2861,7 @@ export type Database = {
         Returns: string
       }
       release_creator_access_escrow: { Args: never; Returns: number }
+      release_vip_checkout: { Args: { _checkout: string }; Returns: undefined }
       renew_request_delivery: { Args: { _request_id: string }; Returns: string }
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
@@ -2865,6 +2878,7 @@ export type Database = {
           creator_id: string
           expires_at: string
           id: string
+          invoice_started_at: string | null
           invoice_url: string | null
           pass_type: Database["public"]["Enums"]["vip_pass_type"]
           payment_id: string | null

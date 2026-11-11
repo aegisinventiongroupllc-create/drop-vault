@@ -708,6 +708,20 @@
       "when": 1794189213753,
       "tag": "0100_persona_sandbox_inquiries",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1794415061481,
+      "tag": "0101_complete_vip_checkout_binding",
+      "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1794415085713,
+      "tag": "0102_vip_reserved_confirmation_and_status",
+      "breakpoints": true
     }
   ]
 }
