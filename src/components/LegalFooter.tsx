@@ -185,7 +185,7 @@ export const PrivacyPolicy = () => (
   </SectionShell>
 );
 
-const RefundPolicy = () => (
+export const RefundPolicy = () => (
   <SectionShell title="Refund & Cancellation Policy">
     <p><strong className="text-foreground">All sales are final.</strong> Bit-Tokens are digital access credits delivered immediately upon payment confirmation and are non-refundable once credited.</p>
     <p><strong className="text-foreground">Exceptions.</strong> A refund will be issued only if: (a) tokens were charged but not credited within 24 hours due to a technical error on our side; (b) duplicate charge confirmed by the payment processor; (c) refund is required by applicable consumer protection law in your jurisdiction.</p>

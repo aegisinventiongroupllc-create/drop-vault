@@ -53,14 +53,18 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("counts each pass once and refuses the 1001st pass", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
-      for (const table of ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
+      const tables = ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings","vip_pass_checkouts","account_bans","creator_consent_withdrawals"];
+      for (const table of tables) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
       const [row] = await sql`SELECT pg_get_functiondef('public.apply_verified_vip_pass(text)'::regprocedure) AS d`;
       let body = row.d.replace("public.apply_verified_vip_pass(","pg_temp.apply_pass(").replaceAll("auth.role()", "'service_role'").replace("public.has_role(r.creator_id, 'creator'::app_role)", "true").replace("public.has_role(r.creator_id,'creator')", "true");
-      for (const table of ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings"]) body = body.replaceAll(`public.${table}`,`pg_temp.${table}`);
+      for (const table of tables) body = body.replaceAll(`public.${table}`,`pg_temp.${table}`);
       await sql.unsafe(body);
       await sql`INSERT INTO pg_temp.vip_pass_inventory(id,total_passes_cap,passes_sold) VALUES(true,1000,999)`;
       const creator = crypto.randomUUID();
       await sql`INSERT INTO pg_temp.vip_pass_payment_receipts(payment_id,creator_id,pass_type,amount_usd,verified_at) VALUES('last',${creator},'ELITE_PASS',3500,now()),('extra',${crypto.randomUUID()},'PRO_PASS',1500,now())`;
+      const checkoutId = crypto.randomUUID();
+      await sql`INSERT INTO pg_temp.vip_pass_checkouts(id,creator_id,pass_type,amount_usd,status,payment_id) VALUES(${checkoutId},${creator},'ELITE_PASS',3500,'invoiced','last')`;
+      await sql`UPDATE pg_temp.vip_pass_payment_receipts SET order_id=${`dttvip-${checkoutId}`} WHERE payment_id='last'`;
       const [first] = await sql`SELECT pg_temp.apply_pass('last') AS ok`; expect(first.ok).toBe(true);
       const [again] = await sql`SELECT pg_temp.apply_pass('last') AS ok`; expect(again.ok).toBe(false);
       const [inventory] = await sql`SELECT passes_sold FROM pg_temp.vip_pass_inventory`; expect(inventory.passes_sold).toBe(1000);
