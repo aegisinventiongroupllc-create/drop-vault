@@ -722,6 +722,13 @@
       "when": 1794415085713,
       "tag": "0102_vip_reserved_confirmation_and_status",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1794663715132,
+      "tag": "0103_restrict_comment_author_and_split_lookup",
+      "breakpoints": true
     }
   ]
 }
