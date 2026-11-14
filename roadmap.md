@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Current request
+- [x] Deep pre-creator-advertising/TryBit-style review: 568 tests across 90 files pass; live/preview phone entry and signed-in pricing, Persona screen and non-admin denial inspected. Fresh quick and deep security scans completed; two deep privacy warnings and one production-dependency advisory require remediation/recheck. Detailed evidence and launch gates saved in creator-advertising-review.md and Files. No app edits, publication, payments, approvals, or provider changes.
+- [ ] Finish genuine creator/customer/admin, payment, upload/playback, payout, email and recovery operational tests: backend became paused during this review; owner must resume it and supply eligible sessions/evidence plus an authorized provider test path. Review is not launch approval; no agreements accepted or identities fabricated.
 - [x] Checked public source branding and selfie camera presentation; creator/invitation shares now use dropthatthing.com instead of preview origin. Badge already hidden; public/preview entrance visibly DTT-only, 31 focused tests pass and build OK. Browser camera prompts identify the current host, so use the custom domain rather than preview; full signed-in camera/video walkthrough and provider-hosted screens not verified. Required internal connections preserved; not published.
 - [x] Connected Persona securely and added signed-in sandbox test at /persona-test and creator Verify; 21 identity tests pass, current app builds. Final approval unchanged. Real signed-in start reaches Persona but is rejected because supplied template is not deployed to Sandbox.
 - [ ] Complete Persona hosted test: owner must deploy supplied template to Sandbox in Persona; no inquiry or test approval created. Publishing requested separately.
