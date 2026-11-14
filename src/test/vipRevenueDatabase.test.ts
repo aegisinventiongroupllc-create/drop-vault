@@ -7,10 +7,10 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("gives Elite 93 for life and ignores Power Week for pass holders", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
-      for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
+      for (const table of ["creator_split_settings", "founding_creators", "power_weeks", "creator_lifetime_awards"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
       const [row] = await sql`SELECT pg_get_functiondef('public.creator_split_percent(uuid)'::regprocedure) AS d`;
       let body = row.d.replace("public.creator_split_percent(", "pg_temp.split(");
-      for (const table of ["creator_split_settings", "founding_creators", "power_weeks"]) body = body.replaceAll(`public.${table}`, `pg_temp.${table}`);
+      for (const table of ["creator_split_settings", "founding_creators", "power_weeks", "creator_lifetime_awards"]) body = body.replaceAll(`public.${table}`, `pg_temp.${table}`);
       await sql.unsafe(body);
       const creator = crypto.randomUUID();
       const [standard] = await sql`SELECT pg_temp.split(${creator}) AS n`; expect(standard.n).toBe(90);

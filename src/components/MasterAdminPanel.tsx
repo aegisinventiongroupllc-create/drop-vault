@@ -1,5 +1,6 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminFoundingCreators from "@/components/AdminFoundingCreators";
+import AdminYearEndAwards from "@/components/AdminYearEndAwards";
 import AdminSuggestions from "@/components/AdminSuggestions";
 import AdminGlobeStyle from "@/components/AdminGlobeStyle";
 import { useState, useEffect } from "react";
@@ -59,7 +60,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention" | "yearend";
 
 interface FinanceWallet {
   user_id: string;
@@ -302,6 +303,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const sections: { id: Section; label: string }[] = [
     { id: "countries", label: "COUNTRIES" },
     { id: "founding", label: "FOUNDING 5" },
+    { id: "yearend", label: "YEAR-END AWARDS" },
     { id: "flow", label: "HOW IT WORKS" },
     { id: "verification", label: "VERIFY" },
     { id: "analytics", label: "ANALYTICS" },
@@ -703,6 +705,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       )}
 
       {activeSection === "founding" && <AdminFoundingCreators />}
+      {activeSection === "yearend" && <AdminYearEndAwards />}
       {activeSection === "powerweek" && <AdminPowerWeeks callFinance={callFinance} />}
       {activeSection === "flow" && <AdminFlowPreview />}
 

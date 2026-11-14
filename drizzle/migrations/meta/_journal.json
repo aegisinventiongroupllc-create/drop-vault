@@ -729,6 +729,20 @@
       "when": 1794663715132,
       "tag": "0103_restrict_comment_author_and_split_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1794665331043,
+      "tag": "0104_year_end_country_lifetime_awards",
+      "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1794665480544,
+      "tag": "0105_restrict_year_end_award_client_writes",
+      "breakpoints": true
     }
   ]
 }

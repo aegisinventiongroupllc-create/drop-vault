@@ -1,5 +1,10 @@
 # Roadmap
 
+## Year-end lifetime award
+- [x] Add protected year-end paid-follower country snapshots and confirmation-only lifetime awards.
+- [x] Add administrator review and tie selection, verify payout precedence and access controls.
+- [x] Six isolated server tests pass; isolated desktop/mobile confirmation and cancel/readback checked. Available real account reaches protected admin sign-in, not award controls. No real awards or publication; first 2026 review opens January 1, 2027 UTC.
+
 ## Current request
 - [x] Deep pre-creator-advertising/TryBit-style review: 568 tests across 90 files pass; live/preview phone entry and signed-in pricing, Persona screen and non-admin denial inspected. Fresh quick and deep security scans completed; two deep privacy warnings and one production-dependency advisory require remediation/recheck. Detailed evidence and launch gates saved in creator-advertising-review.md and Files. No app edits, publication, payments, approvals, or provider changes.
 - [ ] Finish genuine creator/customer/admin, payment, upload/playback, payout, email and recovery operational tests: backend became paused during this review; owner must resume it and supply eligible sessions/evidence plus an authorized provider test path. Review is not launch approval; no agreements accepted or identities fabricated.

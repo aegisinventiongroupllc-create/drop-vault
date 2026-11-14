@@ -1,5 +1,6 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminFoundingCreators from "@/components/AdminFoundingCreators";
+import AdminYearEndAwards from "@/components/AdminYearEndAwards";
 import AdminFinanceBreakdown, { type FinanceCategory } from "@/components/AdminFinanceBreakdown";
 import { useEffect, useState } from "react";
 import TopCreatorsBoard from "@/components/TopCreatorsBoard";
@@ -69,7 +70,7 @@ interface Stats {
 
 const AdminPortal = () => {
   const navigate = useNavigate();
-  const [countrySection, setCountrySection] = useState<"countries" | "founding" | null>(null);
+  const [countrySection, setCountrySection] = useState<"countries" | "founding" | "yearend" | null>(null);
   const [authed] = useState(() => isAdminUnlocked());
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -394,9 +395,11 @@ const AdminPortal = () => {
             <Button variant={countrySection === null ? "default" : "outline"} onClick={() => setCountrySection(null)}>OVERVIEW</Button>
             <Button variant={countrySection === "countries" ? "default" : "outline"} onClick={() => setCountrySection("countries")}>COUNTRIES</Button>
             <Button variant={countrySection === "founding" ? "gold" : "outline"} onClick={() => setCountrySection("founding")}>FOUNDING 5</Button>
+            <Button variant={countrySection === "yearend" ? "gold" : "outline"} onClick={() => setCountrySection("yearend")}>YEAR-END AWARDS</Button>
           </nav>
           {countrySection === "countries" && <section className="py-4 border-y border-border"><AdminCountries onOpenCreator={setSelectedCreator} /></section>}
           {countrySection === "founding" && <section className="py-4 border-y border-border"><AdminFoundingCreators /></section>}
+          {countrySection === "yearend" && <section className="py-4 border-y border-border"><AdminYearEndAwards /></section>}
           {/* Platform Overview */}
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">

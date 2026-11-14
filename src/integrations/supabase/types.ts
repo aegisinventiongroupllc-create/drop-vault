@@ -786,6 +786,41 @@ export type Database = {
           },
         ]
       }
+      creator_lifetime_awards: {
+        Row: {
+          award_year: number
+          confirmed_at: string
+          confirmed_by: string
+          country: string
+          creator_id: string
+          followers: number
+        }
+        Insert: {
+          award_year: number
+          confirmed_at?: string
+          confirmed_by: string
+          country: string
+          creator_id: string
+          followers: number
+        }
+        Update: {
+          award_year?: number
+          confirmed_at?: string
+          confirmed_by?: string
+          country?: string
+          creator_id?: string
+          followers?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_lifetime_awards_award_year_country_creator_id_fkey"
+            columns: ["award_year", "country", "creator_id"]
+            isOneToOne: false
+            referencedRelation: "year_end_award_candidates"
+            referencedColumns: ["award_year", "country", "creator_id"]
+          },
+        ]
+      }
       creator_media: {
         Row: {
           active_from: string | null
@@ -2522,6 +2557,62 @@ export type Database = {
           },
         ]
       }
+      year_end_award_candidates: {
+        Row: {
+          award_year: number
+          country: string
+          creator_id: string
+          display_name: string | null
+          followers: number
+        }
+        Insert: {
+          award_year: number
+          country: string
+          creator_id: string
+          display_name?: string | null
+          followers: number
+        }
+        Update: {
+          award_year?: number
+          country?: string
+          creator_id?: string
+          display_name?: string | null
+          followers?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "year_end_award_candidates_award_year_fkey"
+            columns: ["award_year"]
+            isOneToOne: false
+            referencedRelation: "year_end_award_reviews"
+            referencedColumns: ["award_year"]
+          },
+        ]
+      }
+      year_end_award_reviews: {
+        Row: {
+          award_year: number
+          cutoff_at: string
+          excluded_country_count: number
+          prepared_at: string
+          prepared_by: string
+        }
+        Insert: {
+          award_year: number
+          cutoff_at: string
+          excluded_country_count?: number
+          prepared_at?: string
+          prepared_by: string
+        }
+        Update: {
+          award_year?: number
+          cutoff_at?: string
+          excluded_country_count?: number
+          prepared_at?: string
+          prepared_by?: string
+        }
+        Relationships: []
+      }
       yoti_age_checks: {
         Row: {
           created_at: string
@@ -2650,6 +2741,10 @@ export type Database = {
       claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
       claim_vip_invoice: { Args: { _checkout: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
+      confirm_year_end_award: {
+        Args: { _country: string; _creator: string; _year: number }
+        Returns: Json
+      }
       consume_purchase_token: { Args: { _user_id: string }; Returns: string }
       content_is_cleared: {
         Args: { _bucket: string; _path: string }
@@ -2856,6 +2951,7 @@ export type Database = {
           name: string
         }[]
       }
+      prepare_year_end_awards: { Args: { _year: number }; Returns: Json }
       record_creator_withdrawal: {
         Args: { _creator: string; _kind: string; _reason: string }
         Returns: string
