@@ -305,7 +305,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           SEND A TIP
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Tips start at 1 Bit-Token ($20 value). No extra tipping fee; standard creator share is 90%.
+          Tips start at 1 Bit-Token ($20 value). No extra customer tipping fee. Creators receive 90% of the tip’s token value; DTT receives 10% ($18 and $2 per token).
         </p>
       </div>
 
@@ -319,6 +319,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             </h3>
             <p className="text-xs text-muted-foreground text-center mb-4">
               Tip checkout is unavailable. The amounts below are a preview only; no payment will be taken.
+            </p>
+            <p className="text-xs text-muted-foreground text-center mb-4">
+              No extra customer tipping fee. Creators receive 90% of the tip’s token value; DTT receives 10% ($18 and $2 per token). Token purchase fees remain included in the purchase price.
             </p>
             {tipNotification ? (
               <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
