@@ -191,7 +191,7 @@ export const RefundPolicy = () => (
     <p><strong className="text-foreground">Exceptions.</strong> A refund will be issued only if: (a) tokens were charged but not credited within 24 hours due to a technical error on our side; (b) duplicate charge confirmed by the payment processor; (c) refund is required by applicable consumer protection law in your jurisdiction.</p>
     <p><strong className="text-foreground">Crypto Refunds.</strong> Crypto payments are non-reversible by nature; refunds (if approved) are returned in LTC to the originating wallet, typically within 1–3 business days of approval.</p>
     <p><strong className="text-foreground">How to Request.</strong> Email <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a> with order ID, transaction hash (if crypto), and reason. Response within 5 business days.</p>
-    <p><strong className="text-foreground">Chargebacks.</strong> Fraudulent or abusive chargebacks result in permanent account termination and may be reported to credit bureaus and law enforcement.</p>
+    <p><strong className="text-foreground">Chargebacks.</strong> Legitimate payment disputes are not, by themselves, evidence of fraud. Suspected fraud or abuse may be investigated using transaction records and information from the payment processor. Confirmed fraud or abuse may result in permanent account termination and may be reported to law enforcement where permitted or required by law. Nothing in this policy limits your rights to dispute a payment under applicable law or your payment provider’s rules.</p>
   </SectionShell>
 );
 
