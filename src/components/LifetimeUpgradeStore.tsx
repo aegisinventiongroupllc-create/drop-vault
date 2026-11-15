@@ -6,7 +6,7 @@ import { vipRemaining } from "../../supabase/functions/_shared/vipPayment";
 
 export const VIP_PASSES = [
   { id: "PRO_PASS", name: "PRO PASS", price: 1500, perks: ["92/8 split forever on all 14-day vault unlocks", "No follower goal needed"] },
-  { id: "ELITE_PASS", name: "ELITE PASS", price: 3500, perks: ["93/7 split for life on vault unlocks", "90/10 split on Request Room tips", "Verified VIP badge on your profile", "Priority discovery placement for 30 days"] },
+  { id: "ELITE_PASS", name: "ELITE PASS", price: 3500, perks: ["93/7 split for life on vault unlocks", "90/10 split on paid custom requests — exclusive to purchased Elite passes", "Verified VIP badge on your profile", "Priority discovery placement for 30 days"] },
 ] as const;
 
 /** Next founder's-birthday batch: May 1, 00:00 New York time. */

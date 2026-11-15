@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sequential launch corrections
+- [x] First: clarified 85/15 custom requests, with 90/10 exclusively for purchased, verified Elite passes across About, agreement, Analytics, store and checkout. Corrected mislabeled tip perk; 27 focused tests pass, including isolated deployed request rules. No real payment or publication.
+- [ ] Next, separately: reconcile standard vault earnings claims, fee disclosures, actual tip calculations, follower-award wording, payment-status claims and legally reviewed chargeback language.
+
 ## Year-end lifetime award
 - [x] Add protected year-end paid-follower country snapshots and confirmation-only lifetime awards.
 - [x] Add administrator review and tie selection, verify payout precedence and access controls.

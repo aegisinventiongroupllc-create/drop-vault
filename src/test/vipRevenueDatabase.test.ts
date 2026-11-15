@@ -32,6 +32,12 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
       await sql.unsafe(trigger.d.replace("public.enforce_request_revenue_split(","pg_temp.enforce_split(").replaceAll("public.creator_request_split_percent", "pg_temp.request_split"));
       await sql`CREATE TRIGGER split BEFORE INSERT OR UPDATE ON pg_temp.custom_requests FOR EACH ROW EXECUTE FUNCTION pg_temp.enforce_split()`;
       const creator = crypto.randomUUID(), customer = crypto.randomUUID(), id = crypto.randomUUID();
+      const [standardRequest] = await sql`SELECT pg_temp.request_split(${creator}) AS n`;
+      expect(Number(standardRequest.n)).toBe(85);
+      await sql`INSERT INTO pg_temp.creator_split_settings(creator_id,vip_pass_purchased) VALUES(${creator},'PRO_PASS')`;
+      const [proRequest] = await sql`SELECT pg_temp.request_split(${creator}) AS n`;
+      expect(Number(proRequest.n)).toBe(85);
+      await sql`DELETE FROM pg_temp.creator_split_settings WHERE creator_id=${creator}`;
       await sql`INSERT INTO pg_temp.creator_split_settings(creator_id,vip_pass_purchased) VALUES(${creator},'ELITE_PASS')`;
       await sql`INSERT INTO pg_temp.custom_requests(id,creator_id,customer_id,description,amount_usd,tokens,creator_share_usd,platform_share_usd) VALUES(${id},${creator},${customer},'isolated test',100,5,999,999)`;
       const [created] = await sql`SELECT creator_share_usd,platform_share_usd FROM pg_temp.custom_requests WHERE id=${id}`;

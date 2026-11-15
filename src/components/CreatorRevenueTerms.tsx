@@ -8,7 +8,7 @@ export default function CreatorRevenueTerms() {
     <p>A new batch of VIP passes launches every year on the founder's birthday, May 1 at midnight (New York time).</p>
     <p>The first 5 approved women and 5 approved men creators per country receive 91/9 for life.</p>
     <p>Year-end country award: one creator across both vaults with the most unique paid library followers at year end receives a 95/5 vault split for life after administrator confirmation. This takes precedence over founding, VIP and Power Week splits; custom-request terms remain unchanged.</p>
-    <p>Custom requests: 85/15 by default, 90/10 for Elite. Customer-paid fees are separate. Card processing of $1.90–$2.50 per token comes from the $4 buffer; any actual crypto network fee is passed through separately without reducing the $20 token allocation.</p>
+    <p>Custom requests: 85/15 for standard, founding, Pro and year-end award creators. Only a purchased Elite VIP pass, activated after verified payment, grants 90/10 on the agreed request price. Vault splits and follower awards do not change request splits. Customer-paid fees are separate. Card processing of $1.90–$2.50 per token comes from the $4 buffer; any actual crypto network fee is passed through separately without reducing the $20 token allocation.</p>
     <p>VIP checkout is subject to TryBit availability and the shared 1,000-pass first-come limit. Payouts remain manual in Litecoin (LTC).</p>
   </div>;
 }

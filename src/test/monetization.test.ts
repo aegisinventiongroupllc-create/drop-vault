@@ -10,6 +10,7 @@ describe("latest monetization rules", () => {
     expect(POWER_WEEK_MS).toBe(604800000);
   });
   it("splits standard requests 85/15", () => expect(calculateCustomRequestSplit(100, requestPercent("NONE"))).toMatchObject({ creatorShare: 85, platformShare: 15 }));
+  it("keeps Pro requests at 85/15 rather than Elite's 90/10", () => expect(calculateCustomRequestSplit(100, requestPercent("PRO_PASS"))).toMatchObject({ creatorShare: 85, platformShare: 15 }));
   it("splits Elite requests 90/10", () => expect(calculateCustomRequestSplit(100, requestPercent("ELITE_PASS"))).toMatchObject({ creatorShare: 90, platformShare: 10 }));
   it("allocates $25 as $1 + $4 + $20", () => expect(checkoutAllocation(1, "crypto")).toMatchObject({ total: 25, dttFee: 1, buffer: 4, base: 20, networkPassthrough: 0 }));
   it.each([1.9, 2.5])("deducts card cost %s only from buffer", fee => expect(checkoutAllocation(1, "card", fee)).toMatchObject({ base: 20, bufferRemaining: 4-fee }));
