@@ -1,2 +1,3 @@
 # Year-end awards
 - Year-end awards freeze server-ranked paid-follower leaders using reviewed residence and UTC cutoffs; independent authenticated admins confirm one winner per country/year under a lock. Permanent awards override future vault splits only. Why: prevent forged counts, duplicate awards, retroactive earnings changes and tier downgrades.
+- General and support tip previews share tokenEconomy calculations; keep checkout disabled until a verified server transfer exists. Why: disclosures must not imply unimplemented payments.

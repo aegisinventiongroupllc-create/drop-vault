@@ -75,7 +75,7 @@ const es: Translations = {
   pay_with_crypto: "PAGAR CON CRIPTO",
 
   tip_amounts: "Elegir monto de propina",
-  tip_fee_note: "Sin tarifa extra — el creador recibe el 90%",
+  tip_fee_note: "Sin comisión por propinas — el creador recibe el 100% del valor de $20 del token",
 
   payout_ltc_only: "Pagamos solo via LTC. Envíe su dirección Litecoin a continuación.",
   payout_instruction: "Todos los pagos se procesan en Litecoin (LTC) — la moneda de pago universal independientemente de su país o moneda local.",

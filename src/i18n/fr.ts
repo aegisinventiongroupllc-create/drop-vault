@@ -75,7 +75,7 @@ const fr: Translations = {
   pay_with_crypto: "PAYER EN CRYPTO",
 
   tip_amounts: "Choisir le montant du pourboire",
-  tip_fee_note: "Aucun frais — le créateur garde 90 %",
+  tip_fee_note: "Aucun frais sur les pourboires — le créateur garde 100 % de la valeur de 20 $ du jeton",
 
   payout_ltc_only: "Nous payons uniquement via LTC. Soumettez votre adresse Litecoin ci-dessous.",
   payout_instruction: "Tous les paiements sont traités en Litecoin (LTC) — la devise de paiement universelle quel que soit votre pays ou votre devise locale.",

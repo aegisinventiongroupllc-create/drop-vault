@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Sequential launch corrections
+- [x] Fee-free tip calculations and disclosures: general and support tips transfer 100% of the $20 token value; token purchase fees and vault/request splits unchanged. No deployed tip payment function exists; checkout remains unavailable pending an approved verified flow, so a genuine tip transfer cannot yet be tested.
 - [x] First: clarified 85/15 custom requests, with 90/10 exclusively for purchased, verified Elite passes across About, agreement, Analytics, store and checkout. Corrected mislabeled tip perk; 27 focused tests pass, including isolated deployed request rules. No real payment or publication.
 - [ ] Next, separately: reconcile standard vault earnings claims, fee disclosures, actual tip calculations, follower-award wording, payment-status claims and legally reviewed chargeback language.
 

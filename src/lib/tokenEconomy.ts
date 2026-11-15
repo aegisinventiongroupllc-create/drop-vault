@@ -116,11 +116,11 @@ export function calculateCustomRequestSplit(baseAmount: number, creatorPercent: 
 }
 
 /**
- * Tip split: no customer fee; platform keeps 10%, creator 90%
+ * Tips transfer the full spending value; token purchase fees are separate.
  */
 export function calculateTipSplit(tipAmount: number) {
-  const platformShare = Math.round(tipAmount * PLATFORM_SPLIT_PERCENT) / 100;
-  const creatorShare = Math.round(tipAmount * CREATOR_SPLIT_PERCENT) / 100;
+  const platformShare = 0;
+  const creatorShare = Math.round(tipAmount * 100) / 100;
   return { tipAmount, adminFee: 0, platformShare, creatorShare };
 }
 
@@ -131,12 +131,12 @@ export function calculateTokenTip(tokens: number) {
 
 /**
  * Support Tip via 1 Bit-Token ($20 fixed value):
- * Platform Fee: 5% ($1) — Creator Revenue: 95% ($19)
+ * No platform share — Creator Revenue: 100% ($20)
  */
 export const SUPPORT_TIP_TOKENS = 1;
 export const SUPPORT_TIP_USD = 20;
-export const SUPPORT_PLATFORM_PERCENT = 5;
-export const SUPPORT_CREATOR_PERCENT = 95;
+export const SUPPORT_PLATFORM_PERCENT = 0;
+export const SUPPORT_CREATOR_PERCENT = 100;
 
 export function calculateSupportTipSplit() {
   const platformShare = SUPPORT_TIP_USD * (SUPPORT_PLATFORM_PERCENT / 100);

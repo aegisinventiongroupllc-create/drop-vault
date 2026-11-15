@@ -9,7 +9,7 @@ export default function CreatorRevenueTerms() {
     <p>The first 5 approved women and 5 approved men creators per country receive 91/9 for life.</p>
     <p>Year-end country award: one creator across both vaults with the most unique paid library followers at year end receives a 95/5 vault split for life after administrator confirmation. This takes precedence over founding, VIP and Power Week splits; custom-request terms remain unchanged.</p>
     <p>Custom requests: 85/15 for standard, founding, Pro and year-end award creators. Only a purchased Elite VIP pass, activated after verified payment, grants 90/10 on the agreed request price. Vault splits and follower awards do not change request splits. Customer-paid fees are separate. Included fees are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment without reducing the $20 token allocation.</p>
-    <p>Tips: no extra customer tipping fee. Creators receive 90% of the tip’s token value; DTT receives 10% ($18 and $2 per token). Token purchase fees remain included in the purchase price.</p>
+    <p>Tips: creators keep 100% of the $20-per-token spending value; DTT takes no tipping fee or share. Token purchase fees remain included in the purchase price. Tip checkout remains unavailable until an approved, verified payment flow is ready.</p>
     <p>VIP checkout is subject to TryBit testing availability and the shared 1,000-pass first-come limit. Checkout availability does not establish approved live payments; written provider approval and live payment verification remain unverified. Payouts remain manual in Litecoin (LTC).</p>
   </div>;
 }

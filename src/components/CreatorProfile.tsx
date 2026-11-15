@@ -305,7 +305,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           SEND A TIP
         </Button>
         <p className="text-center text-xs text-muted-foreground mt-1.5">
-          Tips start at 1 Bit-Token ($20 value). No extra customer tipping fee. Creators receive 90% of the tip’s token value; DTT receives 10% ($18 and $2 per token).
+          Tips start at 1 Bit-Token ($20 value). Creators keep 100% of that spending value; DTT takes no tipping fee or share.
         </p>
       </div>
 
@@ -321,7 +321,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               Tip checkout is unavailable. The amounts below are a preview only; no payment will be taken.
             </p>
             <p className="text-xs text-muted-foreground text-center mb-4">
-              No extra customer tipping fee. Creators receive 90% of the tip’s token value; DTT receives 10% ($18 and $2 per token). Token purchase fees remain included in the purchase price.
+              Creators keep 100% of the $20-per-token spending value; DTT takes no tipping fee or share. Token purchase fees remain included in the purchase price.
             </p>
             {tipNotification ? (
               <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 text-center">
@@ -350,8 +350,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                 {tipPreview && (
                   <div className="bg-secondary/50 rounded-lg p-3 mb-4 text-xs text-muted-foreground space-y-1">
                     <div className="flex justify-between"><span>Tip value:</span><span className="text-foreground font-bold">${tipPreview.tipAmount}</span></div>
-                    <div className="flex justify-between"><span>Standard platform share (10%):</span><span className="text-foreground font-bold">${tipPreview.platformShare}</span></div>
-                    <div className="flex justify-between border-t border-border pt-1"><span>Standard creator share:</span><span className="text-primary font-bold">${tipPreview.creatorShare}</span></div>
+                    <div className="flex justify-between"><span>DTT tipping share (0%):</span><span className="text-foreground font-bold">${tipPreview.platformShare}</span></div>
+                    <div className="flex justify-between border-t border-border pt-1"><span>Creator share (100%):</span><span className="text-primary font-bold">${tipPreview.creatorShare}</span></div>
                     <p>Tokens cost $25 each to buy, including the $5 purchase fee. No additional fee to tip with existing tokens.</p>
                   </div>
                 )}

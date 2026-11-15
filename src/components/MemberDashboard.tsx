@@ -226,7 +226,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
         <button
           onClick={() => handleSupport(unlock.creatorName)}
           className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary text-[9px] font-bold rounded-full px-2 py-0.5 transition-colors"
-          title={`Send 1 Bit-Token ($${SUPPORT_TIP_USD}) — Creator gets $19, Platform $1`}
+          title={`Send 1 Bit-Token ($${SUPPORT_TIP_USD}) — Creator gets $20, DTT takes no tipping share`}
         >
           <Heart className="w-2.5 h-2.5" />
           SUPPORT 1BT
