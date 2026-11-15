@@ -1,6 +1,7 @@
 // @vitest-environment node
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 describe.skipIf(!db)("empty library server authorization", () => {
   afterAll(async () => { await db?.end(); });
@@ -8,6 +9,7 @@ describe.skipIf(!db)("empty library server authorization", () => {
     if (!db) throw new Error("Database required");
     const rollback = new Error("rollback fixture");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       const rows = await sql`SELECT pg_get_functiondef('public.unlock_creator(uuid)'::regprocedure) AS definition`;
       let definition = rows[0].definition.replace('public.unlock_creator(', 'pg_temp.test_unlock(').replaceAll('auth.uid()', "current_setting('request.jwt.claim.sub')::uuid");
       // Keep the deployed empty-library guard, but redirect media to an empty temporary fixture.

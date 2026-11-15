@@ -4,6 +4,7 @@ import { afterAll, describe, expect, it } from "vitest";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 const tables = ["vip_pass_checkouts", "vip_pass_payment_receipts", "vip_pass_inventory", "creator_split_settings", "account_bans", "creator_consent_withdrawals"];
 async function fixture(sql: postgres.TransactionSql) {
+  await sql.unsafe(`DO $$ DECLARE r record; BEGIN IF pg_my_temp_schema() = 0 THEN RETURN; END IF; FOR r IN SELECT p.proname AS n, pg_get_function_identity_arguments(p.oid) AS a FROM pg_proc p WHERE p.pronamespace = pg_my_temp_schema() LOOP EXECUTE format('DROP FUNCTION pg_temp.%I(%s)', r.n, r.a); END LOOP; FOR r IN SELECT c.relname AS n FROM pg_class c WHERE c.relnamespace = pg_my_temp_schema() AND c.relkind = 'r' LOOP EXECUTE format('DROP TABLE pg_temp.%I CASCADE', r.n); END LOOP; END $$`);
   for (const table of tables) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
   await sql.unsafe("CREATE OR REPLACE FUNCTION pg_temp.has_role(uuid,public.app_role) RETURNS boolean LANGUAGE sql AS 'SELECT true'");
   for (const fn of ["reserve_vip_checkout(uuid,public.vip_pass_type)", "claim_vip_invoice(uuid)", "attach_vip_invoice(uuid,text,text)", "release_vip_checkout(uuid)", "apply_verified_vip_pass(text)"]) {

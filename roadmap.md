@@ -1,5 +1,8 @@
 # Roadmap
 
+## Completed since last review
+- [x] Fixed the Zod dependency advisory: upgraded zod 3.25.76 → 4.6.6 (only the DMCA form schema uses it; updated email/literal syntax). Dependency scan now reports zero known vulnerabilities. Fresh security scan shows only the two owner-dismissed findings. Made all 20 live-database test fixtures drop leftover pooled-session temp objects before creating their own; full suite 576/576 passes, build OK. Not published.
+
 ## Sequential launch corrections
 - [x] Add public “How creators get paid” before age consent: existing 14-day vault escrow vs manual LTC payout, debit/credit checkout pending, TryBit testing/unverified live approval, and legitimate disputes vs fraud. No payment rules or approvals changed.
 - [x] Fee-free tip calculations and disclosures: general and support tips transfer 100% of the $20 token value; token purchase fees and vault/request splits unchanged. No deployed tip payment function exists; checkout remains unavailable pending an approved verified flow, so a genuine tip transfer cannot yet be tested.

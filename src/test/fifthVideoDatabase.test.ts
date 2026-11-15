@@ -6,6 +6,7 @@ async function isolated(fn:(s:postgres.TransactionSql,u:string,c:string,v:string
   if (!db) throw Error('Database required');
   const rollback=Error('rollback');
   await db.begin(async s => {
+    await s.unsafe(`DO $$ DECLARE r record; BEGIN IF pg_my_temp_schema() = 0 THEN RETURN; END IF; FOR r IN SELECT p.proname AS n, pg_get_function_identity_arguments(p.oid) AS a FROM pg_proc p WHERE p.pronamespace = pg_my_temp_schema() LOOP EXECUTE format('DROP FUNCTION pg_temp.%I(%s)', r.n, r.a); END LOOP; FOR r IN SELECT c.relname AS n FROM pg_class c WHERE c.relnamespace = pg_my_temp_schema() AND c.relkind = 'r' LOOP EXECUTE format('DROP TABLE pg_temp.%I CASCADE', r.n); END LOOP; END $$`);
     for (const t of ['creator_media','video_early_access','transactions','subscriptions','creator_access_escrow','profiles','token_balances','token_purchases','account_bans','creator_consent_withdrawals']) await s.unsafe(`CREATE TEMP TABLE ${t} (LIKE public.${t} INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES)`);
     await s.unsafe(`CREATE TEMP TABLE storage_objects(bucket_id text,name text); CREATE FUNCTION pg_temp.content_is_cleared(text,text) RETURNS boolean LANGUAGE sql AS 'SELECT true'; CREATE FUNCTION pg_temp.creator_split_percent(uuid) RETURNS integer LANGUAGE sql AS 'SELECT 90'; CREATE FUNCTION pg_temp.has_role(uuid,public.app_role) RETURNS boolean LANGUAGE sql AS 'SELECT false'`);
     for (const n of ['consume_purchase_token','spend_access_token','unlock_creator','buy_fifth_video','guard_library_video_slots','fifth_video_storage_access']) {

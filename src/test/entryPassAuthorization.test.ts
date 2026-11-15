@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 const rollback = new Error("rollback test fixture");
@@ -32,6 +33,7 @@ describe.skipIf(!db)("live entry-pass server authorization", () => {
   it("checks server authorization inside the function even for a privileged connection", async () => {
     if (!db) throw Error("Database required");
     await expect(db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await setup(sql);
       await sql`SELECT set_config('request.jwt.claims', '{"role":"authenticated"}', true)`;
       await sql`SELECT pg_temp.test_credit_entry_pass(gen_random_uuid(), 'guard-test', 20, 'crypto')`;
@@ -41,6 +43,7 @@ describe.skipIf(!db)("live entry-pass server authorization", () => {
   it("denies an unpaid attempt even from the server role", async () => {
     if (!db) throw Error("Database required");
     await expect(db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await setup(sql);
       await sql`SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true)`;
       await sql`SELECT pg_temp.test_credit_entry_pass(gen_random_uuid(), 'unpaid-test', 20, 'crypto')`;
@@ -50,6 +53,7 @@ describe.skipIf(!db)("live entry-pass server authorization", () => {
   it("rejects a pending receipt, a different buyer and a wrong amount without creating access", async () => {
     if (!db) throw Error("Database required");
     const outcome = await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await setup(sql);
       const uid = crypto.randomUUID();
       const id = `security-test-${crypto.randomUUID()}`;
@@ -76,6 +80,7 @@ describe.skipIf(!db)("live entry-pass server authorization", () => {
   it("grants exactly 365 days once for a verified receipt; duplicate notifications add nothing", async () => {
     if (!db) throw Error("Database required");
     const outcome = await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await setup(sql);
       const uid = crypto.randomUUID();
       const id = `security-test-${crypto.randomUUID()}`;

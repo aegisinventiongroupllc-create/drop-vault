@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("token payment database authorization", () => {
@@ -18,6 +19,7 @@ describe.skipIf(!db)("token payment database authorization", () => {
     if (!db) throw Error("Database required");
     const rollback = new Error("rollback isolated test");
     const result = await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
     const catalog = await sql`SELECT pg_get_functiondef('public.token_bundle_total(integer)'::regprocedure) AS definition`;
     await sql.unsafe(catalog[0].definition.replace('public.token_bundle_total(', 'pg_temp.token_bundle_total('));
     for (const table of ["token_payment_receipts", "token_purchases", "token_balances"]) {

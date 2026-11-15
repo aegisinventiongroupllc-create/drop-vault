@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from 'vitest';
 import postgres from 'postgres';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 describe.skipIf(!db)('Creator calendar privacy', () => {
   afterAll(async () => { await db?.end(); });
@@ -19,6 +20,7 @@ describe.skipIf(!db)('Creator calendar privacy', () => {
     if (!db) throw new Error('Database unavailable');
     const rollback = new Error('rollback');
     await expect(db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await sql.unsafe('CREATE TEMP TABLE calendar_test_requests (LIKE public.custom_requests INCLUDING ALL)');
       const [fn] = await sql`SELECT pg_get_functiondef('public.stamp_request_calendar_agreement()'::regprocedure) AS body`;
       await sql.unsafe(fn.body.replace('public.stamp_request_calendar_agreement()', 'pg_temp.stamp_agreement()'));

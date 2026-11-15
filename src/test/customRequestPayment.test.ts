@@ -2,6 +2,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
 import { confirmCustomRequestInvoice, priceAgreedRequest, verifyCustomRequestInvoice } from "../../supabase/functions/_shared/customRequestPayment";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 
 const uid = "11111111-1111-1111-1111-111111111111";
 const receipt = { payment_id: "ABC", order_id: "dttreq-1-r", request_id: "r", user_id: uid, base_usd: 100, amount_usd: 105, currency: "USD" };
@@ -43,6 +44,7 @@ describe.skipIf(!db)("custom request payment database authorization", () => {
   it("rejects unpaid, mismatched and unauthorized attempts; marks a verified receipt once", async () => {
     const rollback = new Error("rollback");
     await expect(db!.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       for (const t of ["custom_request_payment_receipts", "custom_requests"]) {
         await sql.unsafe(`CREATE TEMP TABLE ${t} (LIKE public.${t} INCLUDING ALL)`);
       }

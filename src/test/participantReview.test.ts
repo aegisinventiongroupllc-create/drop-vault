@@ -2,6 +2,7 @@
 import { afterAll,describe,expect,it } from 'vitest';
 import postgres from 'postgres';
 import { adultAtRecording } from '../../supabase/functions/_shared/participantRules';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 describe('participant recording age',()=>{
  it('allows a participant exactly 18 at recording',()=>expect(adultAtRecording('2000-11-03','2018-11-03','2026-11-03')).toBe(true));
  it('rejects a person adult now but 17 at recording',()=>expect(adultAtRecording('2000-11-03','2018-11-02','2026-11-03')).toBe(false));
@@ -23,6 +24,7 @@ describe.skipIf(!db)('participant server clearance',()=>{
  ] as const)('%s content clearance',async(name,allowed)=>{
   if(!db)throw Error('Database required');const rollback=new Error('rollback');
   await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
    await sql.unsafe(`CREATE TEMP TABLE content_manifests (LIKE public.content_manifests INCLUDING DEFAULTS);CREATE TEMP TABLE content_participants(LIKE public.content_participants INCLUDING DEFAULTS);CREATE TEMP TABLE participant_consents(LIKE public.participant_consents INCLUDING DEFAULTS);CREATE TEMP TABLE creator_verifications(LIKE public.creator_verifications INCLUDING DEFAULTS);CREATE TEMP TABLE account_bans(LIKE public.account_bans INCLUDING DEFAULTS);CREATE TEMP TABLE objects(bucket_id text,name text,updated_at timestamptz);`);
    const r=await sql`SELECT pg_get_functiondef('public.content_is_cleared(text,text)'::regprocedure) AS definition`;let def=r[0].definition.replaceAll('public.content_is_cleared','pg_temp.content_is_cleared').replaceAll('storage.objects','pg_temp.objects');for(const t of ['content_manifests','content_participants','participant_consents','creator_verifications','account_bans'])def=def.replaceAll(`public.${t}`,`pg_temp.${t}`);await sql.unsafe(def);
    const owner=crypto.randomUUID(),pid=crypto.randomUUID(),mid=crypto.randomUUID(),reviewer=crypto.randomUUID(),updated=new Date(),path=`${owner}/video.mp4`;

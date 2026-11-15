@@ -1,6 +1,7 @@
 // @vitest-environment node
 import postgres from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL,{max:1,prepare:false,connect_timeout:30}) : null;
 const tables=['token_balances','token_purchases','subscriptions','profiles','creator_media','transactions','creator_access_escrow','creator_wallets','creator_consent_withdrawals','creator_withdrawal_settlements','withdrawal_customer_credits','user_permanent_library','account_bans'];
 async function fixture(sql:postgres.TransactionSql) {
@@ -21,7 +22,8 @@ async function fixture(sql:postgres.TransactionSql) {
 async function isolated(fn:(sql:postgres.TransactionSql)=>Promise<void>) {
   if(!db) throw Error('Database required');
   const rollback=Error('fixture rollback');
-  await db.begin(async sql=>{await fn(sql);throw rollback;}).catch(e=>{if(e!==rollback)throw e;});
+  await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);await fn(sql);throw rollback;}).catch(e=>{if(e!==rollback)throw e;});
 }
 describe.skipIf(!db)('deployed access escrow and credits',()=>{
   afterAll(async()=>{await db?.end();});

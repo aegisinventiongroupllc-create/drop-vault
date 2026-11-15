@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from 'vitest';
 import postgres from 'postgres';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 const rollback = Error('rollback');
 const inTx = (fn: (sql: postgres.TransactionSql) => Promise<void>) =>
@@ -20,6 +21,7 @@ describe.skipIf(!db)('creator consent withdrawal', () => {
 
   it.each(["DELETE FROM copy_fixture", "UPDATE copy_fixture SET state='ready'"])('blocks deleting or re-enabling a withdrawn copy: %s', async (statement) => {
     await expect(db!.begin(async (sql) => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       const [{ d }] = await sql`SELECT pg_get_functiondef('public.keep_withdrawn_delivery_archived'::regproc) AS d`;
       await sql.unsafe(d.replace('public.', 'pg_temp.'));
       await sql.unsafe(`CREATE TEMP TABLE copy_fixture(LIKE public.bunny_video_deliveries INCLUDING DEFAULTS); CREATE TRIGGER k BEFORE UPDATE OR DELETE ON copy_fixture FOR EACH ROW EXECUTE FUNCTION pg_temp.keep_withdrawn_delivery_archived(); INSERT INTO copy_fixture(creator_id,bucket,storage_path,source_updated_at,video_id,state) VALUES (gen_random_uuid(),'vault','x/y.mp4',now(),gen_random_uuid(),'withdrawn')`);

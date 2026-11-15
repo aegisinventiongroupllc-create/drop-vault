@@ -1,12 +1,14 @@
 // @vitest-environment node
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 describe.skipIf(!db)("VIP revenue server rules", () => {
   afterAll(async () => { await db?.end(); });
   it("gives Elite 93 for life and ignores Power Week for pass holders", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       for (const table of ["creator_split_settings", "founding_creators", "power_weeks", "creator_lifetime_awards"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
       const [row] = await sql`SELECT pg_get_functiondef('public.creator_split_percent(uuid)'::regprocedure) AS d`;
       let body = row.d.replace("public.creator_split_percent(", "pg_temp.split(");
@@ -25,6 +27,7 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("recomputes Elite request shares and counteroffers and rejects paid-share changes", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       for (const table of ["creator_split_settings", "custom_requests"]) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
       const [split] = await sql`SELECT pg_get_functiondef('public.creator_request_split_percent(uuid)'::regprocedure) AS d`;
       await sql.unsafe(split.d.replace("public.creator_request_split_percent(","pg_temp.request_split(").replaceAll("public.creator_split_settings","pg_temp.creator_split_settings"));
@@ -59,6 +62,7 @@ describe.skipIf(!db)("VIP revenue server rules", () => {
   it("counts each pass once and refuses the 1001st pass", async () => {
     if (!db) throw Error("Database required");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       const tables = ["vip_pass_payment_receipts","vip_pass_inventory","creator_split_settings","vip_pass_checkouts","account_bans","creator_consent_withdrawals"];
       for (const table of tables) { await sql.unsafe(`DROP TABLE IF EXISTS pg_temp.${table}`); await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`); }
       const [row] = await sql`SELECT pg_get_functiondef('public.apply_verified_vip_pass(text)'::regprocedure) AS d`;

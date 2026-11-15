@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("creator upload authorization", () => {
   afterAll(async () => { await db?.end(); });
@@ -60,6 +61,7 @@ describe.skipIf(!db)("creator upload authorization", () => {
     if (!db) throw Error("Database required");
     const rollback = new Error("rollback fixtures");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await sql.unsafe(`CREATE TEMP TABLE profiles(user_id uuid,verification_status text);
         CREATE TEMP TABLE creator_verifications(id uuid DEFAULT gen_random_uuid(),user_id uuid,status text,reviewed_at timestamptz,reviewer_id uuid,identity_confirmed boolean,date_of_birth date,submitted_at timestamptz DEFAULT now());
         CREATE TEMP TABLE yoti_age_checks(id uuid,user_id uuid,status text,environment text,server_verified_at timestamptz,created_at timestamptz);

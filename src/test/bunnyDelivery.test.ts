@@ -2,6 +2,7 @@
 import { afterAll, describe, expect, it, vi } from 'vitest';
 import postgres from 'postgres';
 import { bunnyPlaybackUrl, deliveryUrl } from '../../supabase/functions/_shared/bunnyStream';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db=process.env.SUPABASE_DB_URL?postgres(process.env.SUPABASE_DB_URL,{max:1,prepare:false,connect_timeout:30}):null;
 describe.skipIf(!db)('Bunny private delivery records',()=>{
  afterAll(async()=>{await db?.end();});
@@ -14,6 +15,7 @@ describe.skipIf(!db)('Bunny private delivery records',()=>{
   if(!db)throw new Error('Database required');
   const rollback=new Error('rollback synthetic fixtures');
   try { await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
    const [row]=await sql`select pg_get_functiondef('public.bunny_source_current(uuid)'::regprocedure) as definition`;
    await sql`create temp table if not exists bunny_copies (like public.bunny_video_deliveries including defaults) on commit drop`;
    await sql`create temp table if not exists source_objects(bucket_id text,name text,updated_at timestamptz) on commit drop`;

@@ -1,6 +1,7 @@
 // @vitest-environment node
 import {afterAll,describe,it,expect} from 'vitest';
 import postgres from 'postgres';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db=process.env.SUPABASE_DB_URL?postgres(process.env.SUPABASE_DB_URL,{max:1,prepare:false,connect_timeout:30}):null;
 describe.skipIf(!db)('deployed atomic renewals in isolated fixtures',()=>{
  afterAll(async()=>{await db?.end();});
@@ -23,7 +24,8 @@ describe.skipIf(!db)('deployed atomic renewals in isolated fixtures',()=>{
  }
  const fixture=async(fn:(sql:postgres.TransactionSql,f:{uid:string;creator:string;id:string})=>Promise<void>)=>{
   if(!db)throw Error('Database required');const rollback=new Error('rollback');
-  await db.begin(async sql=>{const f=await setup(sql);await fn(sql,f);throw rollback;}).catch(e=>{if(e!==rollback)throw e;});
+  await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);const f=await setup(sql);await fn(sql,f);throw rollback;}).catch(e=>{if(e!==rollback)throw e;});
  };
  it.each(['anon','authenticated'])('denies %s callers',async role=>{
   if(!db)throw Error('Database required');const r=await db`SELECT has_function_privilege(${role},'public.renew_subscription_atomic(uuid,timestamptz)','EXECUTE') AS allowed`;expect(r[0].allowed).toBe(false);

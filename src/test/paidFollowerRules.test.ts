@@ -1,12 +1,14 @@
 // @vitest-environment node
 import postgres from 'postgres';
 import { afterAll, describe, expect, it } from 'vitest';
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL,{max:1,prepare:false,connect_timeout:30}) : null;
 describe.skipIf(!db)('paid library follower rules',()=>{
  afterAll(async()=>{await db?.end();});
  it('counts unique paid unlocks, excludes hearts/free/tips and awards 100k once',async()=>{
   if(!db) throw Error('Database required');
   await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
    const tables=['transactions','token_purchases','creator_paid_followers','creator_paid_follower_totals','power_weeks','creator_split_settings'];
    for(const t of tables) await sql.unsafe(`CREATE TEMP TABLE ${t} (LIKE public.${t} INCLUDING ALL) ON COMMIT DROP`);
    for(const fn of ['record_paid_creator_follower','maybe_start_power_week']){
@@ -34,6 +36,7 @@ describe.skipIf(!db)('paid library follower rules',()=>{
  it('keeps one paid follower through actual renewal, retry and heart changes',async()=>{
   if(!db) throw Error('Database required');
   await db.begin(async sql=>{
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
    const tables=['transactions','token_purchases','creator_paid_followers','creator_paid_follower_totals','power_weeks','creator_split_settings','creator_hearts','creator_heart_totals','subscriptions','token_balances','creator_wallets','account_bans','creator_access_escrow','creator_consent_withdrawals'];
    for(const table of tables) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
    await sql.unsafe(`CREATE FUNCTION pg_temp.get_creator_library_count(uuid) RETURNS bigint LANGUAGE sql AS 'SELECT 1'`);

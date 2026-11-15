@@ -1,6 +1,7 @@
 // @vitest-environment node
 import postgres from "postgres";
 import { afterAll, describe, expect, it } from "vitest";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 const tables = ["year_end_award_reviews", "year_end_award_candidates", "creator_lifetime_awards", "profiles", "creator_verifications", "creator_paid_followers", "account_bans", "creator_consent_withdrawals", "creator_split_settings", "power_weeks", "founding_creators"];
@@ -10,6 +11,7 @@ describe.skipIf(!db)("year-end lifetime country awards", () => {
   const isolated = async (run: (sql: postgres.TransactionSql) => Promise<void>) => {
     if (!db) throw new Error("Database required");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       for (const table of tables) await sql.unsafe(`CREATE TEMP TABLE ${table} (LIKE public.${table} INCLUDING ALL) ON COMMIT DROP`);
       await sql`CREATE TEMP TABLE test_roles(user_id uuid, role text) ON COMMIT DROP`;
       await sql`CREATE OR REPLACE FUNCTION pg_temp.has_role(id uuid, wanted public.app_role) RETURNS boolean LANGUAGE sql AS 'SELECT EXISTS(SELECT 1 FROM pg_temp.test_roles WHERE user_id=id AND role=wanted::text)'`;

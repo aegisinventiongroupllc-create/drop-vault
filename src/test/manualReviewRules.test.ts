@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
+import { CLEAN_TEMP_SCHEMA_SQL } from "./tempSchemaCleanup";
 const db = process.env.SUPABASE_DB_URL ? postgres(process.env.SUPABASE_DB_URL, { max: 1, prepare: false }) : null;
 describe.skipIf(!db)("isolated manual identity decisions", () => {
   afterAll(async () => { await db?.end(); });
@@ -18,6 +19,7 @@ describe.skipIf(!db)("isolated manual identity decisions", () => {
     if (!db) throw Error("Database required");
     const rollback = Error("rollback isolated review");
     await db.begin(async sql => {
+    await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
       await sql.unsafe(`CREATE TEMP TABLE creator_verifications(id uuid,user_id uuid,status text,date_of_birth date,id_front_path text,selfie_path text,document_bucket text,reviewer_id uuid,reviewed_at timestamptz,reviewer_notes text,identity_confirmed boolean);
         CREATE TEMP TABLE objects(bucket_id text,name text);
         CREATE TEMP TABLE user_roles(user_id uuid,role text);

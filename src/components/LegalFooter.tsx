@@ -239,15 +239,15 @@ const ContactInfo = () => (
 
 const dmcaSchema = z.object({
   complainant_name: z.string().trim().min(1, "Required").max(120),
-  complainant_email: z.string().trim().email("Invalid email").max(255),
+  complainant_email: z.email("Invalid email").trim().max(255),
   complainant_address: z.string().trim().max(500).optional().or(z.literal("")),
   complainant_phone: z.string().trim().max(40).optional().or(z.literal("")),
   copyright_owner: z.string().trim().min(1, "Required").max(200),
   original_work_description: z.string().trim().min(10, "Describe your work").max(2000),
   infringing_urls: z.string().trim().min(5, "Provide at least one URL on the platform").max(4000),
   signature: z.string().trim().min(2, "Type your full legal name").max(120),
-  good_faith_statement: z.literal(true, { errorMap: () => ({ message: "Required" }) }),
-  accuracy_statement: z.literal(true, { errorMap: () => ({ message: "Required" }) }),
+  good_faith_statement: z.literal(true, { error: "Required" }),
+  accuracy_statement: z.literal(true, { error: "Required" }),
 });
 
 const DmcaTakedown = () => {
