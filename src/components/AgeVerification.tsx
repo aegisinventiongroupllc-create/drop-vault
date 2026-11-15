@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n/I18nContext";
 import LegalFooter from "@/components/LegalFooter";
 import { affirmAgeConsent } from "@/lib/ageConsent";
+import CreatorPaymentOverview from "@/components/CreatorPaymentOverview";
 
 const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
   const { t } = useI18n();
@@ -71,6 +72,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
         ))}
       </div>
       <div className="relative flex min-h-full flex-col">
+      <CreatorPaymentOverview />
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center">
         <div className="consent-globe relative h-20 w-20" aria-hidden="true">
           <EntryPassGlobe size={80} solid sharp bright motionless={Boolean(reducedMotion)} />

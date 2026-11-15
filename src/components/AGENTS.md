@@ -1,4 +1,5 @@
 # Component architecture rules
+- CreatorPaymentOverview is public information above age consent, never a replacement for consent or payment verification. Why: explain payout readiness without granting entry or promising settlement.
 
 - Intro presentation stays scoped to launch-intro.css; reduced motion shows the unobscured globe immediately. Why: opening changes must not alter shared entry, idle or saved themes.
 - Intro entry readiness uses a shared timer hook to gate text visibility and dismissal together. Why: hidden prompts must not permit premature entry.
