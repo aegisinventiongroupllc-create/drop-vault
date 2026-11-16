@@ -196,8 +196,9 @@ export default function LaunchIntro() {
       Promise.all(animations.map((animation) => animation.finished)).then(() => {
         const title = titleRef.current;
         const breathe = globeRef.current?.querySelector(".globe-breathe")?.getAnimations()[0];
-        if (!title || !breathe) return;
+        if (!title) return;
         title.classList.add("dtt-intro-title-settled");
+        if (!breathe) return;
         const pulse = title.getAnimations().find((animation) =>
           animation instanceof CSSAnimation && animation.animationName === "dtt-title-pulse");
         if (pulse) pulse.startTime = breathe.startTime;

@@ -26,9 +26,27 @@
 @keyframes dtt-pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 
 .dtt-intro-title {
+  position: relative;
+  isolation: isolate;
   font-size: 3.5rem;
   letter-spacing: 0;
   opacity: 1;
+}
+.dtt-intro-title::before {
+  content: "";
+  position: absolute;
+  inset: -0.12em -0.25em;
+  z-index: -1;
+  border-radius: 8px;
+  background: hsl(var(--background) / 0.8);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.dtt-intro-title-settled::before,
+.dtt-intro-still .dtt-intro-title::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .dtt-intro-title::before { opacity: 1; transition: none; }
 }
 .dtt-intro-word { display: inline-block; transform-origin: center; }
 @keyframes dtt-title-in {
