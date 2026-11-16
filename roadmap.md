@@ -1,5 +1,10 @@
 # Roadmap
 
+## Named-account category and adaptive audit
+- [x] Audited both named sessions on desktop/384×629 through actual home entry; read actual profiles, role/preferences, founder pools and media coverage. Forty focused category/tag/founder/browse checks pass; 36 actual customer authorized feed-filter reads succeed with empty results. No account data, consents, approvals, payments or publication changed.
+- [x] Delivered dtt-category-flow-audit.md: full suite 610 passed/1 failed (outdated privacy column allowlist missing intentional creator-only adaptive_tags); direct /index returns 404 while actual home / works. No bug-free claim or unrelated fixes.
+- [ ] Genuine creator onboarding/settings save-to-public-profile and populated customer rapid-filter/thumbnail walkthrough: creator-named account is currently a customer, both fresh sessions await owner-completed legal consent; genuine identity/residence clearance and accurately labeled approved four-category/adaptive content are required. Customer already has an active entry pass, but all 36 current feed reads return zero teasers.
+
 ## Optional adaptive descriptors
 - [x] Added four optional self-described adaptive tags in registration and profile settings, public-disclosure notice, validated own-creator save/removal and creator-only public projection. No medical evidence, disability inference or bonus founder pool.
 - [x] Display selected profile/search badges; adaptive filters use all-selected-tag matching within explicit category preferences before pagination. Feed controls sit above shelves; existing independent identity/residence review and five-per-category lifetime founding rules unchanged.
