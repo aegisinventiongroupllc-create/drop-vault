@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
+import { isCreatorCategory } from "@/lib/creatorCategories";
 
-type Item = { id: string; title: string; media_type: string; creator_name: string | null; purchased_at: string; url: string | null };
+type Item = { id: string; creator_id: string; title: string; media_type: string; creator_name: string | null; purchased_at: string; url: string | null };
 
 /** Customer's permanently purchased videos; access survives library rotation. */
-export default function PermanentVault() {
+export default function PermanentVault({ preference }: { preference?: CustomerPreference }) {
   const [items, setItems] = useState<Item[]>([]);
   const [offset, setOffset] = useState(0);
   const [more, setMore] = useState(false);
@@ -22,16 +24,23 @@ export default function PermanentVault() {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke("permanent-vault", { body: { offset } });
       if (cancel) return;
+      const rows: Item[] = data?.items ?? [];
+      const ids = Array.from(new Set(rows.map(item => item.creator_id)));
+      const { data: profiles, error: profileError } = ids.length ? await supabase.from("public_profiles").select("user_id, vault_side").in("user_id", ids) : { data: [], error: null };
+      if (cancel) return;
+      const visible = new Set((profiles ?? []).filter(profile => isCreatorCategory(profile.vault_side) && allowedVaults(preference).includes(profile.vault_side)).map(profile => profile.user_id));
+      const filtered = rows.filter(item => visible.has(item.creator_id));
       setLoading(false);
-      if (error || !data?.items) { setError("Your permanent vault is unavailable right now."); return; }
+      if (error || profileError || !data?.items) { setError("Your permanent vault is unavailable right now."); return; }
       setError(""); setMore(!!data.has_more);
-      setItems((prev) => (offset === 0 ? data.items : [...prev.filter((p) => !data.items.some((i: Item) => i.id === p.id)), ...data.items]));
+      setItems((prev) => (offset === 0 ? filtered : [...prev.filter((p) => !filtered.some(i => i.id === p.id)), ...filtered]));
       // Refresh links before they expire.
       timer = setTimeout(() => { if (offset === 0) void load(); else { setItems([]); setOffset(0); } }, Math.max(30, (Number(data.link_seconds) || 300) - 30) * 1000);
     };
     void load();
     return () => { cancel = true; clearTimeout(timer); };
-  }, [offset]);
+  }, [offset, preference]);
+  useEffect(() => { setItems([]); setOffset(0); }, [preference]);
 
   return (
     <div className="px-4 space-y-3 flex-1">

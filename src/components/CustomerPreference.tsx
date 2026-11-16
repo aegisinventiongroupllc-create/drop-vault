@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import LegalFooter from "@/components/LegalFooter";
+import { useState } from "react";
+import type { CustomerPreference as Preference } from "@/lib/customerPreference";
 
-export type GenderPreference = "women" | "men" | "both";
+export type GenderPreference = Preference;
 
 interface CustomerPreferenceProps {
   onSelect: (pref: GenderPreference) => void;
 }
 
 const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
+  const [showTrans, setShowTrans] = useState(false);
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
       <div className="flex min-h-full flex-col">
@@ -44,6 +47,13 @@ const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
           >
             BOTH
           </Button>
+          <Button variant="ghost" onClick={() => setShowTrans(value => !value)} aria-expanded={showTrans}>
+            TRANS CATEGORIES
+          </Button>
+          {showTrans && <div className="flex flex-col gap-3">
+            <Button variant="outline" size="lg" onClick={() => onSelect("trans_women")}>TRANS WOMEN</Button>
+            <Button variant="outline" size="lg" onClick={() => onSelect("trans_men")}>TRANS MEN</Button>
+          </div>}
         </div>
 
       </div>

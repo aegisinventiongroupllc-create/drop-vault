@@ -20,6 +20,7 @@ import BuyTokensModal from "@/components/BuyTokensModal";
 import { teaserGateTime } from "@/lib/teaserGate";
 import TeaserShelves from "@/components/TeaserShelves";
 import { publicCreatorUrl } from "@/lib/publicBranding";
+import { isCreatorCategory } from "@/lib/creatorCategories";
 
 interface VideoItem {
   id: string;
@@ -429,12 +430,13 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
       const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType; tags: string[] }> = {};
       profs?.forEach((p) => {
+        if (!isCreatorCategory(p.vault_side)) return;
         profMap[p.user_id] = {
           name: p.display_name || "creator",
           country: p.country || "GLOBAL",
           avatar: p.avatar_config,
           photoPath: p.profile_photo_path,
-          side: p.vault_side === "men" ? "men" : "women",
+          side: p.vault_side,
           tags: Array.isArray(p.tags) ? p.tags : [],
         };
       });
@@ -445,7 +447,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (signingError && !cancelled) setLoadError("Some teasers couldn’t load. Please try again.");
       const urlMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => { if (s.path && s.signedUrl) urlMap[s.path] = s.signedUrl; });
-      const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path]).map((m) => {
+      const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path] && profMap[m.creator_id]?.side === vault).map((m) => {
         const prof = profMap[m.creator_id];
         const name = prof?.name || "creator";
         return {

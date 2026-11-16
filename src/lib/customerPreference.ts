@@ -1,4 +1,5 @@
-export type CustomerPreference = "women" | "men" | "both";
-export function allowedVaults(preference: CustomerPreference | null | undefined): ("women" | "men")[] {
-  return preference === "both" ? ["women", "men"] : preference === "men" ? ["men"] : ["women"];
+import { isCreatorCategory, type CreatorCategory } from "./creatorCategories";
+export type CustomerPreference = CreatorCategory | "both";
+export function allowedVaults(preference: CustomerPreference | null | undefined): CreatorCategory[] {
+  return preference === "both" ? ["women", "men"] : isCreatorCategory(preference) ? [preference] : ["women"];
 }

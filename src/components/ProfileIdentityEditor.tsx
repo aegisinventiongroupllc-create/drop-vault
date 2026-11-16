@@ -21,6 +21,7 @@ import { parseCreatorBackdrop } from "@/lib/creatorBackdrop";
 import ProfileBackdropPicker from "@/components/ProfileBackdropPicker";
 import { useProfileBackdrop } from "@/hooks/useProfileBackdrop";
 import LivingProfileBackdrop from "@/components/LivingProfileBackdrop";
+import CreatorCategorySetting from "@/components/CreatorCategorySetting";
 
 const HANDLE_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/;
 
@@ -318,6 +319,7 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
       {isCreator && (
       <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3 text-left sm:p-4">
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Get found in search</p>
+        <CreatorCategorySetting />
         <div>
           <label htmlFor="identity-country" className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your country</label>
           <select

@@ -158,7 +158,7 @@ export function calculateRequestTokens(usd: number): { baseTokens: number; fee: 
   };
 }
 
-export type VaultType = "women" | "men";
+export type VaultType = import("./creatorCategories").CreatorCategory;
 
 export interface UserPreferences {
   primaryVault: VaultType;

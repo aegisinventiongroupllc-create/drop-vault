@@ -5,6 +5,7 @@ import RequestDelivery from "@/components/RequestDelivery";
 import PrivateMessages from "@/components/PrivateMessages";
 import PermanentVault from "@/components/PermanentVault";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
+import { CATEGORY_LABELS, isCreatorCategory } from "@/lib/creatorCategories";
 import SuggestionBox from "@/components/SuggestionBox";
 import { useState, useEffect, useCallback } from "react";
 import { Bell, RefreshCw, Compass, Heart, Vault } from "lucide-react";
@@ -70,7 +71,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
   const { requests: myRequests, loading: reqLoading, refresh: refreshReqs } = useCustomRequests("customer");
   const [reqBusy, setReqBusy] = useState(false);
   const { subs } = useSubscriptions();
-  const [genderMap, setGenderMap] = useState<Record<string, "women" | "men">>({});
+  const [genderMap, setGenderMap] = useState<Record<string, VaultType>>({});
   const { hearts } = useMyHearts();
   const [savedNames, setSavedNames] = useState<Record<string, string>>({});
   const [savedAvatars, setSavedAvatars] = useState<Record<string, unknown>>({});
@@ -86,8 +87,8 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
         .select("user_id, vault_side, display_name, avatar_config, profile_photo_path")
         .in("user_id", ids);
       if (cancel || !data) return;
-      const map: Record<string, "women" | "men"> = {};
-      data.forEach((p: any) => { map[p.user_id] = (p.vault_side === "men" ? "men" : "women"); });
+      const map: Record<string, VaultType> = {};
+      data.forEach((p) => { if (isCreatorCategory(p.vault_side)) map[p.user_id] = p.vault_side; });
       setGenderMap(map);
       const names: Record<string, string> = {};
       data.forEach((p: any) => { names[p.user_id] = p.display_name || "creator"; });
@@ -150,18 +151,16 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
       unlockedAt: new Date(s.started_at).getTime(),
       expiresAt: new Date(s.expires_at).getTime(),
     }));
-  const myGirls = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "women");
-  const myGuys  = activeUnlocks.filter(u => (genderMap[u.creatorId] ?? "women") === "men");
 
   const unlockedIds = new Set(activeUnlocks.map((u) => u.creatorId));
   const savedLocked = hearts
     .filter((h) => !unlockedIds.has(h.creator_id))
-    .map((h) => ({ id: h.creator_id, name: savedNames[h.creator_id] || "creator", side: genderMap[h.creator_id] ?? "women" }))
+    .map((h) => ({ id: h.creator_id, name: savedNames[h.creator_id] || "creator", side: genderMap[h.creator_id] }))
     .filter((c) => visibleVaults.includes(c.side));
-  const hasUnlocks = activeUnlocks.length > 0 || savedLocked.length > 0;
+  const hasUnlocks = activeUnlocks.some(u => visibleVaults.includes(genderMap[u.creatorId])) || savedLocked.length > 0;
 
   // Dynamic header based on vault preference
-  const libraryTitle = visibleVaults.length === 2 ? "MY LIBRARY" : visibleVaults[0] === "men" ? "MY GUYS" : "MY GIRLS";
+  const libraryTitle = visibleVaults.length === 2 ? "MY LIBRARY" : visibleVaults[0] === "men" ? "MY GUYS" : visibleVaults[0] === "women" ? "MY GIRLS" : `MY ${CATEGORY_LABELS[visibleVaults[0]].toUpperCase()}`;
 
   const expiringCreators = activeUnlocks.filter(u => {
     const remaining = getUnlockTimeRemaining(u);
@@ -339,33 +338,13 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
                 </div>
               )}
 
-              {/* My Girls */}
-              {visibleVaults.includes("women") && (
-                <div>
-                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GIRLS</h3>
-                  {myGirls.length > 0 ? (
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                      {myGirls.map(renderCreatorCircle)}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-                  )}
-                </div>
-              )}
-
-              {/* My Guys */}
-              {visibleVaults.includes("men") && (
-                <div>
-                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">MY GUYS</h3>
-                  {myGuys.length > 0 ? (
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                      {myGuys.map(renderCreatorCircle)}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>
-                  )}
-                </div>
-              )}
+              {visibleVaults.map(side => {
+                const unlocks = activeUnlocks.filter(u => genderMap[u.creatorId] === side);
+                return <div key={side}>
+                  <h3 className="text-xs font-bold tracking-widest text-muted-foreground mb-3">{side === "women" ? "MY GIRLS" : side === "men" ? "MY GUYS" : `MY ${CATEGORY_LABELS[side].toUpperCase()}`}</h3>
+                  {unlocks.length ? <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">{unlocks.map(renderCreatorCircle)}</div> : <p className="text-xs text-muted-foreground/60 italic">No unlocked creators yet</p>}
+                </div>;
+              })}
 
 
 
@@ -381,7 +360,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
       )}
 
       {/* My Requests — real data */}
-      {activeTab === "permanent" && <PermanentVault />}
+      {activeTab === "permanent" && <PermanentVault preference={preference ?? vault} />}
       {activeTab === "founding" && <FoundingCreatorsBoard onCreatorClick={handleCreatorClick} vaults={visibleVaults} />}
       {activeTab === "messages" && <div className="px-4 flex-1"><PrivateMessages /></div>}
       {activeTab === "requests" && (

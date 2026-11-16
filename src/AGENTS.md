@@ -1,4 +1,5 @@
 # Year-end awards
+- Creator categories use one shared validated type; general search excludes explicit secondary categories, and missing identities are never mapped to Women. Category settings save independently of avatar/handle edits. Why: prevent accidental discovery mixing while preserving identity privacy and payout rules.
 - Year-end awards freeze server-ranked paid-follower leaders using reviewed residence and UTC cutoffs; independent authenticated admins confirm one winner per country/year under a lock. Permanent awards override future vault splits only. Why: prevent forged counts, duplicate awards, retroactive earnings changes and tier downgrades.
 - General and support tip previews share tokenEconomy calculations; keep checkout disabled until a verified server transfer exists. Why: disclosures must not imply unimplemented payments.
 - Content reactions use server-checked paid entitlements and creator opt-in; customers read only their selection and creators read aggregate counts. Why: prevent unpaid reactions and buyer disclosure.

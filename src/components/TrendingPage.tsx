@@ -26,7 +26,7 @@ const TRENDING_MEN = [
 ];
 
 const TrendingPage = ({ onCreatorClick, vault, hasVaultToggle, countryFilter }: { onCreatorClick: (name: string) => void; vault: VaultType; hasVaultToggle?: boolean; countryFilter?: string }) => {
-  const allTrending = vault === "women" ? TRENDING_WOMEN : TRENDING_MEN;
+  const allTrending = vault === "women" ? TRENDING_WOMEN : vault === "men" ? TRENDING_MEN : [];
   const trending = countryFilter && countryFilter !== "GLOBAL"
     ? allTrending.filter(t => t.country === countryFilter)
     : allTrending;

@@ -5,6 +5,7 @@ import type { UserRole } from "@/components/RoleSelection";
 import type { VaultType } from "@/lib/tokenEconomy";
 import LegalFooter from "@/components/LegalFooter";
 import { useCreatorText } from "@/i18n/creator";
+import ContentLabelingNotice from "@/components/ContentLabelingNotice";
 
 interface PostAuthRolePickerProps {
   email?: string;
@@ -49,6 +50,9 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
             >
               {ct.mens_vault}
             </Button>
+            <Button variant="outline" size="lg" onClick={() => onSelect("creator", "trans_women")}>TRANS WOMEN</Button>
+            <Button variant="outline" size="lg" onClick={() => onSelect("creator", "trans_men")}>TRANS MEN</Button>
+            <ContentLabelingNotice />
             <button
               type="button"
               className="text-xs text-muted-foreground hover:text-foreground tracking-widest mt-1"

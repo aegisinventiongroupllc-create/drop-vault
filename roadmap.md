@@ -1,5 +1,12 @@
 # Roadmap
 
+## Creator category separation
+- [x] Explained category scanner limits: can audit saved labels/filter placement, not infer gender/anatomy; disputed labeling requires confidential human review. No identity scanner or automatic reclassification built.
+- [x] Added four self-selected signup/profile categories and content labeling notice; creator category saves independently of profile identity edits.
+- [x] Both/general search remains Women and Men only; trans categories require deliberate choices. Search, teasers and regular/permanent library presentation filter saved categories; missing categories fail closed. Payment and award rules unchanged.
+- [x] Thirteen category tests pass, including isolated deployed category persistence/search/teaser rules; eleven privacy tests and existing teaser gesture test pass. Desktop/phone signup controls and deliberate secondary choices verified in isolation; build OK. No real account categories changed or publication.
+- [ ] Genuine new creator signup and paid-customer category/save/library walkthrough: blocked by user-completed legal consent, genuine approved content and eligible paid access. Existing isolated checks do not prove every content label is accurate. New policy translations require review.
+
 ## Completed since last review
 - [x] Fixed the Zod dependency advisory: upgraded zod 3.25.76 → 4.6.6 (only the DMCA form schema uses it; updated email/literal syntax). Dependency scan now reports zero known vulnerabilities. Fresh security scan shows only the two owner-dismissed findings. Made all 20 live-database test fixtures drop leftover pooled-session temp objects before creating their own; full suite 576/576 passes, build OK. Not published.
 

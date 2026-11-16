@@ -1,4 +1,5 @@
 import { allowedVaults } from "@/lib/customerPreference";
+import { CATEGORY_LABELS, isCreatorCategory } from "@/lib/creatorCategories";
 import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
 import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
@@ -112,6 +113,7 @@ const Index = () => {
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  const [editingPreference, setEditingPreference] = useState(false);
   // Owner shortcut: triple-tap the DTT logo to preview the sign-in page while signed in
   const [authPreview, setAuthPreview] = useState(false);
   const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
@@ -138,7 +140,7 @@ const Index = () => {
             .select("vault_side")
             .eq("user_id", userId)
             .maybeSingle();
-          const side: VaultType = prof?.vault_side === "men" ? "men" : "women";
+          const side: VaultType = isCreatorCategory(prof?.vault_side) ? prof.vault_side : "women";
           setVault(side);
           setPreference(side);
           const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: side, preference: side };
@@ -169,6 +171,7 @@ const Index = () => {
         if (hydratedUserId !== userId) {
           hydratedUserId = userId;
           setCreatorFeed(false);
+          setEditingPreference(false);
           setSelectedCreator(null);
           setShowSearch(false);
           setAuthPreview(false);
@@ -366,16 +369,14 @@ const Index = () => {
             console.error("Failed to save role", error);
             return;
           }
-          setRole(chosenRole);
-          setRoleChosen(true);
           if (chosenRole === "creator") {
-            const side: VaultType = creatorSide === "men" ? "men" : "women";
+            const side: VaultType = isCreatorCategory(creatorSide) ? creatorSide : "women";
             if (authedUserId) {
               const { error: sideError } = await supabase
                 .from("profiles")
                 .update({ vault_side: side })
                 .eq("user_id", authedUserId);
-              if (sideError) console.error("Failed to save creator side", sideError);
+              if (sideError) { console.error("Failed to save creator side", sideError); return; }
             }
             setVault(side);
             setPreference(side);
@@ -385,6 +386,8 @@ const Index = () => {
             setPreference(null);
             setVault(null);
           }
+          setRole(chosenRole);
+          setRoleChosen(true);
         }}
       />
     );
@@ -399,22 +402,18 @@ const Index = () => {
   }
 
   // Customer preference screen — goes directly to feed after selection
-  if (role === "customer" && !preference) {
+  if (role === "customer" && (!preference || editingPreference)) {
     return (
       <CustomerPreference
-        onSelect={(pref) => {
+        onSelect={async (pref) => {
+          const { error } = await supabase.from("account_preferences").update({ customer_preference: pref }).eq("user_id", authedUserId);
+          if (error) { console.error("Failed to save customer preference", error); return; }
+          setEditingPreference(false);
           setPreference(pref);
           const activeVault: VaultType = pref === "both" ? "women" : pref;
           setVault(activeVault);
           const prefs: UserPrefs = { email, role: "customer", vault: activeVault, preference: pref };
           savePrefs(prefs);
-          supabase
-            .from("account_preferences")
-            .update({ customer_preference: pref })
-            .eq("user_id", authedUserId)
-            .then(({ error }) => {
-              if (error) console.error("Failed to save customer preference", error);
-            });
           if (!hasSeenCoins) setShowKnowYourCoins(true);
         }}
       />
@@ -513,9 +512,9 @@ const Index = () => {
                   DASHBOARD
                 </button>
               )}
-              {(role === "creator" ? ["women", "men"] as VaultType[] : allowedVaults(preference)).map((side) => (
+              {(role === "creator" ? allowedVaults(preference) : allowedVaults(preference)).map((side) => (
                 <Button key={side} size="sm" variant={vault === side ? "neon" : "secondary"} onClick={() => setVault(side)} className="text-xs font-bold">
-                  {side === "women" ? t.women : t.men}
+                  {side === "women" ? t.women : side === "men" ? t.men : CATEGORY_LABELS[side].toUpperCase()}
                 </Button>
               ))}
             </div>
@@ -571,6 +570,7 @@ const Index = () => {
             </div>
             <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
             <ProfileIdentityEditor />
+            <Button variant="outline" onClick={() => setEditingPreference(true)}>BROWSING PREFERENCES</Button>
             <button
               onClick={() => {
                 logActivity("logout", "Customer profile tab").finally(() => {

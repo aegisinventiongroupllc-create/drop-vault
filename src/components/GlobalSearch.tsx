@@ -7,6 +7,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import CreatorHeartButton from "@/components/CreatorHeartButton";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { COUNTRIES } from "@/components/GlobalPassport";
+import { matchesCategory } from "@/lib/creatorCategories";
 
 interface CreatorRow {
   user_id: string;
@@ -46,7 +47,7 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
     },300);
     return()=>{cancelled=true;clearTimeout(timer);};
   },[q,vault,offset]);
-  const creatorResults=creators;
+  const creatorResults=creators.filter(creator => matchesCategory(creator.vault_side, vault));
   const noResults=q.length>0&&!loading&&!error&&creatorResults.length===0;
 
   const handleRequestDemand = async () => {
