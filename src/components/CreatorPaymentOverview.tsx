@@ -1,3 +1,5 @@
+import { REFUND_SUMMARY, DISPUTE_SUMMARY, CHARGEBACK_EARNINGS } from "@/components/RefundDisputeNotice";
+
 const CreatorPaymentOverview = () => (
   <section aria-labelledby="creator-payment-heading" className="w-full border-b border-border bg-secondary/20">
     <div className="mx-auto max-w-3xl px-6 py-8 sm:py-10">
@@ -22,7 +24,7 @@ const CreatorPaymentOverview = () => (
         </div>
         <div className="sm:col-span-2">
           <dt className="text-sm font-semibold text-foreground">Disputes and chargebacks</dt>
-          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">A legitimate payment dispute is not, by itself, fraud. Earnings from charged-back or confirmed fraudulent payments may be reversed; suspected abuse may be investigated. Applicable payment-dispute rights remain unchanged. For payment questions, contact <a href="mailto:admin@dttmediallc.com" className="break-all text-primary underline underline-offset-4">admin@dttmediallc.com</a>. The Refund Policy and Creator &amp; Purchase Rules below provide the full terms.</dd>
+          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{REFUND_SUMMARY} {DISPUTE_SUMMARY} {CHARGEBACK_EARNINGS} For payment questions, contact <a href="mailto:admin@dttmediallc.com" className="break-all text-primary underline underline-offset-4">admin@dttmediallc.com</a>. The Refund Policy and Creator &amp; Purchase Rules below provide the full terms.</dd>
         </div>
       </dl>
     </div>

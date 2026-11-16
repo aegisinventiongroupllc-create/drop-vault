@@ -7,7 +7,7 @@ export function PurchaseAccessNotice({ checked, onChange, id = "purchase-access-
   return (
     <label htmlFor={id} className="flex items-start gap-2 rounded-md border border-border bg-card/60 p-2 text-left text-[11px] leading-snug text-muted-foreground cursor-pointer">
       <Checkbox id={id} checked={checked} onCheckedChange={(v) => onChange(v === true)} className="mt-0.5" />
-      <span>{PURCHASE_ACCESS_NOTICE} No cash or card refunds.</span>
+      <span>{PURCHASE_ACCESS_NOTICE} Credits are recorded as Bit-cents (100 Bit-cents = 1 Bit-Token); included checkout fees are not credited. No discretionary cash or card refunds; exceptions required by applicable law or payment-provider rules remain available. See the Refund Policy.</span>
     </label>
   );
 }

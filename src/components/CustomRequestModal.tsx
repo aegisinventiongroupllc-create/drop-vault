@@ -4,6 +4,7 @@ import { X, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { calculateRequestTokens, calculateCustomRequestSplit, TOKEN_VALUE_USD, ADMIN_FEE_USD, CUSTOM_REQUEST_PROCESSING_FEE_USD, TOKEN_BASE_VALUE_USD } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
+import { RefundDisputeNotice } from "@/components/RefundDisputeNotice";
 
 
 const MAX_TOKENS = 500; // 500 BT = $10,001 ceiling
@@ -117,6 +118,8 @@ const CustomRequestModal = ({ creatorName, onClose }: { creatorName: string; onC
         {step === "confirm" && (
           <div className="p-4 space-y-4 text-center">
             <h3 className="text-lg font-bold text-foreground font-display tracking-wider">CONFIRM REQUEST</h3>
+            <p className="text-xs text-muted-foreground">Submitting or agreeing to a request does not take payment. Delivery is due within 48 hours after verified payment. Report missing or materially different agreed delivery for review under the Refund Policy; statutory and payment-provider rights remain unchanged.</p>
+            <RefundDisputeNotice />
 
             <div className="bg-secondary/50 rounded-xl p-4 text-left space-y-2">
               <div className="flex justify-between text-sm">

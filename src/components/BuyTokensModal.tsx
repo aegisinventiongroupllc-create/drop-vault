@@ -8,8 +8,9 @@ import {
 } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
+import { RefundDisputeNotice, REFUND_SUMMARY, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
 
-const FINAL_SALE_TEXT = "I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.";
+const FINAL_SALE_TEXT = `I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. ${REFUND_SUMMARY} My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.`;
 
 interface BuyTokensModalProps {
   onClose: () => void;
@@ -341,7 +342,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
                     <li>• Card details are handled by CCBill, not collected by DTT.</li>
                     <li>• {isEntryPass ? "Your Vault Entry Pass activates" : "Bit-Tokens credit"} only after payment is verified. Refund exceptions follow the DTT Refund Policy and applicable law.</li>
                     <li>• Strictly 18+. You confirm the card is yours and the funds are lawful.</li>
-                    <li>• Disputed or unauthorized charges (chargebacks) can result in permanent account suspension.</li>
+                    <li>• {DISPUTE_SUMMARY}</li>
                     <li>• Questions before you buy? Contact <span className="text-foreground font-semibold">admin@dttmediallc.com</span> — we answer before and after purchase.</li>
                   </ul>
                 </div>
@@ -370,6 +371,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
               </>
             )}
 
+            <RefundDisputeNotice />
             <label className="flex items-start gap-2 bg-secondary/40 border border-border rounded-lg p-3 cursor-pointer">
               <input
                 type="checkbox"

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CHARGEBACK_EARNINGS, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
 
-export const CREATOR_AGREEMENT_VERSION = "1.5";
+export const CREATOR_AGREEMENT_VERSION = "1.6";
 export const CREATOR_AGREEMENT_TEXT =
-  "DTT Creator Agreement v1.5 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
+  "DTT Creator Agreement v1.6 with DTT Media LLC: I am 18+ and an independent contractor; I own or have rights to everything I upload; " +
   "standard payout is 90% of each $20 Bit-Token value; the first 10 approved creators per country (5 women and 5 men) receive a straight 91% for life and may also buy a VIP pass; once a year, one winner per country across both vaults, based on the most unique paid library followers at year-end UTC, receives 95% for life with administrator confirmation required before the award is applied, the only 95/5 split; " +
-  "Pro Pass grants 92/8 forever and Elite Pass grants 93/7 for life; VIP passes are limited to 1,000 worldwide across Pro and Elite combined, on a first-come, first-served basis; activation requires verified payment through available TryBit checkout; without a pass, each 100k all-time unique customers who paid to unlock my library starts a 7-day 92/8 Power Week, then 90/10 resumes; each customer counts once, renewals and likes/hearts never count; custom requests split 85/15 for standard, founding, Pro and year-end award creators; only a purchased Elite VIP pass activated after verified payment grants 90/10 on the agreed request price; vault awards do not change request splits; payouts are manual in Litecoin (LTC); charged-back earnings are reversed; " +
+  "Pro Pass grants 92/8 forever and Elite Pass grants 93/7 for life; VIP passes are limited to 1,000 worldwide across Pro and Elite combined, on a first-come, first-served basis; activation requires verified payment through available TryBit checkout; without a pass, each 100k all-time unique customers who paid to unlock my library starts a 7-day 92/8 Power Week, then 90/10 resumes; each customer counts once, renewals and likes/hearts never count; custom requests split 85/15 for standard, founding, Pro and year-end award creators; only a purchased Elite VIP pass activated after verified payment grants 90/10 on the agreed request price; vault awards do not change request splits; payouts are manual in Litecoin (LTC); " +
+  `${CHARGEBACK_EARNINGS} ${DISPUTE_SUMMARY} Refunds and creator-departure Bit-cent credits follow the Refund Policy. ` +
   "I may leave at any time and DTT may suspend accounts that break the Creator & Purchase Rules or Terms of Service.";
 
 const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
@@ -25,7 +27,7 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
             <p><span className="text-foreground font-medium">Power Week.</span> At 100,000 paid followers you receive 92/8 ($18.40 per token) for 7 days, then return to 90/10. Another Power Week starts at each additional 100,000. Each unique customer who paid to unlock your library counts once; renewals, likes, hearts, tips and the DTT entry pass alone do not count.</p>
             <p><span className="text-foreground font-medium">VIP passes.</span> PRO PASS ($1,500) grants 92/8 forever. ELITE PASS ($3,500) grants 93/7 for life. <span className="text-primary font-medium">Limited to 1,000 VIP passes worldwide across Pro and Elite combined. First come, first served.</span> Pass holders keep only their pass split. Activation requires verified payment through available TryBit checkout. <span>A new batch of VIP passes launches every year on the founder's birthday, May 1 at midnight (New York time).</span></p>
             <p><span className="text-foreground font-medium">Custom requests.</span> Standard, founding, Pro and year-end award creators receive 85/15 of the agreed request price. Only a purchased Elite VIP pass activated after verified payment grants 90/10 on requests. Vault awards do not change request splits; customer-paid fees are separate. Delivery requires confirmed customer payment. <span>DTT provides a built-in calendar on your Requests page to plan your day, set reminders and keep track of agreed requests.</span></p>
-            <p><span className="text-foreground font-medium">Payouts.</span> Sent manually in Litecoin (LTC). Earnings from charged-back payments are reversed.</p>
+            <p><span className="text-foreground font-medium">Payouts and disputes.</span> Sent manually in Litecoin (LTC). {CHARGEBACK_EARNINGS} {DISPUTE_SUMMARY} Refunds and creator-departure Bit-cent credits follow the Refund Policy.</p>
             <p><span className="text-foreground font-medium">Your content.</span> You are 18+, an independent contractor, and you own or have the rights to everything you upload, including consent from anyone shown.</p>
             <p>Breaking the Creator &amp; Purchase Rules or Terms of Service may lead to suspension.</p>
           </div>

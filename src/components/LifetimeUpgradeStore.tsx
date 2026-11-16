@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import VipCheckoutDialog, { vipFunctionError } from "@/components/VipCheckoutDialog";
 import { vipRemaining } from "../../supabase/functions/_shared/vipPayment";
+import { REFUND_SUMMARY } from "@/components/RefundDisputeNotice";
 
 export const VIP_PASSES = [
   { id: "PRO_PASS", name: "PRO PASS", price: 1500, perks: ["92/8 split forever on all 14-day vault unlocks", "No follower goal needed"] },
@@ -86,6 +87,7 @@ export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string
       </div>
       <p className="text-xs font-semibold text-gold">🎂 New VIP pass batch every year on the founder's birthday — May 1 at midnight (New York time). Next batch: {nextVipBatch().toLocaleDateString(undefined, { dateStyle: "long" })}.</p>
       <p className="text-[10px] text-muted-foreground">1,000 worldwide across Pro and Elite combined. First come, first served. Pending invoices reserve a place; unpaid expiry must be confirmed by TryBit.</p>
+      <p className="text-xs leading-relaxed text-muted-foreground">{REFUND_SUMMARY}</p>
       <Button variant="outline" size="sm" disabled={checking} onClick={() => setRefresh(n => n + 1)}>{checking ? "CHECKING…" : "CHECK PAYMENT & AVAILABILITY"}</Button>
       {selected && <VipCheckoutDialog pass={selected} onClose={() => setSelected(null)} onCreated={() => { setSelected(null); setRefresh(n => n + 1); }} />}
     </section>

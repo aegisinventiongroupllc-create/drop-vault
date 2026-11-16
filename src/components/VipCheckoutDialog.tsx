@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
 import { TermsOfService, PrivacyPolicy, RefundPolicy } from "@/components/LegalFooter";
+import { RefundDisputeNotice, REFUND_SUMMARY, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
 
 export async function vipFunctionError(error: unknown): Promise<string> {
   const context = (error as { context?: Response })?.context;
@@ -23,7 +24,7 @@ export default function VipCheckoutDialog({ pass, onClose, onCreated }: { pass: 
     const popup = window.open("about:blank", "_blank");
     if (popup) popup.opener = null;
     try {
-      const saved = await supabase.from("legal_consents").insert({ terms_version: "2.0", consent_type: "checkout_consent", user_agent: navigator.userAgent, consent_text: `[VIP CHECKOUT] ${pass.name} $${pass.price}. I am 18+ and agree to Terms, Privacy and Refund Policy. One-time payment; activation only after verified payment. Shared 1,000-pass first-come limit. Purchase consent may be retained and shared with the processor to resolve disputes.` });
+      const saved = await supabase.from("legal_consents").insert({ terms_version: "2.0", consent_type: "checkout_consent", user_agent: navigator.userAgent, consent_text: `[VIP CHECKOUT] ${pass.name} $${pass.price}. I am 18+ and agree to Terms, Privacy and Refund Policy. One-time payment; activation only after verified payment. Shared 1,000-pass first-come limit. ${REFUND_SUMMARY} ${DISPUTE_SUMMARY} Purchase consent may be retained and shared with the processor to resolve disputes.` });
       if (saved.error) throw new Error("Your purchase consent could not be saved. Please retry.");
       const receipt = await affirmAgeConsent("checkout");
       const result = await supabase.functions.invoke("vip-checkout", { body: { action: "create", pass_type: pass.id, consent_receipt: receipt } });
@@ -41,6 +42,7 @@ export default function VipCheckoutDialog({ pass, onClose, onCreated }: { pass: 
       <p className="text-sm text-muted-foreground">TryBit checkout is available for testing, not evidence of approved live payments. Written provider approval and live payment verification remain unverified. Testing may involve real funds; follow only a provider-authorized test method.</p>
       <p className="text-sm text-muted-foreground">Limited to 1,000 worldwide across Pro and Elite combined. First come, first served. Your pass activates only after DTT verifies payment.</p>
       <p className="text-sm text-muted-foreground">{pass.id === "ELITE_PASS" ? "Only a purchased Elite VIP pass activated after verified payment grants a 90/10 split on the agreed custom-request price." : "Pro keeps the standard 85/15 split on custom requests; it does not grant the Elite 90/10 request benefit."} Customer-paid request fees are separate. This benefit concerns paid custom requests, not tips.</p>
+      <RefundDisputeNotice />
       <label className="flex items-start gap-3 text-sm text-foreground"><Checkbox checked={age} onCheckedChange={v => setAge(v === true)} aria-label="I am at least 18 years old" /><span>I am at least 18 years old.</span></label>
       <label className="flex items-start gap-3 text-sm text-foreground"><Checkbox checked={consent} onCheckedChange={v => setConsent(v === true)} aria-label="I agree to the VIP purchase policies" /><span>I agree to the Terms, Privacy and Refund Policy. Purchase consent may be retained with the transaction and shared with the payment processor to resolve disputes.</span></label>
       <div className="flex flex-wrap gap-2">{(["terms", "privacy", "refund"] as const).map(p => <Button key={p} variant="link" size="sm" onClick={() => setPolicy(p)}>{p === "terms" ? "Terms" : p === "privacy" ? "Privacy" : "Refund Policy"}</Button>)}</div>
