@@ -1,4 +1,5 @@
 import ProtectedVideo from "@/components/ProtectedVideo";
+import ContentEmojiReactions from "@/components/ContentEmojiReactions";
 import { useState, useEffect, useCallback, useRef } from "react";
 import dttCoin from "@/assets/dtt-reward-coin.png";
 import { ArrowLeft, BadgeCheck, Crown, Lock, Sparkles, Palette, Heart, DollarSign, Play, Loader2, CheckCircle2 } from "lucide-react";
@@ -254,13 +255,19 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
               {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">Content Creator • {heartCount.toLocaleString()} {heartCount === 1 ? "heart" : "hearts"}</p>
+            <p className="text-sm text-muted-foreground mt-1">Content Creator</p>
             <span aria-hidden="true" className="block h-2" />
           </div>
         </div>
 
         {/* Heart row — sits just under the backdrop edge */}
         {creatorId && <CreatorHeartButton creatorId={creatorId} />}
+        <div className="mt-3 flex justify-center" aria-label="Creator public statistics">
+          <div className="text-center">
+            <p className="text-xl font-bold text-primary tabular-nums">{heartCount.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">{heartCount === 1 ? "Heart" : "Hearts"}</p>
+          </div>
+        </div>
 
         {/* King of the Vault — empty until first top supporter */}
         <div className="mt-4 mx-auto max-w-xs bg-secondary/50 border border-gold/30 rounded-lg px-4 py-3 gold-glow">
@@ -407,6 +414,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
                       <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>
                     )}
                     <p className="text-xs font-semibold text-foreground p-2 truncate">{v.title}</p>
+                    {v.url && <ContentEmojiReactions mediaId={v.id} />}
                     {v.allow_permanent_buyout && (v.owned ? (
                       <p className="text-[10px] font-bold text-gold px-2 pb-2">✓ IN YOUR PERMANENT VAULT</p>
                     ) : (
@@ -463,6 +471,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         <div className="p-4 space-y-3">
           <p className="text-xs font-bold text-primary">COMING NEXT WEEK · FIFTH VIDEO</p>
           <h3 className="font-semibold text-foreground break-words">{fifth.title}</h3>
+          {isUnlocked && fifth.purchased && vaultItems.find(v => v.id === fifth.id)?.url && <ContentEmojiReactions mediaId={fifth.id} />}
           <p className="text-sm text-muted-foreground">Separately paid. Watch early for 1 Bit-Token and add 14 days to your current access. Playback requires active creator access; this is not a permanent buyout.</p>
           {fifth.purchased ? <p className="text-sm text-primary">Purchased{!isUnlocked ? " · Renew library access to watch" : " · Early access unlocked"}</p> : <Button variant="neon" className="w-full h-auto py-3 whitespace-normal" disabled={!isUnlocked || fifthBusy} onClick={() => void buyFifth()}>{fifthBusy ? "Unlocking…" : isUnlocked ? "EARLY ACCESS +14 DAYS — 1 BIT-TOKEN" : "UNLOCK THE REGULAR LIBRARY FIRST"}</Button>}
         </div>

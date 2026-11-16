@@ -1,4 +1,6 @@
 import FoundingCongrats from "@/components/FoundingCongrats";
+import ContentEmojiReactions from "@/components/ContentEmojiReactions";
+import CreatorReactionSetting from "@/components/CreatorReactionSetting";
 import CreatorAgreementModal, { CREATOR_AGREEMENT_TEXT, CREATOR_AGREEMENT_VERSION } from "@/components/CreatorAgreementModal";
 import { useState, useEffect, useRef } from "react";
 import TopFansSection from "@/components/TopFansSection";
@@ -93,6 +95,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   };
 
   const [activeSection, setActiveSection] = useState<Section>("verification");
+  const [reactionRevision, setReactionRevision] = useState(0);
   const [profileUsername, setProfileUsername] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified" | "failed">("none");
   const [idUploaded, setIdUploaded] = useState(false);
@@ -870,6 +873,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             </>
           )}
           {uploadEligible && <>
+          <CreatorReactionSetting onSaved={() => setReactionRevision(value => value + 1)} />
           {/* Step 1: Title */}
           <div className="bg-card border border-primary/30 rounded-2xl p-5 space-y-4">
             <h3 className="text-base font-bold text-foreground tracking-wider">{ct.upload_video}</h3>
@@ -993,6 +997,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
                         <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
                         {item.library_slot === "early_access" && <p className="text-xs text-primary">Fifth video · Coming next week · Separately paid</p>}
                         <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString()} • {item.views} views</span>
+                        {item.bucket === "vault" && <ContentEmojiReactions mediaId={item.id} revision={reactionRevision} />}
                         {item.bucket === "vault" && item.library_slot !== "early_access" && (
                           <label className="flex items-center gap-2 mt-1 cursor-pointer">
                             <Switch checked={item.allow_permanent_buyout} onCheckedChange={async (v) => { const r = await setPermanentBuyout(item.id, v); if ("error" in r) toast.error(r.error); }} aria-label="Allow Permanent Buyouts (1 Bit-Token)" className="scale-75 origin-left" />

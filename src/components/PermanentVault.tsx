@@ -1,4 +1,5 @@
 import ProtectedVideo from "@/components/ProtectedVideo";
+import ContentEmojiReactions from "@/components/ContentEmojiReactions";
 import { useEffect, useState } from "react";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export default function PermanentVault() {
                   : <div className="w-full aspect-video bg-secondary flex items-center justify-center"><Lock className="w-4 h-4 text-muted-foreground" /></div>}
                 <p className="text-xs font-semibold text-foreground px-2 pt-2 truncate">{v.title}</p>
                 <p className="text-[10px] text-muted-foreground px-2 pb-2 truncate">{v.creator_name ? `@${v.creator_name}` : ""}</p>
+                {v.url && <ContentEmojiReactions mediaId={v.id} />}
               </div>
             ))}
           </div>

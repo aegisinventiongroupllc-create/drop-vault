@@ -212,6 +212,35 @@ export type Database = {
         }
         Relationships: []
       }
+      content_emoji_reactions: {
+        Row: {
+          customer_id: string
+          emoji: string
+          media_id: string
+          updated_at: string
+        }
+        Insert: {
+          customer_id: string
+          emoji: string
+          media_id: string
+          updated_at?: string
+        }
+        Update: {
+          customer_id?: string
+          emoji?: string
+          media_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_emoji_reactions_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "creator_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_manifests: {
         Row: {
           age_at_recording_confirmed: boolean
@@ -425,6 +454,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_reaction_events: {
+        Row: {
+          customer_id: string
+          id: string
+          media_id: string
+          new_emoji: string | null
+          previous_emoji: string | null
+          recorded_at: string
+        }
+        Insert: {
+          customer_id: string
+          id?: string
+          media_id: string
+          new_emoji?: string | null
+          previous_emoji?: string | null
+          recorded_at?: string
+        }
+        Update: {
+          customer_id?: string
+          id?: string
+          media_id?: string
+          new_emoji?: string | null
+          previous_emoji?: string | null
+          recorded_at?: string
+        }
+        Relationships: []
       }
       content_review_events: {
         Row: {
@@ -1054,6 +1110,21 @@ export type Database = {
           is_active?: boolean
           storage_path?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      creator_reaction_settings: {
+        Row: {
+          creator_id: string
+          enabled: boolean
+        }
+        Insert: {
+          creator_id: string
+          enabled?: boolean
+        }
+        Update: {
+          creator_id?: string
+          enabled?: boolean
         }
         Relationships: []
       }
@@ -2732,6 +2803,7 @@ export type Database = {
         }
       }
       buy_permanent_video: { Args: { _video_id: string }; Returns: string }
+      can_react_to_content: { Args: { _media_id: string }; Returns: boolean }
       can_stage_creator_draft: { Args: { _user: string }; Returns: boolean }
       can_upload_creator_media: {
         Args: { _creator_id: string }
@@ -2750,6 +2822,7 @@ export type Database = {
         Args: { _bucket: string; _path: string }
         Returns: boolean
       }
+      content_reaction_state: { Args: { _media_id: string }; Returns: Json }
       content_review_access: {
         Args: { _bucket: string; _path: string }
         Returns: boolean
@@ -2937,6 +3010,7 @@ export type Database = {
         Args: { _payment_id: string; _request_id: string }
         Returns: boolean
       }
+      my_reaction_setting: { Args: never; Returns: boolean }
       participant_object_evidence: {
         Args: { _bucket: string; _path: string }
         Returns: {
@@ -3075,6 +3149,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_content_reaction: {
+        Args: { _emoji: string; _media_id: string }
+        Returns: Json
+      }
       set_my_account_type: {
         Args: { _account_type: string }
         Returns: {
@@ -3112,6 +3190,7 @@ export type Database = {
         Args: { _design?: string; _path?: string }
         Returns: undefined
       }
+      set_my_reaction_setting: { Args: { _enabled: boolean }; Returns: boolean }
       settle_creator_withdrawal: {
         Args: { _creator: string; _withdrawal: string }
         Returns: number

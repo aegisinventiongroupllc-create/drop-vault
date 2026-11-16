@@ -743,6 +743,27 @@
       "when": 1794665480544,
       "tag": "0105_restrict_year_end_award_client_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1794795530211,
+      "tag": "0106_private_paid_content_reactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1794795593527,
+      "tag": "0107_private_reaction_change_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1794795644275,
+      "tag": "0108_restrict_private_reaction_grants",
+      "breakpoints": true
     }
   ]
 }

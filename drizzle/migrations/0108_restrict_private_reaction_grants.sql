@@ -1,0 +1,2 @@
+REVOKE ALL ON public.creator_reaction_settings,public.content_emoji_reactions,public.content_reaction_events FROM anon,authenticated;
+GRANT SELECT ON public.creator_reaction_settings,public.content_emoji_reactions TO authenticated;
