@@ -184,12 +184,12 @@ export default function LaunchIntro() {
         const y = origin.y + origin.height / 2 - destination.y - destination.height / 2;
         animations.push(word.animate([
           { transform: `translate(${x}px, ${y}px) scale(0.35)`, opacity: 0 },
-          { opacity: 1, offset: 0.12 },
+          { opacity: 1, offset: 0.2 },
           { transform: "translate(0, 0) scale(1)", opacity: 1 },
         ], {
-          duration: 650,
-          delay: index * 90,
-          easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+          duration: 1600,
+          delay: index * 450,
+          easing: "cubic-bezier(0.22, 0.65, 0.3, 1)",
           fill: "backwards",
         }));
       });
