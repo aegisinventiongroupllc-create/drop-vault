@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
 
 const connection = process.env.SUPABASE_DB_URL;
-const database = connection ? postgres(connection, { max: 1, prepare: false }) : null;
+const database = connection ? postgres(connection, { max: 1, prepare: false, connect_timeout: 30 }) : null;
 
 // Run against the live catalog only when a secure sandbox connection is available.
 describe.skipIf(!database)("live database privacy rules", () => {
@@ -31,7 +31,24 @@ describe.skipIf(!database)("live database privacy rules", () => {
   it("excludes personal contact and legal details from the public profile projection", async () => {
     if (!database) throw new Error("Secure database connection required");
     const rows = await database`SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='public_profiles'`;
-    expect(rows.map(r => r.column_name).sort()).toEqual(["user_id", "display_name", "country", "vault_side", "role", "created_at", "avatar_config", "profile_photo_path", "tags"].sort());
+    expect(rows.map(r => r.column_name).sort()).toEqual(["user_id", "display_name", "country", "vault_side", "role", "created_at", "avatar_config", "profile_photo_path", "tags", "adaptive_tags"].sort());
+  });
+
+  it("exposes voluntary creator adaptive tags but hides customer adaptive tags", async () => {
+    if (!database) throw new Error("Secure database connection required");
+    const [view] = await database`SELECT pg_get_viewdef('public.public_profiles'::regclass, true) AS definition`;
+    const expression = String(view.definition).match(/CASE\s+WHEN[\s\S]*?END\s+AS adaptive_tags/i)?.[0];
+    if (!expression) throw new Error("Creator-only adaptive tag projection required");
+    // Exercise the deployed projection with nonempty descriptors for both roles,
+    // without changing real profiles or declaring anyone's disability.
+    const rows = await database.unsafe(`SELECT role, ${expression} FROM (VALUES
+      ('creator'::text, ARRAY['adaptive-creator', 'sensory-inclusive']::text[]),
+      ('customer'::text, ARRAY['adaptive-creator', 'sensory-inclusive']::text[])
+    ) AS p(role, adaptive_tags) ORDER BY role`);
+    expect(rows).toEqual([
+      { role: "creator", adaptive_tags: ["adaptive-creator", "sensory-inclusive"] },
+      { role: "customer", adaptive_tags: [] },
+    ]);
   });
 
   it("keeps the creator photo bucket private", async () => {
