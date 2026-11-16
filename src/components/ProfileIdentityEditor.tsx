@@ -133,15 +133,17 @@ const ProfileIdentityEditor = ({ compact = false, creator = false, onSaved }: { 
       uploadedPortraitPath = portraitPath;
       avatarToSave = { ...currentAvatar, portraitPath, useDttIcon: undefined };
     }
+    let tagsToSave = tags;
     if (user && isCreator) {
-      const { data: latest, error: readError } = await supabase.from("profiles").select("avatar_config").eq("user_id", user.id).single();
+      const { data: latest, error: readError } = await supabase.from("profiles").select("avatar_config, content_labels").eq("user_id", user.id).single();
       if (readError) { setSaving(false); toast({ title: "Couldn't save profile", description: readError.message, variant: "destructive" }); return; }
       const config = latest.avatar_config;
       const backdrop = config && typeof config === "object" && !Array.isArray(config) ? parseCreatorBackdrop(config.creatorBackdrop) : undefined;
       avatarToSave = { ...avatarToSave, creatorBackdrop: backdrop };
+      tagsToSave = [...new Set([...tags, ...(latest.content_labels ?? [])])];
     }
     const { error } = user
-      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json, country, tags }).eq("user_id", user.id)
+      ? await supabase.from("profiles").update({ display_name: clean, avatar_config: avatarToSave as unknown as Json, country, tags: tagsToSave }).eq("user_id", user.id)
       : { error: new Error("Please sign in again.") };
     setSaving(false);
     if (error) {

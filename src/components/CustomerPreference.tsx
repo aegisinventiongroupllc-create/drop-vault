@@ -1,16 +1,23 @@
 import { Button } from "@/components/ui/button";
 import LegalFooter from "@/components/LegalFooter";
 import { useState } from "react";
-import type { CustomerPreference as Preference } from "@/lib/customerPreference";
+import { allowedVaults, type CustomerPreference as Preference } from "@/lib/customerPreference";
+
+import ContentPreferenceChoices from "./ContentPreferenceChoices";
+import type { CreatorCategory } from "@/lib/creatorCategories";
 
 export type GenderPreference = Preference;
 
 interface CustomerPreferenceProps {
-  onSelect: (pref: GenderPreference) => void;
+  onSelect: (pref: CreatorCategory[]) => Promise<void>;
+  initial?: Preference | null;
+  onCancel?: () => void;
 }
 
-const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
-  const [showTrans, setShowTrans] = useState(false);
+const CustomerPreference = ({ onSelect, initial, onCancel }: CustomerPreferenceProps) => {
+  const [selected, setSelected] = useState<CreatorCategory[]>(initial == null ? [] : allowedVaults(initial));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
       <div className="flex min-h-full flex-col">
@@ -22,38 +29,12 @@ const CustomerPreference = ({ onSelect }: CustomerPreferenceProps) => {
           <p className="text-muted-foreground text-sm mt-2">Who are you looking for?</p>
         </div>
 
-        <div className="flex flex-col gap-4 w-full">
-          <Button
-            variant="neon"
-            size="lg"
-            className="w-full text-lg font-bold tracking-wider py-8"
-            onClick={() => onSelect("women")}
-          >
-            WOMEN
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full text-lg font-bold tracking-wider py-8 border-primary/30 hover:border-primary hover:text-primary"
-            onClick={() => onSelect("men")}
-          >
-            MEN
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full text-base font-bold tracking-wider py-6 border-accent/30 hover:border-accent hover:text-accent"
-            onClick={() => onSelect("both")}
-          >
-            BOTH
-          </Button>
-          <Button variant="ghost" onClick={() => setShowTrans(value => !value)} aria-expanded={showTrans}>
-            TRANS CATEGORIES
-          </Button>
-          {showTrans && <div className="flex flex-col gap-3">
-            <Button variant="outline" size="lg" onClick={() => onSelect("trans_women")}>TRANS WOMEN</Button>
-            <Button variant="outline" size="lg" onClick={() => onSelect("trans_men")}>TRANS MEN</Button>
-          </div>}
+        <div className="w-full space-y-6 text-left">
+          <ContentPreferenceChoices value={selected} onChange={setSelected} disabled={busy} />
+          {!selected.length && <p className="text-xs text-muted-foreground">No categories selected. Your feed will stay empty.</p>}
+          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+          <Button variant="neon" disabled={busy} className="w-full" onClick={async () => { setBusy(true); setError(""); try { await onSelect(selected); } catch { setError("Couldn’t save preferences. Please retry."); } finally { setBusy(false); } }}>SAVE PREFERENCES</Button>
+          {onCancel && <Button variant="ghost" className="w-full" onClick={onCancel}>CANCEL</Button>}
         </div>
 
       </div>

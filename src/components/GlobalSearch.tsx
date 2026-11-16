@@ -7,6 +7,8 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import CreatorHeartButton from "@/components/CreatorHeartButton";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { COUNTRIES } from "@/components/GlobalPassport";
+import ContentFilterMenu from "./ContentFilterMenu";
+import { allowedVaults } from "@/lib/customerPreference";
 import { matchesCategory } from "@/lib/creatorCategories";
 
 interface CreatorRow {
@@ -22,7 +24,9 @@ interface CreatorRow {
 const countryFlag = (code: string | null) =>
   COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
 
-const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; onCreatorClick: (name: string) => void; onClose: () => void }) => {
+const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategoriesChange }: { categories?: VaultType[]; onCategoriesChange?: (categories: VaultType[]) => Promise<void>; vault?: VaultType; onCreatorClick: (name: string) => void; onClose: () => void }) => {
+  const categoryKey = (categories ?? allowedVaults(vault ?? "both")).join(",");
+  const selectedCategories = categoryKey ? categoryKey.split(",") as VaultType[] : [];
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [demandSent, setDemandSent] = useState(false);
@@ -33,21 +37,21 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState("");
   const q=query.trim().toLowerCase();
-  useEffect(()=>{setOffset(0);setCreators([]);},[q,vault]);
+  useEffect(()=>{setOffset(0);setCreators([]);},[q,categoryKey]);
   useEffect(()=>{
     let cancelled=false;
     if(!q){setCreators([]);setLoading(false);return;}
     setLoading(true);
     const timer=setTimeout(()=>{
       const countries=COUNTRIES.filter(c=>c.name.toLowerCase().includes(q)||c.code.toLowerCase()===q).map(c=>c.code);
-      void supabase.rpc("search_creator_page",{_query:q,_vault:vault??null,_countries:countries,_offset:offset}).then(({data,error})=>{
+      void supabase.rpc("search_creator_categories",{_query:q,_categories:selectedCategories,_countries:countries,_offset:offset}).then(({data,error})=>{
         if(cancelled)return;setLoading(false);setError(error?"Couldn’t load creators. Please try again.":"");
         if(!error&&data){setHasMore(data.length>24);const rows=data.slice(0,24) as unknown as CreatorRow[];setCreators(previous=>offset===0?rows:[...previous,...rows.filter(r=>!previous.some(p=>p.user_id===r.user_id))]);}
       });
     },300);
     return()=>{cancelled=true;clearTimeout(timer);};
-  },[q,vault,offset]);
-  const creatorResults=creators.filter(creator => matchesCategory(creator.vault_side, vault));
+  },[q,categoryKey,offset]);
+  const creatorResults=creators.filter(creator => selectedCategories.includes(creator.vault_side));
   const noResults=q.length>0&&!loading&&!error&&creatorResults.length===0;
 
   const handleRequestDemand = async () => {
@@ -80,6 +84,7 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault }: { vault?: VaultType; o
         </div>
       </div>
 
+      {onCategoriesChange && <div className="px-4 py-2"><ContentFilterMenu value={selectedCategories} onChange={onCategoriesChange} /></div>}
       <div className="px-4 mt-2 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
         {loading && <p className="text-sm text-muted-foreground">Loading creators…</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

@@ -370,14 +370,16 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     </div>
   );
 });
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap }: { onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap, categories }: { categories?: VaultType[]; onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
+  const categoryKey = (categories ?? [vault]).join(",");
+  const selectedCategories = categoryKey ? categoryKey.split(",").filter(isCreatorCategory) : [];
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
   const [pageOffset, setPageOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [retry, setRetry] = useState(0);
-  useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [vault,countryFilter,searchQuery]);
+  useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [categoryKey,countryFilter,searchQuery]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
   const [myUnlocks, setMyUnlocks] = useState<Set<string>>(new Set());
@@ -415,7 +417,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     let cancelled = false;
     (async () => {
       setLoading(true);setLoadError("");
-      const { data: media, error: mediaError } = await supabase.rpc("get_teaser_page", {_vault:vault,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset});
+      const { data: media, error: mediaError } = await supabase.rpc("get_teaser_categories", {_categories:selectedCategories,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset});
       if (cancelled) return;
       if (mediaError || !media) {setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);return;}
       setHasMore(media.length === 24);
@@ -447,7 +449,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (signingError && !cancelled) setLoadError("Some teasers couldn’t load. Please try again.");
       const urlMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => { if (s.path && s.signedUrl) urlMap[s.path] = s.signedUrl; });
-      const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path] && profMap[m.creator_id]?.side === vault).map((m) => {
+      const items: VideoItem[] = media.filter((m) => urlMap[m.storage_path] && selectedCategories.includes(profMap[m.creator_id]?.side)).map((m) => {
         const prof = profMap[m.creator_id];
         const name = prof?.name || "creator";
         return {
@@ -474,11 +476,11 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (!cancelled) {setLiveVideos(previous => pageOffset === 0 ? items : [...previous, ...items.filter(item => !previous.some(p => p.id === item.id))]);setLoading(false);}
     })().catch(() => {if(!cancelled){setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);}});
     return () => { cancelled = true; };
-  }, [vault,countryFilter,searchQuery,pageOffset,retry]);
+  }, [categoryKey,countryFilter,searchQuery,pageOffset,retry]);
 
   const allVideos = [...liveVideos, ...MOCK_VIDEOS];
   const filteredVideos = allVideos.filter(v => {
-    if (v.vault !== vault) return false;
+    if (!selectedCategories.includes(v.vault)) return false;
     if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
     if (searchQuery && searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -512,7 +514,8 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         </button>
       </div>
 
-      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${vault}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} market={`${vault}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
+      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${categoryKey}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} market={`${categoryKey}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
+        {!selectedCategories.length && <p className="p-6 text-center text-sm text-muted-foreground">No categories selected.</p>}
         {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
         {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}
         <LegalFooter />

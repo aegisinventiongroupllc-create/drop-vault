@@ -1,5 +1,11 @@
 # Roadmap
 
+## Multi-select onboarding and discovery
+- [x] Require creator category and standardized self-selected content labels, persisted with creator-only validation; existing creators with missing labels complete setup. Labels remain self-declared, not anatomy certification.
+- [x] Add saved customer category checkboxes in signup/settings and instant navigation/search dropdown; all four checked shows all, unchecked-all stays empty. Existing choices preserved.
+- [x] Combined selected-category queries paginate before authorized signing; changing selections immediately hides excluded feed/search results, cancels stale requests and resets paging. Library accepts the same saved category arrays.
+- [x] Twenty category/label/deployed-rule tests pass; desktop and 384×629 phone checks confirm required category/labels, mixed customer selection and search dropdown results. Real signed-in account read succeeded but preferences were legacy-null, so no account data changed; genuine paid-content walkthrough remains blocked by consent, eligible paid access and approved media. Screens not published; translations/review remain outstanding.
+
 ## Creator category separation
 - [x] Explained category scanner limits: can audit saved labels/filter placement, not infer gender/anatomy; disputed labeling requires confidential human review. No identity scanner or automatic reclassification built.
 - [x] Added four self-selected signup/profile categories and content labeling notice; creator category saves independently of profile identity edits.

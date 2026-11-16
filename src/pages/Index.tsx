@@ -1,5 +1,6 @@
 import { allowedVaults } from "@/lib/customerPreference";
-import { CATEGORY_LABELS, isCreatorCategory } from "@/lib/creatorCategories";
+import ContentFilterMenu from "@/components/ContentFilterMenu";
+import { CATEGORY_LABELS, isCreatorCategory, type CreatorCategory } from "@/lib/creatorCategories";
 import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
 import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ interface UserPrefs {
 interface AccountPreference {
   account_type: UserRole | null;
   customer_preference: GenderPreference | null;
+  content_categories: CreatorCategory[] | null;
 }
 
 const loadPrefs = (): UserPrefs | null => {
@@ -118,12 +120,23 @@ const Index = () => {
   const [authPreview, setAuthPreview] = useState(false);
   const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
 
+  const updateContentPreferences = async (categories: CreatorCategory[]) => {
+    const previous = preference;
+    setPreference(categories);
+    setSelectedCreator(null);
+    const { data, error } = await supabase.rpc("save_my_content_preferences", { _categories: categories });
+    if (error) { setPreference(previous); throw error; }
+    const selected = allowedVaults((data ?? categories).filter(isCreatorCategory));
+    setPreference(selected); setVault(selected[0] ?? "women");
+    savePrefs({ email, role: role ?? "customer", vault: selected[0] ?? "women", preference: selected });
+  };
+
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
       const { data, error } = await supabase
         .from("account_preferences")
-        .select("account_type, customer_preference")
+        .select("account_type, customer_preference, content_categories")
         .eq("user_id", userId)
         .maybeSingle();
       if (error) console.error("Failed to restore account preference", error);
@@ -137,17 +150,18 @@ const Index = () => {
         if (dbRole === "creator") {
           const { data: prof } = await supabase
             .from("profiles")
-            .select("vault_side")
+            .select("vault_side, content_labels")
             .eq("user_id", userId)
             .maybeSingle();
           const side: VaultType = isCreatorCategory(prof?.vault_side) ? prof.vault_side : "women";
+          if (!isCreatorCategory(prof?.vault_side) || !prof.content_labels?.length) setRoleChosen(false);
           setVault(side);
           setPreference(side);
           const prefs: UserPrefs = { email: userEmail ?? "", role: "creator", vault: side, preference: side };
           savePrefs(prefs);
-        } else if (preferenceRow?.customer_preference) {
-          const customerPreference = preferenceRow.customer_preference;
-          const activeVault: VaultType = customerPreference === "both" ? "women" : customerPreference;
+        } else if (preferenceRow?.content_categories != null || preferenceRow?.customer_preference) {
+          const customerPreference = preferenceRow.content_categories ?? preferenceRow.customer_preference ?? [];
+          const activeVault: VaultType = allowedVaults(customerPreference)[0] ?? "women";
           setPreference(customerPreference);
           setVault(activeVault);
           savePrefs({ email: userEmail ?? "", role: "customer", vault: activeVault, preference: customerPreference });
@@ -362,22 +376,16 @@ const Index = () => {
     return (
       <PostAuthRolePicker
         email={email}
-        onSelect={async (chosenRole, creatorSide) => {
+        onSelect={async (chosenRole, creatorSide, labels) => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
-            console.error("Failed to save role", error);
-            return;
+            throw error;
           }
           if (chosenRole === "creator") {
             const side: VaultType = isCreatorCategory(creatorSide) ? creatorSide : "women";
-            if (authedUserId) {
-              const { error: sideError } = await supabase
-                .from("profiles")
-                .update({ vault_side: side })
-                .eq("user_id", authedUserId);
-              if (sideError) { console.error("Failed to save creator side", sideError); return; }
-            }
+            const { error: sideError } = await supabase.rpc("save_my_creator_discovery", { _category: side, _labels: labels ?? [] });
+            if (sideError) throw sideError;
             setVault(side);
             setPreference(side);
             savePrefs({ email, role: "creator", vault: side, preference: side });
@@ -405,15 +413,11 @@ const Index = () => {
   if (role === "customer" && (!preference || editingPreference)) {
     return (
       <CustomerPreference
+        initial={preference}
+        onCancel={editingPreference ? () => setEditingPreference(false) : undefined}
         onSelect={async (pref) => {
-          const { error } = await supabase.from("account_preferences").update({ customer_preference: pref }).eq("user_id", authedUserId);
-          if (error) { console.error("Failed to save customer preference", error); return; }
+          await updateContentPreferences(pref);
           setEditingPreference(false);
-          setPreference(pref);
-          const activeVault: VaultType = pref === "both" ? "women" : pref;
-          setVault(activeVault);
-          const prefs: UserPrefs = { email, role: "customer", vault: activeVault, preference: pref };
-          savePrefs(prefs);
           if (!hasSeenCoins) setShowKnowYourCoins(true);
         }}
       />
@@ -452,7 +456,8 @@ const Index = () => {
   if (showSearch) {
     return (
       <GlobalSearch
-              vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : undefined}
+              categories={allowedVaults(preference)}
+        onCategoriesChange={updateContentPreferences}
         onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
         onClose={() => setShowSearch(false)}
       />
@@ -512,11 +517,7 @@ const Index = () => {
                   DASHBOARD
                 </button>
               )}
-              {(role === "creator" ? allowedVaults(preference) : allowedVaults(preference)).map((side) => (
-                <Button key={side} size="sm" variant={vault === side ? "neon" : "secondary"} onClick={() => setVault(side)} className="text-xs font-bold">
-                  {side === "women" ? t.women : side === "men" ? t.men : CATEGORY_LABELS[side].toUpperCase()}
-                </Button>
-              ))}
+              <ContentFilterMenu value={allowedVaults(preference)} onChange={updateContentPreferences} />
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -536,7 +537,8 @@ const Index = () => {
       {activeTab === "home" && (
         <DiscoveryFeed
           onCreatorClick={handleCreatorClick}
-          vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : vault ?? "women"}
+          vault={vault ?? "women"}
+          categories={allowedVaults(preference)}
           onSearch={() => setShowSearch(true)}
           hasVaultToggle={true}
           countryFilter={countryFilter}
@@ -546,7 +548,7 @@ const Index = () => {
       {activeTab === "trending" && (
         <TrendingPage
           onCreatorClick={handleCreatorClick}
-          vault={role === "customer" && preference !== "both" ? allowedVaults(preference)[0] : vault ?? "women"}
+          vault={allowedVaults(preference)[0] ?? "women"}
           hasVaultToggle={true}
           countryFilter={countryFilter}
         />

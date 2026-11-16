@@ -6,4 +6,7 @@ describe("customer gender preference", () => {
   it("keeps men-only selection strict", () => { expect(allowedVaults("men")).toEqual(["men"]); });
   it("requires an explicit Trans Women choice", () => { expect(allowedVaults("trans_women")).toEqual(["trans_women"]); expect(allowedVaults("both")).not.toContain("trans_women"); });
   it("requires an explicit Trans Men choice", () => { expect(allowedVaults("trans_men")).toEqual(["trans_men"]); expect(allowedVaults("both")).not.toContain("trans_men"); });
+  it("keeps mixed checkmarks without widening selection", () => expect(allowedVaults(["women", "trans_men"])).toEqual(["women", "trans_men"]));
+  it("shows all four only when all four are checked", () => expect(allowedVaults(["women", "men", "trans_women", "trans_men"])).toEqual(["women", "men", "trans_women", "trans_men"]));
+  it("keeps unchecked-all empty", () => expect(allowedVaults([])).toEqual([]));
 });

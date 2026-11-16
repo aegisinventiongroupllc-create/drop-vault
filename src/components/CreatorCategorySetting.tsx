@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_LABELS, CREATOR_CATEGORIES, isCreatorCategory, type CreatorCategory } from "@/lib/creatorCategories";
+import ContentLabelChoices from "./ContentLabelChoices";
+import { validContentLabels } from "@/lib/contentLabels";
 import ContentLabelingNotice from "./ContentLabelingNotice";
 
 export default function CreatorCategorySetting() {
   const [category, setCategory] = useState<CreatorCategory | "">("");
+  const [labels, setLabels] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -13,18 +16,18 @@ export default function CreatorCategorySetting() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { if (active) { setMessage("Please sign in again."); setBusy(false); } return; }
-      const { data, error } = await supabase.from("profiles").select("vault_side").eq("user_id", user.id).maybeSingle();
-      if (active) { if (isCreatorCategory(data?.vault_side)) setCategory(data.vault_side); setMessage(error ? "Couldn’t load your category." : ""); setBusy(false); }
+      const { data, error } = await supabase.from("profiles").select("vault_side, content_labels").eq("user_id", user.id).maybeSingle();
+      if (active) { if (isCreatorCategory(data?.vault_side)) setCategory(data.vault_side); setLabels(data?.content_labels ?? []); setMessage(error ? "Couldn’t load your category." : ""); setBusy(false); }
     })();
     return () => { active = false; };
   }, []);
   const save = async () => {
-    if (!isCreatorCategory(category)) return;
+    if (!isCreatorCategory(category) || !validContentLabels(labels)) return;
     setBusy(true); setMessage("");
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setBusy(false); setMessage("Please sign in again."); return; }
-    const { data, error } = await supabase.from("profiles").update({ vault_side: category }).eq("user_id", user.id).select("vault_side").single();
-    setBusy(false); setMessage(error || data?.vault_side !== category ? "Couldn’t save your category. Please retry." : "Category saved.");
+    const { error } = await supabase.rpc("save_my_creator_discovery", { _category: category, _labels: labels });
+    setBusy(false); setMessage(error ? "Couldn’t save your category and labels. Please retry." : "Category and labels saved.");
   };
   return <section className="space-y-3 text-left">
     <label htmlFor="creator-category" className="text-xs font-semibold text-foreground">Creator category</label>
@@ -32,8 +35,9 @@ export default function CreatorCategorySetting() {
       <option value="" disabled>Select category</option>
       {CREATOR_CATEGORIES.map(value => <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}
     </select>
+    <ContentLabelChoices value={labels} onChange={setLabels} disabled={busy} />
     <ContentLabelingNotice />
-    <Button variant="outline" disabled={busy || !category} onClick={() => void save()}>SAVE CATEGORY</Button>
+    <Button variant="outline" disabled={busy || !category || !validContentLabels(labels)} onClick={() => void save()}>SAVE CATEGORY</Button>
     {message && <p role="status" className="text-xs text-muted-foreground">{message}</p>}
   </section>;
 }

@@ -41,6 +41,7 @@ export type Database = {
       account_preferences: {
         Row: {
           account_type: string | null
+          content_categories: string[] | null
           created_at: string
           customer_preference: string | null
           email: string
@@ -49,6 +50,7 @@ export type Database = {
         }
         Insert: {
           account_type?: string | null
+          content_categories?: string[] | null
           created_at?: string
           customer_preference?: string | null
           email: string
@@ -57,6 +59,7 @@ export type Database = {
         }
         Update: {
           account_type?: string | null
+          content_categories?: string[] | null
           created_at?: string
           customer_preference?: string | null
           email?: string
@@ -2040,6 +2043,7 @@ export type Database = {
         Row: {
           avatar_config: Json
           avatar_url: string | null
+          content_labels: string[] | null
           country: string | null
           created_at: string
           date_of_birth: string | null
@@ -2064,6 +2068,7 @@ export type Database = {
         Insert: {
           avatar_config?: Json
           avatar_url?: string | null
+          content_labels?: string[] | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -2088,6 +2093,7 @@ export type Database = {
         Update: {
           avatar_config?: Json
           avatar_url?: string | null
+          content_labels?: string[] | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -2945,6 +2951,36 @@ export type Database = {
           inspection_address: string
         }[]
       }
+      get_teaser_categories: {
+        Args: {
+          _categories: string[]
+          _country?: string
+          _offset?: number
+          _query?: string
+        }
+        Returns: {
+          active_from: string | null
+          active_until: string | null
+          allow_permanent_buyout: boolean
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          library_slot: string
+          media_type: string
+          storage_path: string
+          teaser_frame: string
+          title: string
+          updated_at: string
+          views: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "creator_media"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_teaser_page: {
         Args: {
           _country?: string
@@ -3092,6 +3128,39 @@ export type Database = {
         }
         Returns: undefined
       }
+      save_my_content_preferences: {
+        Args: { _categories: string[] }
+        Returns: string[]
+      }
+      save_my_creator_discovery: {
+        Args: { _category: string; _labels: string[] }
+        Returns: undefined
+      }
+      search_creator_categories: {
+        Args: {
+          _categories: string[]
+          _countries?: string[]
+          _offset?: number
+          _query: string
+        }
+        Returns: {
+          avatar_config: Json | null
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          profile_photo_path: string | null
+          role: string | null
+          tags: string[] | null
+          user_id: string | null
+          vault_side: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       search_creator_page: {
         Args: {
           _countries?: string[]
@@ -3157,6 +3226,7 @@ export type Database = {
         Args: { _account_type: string }
         Returns: {
           account_type: string | null
+          content_categories: string[] | null
           created_at: string
           customer_preference: string | null
           email: string
