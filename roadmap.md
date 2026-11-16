@@ -1,5 +1,9 @@
 # Roadmap
 
+## Optional customer adaptive browsing preferences
+- [x] Added optional collapsed adaptive browsing choices to customer onboarding and PROFILE → BROWSING PREFERENCES; private account-saved choices are separate from public creator self-descriptors and saved atomically with categories.
+- [x] Feed/search consume saved choices, adaptive controls removed above both views, and account changes clear previous choices. Twenty-eight focused tests passed; final fourteen preference/privacy tests passed after a test compatibility correction; build OK. Real customer session in isolated preference UI saved a temporary browsing choice, reloaded/read back the checked selection and displayed the cleaner feed on phone/desktop with no page errors; original choices restored. Ordinary consent-gated onboarding and populated approved-media walkthrough remain unverified; creator tags, paid library access and publication unchanged.
+
 ## Named-account category and adaptive audit
 - [x] Audited both named sessions on desktop/384×629 through actual home entry; read actual profiles, role/preferences, founder pools and media coverage. Forty focused category/tag/founder/browse checks pass; 36 actual customer authorized feed-filter reads succeed with empty results. No account data, consents, approvals, payments or publication changed.
 - [x] Delivered dtt-category-flow-audit.md: full suite 610 passed/1 failed (outdated privacy column allowlist missing intentional creator-only adaptive_tags); direct /index returns 404 while actual home / works. No bug-free claim or unrelated fixes.

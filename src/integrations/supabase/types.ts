@@ -41,6 +41,7 @@ export type Database = {
       account_preferences: {
         Row: {
           account_type: string | null
+          adaptive_preferences: string[]
           content_categories: string[] | null
           created_at: string
           customer_preference: string | null
@@ -50,6 +51,7 @@ export type Database = {
         }
         Insert: {
           account_type?: string | null
+          adaptive_preferences?: string[]
           content_categories?: string[] | null
           created_at?: string
           customer_preference?: string | null
@@ -59,6 +61,7 @@ export type Database = {
         }
         Update: {
           account_type?: string | null
+          adaptive_preferences?: string[]
           content_categories?: string[] | null
           created_at?: string
           customer_preference?: string | null
@@ -3166,6 +3169,10 @@ export type Database = {
         Returns: undefined
       }
       save_my_adaptive_tags: { Args: { _tags: string[] }; Returns: undefined }
+      save_my_browsing_preferences: {
+        Args: { _adaptive_tags: string[]; _categories: string[] }
+        Returns: Json
+      }
       save_my_content_preferences: {
         Args: { _categories: string[] }
         Returns: string[]
@@ -3293,6 +3300,7 @@ export type Database = {
         Args: { _account_type: string }
         Returns: {
           account_type: string | null
+          adaptive_preferences: string[]
           content_categories: string[] | null
           created_at: string
           customer_preference: string | null

@@ -21,7 +21,6 @@ import { teaserGateTime } from "@/lib/teaserGate";
 import TeaserShelves from "@/components/TeaserShelves";
 import { publicCreatorUrl } from "@/lib/publicBranding";
 import { isCreatorCategory } from "@/lib/creatorCategories";
-import AdaptiveTagChoices from "./AdaptiveTagChoices";
 import { matchesAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 
 interface VideoItem {
@@ -373,7 +372,7 @@ const VideoCard = memo(({ video, onCreatorClick, initiallyLiked, viewerId, initi
     </div>
   );
 });
-const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap, categories }: { categories?: VaultType[]; onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
+const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countryFilter, searchQuery, onGlobeOpen, topOffset, onLogoTripleTap, categories, adaptiveTags = [] }: { adaptiveTags?: AdaptiveTag[]; categories?: VaultType[]; onCreatorClick: (name: string) => void; vault: VaultType; onSearch: () => void; hasVaultToggle?: boolean; countryFilter?: string; searchQuery?: string; onGlobeOpen?: () => void; topOffset?: boolean; onLogoTripleTap?: () => void }) => {
   const categoryKey = (categories ?? [vault]).join(",");
   const selectedCategories = categoryKey ? categoryKey.split(",").filter(isCreatorCategory) : [];
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([]);
@@ -382,7 +381,6 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [retry, setRetry] = useState(0);
-  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
   const adaptiveKey = adaptiveTags.join(",");
   useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [categoryKey,countryFilter,searchQuery,adaptiveKey]);
   const [viewerId, setViewerId] = useState<string | null>(null);
@@ -522,7 +520,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         </button>
       </div>
 
-      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${categoryKey}:${countryFilter || "GLOBAL"}:${searchQuery || ""}:${adaptiveKey}`} market={`${categoryKey}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading} filters={<details className="py-2"><summary className="cursor-pointer text-sm text-foreground">Adaptive filters{adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary><div className="pt-3"><AdaptiveTagChoices filtering value={adaptiveTags} onChange={setAdaptiveTags} /></div></details>}>
+      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${categoryKey}:${countryFilter || "GLOBAL"}:${searchQuery || ""}:${adaptiveKey}`} market={`${categoryKey}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
         {!selectedCategories.length && <p className="p-6 text-center text-sm text-muted-foreground">No categories selected.</p>}
         {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
         {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}

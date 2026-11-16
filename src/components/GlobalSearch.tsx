@@ -10,7 +10,6 @@ import { COUNTRIES } from "@/components/GlobalPassport";
 import ContentFilterMenu from "./ContentFilterMenu";
 import { allowedVaults } from "@/lib/customerPreference";
 import { matchesCategory } from "@/lib/creatorCategories";
-import AdaptiveTagChoices from "./AdaptiveTagChoices";
 import AdaptiveTagBadges from "./AdaptiveTagBadges";
 import { matchesAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 
@@ -28,14 +27,13 @@ interface CreatorRow {
 const countryFlag = (code: string | null) =>
   COUNTRIES.find((c) => c.code === code)?.flag ?? "🌍";
 
-const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategoriesChange }: { categories?: VaultType[]; onCategoriesChange?: (categories: VaultType[]) => Promise<void>; vault?: VaultType; onCreatorClick: (name: string) => void; onClose: () => void }) => {
+const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategoriesChange, adaptiveTags = [] }: { adaptiveTags?: AdaptiveTag[]; categories?: VaultType[]; onCategoriesChange?: (categories: VaultType[]) => Promise<void>; vault?: VaultType; onCreatorClick: (name: string) => void; onClose: () => void }) => {
   const categoryKey = (categories ?? allowedVaults(vault ?? "both")).join(",");
   const selectedCategories = categoryKey ? categoryKey.split(",") as VaultType[] : [];
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [demandSent, setDemandSent] = useState(false);
   const [creators, setCreators] = useState<CreatorRow[]>([]);
-  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
   const adaptiveKey = adaptiveTags.join(",");
 
   const [offset,setOffset]=useState(0);
@@ -93,7 +91,6 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategories
 
       {onCategoriesChange && <div className="px-4 py-2"><ContentFilterMenu value={selectedCategories} onChange={onCategoriesChange} /></div>}
       <div className="px-4 mt-2 space-y-2 max-h-[calc(100vh-80px)] overflow-y-auto">
-        <details className="py-2"><summary className="cursor-pointer text-xs text-foreground">Adaptive filters{adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary><div className="pt-3"><AdaptiveTagChoices filtering value={adaptiveTags} onChange={setAdaptiveTags} /></div></details>
         {loading && <p className="text-sm text-muted-foreground">Loading creators…</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {/* Creator results */}

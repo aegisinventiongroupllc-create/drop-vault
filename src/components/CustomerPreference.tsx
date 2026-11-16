@@ -5,17 +5,21 @@ import { allowedVaults, type CustomerPreference as Preference } from "@/lib/cust
 
 import ContentPreferenceChoices from "./ContentPreferenceChoices";
 import type { CreatorCategory } from "@/lib/creatorCategories";
+import AdaptiveTagChoices from "./AdaptiveTagChoices";
+import type { AdaptiveTag } from "@/lib/adaptiveTags";
 
 export type GenderPreference = Preference;
 
 interface CustomerPreferenceProps {
-  onSelect: (pref: CreatorCategory[]) => Promise<void>;
+  onSelect: (pref: CreatorCategory[], adaptiveTags: AdaptiveTag[]) => Promise<void>;
   initial?: Preference | null;
+  initialAdaptiveTags?: AdaptiveTag[];
   onCancel?: () => void;
 }
 
-const CustomerPreference = ({ onSelect, initial, onCancel }: CustomerPreferenceProps) => {
+const CustomerPreference = ({ onSelect, initial, initialAdaptiveTags = [], onCancel }: CustomerPreferenceProps) => {
   const [selected, setSelected] = useState<CreatorCategory[]>(initial == null ? [] : allowedVaults(initial));
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>(initialAdaptiveTags);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   return (
@@ -31,9 +35,13 @@ const CustomerPreference = ({ onSelect, initial, onCancel }: CustomerPreferenceP
 
         <div className="w-full space-y-6 text-left">
           <ContentPreferenceChoices value={selected} onChange={setSelected} disabled={busy} />
+          <details>
+            <summary className="cursor-pointer text-sm text-foreground">Adaptive browsing preferences (Optional){adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary>
+            <div className="pt-3"><AdaptiveTagChoices filtering value={adaptiveTags} onChange={setAdaptiveTags} disabled={busy} /></div>
+          </details>
           {!selected.length && <p className="text-xs text-muted-foreground">No categories selected. Your feed will stay empty.</p>}
           {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
-          <Button variant="neon" disabled={busy} className="w-full" onClick={async () => { setBusy(true); setError(""); try { await onSelect(selected); } catch { setError("Couldn’t save preferences. Please retry."); } finally { setBusy(false); } }}>SAVE PREFERENCES</Button>
+          <Button variant="neon" disabled={busy} className="w-full" onClick={async () => { setBusy(true); setError(""); try { await onSelect(selected, adaptiveTags); } catch { setError("Couldn’t save preferences. Please retry."); } finally { setBusy(false); } }}>SAVE PREFERENCES</Button>
           {onCancel && <Button variant="ghost" className="w-full" onClick={onCancel}>CANCEL</Button>}
         </div>
 

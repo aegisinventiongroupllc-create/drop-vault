@@ -7,6 +7,6 @@ export default function AdaptiveTagChoices({ value, onChange, disabled, filterin
       <Checkbox className="mt-0.5 shrink-0" checked={value.includes(tag)} disabled={disabled} onCheckedChange={checked => onChange(checked === true ? [...value, tag] : value.filter(item => item !== tag))} />
       <span>{ADAPTIVE_LABELS[tag]}</span>
     </label>)}
-    <p className="text-xs text-muted-foreground">{filtering ? "Match all selected tags." : "Selected tags appear on your creator profile and in discovery. Self-described, not disability verification. Optional and removable; tags do not change founding eligibility."}</p>
+    <p className="text-xs text-muted-foreground">{filtering ? "Match all selected tags. Leave unchecked for no adaptive preference. Your browsing choices are private." : "Selected tags appear on your creator profile and in discovery. Self-described, not disability verification. Optional and removable; tags do not change founding eligibility."}</p>
   </fieldset>;
 }

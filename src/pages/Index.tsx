@@ -1,4 +1,5 @@
 import { allowedVaults } from "@/lib/customerPreference";
+import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 import ContentFilterMenu from "@/components/ContentFilterMenu";
 import { CATEGORY_LABELS, isCreatorCategory, type CreatorCategory } from "@/lib/creatorCategories";
 import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
@@ -61,6 +62,7 @@ interface AccountPreference {
   account_type: UserRole | null;
   customer_preference: GenderPreference | null;
   content_categories: CreatorCategory[] | null;
+  adaptive_preferences: string[];
 }
 
 const loadPrefs = (): UserPrefs | null => {
@@ -116,6 +118,7 @@ const Index = () => {
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
   const [editingPreference, setEditingPreference] = useState(false);
+  const [adaptivePreferences, setAdaptivePreferences] = useState<AdaptiveTag[]>([]);
   // Owner shortcut: triple-tap the DTT logo to preview the sign-in page while signed in
   const [authPreview, setAuthPreview] = useState(false);
   const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
@@ -131,16 +134,28 @@ const Index = () => {
     savePrefs({ email, role: role ?? "customer", vault: selected[0] ?? "women", preference: selected });
   };
 
+  const updateBrowsingPreferences = async (categories: CreatorCategory[], tags: AdaptiveTag[]) => {
+    const { error } = await supabase.rpc("save_my_browsing_preferences", { _categories: categories, _adaptive_tags: tags });
+    if (error) throw error;
+    const selected = allowedVaults(categories);
+    setPreference(selected);
+    setAdaptivePreferences(parseAdaptiveTags(tags));
+    setVault(selected[0] ?? "women");
+    setSelectedCreator(null);
+    savePrefs({ email, role: role ?? "customer", vault: selected[0] ?? "women", preference: selected });
+  };
+
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
       const { data, error } = await supabase
         .from("account_preferences")
-        .select("account_type, customer_preference, content_categories")
+        .select("account_type, customer_preference, content_categories, adaptive_preferences")
         .eq("user_id", userId)
         .maybeSingle();
       if (error) console.error("Failed to restore account preference", error);
       const preferenceRow = data as AccountPreference | null;
+      setAdaptivePreferences(parseAdaptiveTags(preferenceRow?.adaptive_preferences));
       const dbRole = preferenceRow?.account_type ?? null;
       const chosen = dbRole === "creator" || dbRole === "customer";
       setRoleChosen(chosen);
@@ -185,6 +200,7 @@ const Index = () => {
         if (hydratedUserId !== userId) {
           hydratedUserId = userId;
           setCreatorFeed(false);
+          setAdaptivePreferences([]);
           setEditingPreference(false);
           setSelectedCreator(null);
           setShowSearch(false);
@@ -196,6 +212,7 @@ const Index = () => {
       } else {
         hydratedUserId = null;
         setAuthedUserId(null);
+        setAdaptivePreferences([]);
         setRoleChosen(false);
         setRoleHydrated(true);
       }
@@ -281,6 +298,7 @@ const Index = () => {
           {showSearch ? (
             <GlobalSearch
               vault={previewVault}
+              adaptiveTags={adaptivePreferences}
               onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
               onClose={() => setShowSearch(false)}
             />
@@ -292,6 +310,7 @@ const Index = () => {
                 <DiscoveryFeed
                   onCreatorClick={(name) => setSelectedCreator(name)}
                   vault={previewVault}
+                  adaptiveTags={adaptivePreferences}
                   onSearch={() => setShowSearch(true)}
                   hasVaultToggle={false}
                   countryFilter={countryFilter}
@@ -416,9 +435,10 @@ const Index = () => {
     return (
       <CustomerPreference
         initial={preference}
+        initialAdaptiveTags={adaptivePreferences}
         onCancel={editingPreference ? () => setEditingPreference(false) : undefined}
-        onSelect={async (pref) => {
-          await updateContentPreferences(pref);
+        onSelect={async (pref, tags) => {
+          await updateBrowsingPreferences(pref, tags);
           setEditingPreference(false);
           if (!hasSeenCoins) setShowKnowYourCoins(true);
         }}
@@ -459,6 +479,7 @@ const Index = () => {
     return (
       <GlobalSearch
               categories={allowedVaults(preference)}
+        adaptiveTags={adaptivePreferences}
         onCategoriesChange={updateContentPreferences}
         onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
         onClose={() => setShowSearch(false)}
@@ -541,6 +562,7 @@ const Index = () => {
           onCreatorClick={handleCreatorClick}
           vault={vault ?? "women"}
           categories={allowedVaults(preference)}
+          adaptiveTags={adaptivePreferences}
           onSearch={() => setShowSearch(true)}
           hasVaultToggle={true}
           countryFilter={countryFilter}

@@ -792,6 +792,13 @@
       "when": 1794801669562,
       "tag": "0112_optional_adaptive_creator_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 113,
+      "version": "7",
+      "when": 1794802915805,
+      "tag": "0113_private_customer_adaptive_preferences",
+      "breakpoints": true
     }
   ]
 }
