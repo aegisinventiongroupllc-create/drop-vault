@@ -193,8 +193,21 @@ export default function LaunchIntro() {
           fill: "backwards",
         }));
       });
+      Promise.all(animations.map((animation) => animation.finished)).then(() => {
+        const title = titleRef.current;
+        const breathe = globeRef.current?.querySelector(".globe-breathe")?.getAnimations()[0];
+        if (!title || !breathe) return;
+        title.classList.add("dtt-intro-title-settled");
+        const pulse = title.getAnimations().find((animation) =>
+          animation instanceof CSSAnimation && animation.animationName === "dtt-title-pulse");
+        if (pulse) pulse.startTime = breathe.startTime;
+      }).catch(() => {}); // Leaving/replaying cancels unfinished flights.
     });
-    return () => { cancelAnimationFrame(frame); animations.forEach((animation) => animation.cancel()); };
+    return () => {
+      cancelAnimationFrame(frame);
+      animations.forEach((animation) => animation.cancel());
+      titleRef.current?.classList.remove("dtt-intro-title-settled");
+    };
   }, [show, entryReady, reduced]);
 
   useEffect(() => {

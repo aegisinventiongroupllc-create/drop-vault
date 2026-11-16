@@ -37,8 +37,8 @@
 }
 @media (max-width: 640px) { .dtt-intro-title { font-size: 1.8rem; } }
 @keyframes dtt-title-pulse {
-  0%, 100% { text-shadow: 0 0 12px hsl(var(--primary) / .5); }
-  50% { text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); }
+  0%, 100% { transform: scale(1); text-shadow: 0 0 12px hsl(var(--primary) / .5); }
+  50% { transform: scale(1.035); text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); }
 }
 
 .dtt-intro-tagline, .dtt-intro-adult { opacity: 1; }
@@ -71,7 +71,7 @@
 }
 .dtt-intro-ready .dtt-intro-core { opacity: .9; animation: dtt-core-spin 90s linear infinite; }
 @keyframes dtt-core-spin { to { transform: rotate(360deg) scale(1.1); } }
-.dtt-intro-ready .dtt-intro-title { animation: dtt-title-pulse 2.8s ease-in-out infinite; }
+.dtt-intro-ready .dtt-intro-title-settled { animation: dtt-title-pulse 4.5s ease-in-out infinite; }
 .dtt-intro-ready .dtt-intro-caption { animation: dtt-tap 2.4s ease-in-out infinite; }
 @keyframes dtt-tap { 50% { opacity: .55; } }
 .dtt-intro-still .dtt-intro-sky, .dtt-intro-still .dtt-intro-core { opacity: 1; }
