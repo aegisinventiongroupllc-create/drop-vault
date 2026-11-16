@@ -3,3 +3,4 @@
 - Year-end awards freeze server-ranked paid-follower leaders using reviewed residence and UTC cutoffs; independent authenticated admins confirm one winner per country/year under a lock. Permanent awards override future vault splits only. Why: prevent forged counts, duplicate awards, retroactive earnings changes and tier downgrades.
 - General and support tip previews share tokenEconomy calculations; keep checkout disabled until a verified server transfer exists. Why: disclosures must not imply unimplemented payments.
 - Content reactions use server-checked paid entitlements and creator opt-in; customers read only their selection and creators read aggregate counts. Why: prevent unpaid reactions and buyer disclosure.
+- Founder allocation locks creator and country/category, requires verified residence and category setup, and shares four-category board definitions. Why: preserve original grants and prevent duplicate or over-cap awards.

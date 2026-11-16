@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { foundingCountries, foundingSlots } from "@/lib/foundingCreators";
+import { CATEGORY_LABELS, CREATOR_CATEGORIES, isCreatorCategory, type CreatorCategory } from "@/lib/creatorCategories";
 
 interface FoundingRow {
-  creator_id: string; country: string; vault_side: "women" | "men"; slot: number;
+  creator_id: string; country: string; vault_side: CreatorCategory; slot: number;
   locked_at: string; ends_at: string; split_creator: number; split_platform: number;
   display_name: string | null; email: string | null;
 }
@@ -18,7 +19,7 @@ const flag = (code: string) =>
   /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0))) : "🌐";
 const day = (s: string) => new Date(s).toLocaleDateString(undefined, { dateStyle: "medium" });
 
-/** Owner record of the first 5 women and 5 men approved creators per country (91/9 for life). */
+/** Owner record of five founders in each of four categories per country. */
 const AdminFoundingCreators = () => {
   const [rows, setRows] = useState<FoundingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,19 +41,21 @@ const AdminFoundingCreators = () => {
   useEffect(() => { void load(); }, []);
 
   const countries = useMemo(() => {
-    const m = new Map<string, { women: FoundingRow[]; men: FoundingRow[] }>();
-    for (const c of foundingCountries()) m.set(c.code, { women: [], men: [] });
+    const empty = (): Record<CreatorCategory, FoundingRow[]> => ({ women: [], men: [], trans_women: [], trans_men: [] });
+    const m = new Map<string, Record<CreatorCategory, FoundingRow[]>>();
+    for (const c of foundingCountries()) m.set(c.code, empty());
     for (const r of rows) {
-      const e = m.get(r.country) ?? { women: [], men: [] };
+      if (!isCreatorCategory(r.vault_side)) continue;
+      const e = m.get(r.country) ?? empty();
       e[r.vault_side].push(r);
       m.set(r.country, e);
     }
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [rows]);
 
-  const List = ({ side, list, country }: { side: "women" | "men"; list: FoundingRow[]; country: string }) => (
+  const List = ({ side, list, country }: { side: CreatorCategory; list: FoundingRow[]; country: string }) => (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-bold tracking-wider text-primary">{side === "women" ? "WOMEN" : "MEN"} · {list.length}/5</p>
+      <p className="text-[11px] font-bold tracking-wider text-primary">{CATEGORY_LABELS[side].toUpperCase()} · {list.length}/5</p>
       {foundingSlots(list, country, side).map(({ slot, creator: r }) => {
         const active = r && new Date(r.ends_at).getTime() > Date.now();
         return (
@@ -77,7 +80,7 @@ const AdminFoundingCreators = () => {
       <div className="flex flex-wrap justify-between items-center gap-2"><h2 className="font-bold">FOUNDING 5 BY COUNTRY</h2><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>REFRESH</Button></div>
       <Input aria-label="Search founding countries" placeholder="Search country…" value={query} onChange={(e) => setQuery(e.target.value)} />
       <p className="text-xs text-muted-foreground">
-        The first 5 approved women and 5 approved men creators in each country are locked in automatically at 91/9 for life. Slots are permanent and never reshuffle; awards made before this change keep their original split.
+        The first 5 qualifying approved creators in each category—Women, Men, Trans Women and Trans Men—per country receive 91/9 for life: 20 places per country. Verified identity, reviewed residence and category setup are required. Slots are permanent and never reshuffle; existing awards keep their original split.
       </p>
       {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}
@@ -86,12 +89,11 @@ const AdminFoundingCreators = () => {
         <div key={code} className="rounded-lg border border-border bg-card">
           <Button variant="ghost" aria-expanded={open === code} onClick={() => setOpen(open === code ? null : code)} className="w-full h-auto flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm font-bold text-foreground whitespace-normal text-left">
             <span>{flag(code)} {countryName(code, code).toUpperCase()}</span>
-            <span className="text-xs text-muted-foreground">W {g.women.length}/5 · M {g.men.length}/5</span>
+            <span className="text-xs text-muted-foreground">{CREATOR_CATEGORIES.reduce((n, category) => n + g[category].length, 0)}/20 claimed</span>
           </Button>
           {open === code && (
             <div className="grid gap-4 px-4 pb-4 sm:grid-cols-2">
-              <List side="women" list={g.women} country={code} />
-              <List side="men" list={g.men} country={code} />
+              {CREATOR_CATEGORIES.map(category => <List key={category} side={category} list={g[category]} country={code} />)}
             </div>
           )}
         </div>

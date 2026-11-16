@@ -9,11 +9,11 @@ it.skipIf(!db)("founding country follows verified ID residence, never the claime
   const rollback = Error("rollback");
   await db.begin(async sql => {
     await sql.unsafe(CLEAN_TEMP_SCHEMA_SQL);
-    await sql.unsafe(`CREATE TEMP TABLE profiles(user_id uuid,country text,vault_side text,verification_status text); CREATE TEMP TABLE creator_verifications(id uuid,user_id uuid,status text,identity_confirmed boolean,residence_country text,residence_id_confirmed boolean,residence_reviewed_by uuid,residence_reviewed_at timestamptz,document_expires_on date,reviewed_at timestamptz); CREATE TEMP TABLE founding_creators(creator_id uuid UNIQUE,country text,vault_side text,slot int,split_creator int,split_platform int,ends_at timestamptz); CREATE FUNCTION pg_temp.has_role(uuid,public.app_role) RETURNS boolean LANGUAGE sql AS 'SELECT true';`);
+    await sql.unsafe(`CREATE TEMP TABLE profiles(user_id uuid,country text,vault_side text,verification_status text,content_labels text[] DEFAULT ARRAY['solo']); CREATE TEMP TABLE creator_verifications(id uuid,user_id uuid,status text,identity_confirmed boolean,residence_country text,residence_id_confirmed boolean,residence_reviewed_by uuid,residence_reviewed_at timestamptz,document_expires_on date,reviewed_at timestamptz); CREATE TEMP TABLE founding_creators(creator_id uuid UNIQUE,country text,vault_side text,slot int,split_creator int,split_platform int,ends_at timestamptz); CREATE FUNCTION pg_temp.has_role(uuid,public.app_role) RETURNS boolean LANGUAGE sql AS 'SELECT true';`);
     const [row] = await sql`select pg_get_functiondef('public.claim_founding_slot(uuid)'::regprocedure) d`;
     await sql.unsafe(row.d.replaceAll("public.", "pg_temp."));
     const u = crypto.randomUUID();
-    await sql`insert into pg_temp.profiles values(${u},'CA','men','approved')`;
+    await sql`insert into pg_temp.profiles(user_id,country,vault_side,verification_status) values(${u},'CA','men','approved')`;
     await sql`insert into pg_temp.creator_verifications values(${crypto.randomUUID()},${u},'approved',true,'US',false,${crypto.randomUUID()},now(),current_date+1,now())`;
     await sql`select pg_temp.claim_founding_slot(${u})`;
     expect((await sql`select * from pg_temp.founding_creators`)).toHaveLength(0);
@@ -22,7 +22,7 @@ it.skipIf(!db)("founding country follows verified ID residence, never the claime
     expect((await sql`select country,slot,split_creator,split_platform from pg_temp.founding_creators`)[0]).toEqual({country:"US",slot:1,split_creator:91,split_platform:9});
     for (let i=0;i<5;i++) {
       const c=crypto.randomUUID();
-      await sql`insert into pg_temp.profiles values(${c},'CA','men','approved')`;
+      await sql`insert into pg_temp.profiles(user_id,country,vault_side,verification_status) values(${c},'CA','men','approved')`;
       await sql`insert into pg_temp.creator_verifications values(${crypto.randomUUID()},${c},'approved',true,'US',true,${crypto.randomUUID()},now(),current_date+1,now())`;
       await sql`select pg_temp.claim_founding_slot(${c})`;
     }

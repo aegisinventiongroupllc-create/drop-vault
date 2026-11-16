@@ -35,7 +35,7 @@
 - Recover via Cloud exports plus separate Storage downloads; rehearse only in isolation; media vendors need written content approval. Why: snapshots omit files.
 - Subdirectories have their own AGENTS.md; read it before changing files there.
 - 2257 custodian via get_records_custodian; withdrawals archive and block clearance.
-- Founding slots/splits are server-set and permanent; admin views share empty-market lists. Why: vacancies never alter awards.
+- Founder awards lock creator/category; boards share category lists. Why: prevent duplicate grants; preserve original splits.
 
 - Sky photos preload/retry.
 - Discovery shelves use the paginated authorized teaser feed; persist only bounded account/market scroll and interest counts, no signed links; explicit playback gestures. Why: privacy, no autoplay.

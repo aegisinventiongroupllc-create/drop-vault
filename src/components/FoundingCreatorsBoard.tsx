@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { countryName as translatedCountryName } from "@/lib/siteTranslate";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { FOUNDING_SLOTS } from "@/lib/foundingCreators";
+import { Button } from "@/components/ui/button";
+import { CATEGORY_LABELS, CREATOR_CATEGORIES } from "@/lib/creatorCategories";
 
 type Row = { country: string; vault_side: string; slot: number; display_name: string | null };
 const name = (code: string) => translatedCountryName(code, COUNTRIES.find((c) => c.code === code)?.name ?? code);
@@ -27,9 +29,9 @@ const FoundingCreatorsBoard = ({ onCreatorClick, vaults = ["women", "men"] }: { 
       {Array.from({ length: FOUNDING_SLOTS }, (_, i) => {
         const r = list.find((x) => x.vault_side === s && x.slot === i + 1);
         return r?.display_name ? (
-          <button key={i} onClick={() => onCreatorClick?.(r.display_name!.replace(/^@/, ""))} className="block w-full rounded-lg bg-secondary/50 px-3 py-2 text-left text-xs text-foreground hover:bg-secondary">
+          <Button variant="ghost" key={i} onClick={() => { if (r.display_name) onCreatorClick?.(r.display_name.replace(/^@/, "")); }} className="block h-auto w-full whitespace-normal break-words rounded-lg bg-secondary/50 px-3 py-2 text-left text-xs text-foreground hover:bg-secondary">
             #{i + 1} @{r.display_name.replace(/^@/, "")}
-          </button>
+          </Button>
         ) : <p key={i} className="rounded-lg bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">#{i + 1} Coming soon</p>;
       })}
     </div>
@@ -37,14 +39,14 @@ const FoundingCreatorsBoard = ({ onCreatorClick, vaults = ["women", "men"] }: { 
   return (
     <div className="px-4 space-y-3">
       <h2 className="font-bold text-gold">FOUNDING CREATORS</h2>
-      <p className="text-xs text-muted-foreground">The first 5 women and 5 men creators approved in each country.</p>
+      <p className="text-xs text-muted-foreground">The first 5 qualifying approved creators in each category—Women, Men, Trans Women and Trans Men—per country receive 91/9 for life.</p>
       <Input aria-label="Search countries" placeholder="Search country…" value={query} onChange={(e) => setQuery(e.target.value)} />
       {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
       {!loading && groups.length === 0 && <p className="text-xs text-muted-foreground">No founding creators yet.</p>}
       {groups.map(([code, list]) => (
         <div key={code} className="rounded-lg border border-border bg-card p-4 space-y-3">
           <p className="text-sm font-bold">{name(code).toUpperCase()}</p>
-          <div className="grid gap-3 sm:grid-cols-2">{vaults.includes("women") && side(list, "women", "WOMEN")}{vaults.includes("men") && side(list, "men", "MEN")}</div>
+          <div className="grid gap-3 sm:grid-cols-2">{CREATOR_CATEGORIES.filter(category => vaults.includes(category)).map(category => <div key={category}>{side(list, category, CATEGORY_LABELS[category].toUpperCase())}</div>)}</div>
         </div>
       ))}
     </div>

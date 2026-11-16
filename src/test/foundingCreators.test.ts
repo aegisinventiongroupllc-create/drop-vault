@@ -19,6 +19,13 @@ describe("per-country founding slots", () => {
     expect(foundingSlots(rows, "US", "women")[0].creator).toBeNull();
     expect(foundingSlots(rows, "US", "men")[0].creator?.creator_id).toBe("man");
   });
+  it.each(["women", "men", "trans_women", "trans_men"] as const)("gives %s five independent places per country", category => {
+    const rows = (["women", "men", "trans_women", "trans_men"] as const).map(vault_side => ({ creator_id: vault_side, country: "US", vault_side, slot: 1 }));
+    const slots = foundingSlots(rows, "US", category);
+    expect(slots).toHaveLength(5);
+    expect(slots.filter(slot => slot.creator).map(slot => slot.creator?.creator_id)).toEqual([category]);
+    expect(slots.filter(slot => !slot.creator)).toHaveLength(4);
+  });
   it("keeps country awards separate", () => {
     expect(foundingSlots([{ creator_id: "man", country: "US", vault_side: "men", slot: 1 }], "CA", "men")[0].creator).toBeNull();
   });

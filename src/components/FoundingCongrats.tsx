@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { getTargetLang } from "@/components/AutoTranslator";
 import { languageDirection } from "@/lib/uiTranslation";
 import { fillCopy, foundingCongratsCopy } from "@/lib/foundingCongratsText";
+import { CATEGORY_LABELS, isCreatorCategory } from "@/lib/creatorCategories";
 
 type Slot = { slot: number; country: string; vault_side: string; split_creator: number; split_platform: number; ends_at: string };
 
@@ -30,7 +31,8 @@ const FoundingCongrats = ({ userId, preview }: { userId: string; preview?: Slot 
       <div className="w-full max-w-sm rounded-2xl border border-gold bg-card p-6 text-center shadow-2xl space-y-3">
         <p className="text-4xl" aria-hidden>🏆</p>
         <h2 id="founding-congrats-title" className="text-xl font-bold text-gold">{t.title}</h2>
-        <p className="text-sm text-foreground">{fillCopy(slot.vault_side === "men" ? t.man : t.woman, v)}</p>
+        <p className="text-sm text-foreground">{fillCopy(slot.vault_side === "men" || slot.vault_side === "trans_men" ? t.man : t.woman, v)}</p>
+        {isCreatorCategory(slot.vault_side) && <p className="text-xs text-muted-foreground">{CATEGORY_LABELS[slot.vault_side]}</p>}
         <p className="text-sm text-muted-foreground">{fillCopy(t.body, v)}</p>
         <Button variant="gold" className="w-full" onClick={close}>{t.button}</Button>
       </div>

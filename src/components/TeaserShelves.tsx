@@ -71,7 +71,7 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
         <img src={dttCoin} alt="" className="absolute top-3 right-3 h-7 w-7 object-contain opacity-60" />
       </Button>
       {(gate || error) && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/90 px-3 text-center">
-        <p className="text-sm font-semibold">{error ? "Teaser unavailable" : item.vault === "men" ? "UNLOCK HIS LIBRARY" : "UNLOCK HER LIBRARY"}</p>
+        <p className="text-sm font-semibold">{error ? "Teaser unavailable" : "UNLOCK CREATOR LIBRARY"}</p>
         {error && <><p className="text-xs text-muted-foreground">Try again or use a browser that supports MP4 video.</p><Button variant="outline" size="sm" onClick={() => { setError(false); video.current?.load(); onPlay(); video.current?.play().catch(e => { if (!isPlaybackInterruption(e)) setError(true); }); }}>TRY AGAIN</Button></>}
         {!error && <p className="text-xs text-muted-foreground">1 Bit-Token · 14-day access</p>}
         <Button variant="neon" size="sm" className="h-auto whitespace-normal py-2" onClick={() => onCreatorClick(item.creator)}>VIEW LIBRARY</Button>
@@ -110,7 +110,7 @@ export default function TeaserShelves({ items, viewerId, scope, market, marketLa
   const save = () => saveBrowsePosition(viewerId, scope, positions.current);
   return <div ref={container} className="h-[100dvh] overflow-y-auto bottom-nav-scroll-area pt-40 sm:pt-44" onScroll={event => { positions.current.top = event.currentTarget.scrollTop; save(); }}>
     <div className="mx-auto max-w-7xl space-y-7 px-4 pb-6 sm:px-8">
-      <div><h2 className="font-display text-xl font-bold text-foreground">{scope.startsWith("men") ? "MEN’S VAULT" : "WOMEN’S VAULT"}</h2><p className="mt-1 text-sm text-muted-foreground">{marketLabel}</p></div>
+      <div><h2 className="font-display text-xl font-bold text-foreground">CREATOR DISCOVERY</h2><p className="mt-1 text-sm text-muted-foreground">{marketLabel}</p></div>
       {rows.map((row, index) => <section key={row.title} aria-label={row.title}>
         <h2 className="mb-3 text-base font-semibold text-foreground">{row.title}</h2>
         <div data-shelf={row.title} className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3" onScroll={event => { positions.current.rows[row.title] = event.currentTarget.scrollLeft; save(); }}>

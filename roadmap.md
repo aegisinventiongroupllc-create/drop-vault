@@ -1,5 +1,11 @@
 # Roadmap
 
+## Four-category founding allocation
+- [x] Deployed automatic verified-residence/category-setup allocation: five lifetime 91/9 slots each for Women, Men, Trans Women and Trans Men per country (20 total), creator and category/country locks, duplicate protection and permanent original awards. Existing Spain 92/8 award read back unchanged.
+- [x] Updated four-category admin/customer founder lists, congratulations, agreement v1.7, About, Analytics and English/Spanish onboarding offer; shared multi-select discovery/search and category-neutral promotional ordering preserved. Mixed feed heading no longer labels everything Women’s Vault.
+- [x] 42 unique focused founder/category/VIP/year-end tests pass, including isolated deployed onboarding-trigger allocation and 20-place country caps. Desktop/384×629 onboarding, mixed search and four-category founder boards checked with simulated display data; build OK. No real approvals, account changes, awards or publication.
+- [ ] Genuine new creator verification-to-founder readback and populated paid mixed-feed walkthrough: require authentic adult/residence evidence, independent administrator review and approved paid-access media. Existing signed-in visit remained at the intro; isolated checks do not prove that genuine journey. New full-language legal translations still need review.
+
 ## Multi-select onboarding and discovery
 - [x] Require creator category and standardized self-selected content labels, persisted with creator-only validation; existing creators with missing labels complete setup. Labels remain self-declared, not anatomy certification.
 - [x] Add saved customer category checkboxes in signup/settings and instant navigation/search dropdown; all four checked shows all, unchecked-all stays empty. Existing choices preserved.
