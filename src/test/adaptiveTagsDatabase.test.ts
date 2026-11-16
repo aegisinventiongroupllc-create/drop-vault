@@ -19,7 +19,8 @@ it.skipIf(!db)("saves removable own tags, denies non-creators, and filters categ
     const user=crypto.randomUUID(), other=crypto.randomUUID();
     await sql`SELECT set_config('request.jwt.claim.sub',${user},true),set_config('test.creator','true',true)`;
     await sql`INSERT INTO pg_temp.profiles(user_id,email) VALUES(${user},'fixture'),(${other},'other')`;
-    const tags=["adaptive-creator","mobility-aid-wheelchair-user","prosthetic-limb-difference","sensory-inclusive"];
+    const specialized=["plus-size-curvy","petite","muscle-athletic","mature","custom-request-friendly"];
+    const tags=["adaptive-creator","mobility-aid-wheelchair-user","prosthetic-limb-difference","sensory-inclusive",...specialized];
     await sql`SELECT pg_temp.save_my_adaptive_tags(${tags})`;
     expect((await sql`SELECT adaptive_tags FROM pg_temp.profiles WHERE user_id=${user}`)[0].adaptive_tags.sort()).toEqual([...tags].sort());
     expect((await sql`SELECT adaptive_tags FROM pg_temp.profiles WHERE user_id=${other}`)[0].adaptive_tags).toEqual([]);
@@ -38,6 +39,10 @@ it.skipIf(!db)("saves removable own tags, denies non-creators, and filters categ
     expect(await sql`SELECT * FROM pg_temp.get_teaser_adaptive('{}'::text[],ARRAY['adaptive-creator'])`).toHaveLength(0);
     expect(await sql`SELECT * FROM pg_temp.search_creator_adaptive('',ARRAY['women'],ARRAY['invalid'])`).toHaveLength(0);
     expect(await sql`SELECT * FROM pg_temp.search_creator_adaptive('',ARRAY['women'],'{}'::text[])`).toHaveLength(2);
+    for (const tag of specialized) {
+      expect((await sql`SELECT vault_side FROM pg_temp.search_creator_adaptive('',ARRAY['men','trans_women'],ARRAY[${tag}])`).map(r=>r.vault_side).sort()).toEqual(['men','trans_women']);
+      expect(await sql`SELECT * FROM pg_temp.get_teaser_adaptive(ARRAY['men'],ARRAY[${tag}])`).toHaveLength(1);
+    }
     throw rollback;
   }).catch(error=>{if(error!==rollback)throw error;});
 });

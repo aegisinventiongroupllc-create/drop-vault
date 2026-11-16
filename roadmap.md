@@ -1,5 +1,9 @@
 # Roadmap
 
+## Expanded specialized discovery tags
+- [x] Added all five requested optional descriptors to the shared creator/customer checklist and expanded validated creator saves, private customer saves, search and teaser filters; original adaptive tags and category/founder rules preserved.
+- [x] Preserved aligned checkboxes with a bounded scrollable list and optional collapsed customer settings. Thirty-one focused persistence/filter/privacy tests passed; deployed four functions accept new tags; build OK. Real customer session in isolated settings UI selected Custom Request Friendly, saved/read back after reload and verified phone/desktop with no page errors; original preferences restored. Creator save/filter rules tested in rollback fixtures; genuine approved creator/profile and populated feed walkthrough remains unverified. Nothing published.
+
 ## Optional customer adaptive browsing preferences
 - [x] Added optional collapsed adaptive browsing choices to customer onboarding and PROFILE → BROWSING PREFERENCES; private account-saved choices are separate from public creator self-descriptors and saved atomically with categories.
 - [x] Feed/search consume saved choices, adaptive controls removed above both views, and account changes clear previous choices. Twenty-eight focused tests passed; final fourteen preference/privacy tests passed after a test compatibility correction; build OK. Real customer session in isolated preference UI saved a temporary browsing choice, reloaded/read back the checked selection and displayed the cleaner feed on phone/desktop with no page errors; original choices restored. Ordinary consent-gated onboarding and populated approved-media walkthrough remain unverified; creator tags, paid library access and publication unchanged.

@@ -799,6 +799,13 @@
       "when": 1794802915805,
       "tag": "0113_private_customer_adaptive_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 114,
+      "version": "7",
+      "when": 1794803481390,
+      "tag": "0114_expanded_specialized_discovery_tags",
+      "breakpoints": true
     }
   ]
 }

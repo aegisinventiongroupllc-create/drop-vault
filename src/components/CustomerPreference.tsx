@@ -36,7 +36,7 @@ const CustomerPreference = ({ onSelect, initial, initialAdaptiveTags = [], onCan
         <div className="w-full space-y-6 text-left">
           <ContentPreferenceChoices value={selected} onChange={setSelected} disabled={busy} />
           <details>
-            <summary className="cursor-pointer text-sm text-foreground">Adaptive browsing preferences (Optional){adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary>
+            <summary className="cursor-pointer text-sm text-foreground">Specialized browsing preferences (Optional){adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary>
             <div className="pt-3"><AdaptiveTagChoices filtering value={adaptiveTags} onChange={setAdaptiveTags} disabled={busy} /></div>
           </details>
           {!selected.length && <p className="text-xs text-muted-foreground">No categories selected. Your feed will stay empty.</p>}

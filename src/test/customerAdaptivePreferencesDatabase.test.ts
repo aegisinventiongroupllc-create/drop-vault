@@ -17,7 +17,7 @@ it.skipIf(!db)("saves private own category and adaptive preferences atomically, 
     const user = crypto.randomUUID(), other = crypto.randomUUID();
     await sql`INSERT INTO pg_temp.account_preferences(user_id,email) VALUES(${user},'fixture'),(${other},'other')`;
     await sql`SELECT set_config('request.jwt.claim.sub',${user},true)`;
-    const tags = ["adaptive-creator","mobility-aid-wheelchair-user","prosthetic-limb-difference","sensory-inclusive"];
+    const tags = ["adaptive-creator","mobility-aid-wheelchair-user","prosthetic-limb-difference","sensory-inclusive","plus-size-curvy","petite","muscle-athletic","mature","custom-request-friendly"];
     await sql`SELECT pg_temp.save_my_browsing_preferences(ARRAY['women','trans_men'],${tags})`;
     expect((await sql`SELECT content_categories,adaptive_preferences FROM pg_temp.account_preferences WHERE user_id=${user}`)[0]).toEqual({content_categories:["trans_men","women"],adaptive_preferences:[...tags].sort()});
     expect((await sql`SELECT content_categories,adaptive_preferences FROM pg_temp.account_preferences WHERE user_id=${other}`)[0]).toEqual({content_categories:null,adaptive_preferences:[]});
