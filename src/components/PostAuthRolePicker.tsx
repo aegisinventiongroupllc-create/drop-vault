@@ -9,19 +9,22 @@ import { CATEGORY_LABELS, CREATOR_CATEGORIES, type CreatorCategory } from "@/lib
 import { validContentLabels } from "@/lib/contentLabels";
 import ContentLabelChoices from "./ContentLabelChoices";
 import ContentLabelingNotice from "@/components/ContentLabelingNotice";
+import AdaptiveTagChoices from "@/components/AdaptiveTagChoices";
+import type { AdaptiveTag } from "@/lib/adaptiveTags";
 
 interface PostAuthRolePickerProps {
   email?: string;
-  onSelect: (role: UserRole, creatorSide?: VaultType, labels?: string[]) => Promise<void>;
+  onSelect: (role: UserRole, creatorSide?: VaultType, labels?: string[], adaptiveTags?: AdaptiveTag[]) => Promise<void>;
 }
 
 const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
   const [pickingSide, setPickingSide] = useState(false);
   const [category, setCategory] = useState<CreatorCategory | "">("");
   const [labels, setLabels] = useState<string[]>([]);
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const submit = async (role: UserRole) => { setBusy(true); setError(""); try { await onSelect(role, category || undefined, labels); } catch { setError("Couldn’t save your profile. Please retry."); } finally { setBusy(false); } };
+  const submit = async (role: UserRole) => { setBusy(true); setError(""); try { await onSelect(role, category || undefined, labels, adaptiveTags); } catch { setError("Couldn’t save your profile. Please retry."); } finally { setBusy(false); } };
   const ct = useCreatorText();
 
   return (
@@ -49,6 +52,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               </select>
             </label>
             <ContentLabelChoices value={labels} onChange={setLabels} disabled={busy} />
+            <AdaptiveTagChoices value={adaptiveTags} onChange={setAdaptiveTags} disabled={busy} />
             {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
             <Button variant="neon" disabled={busy || !category || !validContentLabels(labels)} onClick={() => void submit("creator")}>CONTINUE</Button>
             <ContentLabelingNotice />

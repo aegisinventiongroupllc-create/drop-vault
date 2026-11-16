@@ -82,8 +82,8 @@ export function ShelfTeaser({ item, active, onPlay, onCreatorClick, unlocked }: 
   </article>;
 }
 
-export default function TeaserShelves({ items, viewerId, scope, market, marketLabel, unlocked, onCreatorClick, loading, children }: {
-  items: VideoItem[]; viewerId: string | null; scope: string; market: string; marketLabel: string; unlocked: Set<string>; onCreatorClick: (name: string) => void; loading: boolean; children?: React.ReactNode;
+export default function TeaserShelves({ items, viewerId, scope, market, marketLabel, unlocked, onCreatorClick, loading, children, filters }: {
+  items: VideoItem[]; viewerId: string | null; scope: string; market: string; marketLabel: string; unlocked: Set<string>; onCreatorClick: (name: string) => void; loading: boolean; children?: React.ReactNode; filters?: React.ReactNode;
 }) {
   const [active, setActive] = useState<string | null>(null);
   const [interests, setInterests] = useState(() => readInterests(viewerId, market));
@@ -111,6 +111,7 @@ export default function TeaserShelves({ items, viewerId, scope, market, marketLa
   return <div ref={container} className="h-[100dvh] overflow-y-auto bottom-nav-scroll-area pt-40 sm:pt-44" onScroll={event => { positions.current.top = event.currentTarget.scrollTop; save(); }}>
     <div className="mx-auto max-w-7xl space-y-7 px-4 pb-6 sm:px-8">
       <div><h2 className="font-display text-xl font-bold text-foreground">CREATOR DISCOVERY</h2><p className="mt-1 text-sm text-muted-foreground">{marketLabel}</p></div>
+      {filters}
       {rows.map((row, index) => <section key={row.title} aria-label={row.title}>
         <h2 className="mb-3 text-base font-semibold text-foreground">{row.title}</h2>
         <div data-shelf={row.title} className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3" onScroll={event => { positions.current.rows[row.title] = event.currentTarget.scrollLeft; save(); }}>

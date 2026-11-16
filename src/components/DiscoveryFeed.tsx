@@ -21,6 +21,8 @@ import { teaserGateTime } from "@/lib/teaserGate";
 import TeaserShelves from "@/components/TeaserShelves";
 import { publicCreatorUrl } from "@/lib/publicBranding";
 import { isCreatorCategory } from "@/lib/creatorCategories";
+import AdaptiveTagChoices from "./AdaptiveTagChoices";
+import { matchesAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 
 interface VideoItem {
   id: string;
@@ -36,6 +38,7 @@ interface VideoItem {
   vault: VaultType;
   country: string;
   tags?: string[];
+  adaptiveTags?: string[];
   videoUrl?: string;
   mediaType?: "photo" | "video";
   frame?: TeaserFrame;
@@ -379,7 +382,9 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [retry, setRetry] = useState(0);
-  useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [categoryKey,countryFilter,searchQuery]);
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
+  const adaptiveKey = adaptiveTags.join(",");
+  useEffect(() => {setPageOffset(0);setLiveVideos([]);}, [categoryKey,countryFilter,searchQuery,adaptiveKey]);
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [myHearts, setMyHearts] = useState<Set<string>>(new Set());
   const [myUnlocks, setMyUnlocks] = useState<Set<string>>(new Set());
@@ -417,7 +422,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
     let cancelled = false;
     (async () => {
       setLoading(true);setLoadError("");
-      const { data: media, error: mediaError } = await supabase.rpc("get_teaser_categories", {_categories:selectedCategories,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset});
+      const { data: media, error: mediaError } = adaptiveTags.length ? await supabase.rpc("get_teaser_adaptive", {_categories:selectedCategories,_adaptive_tags:adaptiveTags,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset}) : await supabase.rpc("get_teaser_categories", {_categories:selectedCategories,_country:countryFilter ?? null,_query:searchQuery ?? "",_offset:pageOffset});
       if (cancelled) return;
       if (mediaError || !media) {setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);return;}
       setHasMore(media.length === 24);
@@ -425,12 +430,12 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       const creatorIds = Array.from(new Set(media.map((m) => m.creator_id)));
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("user_id, display_name, country, avatar_config, profile_photo_path, vault_side, tags")
+        .select("user_id, display_name, country, avatar_config, profile_photo_path, vault_side, tags, adaptive_tags")
         .in("user_id", creatorIds);
       const { data: counts } = await supabase.rpc("get_heart_counts", { _creator_ids: creatorIds });
       const countMap: Record<string, number> = {};
       (counts ?? []).forEach((r: { creator_id: string; hearts: number }) => { countMap[r.creator_id] = Number(r.hearts); });
-      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType; tags: string[] }> = {};
+      const profMap: Record<string, { name: string; country: string; avatar: unknown; photoPath: string | null; side: VaultType; tags: string[]; adaptiveTags: string[] }> = {};
       profs?.forEach((p) => {
         if (!isCreatorCategory(p.vault_side)) return;
         profMap[p.user_id] = {
@@ -440,6 +445,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           photoPath: p.profile_photo_path,
           side: p.vault_side,
           tags: Array.isArray(p.tags) ? p.tags : [],
+          adaptiveTags: p.adaptive_tags ?? [],
         };
       });
       // Teaser files are private: only pass holders, creators and admins get short-lived links.
@@ -469,6 +475,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
           vault: prof?.side ?? "women",
           country: prof?.country || "GLOBAL",
           tags: prof?.tags ?? [],
+          adaptiveTags: prof?.adaptiveTags ?? [],
           videoUrl: urlMap[m.storage_path],
           storagePath: m.storage_path,
         };
@@ -476,11 +483,12 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
       if (!cancelled) {setLiveVideos(previous => pageOffset === 0 ? items : [...previous, ...items.filter(item => !previous.some(p => p.id === item.id))]);setLoading(false);}
     })().catch(() => {if(!cancelled){setLoadError("Couldn’t load teasers. Please try again.");setLoading(false);}});
     return () => { cancelled = true; };
-  }, [categoryKey,countryFilter,searchQuery,pageOffset,retry]);
+  }, [categoryKey,countryFilter,searchQuery,pageOffset,retry,adaptiveKey]);
 
   const allVideos = [...liveVideos, ...MOCK_VIDEOS];
   const filteredVideos = allVideos.filter(v => {
     if (!selectedCategories.includes(v.vault)) return false;
+    if (!matchesAdaptiveTags(v.adaptiveTags, adaptiveTags)) return false;
     if (countryFilter && countryFilter !== "GLOBAL" && v.country !== countryFilter) return false;
     if (searchQuery && searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -514,7 +522,7 @@ const DiscoveryFeed = ({ onCreatorClick, vault, onSearch, hasVaultToggle, countr
         </button>
       </div>
 
-      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${categoryKey}:${countryFilter || "GLOBAL"}:${searchQuery || ""}`} market={`${categoryKey}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading}>
+      <TeaserShelves items={filteredVideos} viewerId={viewerId} scope={`${categoryKey}:${countryFilter || "GLOBAL"}:${searchQuery || ""}:${adaptiveKey}`} market={`${categoryKey}:${countryFilter || "GLOBAL"}`} marketLabel={!countryFilter || countryFilter === "GLOBAL" ? "Global" : countryFilter} unlocked={myUnlocks} onCreatorClick={onCreatorClick} loading={loading} filters={<details className="py-2"><summary className="cursor-pointer text-sm text-foreground">Adaptive filters{adaptiveTags.length ? ` · ${adaptiveTags.length}` : ""}</summary><div className="pt-3"><AdaptiveTagChoices filtering value={adaptiveTags} onChange={setAdaptiveTags} /></div></details>}>
         {!selectedCategories.length && <p className="p-6 text-center text-sm text-muted-foreground">No categories selected.</p>}
         {loadError && <div className="p-6 text-center text-destructive"><p>{loadError}</p><Button variant="outline" onClick={()=>setRetry(n=>n+1)}>Try again</Button></div>}
         {hasMore && <div className="p-6 text-center"><Button variant="outline" disabled={loading} onClick={()=>setPageOffset(n=>n+24)}>{loading ? "Loading…" : "More creators"}</Button></div>}

@@ -4,3 +4,4 @@
 - General and support tip previews share tokenEconomy calculations; keep checkout disabled until a verified server transfer exists. Why: disclosures must not imply unimplemented payments.
 - Content reactions use server-checked paid entitlements and creator opt-in; customers read only their selection and creators read aggregate counts. Why: prevent unpaid reactions and buyer disclosure.
 - Founder allocation locks creator and country/category, requires verified residence and category setup, and shares four-category board definitions. Why: preserve original grants and prevent duplicate or over-cap awards.
+- Adaptive descriptors use a validated owner-saved array exposed only for creators in the public projection, with server-side category/tag intersection before pagination. Why: voluntary public disclosure must not leak customer labels or grant financial eligibility.

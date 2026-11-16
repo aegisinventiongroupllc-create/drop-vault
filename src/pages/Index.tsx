@@ -376,7 +376,7 @@ const Index = () => {
     return (
       <PostAuthRolePicker
         email={email}
-        onSelect={async (chosenRole, creatorSide, labels) => {
+        onSelect={async (chosenRole, creatorSide, labels, adaptiveTags) => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
@@ -386,6 +386,8 @@ const Index = () => {
             const side: VaultType = isCreatorCategory(creatorSide) ? creatorSide : "women";
             const { error: sideError } = await supabase.rpc("save_my_creator_discovery", { _category: side, _labels: labels ?? [] });
             if (sideError) throw sideError;
+            const { error: adaptiveError } = await supabase.rpc("save_my_adaptive_tags", { _tags: adaptiveTags ?? [] });
+            if (adaptiveError) throw adaptiveError;
             setVault(side);
             setPreference(side);
             savePrefs({ email, role: "creator", vault: side, preference: side });

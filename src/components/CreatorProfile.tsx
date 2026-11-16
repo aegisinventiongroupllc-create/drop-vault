@@ -26,6 +26,8 @@ import { useHeartTotal } from "@/hooks/useHearts";
 import { hasLibraryContent } from "@/lib/teaserPlayback";
 import { PurchaseAccessNotice } from "@/components/PurchaseAccessNotice";
 import { spendableTokens } from "@/lib/accessEscrow";
+import AdaptiveTagBadges from "@/components/AdaptiveTagBadges";
+import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 
 interface Vault {
   name: string;
@@ -54,6 +56,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   };
 
   const [isMen, setIsMen] = useState(false);
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
   const [vipBadge, setVipBadge] = useState(false);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const profileBackdrop = useProfileBackdrop(creatorId);
@@ -88,7 +91,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
     (async () => {
       const { data } = await supabase
         .from("public_profiles")
-        .select("user_id, avatar_config, profile_photo_path, vault_side")
+        .select("user_id, avatar_config, profile_photo_path, vault_side, adaptive_tags")
         .ilike("display_name", creatorName)
         .limit(1)
         .maybeSingle();
@@ -97,6 +100,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
         setAvatarConfig(data?.avatar_config ?? null);
         setProfilePhotoPath(data?.profile_photo_path ?? null);
         setIsMen(data?.vault_side === "men");
+        setAdaptiveTags(parseAdaptiveTags(data?.adaptive_tags));
       }
     })();
     return () => { cancel = true; };
@@ -256,6 +260,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
             </div>
             <p className="text-sm text-muted-foreground mt-1">Content Creator</p>
+            <AdaptiveTagBadges tags={adaptiveTags} />
             <span aria-hidden="true" className="block h-2" />
           </div>
         </div>

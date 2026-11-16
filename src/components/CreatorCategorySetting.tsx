@@ -5,10 +5,13 @@ import { CATEGORY_LABELS, CREATOR_CATEGORIES, isCreatorCategory, type CreatorCat
 import ContentLabelChoices from "./ContentLabelChoices";
 import { validContentLabels } from "@/lib/contentLabels";
 import ContentLabelingNotice from "./ContentLabelingNotice";
+import AdaptiveTagChoices from "./AdaptiveTagChoices";
+import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 
 export default function CreatorCategorySetting() {
   const [category, setCategory] = useState<CreatorCategory | "">("");
   const [labels, setLabels] = useState<string[]>([]);
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -16,8 +19,8 @@ export default function CreatorCategorySetting() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { if (active) { setMessage("Please sign in again."); setBusy(false); } return; }
-      const { data, error } = await supabase.from("profiles").select("vault_side, content_labels").eq("user_id", user.id).maybeSingle();
-      if (active) { if (isCreatorCategory(data?.vault_side)) setCategory(data.vault_side); setLabels(data?.content_labels ?? []); setMessage(error ? "Couldn’t load your category." : ""); setBusy(false); }
+      const { data, error } = await supabase.from("profiles").select("vault_side, content_labels, adaptive_tags").eq("user_id", user.id).maybeSingle();
+      if (active) { if (isCreatorCategory(data?.vault_side)) setCategory(data.vault_side); setLabels(data?.content_labels ?? []); setAdaptiveTags(parseAdaptiveTags(data?.adaptive_tags)); setMessage(error ? "Couldn’t load your category." : ""); setBusy(false); }
     })();
     return () => { active = false; };
   }, []);
@@ -27,7 +30,9 @@ export default function CreatorCategorySetting() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setBusy(false); setMessage("Please sign in again."); return; }
     const { error } = await supabase.rpc("save_my_creator_discovery", { _category: category, _labels: labels });
-    setBusy(false); setMessage(error ? "Couldn’t save your category and labels. Please retry." : "Category and labels saved.");
+    if (error) { setBusy(false); setMessage("Couldn’t save your category and labels. Please retry."); return; }
+    const { error: adaptiveError } = await supabase.rpc("save_my_adaptive_tags", { _tags: adaptiveTags });
+    setBusy(false); setMessage(adaptiveError ? "Category saved, but adaptive tags couldn’t save. Please retry." : "Category and labels saved.");
   };
   return <section className="space-y-3 text-left">
     <label htmlFor="creator-category" className="text-xs font-semibold text-foreground">Creator category</label>
@@ -36,6 +41,7 @@ export default function CreatorCategorySetting() {
       {CREATOR_CATEGORIES.map(value => <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}
     </select>
     <ContentLabelChoices value={labels} onChange={setLabels} disabled={busy} />
+    <AdaptiveTagChoices value={adaptiveTags} onChange={setAdaptiveTags} disabled={busy} />
     <ContentLabelingNotice />
     <Button variant="outline" disabled={busy || !category || !validContentLabels(labels)} onClick={() => void save()}>SAVE CATEGORY</Button>
     {message && <p role="status" className="text-xs text-muted-foreground">{message}</p>}

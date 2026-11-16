@@ -1,5 +1,11 @@
 # Roadmap
 
+## Optional adaptive descriptors
+- [x] Added four optional self-described adaptive tags in registration and profile settings, public-disclosure notice, validated own-creator save/removal and creator-only public projection. No medical evidence, disability inference or bonus founder pool.
+- [x] Display selected profile/search badges; adaptive filters use all-selected-tag matching within explicit category preferences before pagination. Feed controls sit above shelves; existing independent identity/residence review and five-per-category lifetime founding rules unchanged.
+- [x] 23 unique focused adaptive/category/founder/browse tests pass. Desktop/384×629 voluntary selection, no-tag continuation eligibility, profile badges and search/feed filter requests verified with simulated display responses; build OK. Actual signed-in customer read shows no tags and no creator approval; no sensitive account tags assigned or publication.
+- [ ] Genuine creator self-selection-to-save-to-public-profile and populated paid adaptive-feed walkthrough: needs a consenting creator choosing their own descriptors, approved profile/media and eligible customer access. Current account is an unapproved customer; isolated checks do not establish that journey. Reviewed translations for new wording remain outstanding.
+
 ## Four-category founding allocation
 - [x] Deployed automatic verified-residence/category-setup allocation: five lifetime 91/9 slots each for Women, Men, Trans Women and Trans Men per country (20 total), creator and category/country locks, duplicate protection and permanent original awards. Existing Spain 92/8 award read back unchanged.
 - [x] Updated four-category admin/customer founder lists, congratulations, agreement v1.7, About, Analytics and English/Spanish onboarding offer; shared multi-select discovery/search and category-neutral promotional ordering preserved. Mixed feed heading no longer labels everything Women’s Vault.
