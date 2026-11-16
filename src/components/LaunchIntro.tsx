@@ -187,9 +187,9 @@ export default function LaunchIntro() {
           { opacity: 1, offset: 0.2 },
           { transform: "translate(0, 0) scale(1)", opacity: 1 },
         ], {
-          duration: 1600,
-          delay: index * 450,
-          easing: "cubic-bezier(0.22, 0.65, 0.3, 1)",
+          duration: 2100,
+          delay: index * 500,
+          easing: "cubic-bezier(0.25, 0.5, 0.25, 1)",
           fill: "backwards",
         }));
       });
