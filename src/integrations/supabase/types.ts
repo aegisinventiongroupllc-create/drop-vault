@@ -2041,6 +2041,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          adaptive_tags: string[]
           avatar_config: Json
           avatar_url: string | null
           content_labels: string[] | null
@@ -2066,6 +2067,7 @@ export type Database = {
           verification_submitted_at: string | null
         }
         Insert: {
+          adaptive_tags?: string[]
           avatar_config?: Json
           avatar_url?: string | null
           content_labels?: string[] | null
@@ -2091,6 +2093,7 @@ export type Database = {
           verification_submitted_at?: string | null
         }
         Update: {
+          adaptive_tags?: string[]
           avatar_config?: Json
           avatar_url?: string | null
           content_labels?: string[] | null
@@ -2730,6 +2733,7 @@ export type Database = {
     Views: {
       public_profiles: {
         Row: {
+          adaptive_tags: string[] | null
           avatar_config: Json | null
           country: string | null
           created_at: string | null
@@ -2741,6 +2745,7 @@ export type Database = {
           vault_side: string | null
         }
         Insert: {
+          adaptive_tags?: never
           avatar_config?: Json | null
           country?: string | null
           created_at?: string | null
@@ -2752,6 +2757,7 @@ export type Database = {
           vault_side?: string | null
         }
         Update: {
+          adaptive_tags?: never
           avatar_config?: Json | null
           country?: string | null
           created_at?: string | null
@@ -2951,6 +2957,37 @@ export type Database = {
           inspection_address: string
         }[]
       }
+      get_teaser_adaptive: {
+        Args: {
+          _adaptive_tags: string[]
+          _categories: string[]
+          _country?: string
+          _offset?: number
+          _query?: string
+        }
+        Returns: {
+          active_from: string | null
+          active_until: string | null
+          allow_permanent_buyout: boolean
+          bucket: string
+          created_at: string
+          creator_id: string
+          id: string
+          library_slot: string
+          media_type: string
+          storage_path: string
+          teaser_frame: string
+          title: string
+          updated_at: string
+          views: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "creator_media"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_teaser_categories: {
         Args: {
           _categories: string[]
@@ -3128,6 +3165,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      save_my_adaptive_tags: { Args: { _tags: string[] }; Returns: undefined }
       save_my_content_preferences: {
         Args: { _categories: string[] }
         Returns: string[]
@@ -3135,6 +3173,33 @@ export type Database = {
       save_my_creator_discovery: {
         Args: { _category: string; _labels: string[] }
         Returns: undefined
+      }
+      search_creator_adaptive: {
+        Args: {
+          _adaptive_tags: string[]
+          _categories: string[]
+          _countries?: string[]
+          _offset?: number
+          _query: string
+        }
+        Returns: {
+          adaptive_tags: string[] | null
+          avatar_config: Json | null
+          country: string | null
+          created_at: string | null
+          display_name: string | null
+          profile_photo_path: string | null
+          role: string | null
+          tags: string[] | null
+          user_id: string | null
+          vault_side: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       search_creator_categories: {
         Args: {
@@ -3144,6 +3209,7 @@ export type Database = {
           _query: string
         }
         Returns: {
+          adaptive_tags: string[] | null
           avatar_config: Json | null
           country: string | null
           created_at: string | null
@@ -3169,6 +3235,7 @@ export type Database = {
           _vault?: string
         }
         Returns: {
+          adaptive_tags: string[] | null
           avatar_config: Json | null
           country: string | null
           created_at: string | null
