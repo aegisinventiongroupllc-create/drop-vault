@@ -160,7 +160,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
   const hasUnlocks = activeUnlocks.some(u => visibleVaults.includes(genderMap[u.creatorId])) || savedLocked.length > 0;
 
   // Dynamic header based on vault preference
-  const libraryTitle = visibleVaults.length === 2 ? "MY LIBRARY" : visibleVaults[0] === "men" ? "MY GUYS" : visibleVaults[0] === "women" ? "MY GIRLS" : `MY ${CATEGORY_LABELS[visibleVaults[0]].toUpperCase()}`;
+  const libraryTitle = visibleVaults.length !== 1 ? "MY LIBRARY" : visibleVaults[0] === "men" ? "MY GUYS" : visibleVaults[0] === "women" ? "MY GIRLS" : `MY ${CATEGORY_LABELS[visibleVaults[0]].toUpperCase()}`;
 
   const expiringCreators = activeUnlocks.filter(u => {
     const remaining = getUnlockTimeRemaining(u);
