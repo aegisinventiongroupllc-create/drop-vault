@@ -150,6 +150,8 @@ export default function LaunchIntro() {
   const [lang, setLang] = useState(() => getTargetLang());
   const [ready, setReady] = useState(skyReady);
   const [size, setSize] = useState(() => (typeof window !== "undefined" ? globeSize() : 300));
+  const globeRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (ready) return;
     const go = () => setReady(true);
@@ -163,6 +165,37 @@ export default function LaunchIntro() {
     return () => removeEventListener("resize", r);
   }, []);
   const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (!show || !entryReady || reduced) return;
+    const animations: Animation[] = [];
+    const frame = requestAnimationFrame(() => {
+      const source = globeRef.current?.querySelector("p")?.firstChild;
+      const words = titleRef.current?.querySelectorAll<HTMLElement>(".dtt-intro-word");
+      if (!source || source.nodeType !== Node.TEXT_NODE || !words) return;
+      words.forEach((word, index) => {
+        // Measure the original D/T/T pixels, not an estimated globe position.
+        const range = document.createRange();
+        range.setStart(source, index);
+        range.setEnd(source, index + 1);
+        const origin = range.getBoundingClientRect();
+        const destination = word.getBoundingClientRect();
+        const x = origin.x + origin.width / 2 - destination.x - destination.width / 2;
+        const y = origin.y + origin.height / 2 - destination.y - destination.height / 2;
+        animations.push(word.animate([
+          { transform: `translate(${x}px, ${y}px) scale(0.35)`, opacity: 0 },
+          { opacity: 1, offset: 0.12 },
+          { transform: "translate(0, 0) scale(1)", opacity: 1 },
+        ], {
+          duration: 650,
+          delay: index * 90,
+          easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+          fill: "backwards",
+        }));
+      });
+    });
+    return () => { cancelAnimationFrame(frame); animations.forEach((animation) => animation.cancel()); };
+  }, [show, entryReady, reduced]);
 
   useEffect(() => {
     const replay = () => { setLeaving(false); setShow(false); requestAnimationFrame(() => setShow(true)); };
@@ -198,9 +231,13 @@ export default function LaunchIntro() {
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
       <div className="relative flex flex-col items-center gap-5 px-6 text-center">
-        <div className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp motionless={reduced} /></div>
+        <div ref={globeRef} className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp motionless={reduced} /></div>
         <div className="flex flex-col items-center gap-2">
-          <h1 className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no">Drop That Thing™</h1>
+          <h1 ref={titleRef} className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no" aria-label="Drop That Thing™">
+            <span className="dtt-intro-word" aria-hidden="true">Drop</span>{" "}
+            <span className="dtt-intro-word" aria-hidden="true">That</span>{" "}
+            <span className="dtt-intro-word" aria-hidden="true">Thing™</span>
+          </h1>
           <p dir={rtl ? "rtl" : "ltr"} className="dtt-intro-tagline notranslate max-w-xs text-[11px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-foreground/80" translate="no">
             {introTaglines(lang)}
           </p>

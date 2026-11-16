@@ -30,14 +30,15 @@
   letter-spacing: 0;
   opacity: 1;
 }
+.dtt-intro-word { display: inline-block; transform-origin: center; }
 @keyframes dtt-title-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: none; letter-spacing: 0; }
 }
 @media (max-width: 640px) { .dtt-intro-title { font-size: 1.8rem; } }
 @keyframes dtt-title-pulse {
-  0%, 100% { text-shadow: 0 0 12px hsl(var(--primary) / .5); transform: scale(1); }
-  50% { text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); transform: scale(1.04); }
+  0%, 100% { text-shadow: 0 0 12px hsl(var(--primary) / .5); }
+  50% { text-shadow: 0 0 34px hsl(var(--primary) / 1), 0 0 60px hsl(var(--primary) / .6); }
 }
 
 .dtt-intro-tagline, .dtt-intro-adult { opacity: 1; }
