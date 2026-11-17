@@ -49,9 +49,13 @@ interface MemberDashboardProps {
   preference?: CustomerPreference;
   onNavigateHome?: () => void;
   onCreatorClick?: (name: string) => void;
+  onBrowsingPreferences?: () => void;
+  onCountryFilter?: () => void;
+  countryFilter?: string;
+  categoryFilters?: React.ReactNode;
 }
 
-const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick }: MemberDashboardProps) => {
+const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference, onNavigateHome, onCreatorClick, onBrowsingPreferences, onCountryFilter, countryFilter = "GLOBAL", categoryFilters }: MemberDashboardProps) => {
   const visibleVaults = allowedVaults(preference ?? vault);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [payRequest, setPayRequest] = useState<CustomRequestRow | null>(null);
@@ -251,6 +255,17 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
         <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
         <WalletIndicator />
       </div>
+
+      {(onBrowsingPreferences || onCountryFilter || categoryFilters) && (
+        <section className="px-4 py-3 mb-4 border-y border-border space-y-3" aria-label="Discovery filters">
+          <h2 className="text-sm font-bold text-foreground">DISCOVERY FILTERS</h2>
+          <div className="flex flex-wrap gap-2">
+            {categoryFilters}
+            {onBrowsingPreferences && <Button variant="outline" onClick={onBrowsingPreferences}>BROWSING PREFERENCES</Button>}
+            {onCountryFilter && <Button variant="outline" onClick={onCountryFilter}>COUNTRY · {countryFilter}</Button>}
+          </div>
+        </section>
+      )}
 
       {/* Expiration notification */}
       {notification && (

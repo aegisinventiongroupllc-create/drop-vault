@@ -5,11 +5,9 @@ import { CATEGORY_LABELS, isCreatorCategory, type CreatorCategory } from "@/lib/
 import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
 import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
-import MiniGlobe from "@/components/MiniGlobe";
 import { useState, useEffect } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
-import { COUNTRIES } from "@/components/GlobalPassport";
 import GlobePicker from "@/components/GlobePicker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthScreen from "@/components/AuthScreen";
@@ -314,7 +312,6 @@ const Index = () => {
                   onSearch={() => setShowSearch(true)}
                   hasVaultToggle={false}
                   countryFilter={countryFilter}
-                  onGlobeOpen={() => setShowGlobe(true)}
                   topOffset
                   onLogoTripleTap={() => setAuthPreview(true)}
                 />
@@ -335,6 +332,8 @@ const Index = () => {
                   vault={previewVault}
                   onNavigateHome={() => navigateToTab("home")}
                   onCreatorClick={(name) => setSelectedCreator(name)}
+                  onCountryFilter={() => setShowGlobe(true)}
+                  countryFilter={countryFilter}
                 />
               )}
               {activeTab === "profile" && (
@@ -480,7 +479,6 @@ const Index = () => {
       <GlobalSearch
               categories={allowedVaults(preference)}
         adaptiveTags={adaptivePreferences}
-        onCategoriesChange={updateContentPreferences}
         onCreatorClick={(name) => { setSelectedCreator(name); setShowSearch(false); }}
         onClose={() => setShowSearch(false)}
       />
@@ -540,17 +538,8 @@ const Index = () => {
                   DASHBOARD
                 </button>
               )}
-              <ContentFilterMenu value={allowedVaults(preference)} onChange={updateContentPreferences} />
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowGlobe(true)}
-                aria-label="Pick a country"
-                className="flex items-center gap-1.5 bg-secondary/80 border border-border rounded-full px-3 py-1.5 text-xs font-bold tracking-wider hover:border-primary/50 transition-all active:scale-95"
-              >
-                {countryFilter === "GLOBAL" ? <MiniGlobe size={26} speed={0.4} lights /> : <span className="text-sm">{(COUNTRIES.find(c => c.code === countryFilter) ?? COUNTRIES[0]).flag}</span>}
-                <span className="text-foreground">{countryFilter === "GLOBAL" ? "GLOBAL" : countryFilter}</span>
-              </button>
               <LanguageToggle />
             </div>
           </div>
@@ -586,6 +575,10 @@ const Index = () => {
           preference={preference ?? undefined}
           onNavigateHome={() => navigateToTab("home")}
           onCreatorClick={handleCreatorClick}
+          onBrowsingPreferences={role === "customer" ? () => setEditingPreference(true) : undefined}
+          onCountryFilter={() => setShowGlobe(true)}
+          countryFilter={countryFilter}
+          categoryFilters={role === "creator" ? <ContentFilterMenu value={allowedVaults(preference)} onChange={updateContentPreferences} /> : undefined}
         />
       )}
       {activeTab === "profile" && (
@@ -597,6 +590,7 @@ const Index = () => {
             <h2 className="text-xl font-bold text-foreground tracking-wider font-display">{t.profile}</h2>
             <ProfileIdentityEditor />
             <Button variant="outline" onClick={() => setEditingPreference(true)}>BROWSING PREFERENCES</Button>
+            <Button variant="outline" onClick={() => setShowGlobe(true)}>COUNTRY · {countryFilter}</Button>
             <button
               onClick={() => {
                 logActivity("logout", "Customer profile tab").finally(() => {
