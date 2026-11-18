@@ -1,5 +1,11 @@
 # Roadmap
 
+## New Year launch and renewed provider review — November 18
+- [x] Re-ran the complete automated suite: 624/624 checks across 102 files passed. Live domain returned HTTP 200; preview entrance and protected routes produced no page errors. Actual availability probes: TryBit enabled for testing, CCBill disabled; neither probe establishes written approval.
+- [x] Rechecked named reviewers: customer reviewer has active entry access through November 3, 2027; creator-named reviewer is currently a customer in both profile and server role, with verification unsubmitted. Saved current provider checklist and candid launch blockers in dtt-new-year-review-checklist.md and Files; no submissions, payments, settings or publication changed.
+- [ ] Complete genuine creator/customer/admin and settled-payment-to-LTC-payout walkthroughs, reviewer creator setup, identity/content clearance, inbox/recovery checks, country/legal/translation review and isolated backup rehearsal; these need consenting participants, owner administrator access, provider-authorized payments and outside confirmations. Current full tests are not operational or merchant approval.
+- [ ] Obtain TryBit's exact prior rejection steps and written adult-marketplace/testing approval; obtain CCBill's current compliance PDF, processing-rate attachment and fee timing before accepting costs. January 1, 2027 is a target, not a guaranteed approved launch.
+
 ## Suspicious access monitoring
 - [x] Record rejected administrator access and denied identity-record requests privately; deployed both services. Real wrong-code request was blocked and read back in trusted query; no credentials stored.
 - [x] Add an account-protected SECURITY view with paginated recent alerts; 15 focused security/privacy checks pass and build OK. Real signed-in non-admin sees no rows and the account-required notice on desktop/mobile.
