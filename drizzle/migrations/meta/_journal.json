@@ -806,6 +806,13 @@
       "when": 1794803481390,
       "tag": "0114_expanded_specialized_discovery_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1795010137683,
+      "tag": "0115_private_security_access_events",
+      "breakpoints": true
     }
   ]
 }

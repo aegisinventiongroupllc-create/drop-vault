@@ -2177,6 +2177,33 @@ export type Database = {
         }
         Relationships: []
       }
+      security_access_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          outcome: string
+          source: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          outcome?: string
+          source: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          outcome?: string
+          source?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           autorenew: boolean

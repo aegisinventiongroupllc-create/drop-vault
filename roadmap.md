@@ -1,5 +1,11 @@
 # Roadmap
 
+## Suspicious access monitoring
+- [x] Record rejected administrator access and denied identity-record requests privately; deployed both services. Real wrong-code request was blocked and read back in trusted query; no credentials stored.
+- [x] Add an account-protected SECURITY view with paginated recent alerts; 15 focused security/privacy checks pass and build OK. Real signed-in non-admin sees no rows and the account-required notice on desktop/mobile.
+- [ ] Verify the administrator alert-list walkthrough: current supplied session is not an administrator; no account privileges changed.
+- [x] Document coverage limits: no provider-breach detection, universal intrusion guarantee, email alerts or traffic firewall included. Frontend not published; existing access guards preserved rather than replaced by a universal blocker.
+
 ## Expanded specialized discovery tags
 - [x] Added all five requested optional descriptors to the shared creator/customer checklist and expanded validated creator saves, private customer saves, search and teaser filters; original adaptive tags and category/founder rules preserved.
 - [x] Preserved aligned checkboxes with a bounded scrollable list and optional collapsed customer settings. Thirty-one focused persistence/filter/privacy tests passed; deployed four functions accept new tags; build OK. Real customer session in isolated settings UI selected Custom Request Friendly, saved/read back after reload and verified phone/desktop with no page errors; original preferences restored. Creator save/filter rules tested in rollback fixtures; genuine approved creator/profile and populated feed walkthrough remains unverified. Nothing published.

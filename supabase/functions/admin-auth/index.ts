@@ -1,4 +1,5 @@
 // Verifies the admin passcode server-side so it never has to live in the website bundle.
+import { recordSecurityDenial } from "../_shared/securityAccessEvents.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -23,6 +24,7 @@ Deno.serve(async (req) => {
   const passcode = typeof body?.passcode === "string" ? body.passcode.trim() : "";
 
   if (!passcode || passcode !== ADMIN_PASSCODE) {
+    await recordSecurityDenial("admin_code_rejected", "admin-auth");
     // A wrong code is a normal sign-in outcome, not a server fault: answer 200
     // with ok:false so clients never see a failed function call.
     return json({ ok: false, error: "Invalid access code" });

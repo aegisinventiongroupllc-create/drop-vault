@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
+import { recordSecurityDenial } from "../_shared/securityAccessEvents.ts";
 const json = (body: unknown, status=200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type":"application/json" } });
 const schema = z.discriminatedUnion("action", [
  z.object({ action:z.literal("list"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
@@ -18,9 +19,9 @@ Deno.serve(async req => {
  const authorization=req.headers.get("authorization")??"";
  const client=createClient(url,anonKey,{global:{headers:{Authorization:authorization}}});
  const {data:{user},error:authError}=await client.auth.getUser();
- if(authError||!user) return json({error:"Administrator account sign-in required"},401);
+ if(authError||!user) { await recordSecurityDenial("identity_access_denied","admin-verifications"); return json({error:"Administrator account sign-in required"},401); }
  const {data:admin,error:roleError}=await client.rpc("has_role",{_user_id:user.id,_role:"admin"});
- if(roleError||admin!==true) return json({error:"Administrator privileges required"},403);
+ if(roleError||admin!==true) { await recordSecurityDenial("identity_access_denied","admin-verifications",user.id); return json({error:"Administrator privileges required"},403); }
  const parsed=schema.safeParse(await req.json());
  if(!parsed.success) return json({error:"Invalid review request"},400);
  const body=parsed.data;

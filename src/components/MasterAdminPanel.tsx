@@ -1,6 +1,7 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminFoundingCreators from "@/components/AdminFoundingCreators";
 import AdminYearEndAwards from "@/components/AdminYearEndAwards";
+import AdminSecurityEvents from "@/components/AdminSecurityEvents";
 import AdminSuggestions from "@/components/AdminSuggestions";
 import AdminGlobeStyle from "@/components/AdminGlobeStyle";
 import { useState, useEffect } from "react";
@@ -60,7 +61,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention" | "yearend";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention" | "yearend" | "security";
 
 interface FinanceWallet {
   user_id: string;
@@ -316,6 +317,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
     { id: "powerweek", label: "⚡ POWER" },
     { id: "demand", label: "DEMAND" },
     { id: "health", label: "HEALTH" },
+    { id: "security", label: "SECURITY" },
     { id: "legal", label: "LEGAL LOGS" },
     { id: "retention", label: "BACKUPS & RETENTION" },
   ];
@@ -361,6 +363,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       </div>
 
       {/* Creator Verification Queue */}
+      {activeSection === "security" && <AdminSecurityEvents />}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
           <Button variant="outline" onClick={() => window.location.assign("/admin/verifications")}>OPEN VERIFICATION RECORDS</Button>
