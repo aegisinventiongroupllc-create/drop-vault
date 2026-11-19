@@ -10,7 +10,8 @@ describe("Persona sandbox protections", () => {
   it("rejects substitution of a saved inquiry", () => { expect(() => inquirySummary(inquiry("completed"), owner, "inq_Different")).toThrow("Invalid inquiry"); });
   it("does not project private identity fields", () => { expect(Object.keys(inquirySummary(inquiry("completed"), owner))).toEqual(["inquiryId", "status", "environment", "grantsCreatorApproval"]); });
   it("allows only Persona HTTPS one-time verification links", () => {
+    expect(safeOneTimeLink({ meta: { "one-time-link": "https://withpersona.com/verify?code=synthetic" } })).toBe("https://withpersona.com/verify?code=synthetic");
     expect(safeOneTimeLink({ meta: { "one-time-link": "https://inquiry.withpersona.com/verify?code=example" } })).toBe("https://inquiry.withpersona.com/verify?code=example");
-    for (const link of ["https://evil.example/verify", "http://inquiry.withpersona.com/verify", "https://inquiry.withpersona.com.evil.example/verify"]) expect(() => safeOneTimeLink({ meta: { "one-time-link": link } })).toThrow();
+    for (const link of ["https://evil.example/verify", "http://inquiry.withpersona.com/verify", "https://inquiry.withpersona.com.evil.example/verify", "https://withpersona.com.evil.example/verify", "https://withpersona.com:444/verify", "https://user@withpersona.com/verify"]) expect(() => safeOneTimeLink({ meta: { "one-time-link": link } })).toThrow();
   });
 });

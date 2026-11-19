@@ -1,5 +1,9 @@
 # Roadmap
 
+## Persona Sandbox retest — November 19
+- [x] Clarified private creator onboarding can start before payment readiness; paid launch still requires verified payments and a working payout process. No payment settings changed.
+- [ ] Retest deployed Sandbox template with a temporary creator, synthetic simulation only and account approval readback; fix the documented Persona link hostname mismatch. No real identity submissions or approvals.
+
 ## Private security email alerts — November 19
 - [x] Explained practical security layers and conditional costs; Lovable internal security pricing and DTT's ongoing bill remain unknown. No new paid service added; existing Cloud/email usage still applies.
 - [x] Send server-recorded administrator-code and identity-access denials to Admin@dttmediallc.com with managed idempotency per event kind/15-minute UTC window; omit actor identity/credentials. Nine notification/privacy tests passed, including live database restrictions.

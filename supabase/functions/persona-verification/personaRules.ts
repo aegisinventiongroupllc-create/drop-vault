@@ -12,6 +12,6 @@ export function safeOneTimeLink(body: unknown) {
   const link = (body as { meta?: Record<string, unknown> } | null)?.meta?.["one-time-link"];
   if (typeof link !== "string") throw new Error("Persona did not provide a verification link");
   const url = new URL(link);
-  if (url.protocol !== "https:" || url.hostname !== "inquiry.withpersona.com" || url.pathname !== "/verify" || url.username || url.password) throw new Error("Invalid verification link");
+  if (url.protocol !== "https:" || !["withpersona.com", "inquiry.withpersona.com"].includes(url.hostname) || url.port || url.pathname !== "/verify" || url.username || url.password) throw new Error("Invalid verification link");
   return url.toString();
 }
