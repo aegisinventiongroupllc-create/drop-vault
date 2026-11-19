@@ -2,7 +2,8 @@
 
 ## Persona Sandbox retest — November 19
 - [x] Clarified private creator onboarding can start before payment readiness; paid launch still requires verified payments and a working payout process. No payment settings changed.
-- [ ] Retest deployed Sandbox template with a temporary creator, synthetic simulation only and account approval readback; fix the documented Persona link hostname mismatch. No real identity submissions or approvals.
+- [x] Fixed and deployed the documented Persona HTTPS link hostname check; five privacy/redirect regression tests pass and build OK. Temporary creator opened Persona's hosted screen, which explicitly confirmed Sandbox and DTT Media LLC. Persona's documented synthetic actions completed/approved only that Sandbox inquiry; DTT CHECK TEST STATUS and reload read back approved with no page errors. Real DTT account remains unsubmitted/is_verified=false with zero identity submissions. No real identity data, creator approval, payment changes or publication.
+- [ ] Actual hosted document/selfie step interaction remains unverified: this retest used Persona's official lifecycle simulation instead of uploading identities or completing biometric capture. Genuine creator clearance remains a separate consenting-adult/manual-review task.
 
 ## Private security email alerts — November 19
 - [x] Explained practical security layers and conditional costs; Lovable internal security pricing and DTT's ongoing bill remain unknown. No new paid service added; existing Cloud/email usage still applies.
