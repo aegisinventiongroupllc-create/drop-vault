@@ -1,6 +1,7 @@
 import type { ComponentType } from 'npm:react@18.3.1'
 import { template as creatorApproved } from './creator-approved.tsx'
 import { template as creatorDeclined } from './creator-declined.tsx'
+import { template as securityAccessDenied } from './security-access-denied.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -22,4 +23,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'creator-approved': creatorApproved,
   'creator-declined': creatorDeclined,
+  'security-access-denied': securityAccessDenied,
 }

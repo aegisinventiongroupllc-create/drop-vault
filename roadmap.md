@@ -1,5 +1,11 @@
 # Roadmap
 
+## Private security email alerts — November 19
+- [x] Explained practical security layers and conditional costs; Lovable internal security pricing and DTT's ongoing bill remain unknown. No new paid service added; existing Cloud/email usage still applies.
+- [x] Send server-recorded administrator-code and identity-access denials to Admin@dttmediallc.com with managed idempotency per event kind/15-minute UTC window; omit actor identity/credentials. Nine notification/privacy tests passed, including live database restrictions.
+- [x] Deployed admin-auth, admin-verifications and email preview. Controlled wrong-code request blocked, new event read back, managed email log confirms sent at 01:57:34 UTC; build OK. No publication or privilege changes.
+- [ ] Owner confirms inbox arrival (managed logs establish sent, not delivered/opened). Prior security scan warnings still require separate review; these alerts do not detect all intrusions or prevent copying.
+
 ## New Year launch and renewed provider review — November 18
 - [x] Re-ran the complete automated suite: 624/624 checks across 102 files passed. Live domain returned HTTP 200; preview entrance and protected routes produced no page errors. Actual availability probes: TryBit enabled for testing, CCBill disabled; neither probe establishes written approval.
 - [x] Rechecked named reviewers: customer reviewer has active entry access through November 3, 2027; creator-named reviewer is currently a customer in both profile and server role, with verification unsubmitted. Saved current provider checklist and candid launch blockers in dtt-new-year-review-checklist.md and Files; no submissions, payments, settings or publication changed.
@@ -10,7 +16,7 @@
 - [x] Record rejected administrator access and denied identity-record requests privately; deployed both services. Real wrong-code request was blocked and read back in trusted query; no credentials stored.
 - [x] Add an account-protected SECURITY view with paginated recent alerts; 15 focused security/privacy checks pass and build OK. Real signed-in non-admin sees no rows and the account-required notice on desktop/mobile.
 - [ ] Verify the administrator alert-list walkthrough: current supplied session is not an administrator; no account privileges changed.
-- [x] Document coverage limits: no provider-breach detection, universal intrusion guarantee, email alerts or traffic firewall included. Frontend not published; existing access guards preserved rather than replaced by a universal blocker.
+- [x] Document coverage limits: no provider-breach detection, universal intrusion guarantee or traffic firewall included. Email alerts were added November 19 as recorded above. Frontend not published; existing access guards preserved rather than replaced by a universal blocker.
 
 ## Expanded specialized discovery tags
 - [x] Added all five requested optional descriptors to the shared creator/customer checklist and expanded validated creator saves, private customer saves, search and teaser filters; original adaptive tags and category/founder rules preserved.

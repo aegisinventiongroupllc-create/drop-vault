@@ -1,0 +1,2 @@
+# Shared security rules
+- Security denial notifications use the fixed server-side recipient, persist the denied event before sending, and deduplicate by kind/UTC window through managed email idempotency; notification failures never authorize requests. Why: prevent recipient injection, mailbox flooding and fail-open access without an email queue.
