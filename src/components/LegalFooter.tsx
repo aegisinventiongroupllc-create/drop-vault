@@ -51,7 +51,7 @@ const LegalFooter = () => {
           Payment availability is shown at checkout. Creator payouts are processed manually in Litecoin (LTC).
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
-          <span className="notranslate" translate="no">Drop That Thing™ · DTT™</span> is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a>
+          <span className="notranslate" translate="no">Drop That Thing™ · DTT™</span> is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
         </p>
       </footer>
 
