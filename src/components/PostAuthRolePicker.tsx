@@ -54,6 +54,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
                 {CREATOR_CATEGORIES.map(value => <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}
               </select>
             </label>
+            <p className="text-left text-xs text-muted-foreground">Choose a profile category and at least one accurate content label to continue. Adaptive tags below are optional.</p>
             <ContentLabelChoices value={labels} onChange={setLabels} disabled={busy} />
             <AdaptiveTagChoices value={adaptiveTags} onChange={setAdaptiveTags} disabled={busy} />
             {error && <p role="alert" className="text-xs text-destructive">{error}</p>}

@@ -1,4 +1,5 @@
 # Component architecture rules
+- Creator launch displays use a compact countdown during setup and dashboard navigation; VIP interest belongs only in Analytics, separate from purchase inventory. Why: keep identity setup reachable and avoid implying free interest grants a pass.
 - CreatorPaymentOverview is public information above age consent, never a replacement for consent or payment verification. Why: explain payout readiness without granting entry or promising settlement.
 
 - Intro presentation stays scoped to launch-intro.css; reduced motion shows the unobscured globe immediately. Why: opening changes must not alter shared entry, idle or saved themes.

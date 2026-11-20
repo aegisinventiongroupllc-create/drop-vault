@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Creator launch experience review
-- [ ] Check public countdown and creator setup on phone, desktop and short screens; fix clipping and misleading choices without changing payment or approval rules.
-- [ ] Verify signed-in setup and waiting-list join/switch/leave/reload; record launch blockers. Do not publish.
+- [x] Checked desktop, 390px phone and 754x235 short entrance; made short screens scrollable, remounted globe on resize to prevent cropping and restored midnight burst precedence. Clarified required category/labels, launch target, free joining and inactive payment deadline; moved optional interest to Analytics with a setup shortcut. Approval/payment rules unchanged.
+- [x] Temporary signed-in creator selected Women/Dance through normal setup, joined Pro, switched to Elite, reloaded and read back #2, then left successfully. Desktop/mobile screenshots and zero page errors; 16 focused countdown/label/queue/checkout tests passed. Genuine ID/content clearance and approved payment invitations remain unverified and blocked as below. Public support address unified; not published.
 
 ## New Year countdown and VIP interest
 - [x] Put New Year's Launch and countdown above the main entrance globe; desktop/mobile entrance and simulated New Year greeting verified. Entry/language controls preserved; not published.
