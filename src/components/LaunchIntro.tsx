@@ -176,7 +176,7 @@ export default function LaunchIntro() {
     if (!show || !entryReady || reduced) return;
     const animations: Animation[] = [];
     const frame = requestAnimationFrame(() => {
-      const source = globeRef.current?.querySelector("p")?.firstChild;
+      const source = globeRef.current?.querySelector('[data-testid="entry-pass-globe"] p')?.firstChild;
       const words = titleRef.current?.querySelectorAll<HTMLElement>(".dtt-intro-word");
       if (!source || source.nodeType !== Node.TEXT_NODE || !words) return;
       words.forEach((word, index) => {
@@ -250,7 +250,7 @@ export default function LaunchIntro() {
       <div className="dtt-intro-core absolute inset-0" aria-hidden />
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
-      <div className="relative flex flex-col items-center gap-5 px-6 text-center">
+      <div className="dtt-intro-content relative flex flex-col items-center gap-5 px-6 text-center">
         <div ref={globeRef} className="dtt-intro-globe">
           <div className="dtt-intro-launch" data-intro-keep>
             <p className="font-display text-sm font-bold text-primary">{countdown.complete ? "HAPPY NEW YEAR!" : "NEW YEAR’S LAUNCH"}</p>
@@ -259,7 +259,7 @@ export default function LaunchIntro() {
             </div>}
             <p className="mt-2 text-[10px] text-foreground/80">January 1, 2027 · Midnight in New York</p>
           </div>
-          <EntryPassGlobe size={size} solid sharp motionless={reduced} />
+          <EntryPassGlobe key={size} size={size} solid sharp motionless={reduced} />
         </div>
         <div className="flex flex-col items-center gap-2">
           <h1 ref={titleRef} className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no" aria-label="Drop That Thing™">

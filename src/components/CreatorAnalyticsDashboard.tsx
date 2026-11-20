@@ -547,9 +547,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   return (
     <div className="dtt-dashboard mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
-      <CreatorLaunchCountdown />
-      {!adminPreview && <CreatorVipInterest creatorId={authUserId} />}
-      {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">{kycStatus === "rejected" ? "Account Verification Declined — Publishing and draft uploads are unavailable." : "Account Verification Pending — You can upload and organize private drafts now, but your profile and library will remain hidden from the public until your ID is verified."}</p><div className="flex flex-wrap gap-3"><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("drafts")}>PRIVATE DRAFTS</Button></div></div>}
+      <CreatorLaunchCountdown compact />
+      {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">{kycStatus === "rejected" ? "Account Verification Declined — Publishing and draft uploads are unavailable." : "Private creator setup — Complete identity review first. Eligible accounts can prepare private drafts; publishing also requires age-at-recording evidence and content-specific consent for everyone appearing."}</p><div className="flex flex-wrap gap-3"><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("drafts")}>PRIVATE DRAFTS</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("overview")}>VIP WAITING LIST</Button></div></div>}
       {activeSection === "drafts" && authUserId && <div className="px-4"><CreatorDrafts userId={authUserId} approved={uploadEligible} /></div>}
       {authUserId && <FoundingCongrats userId={authUserId} />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {
@@ -633,6 +632,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         ))}
       </div>
 
+      {!adminPreview && activeSection === "overview" && <CreatorVipInterest creatorId={authUserId} />}
       {/* Payment Split Banner */}
       {activeSection === "overview" && <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">
         <div className="flex items-center justify-between mb-2">

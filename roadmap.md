@@ -1,5 +1,9 @@
 # Roadmap
 
+## Creator launch experience review
+- [ ] Check public countdown and creator setup on phone, desktop and short screens; fix clipping and misleading choices without changing payment or approval rules.
+- [ ] Verify signed-in setup and waiting-list join/switch/leave/reload; record launch blockers. Do not publish.
+
 ## New Year countdown and VIP interest
 - [x] Put New Year's Launch and countdown above the main entrance globe; desktop/mobile entrance and simulated New Year greeting verified. Entry/language controls preserved; not published.
 - [ ] One-hour payment invitations and automatic slot handoff remain blocked on approved, verified VIP payment readiness and safe provider-confirmed invoice expiration; current TryBit invoices use a two-hour payment window, debit VIP checkout is not implemented. Owner chose inside-DTT notifications, not email. Midnight in-app readiness notice added, but it does not claim an active payment invitation or expire unpaid interest.

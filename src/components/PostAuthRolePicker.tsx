@@ -46,7 +46,8 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
 
         {pickingSide ? (
           <div className="flex flex-col gap-3 w-full">
-            <CreatorLaunchCountdown />
+            <CreatorLaunchCountdown compact />
+            <p className="text-left text-sm text-foreground">Set up your creator profile privately. Identity review and approval of everyone appearing in your content are required before publishing.</p>
             <label className="text-left text-sm font-semibold text-foreground">Profile Category
               <select required value={category} disabled={busy} onChange={event => setCategory(event.target.value as CreatorCategory)} className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
                 <option value="" disabled>Select category</option>
@@ -58,13 +59,14 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
             {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
             <Button variant="neon" disabled={busy || !category || !validContentLabels(labels)} onClick={() => void submit("creator")}>CONTINUE</Button>
             <ContentLabelingNotice />
-            <button
+            <Button
+              variant="ghost" disabled={busy}
               type="button"
               className="text-xs text-muted-foreground hover:text-foreground tracking-widest mt-1"
               onClick={() => setPickingSide(false)}
             >
               {ct.back}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col gap-3 w-full">

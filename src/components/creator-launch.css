@@ -1,5 +1,7 @@
 .creator-launch { --primary: var(--consent-pink); min-height: 340px; }
 .launch-globe { height: 160px; display: flex; align-items: center; justify-content: center; }
+.creator-launch-compact { min-height: 0; padding-top: 12px; padding-bottom: 12px; }
+.creator-launch-compact .launch-globe { height: 80px; }
 .launch-galaxy { transform-origin: 50% 38%; animation: launch-galaxy-expand 3s ease-out both; }
 .launch-globe-celebrate { animation: launch-globe-release 3s ease-out both; }
 @keyframes launch-galaxy-expand { from { transform: scale(.05); opacity: 0; } to { transform: scale(1); opacity: .75; } }
