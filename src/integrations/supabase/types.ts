@@ -777,6 +777,24 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_founder_pokes: {
+        Row: {
+          creator_id: string
+          poke_day: string
+          received_at: string
+        }
+        Insert: {
+          creator_id: string
+          poke_day: string
+          received_at?: string
+        }
+        Update: {
+          creator_id?: string
+          poke_day?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
       creator_heart_totals: {
         Row: {
           creator_id: string
@@ -2848,6 +2866,7 @@ export type Database = {
         Args: { _country?: string; _offset?: number }
         Returns: Json
       }
+      admin_founder_poke_top_ten: { Args: { _end_day?: string }; Returns: Json }
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       apply_verified_vip_pass: {
         Args: { _payment_id: string }
@@ -3165,6 +3184,7 @@ export type Database = {
         Args: { _action?: string; _country?: string; _language?: string }
         Returns: Json
       }
+      my_founder_poke: { Args: { _send?: boolean }; Returns: Json }
       my_reaction_setting: { Args: never; Returns: boolean }
       my_vip_interest: {
         Args: {

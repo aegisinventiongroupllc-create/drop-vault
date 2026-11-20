@@ -37,6 +37,7 @@ import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 import CreatorVipInterest from "@/components/CreatorVipInterest";
+import CreatorFounderPoke from "@/components/CreatorFounderPoke";
 import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorCalendar from "@/components/CreatorCalendar";
@@ -632,6 +633,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         ))}
       </div>
 
+      {!adminPreview && authUserId && <CreatorFounderPoke key={authUserId} creatorId={authUserId} />}
       {!adminPreview && activeSection === "overview" && <CreatorVipInterest creatorId={authUserId} />}
       {/* Payment Split Banner */}
       {activeSection === "overview" && <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">

@@ -1,5 +1,12 @@
 # Roadmap
 
+## Daily creator pokes
+- [ ] Add one recorded poke per creator per New York day, a wink receipt and dashboard participation tip.
+- [ ] Add private admin top 10 for a rolling 365-day window, ordered by participation with country and latest poke.
+- [ ] Test duplicate prevention, yearly window and role restrictions; verify signed-in save/reload on phone/desktop.
+- [x] Owner confirmed review only; do not alter revenue, awards or payouts.
+- [x] Button says "Poke the founder to get noticed."
+
 ## Customer pre-launch waiting list
 - [x] Customers stop before preferences/discovery/entry checkout at the countdown waiting screen; direct entry preview redirects and both deployed checkout services reject early entry payments. Creator private setup stays open.
 - [x] Added private account-linked country/language/join date records and CUSTOMER WAITING LIST in admin with country totals, filtering and 50-row pages. Server-role checks deny customers; anonymous reads and direct member writes denied. Admin UI with a real administrator remains unverified; isolated admin read rule tested.
