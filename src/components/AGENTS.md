@@ -1,4 +1,5 @@
 # Component architecture rules
+- Customer waiting-list celebration is transient after first successful joining; reloads and country updates only restore the saved ticket. Why: membership state must not replay a signup celebration.
 - Customer pre-launch routing precedes preferences, media and checkout; waitlist records are account-owned and admin pagination is role-verified on the server. Lifetime annual-entry discounts come from server membership offers, never browser input. Why: avoid early charges, private-list leaks and forged prices.
 - Creator launch displays use a compact countdown during setup and dashboard navigation; VIP interest belongs only in Analytics, separate from purchase inventory. Why: keep identity setup reachable and avoid implying free interest grants a pass.
 - CreatorPaymentOverview is public information above age consent, never a replacement for consent or payment verification. Why: explain payout readiness without granting entry or promising settlement.

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Customer waiting-page polish — November 20
+- [x] Replaced static backdrop with the entrance pink galaxy; slow movement confirmed. Streamlined customer/creator hierarchy and ticket; phone/desktop checked without overflow.
+- [x] Congratulations appears only in a dismissible first-join pop-up. Temporary signed-in customer join, ticket reload and country update verified; 10 focused tests and preview build passed. Not published in this turn.
+
 ## First-platform badge and publication — November 20
 - [x] Added optional creator-owned public debut badge in profile settings and customer profile; actual control save and public read after reload checked with a temporary creator. Full dashboard navigation remains unverified; control tests cover opt-in/removal.
 - [x] Added the new-creator invitation to the silent mobile video; checked its closing frame.
