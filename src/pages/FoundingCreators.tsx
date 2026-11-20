@@ -4,8 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 import LegalFooter from "@/components/LegalFooter";
-import sky from "@/assets/brb/stars-cluster.jpg";
-import { CREATOR_SIGNUP_URL, FOUNDING_INVITATION_URL, FOUNDING_OFFER } from "@/lib/foundingInvitation";
+import sky from "@/assets/dtt-pink-galaxy-share.jpg.asset.json";
+import { CREATOR_SIGNUP_URL, CUSTOMER_WAITLIST_URL, FOUNDING_INVITATION_URL, FOUNDING_OFFER } from "@/lib/foundingInvitation";
 
 const description = "Free private creator setup on DTT. Learn about limited lifetime 91/9 founding places, adult verification, residence eligibility and pre-launch readiness.";
 
@@ -19,7 +19,7 @@ export default function FoundingCreators() {
       if (!(error instanceof Error && error.name === "AbortError")) setShareStatus("Copy the invitation address below to share it.");
     }
   }
-  return <div className="min-h-screen bg-background text-foreground">
+  return <div className="dtt-founding-invitation min-h-screen bg-background text-foreground">
     <Helmet>
       <title>Founding Creator Invitation — Drop That Thing™</title>
       <meta name="description" content={description} />
@@ -35,20 +35,31 @@ export default function FoundingCreators() {
       <Button variant="outline" size="sm" onClick={() => void share()}>SHARE INVITATION</Button>
     </header>
     <main>
-      <section className="relative isolate overflow-hidden border-b border-border px-5 py-10 text-center sm:py-14">
-        <img src={sky} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
-        <div className="absolute inset-0 -z-10 bg-background/70" aria-hidden="true" />
+      <section className="relative isolate overflow-hidden border-b border-primary/40 px-5 py-10 text-center sm:py-14">
+        <img src={sky.url} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <div className="absolute inset-0 -z-10 bg-background/40" aria-hidden="true" />
         <div className="mx-auto max-w-2xl">
-          <p className="mb-4 text-sm font-semibold text-gold">Founding creator invitation · 18+ only</p>
+          <p className="mb-4 text-sm font-semibold text-gold">THE FOUNDING ERA · 18+ CREATORS</p>
           <h1 className="font-display text-3xl font-bold leading-tight sm:text-5xl notranslate" translate="no">Drop That Thing<span className="text-primary">™</span></h1>
-          <h2 className="mx-auto mt-5 max-w-lg text-2xl font-semibold">Become a DTT creator</h2>
-          <p className="mx-auto mt-3 max-w-lg text-lg leading-relaxed">Your content. Your audience. A place to build something of your own.</p>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Join DTT’s adult creator marketplace before launch. Set up privately, explore your creator tools, and help shape what comes next.</p>
+          <h2 className="mx-auto mt-5 max-w-lg text-3xl font-semibold leading-tight">Twerk for an audience.<br /><span className="text-primary">Make the stage yours.</span></h2>
+          <p className="mx-auto mt-4 max-w-lg text-lg leading-relaxed">Fast or slow. Your style. Your spotlight.</p>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed">Build your creator profile before DTT’s global twerking feed opens. Free private setup is open now.</p>
+          <p className="mt-5 text-lg font-semibold text-gold">Founding creators: 91% of eligible vault earnings. For life.</p>
+          <p className="mt-2 text-xs">First 5 qualifying approved creators per category, per country. Eligibility and available places apply.</p>
           <div className="mt-6 flex flex-col items-center gap-3">
-            <Button variant="neon" size="lg" asChild className="h-auto min-h-12 max-w-full whitespace-normal"><Link to={CREATOR_SIGNUP_URL}>START FREE CREATOR SETUP</Link></Button>
-            <p className="text-xs text-muted-foreground">For creators, not the customer waiting list. Free account and private setup. No purchase required to begin.</p>
+            <Button variant="neon" size="lg" asChild className="h-auto min-h-12 max-w-full whitespace-normal"><Link to={CREATOR_SIGNUP_URL}>BECOME A CREATOR — FREE</Link></Button>
+            <p className="text-xs">18+ only · Private ID & content-consent review before publishing · No purchase to begin</p>
           </div>
           <CreatorLaunchCountdown compact />
+        </div>
+      </section>
+      <section className="border-b border-primary/40 bg-secondary/30 px-5 py-8 text-center" aria-labelledby="customer-invitation">
+        <div className="mx-auto max-w-xl">
+          <p className="text-sm font-semibold text-primary">HERE TO WATCH?</p>
+          <h2 id="customer-invitation" className="mt-2 text-2xl font-semibold">Your DTT ticket starts here.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Join the customer waiting list free before launch. Lock in $10 a year for life instead of $20 for annual entry to DTT’s global twerking feed when viewing opens.</p>
+          <Button variant="outline" size="lg" asChild className="mt-5 h-auto min-h-12 max-w-full whitespace-normal border-primary text-primary"><Link to={CUSTOMER_WAITLIST_URL}>GET MY CUSTOMER TICKET</Link></Button>
+          <p className="mt-3 text-xs text-muted-foreground">18+ only. Nothing charged today. Paid creator libraries require separate Bit-Tokens. Payment invitations must wait for approved payments.</p>
         </div>
       </section>
       <section className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14" aria-labelledby="founding-offer">

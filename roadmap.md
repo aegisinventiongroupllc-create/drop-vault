@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pink-galaxy invitation and customer tickets
+- [ ] Refresh the creator invitation with DTT’s existing pink galaxy, stronger twerking-focused wording, and separate creator/customer signup actions.
+- [ ] Display and download an account-linked waiting-list ticket, preserving $10/year for life and private admin records; do not create invoices or access before payment readiness.
+- [ ] Verify customer ticket save/reload/download and creator/customer signup paths on desktop and phone; run focused tests and commit without publishing.
+
 ## Clarify creator signup versus customer waiting list
 - [x] Identified the signed-in customer screen clearly, distinguished customer annual entry from free creator setup, and added an explicit sign-out-to-creator-signup action without changing account roles.
 - [x] Real signed-in customer clicked the new action on a phone, passed the existing entry consents and reached free registration with Creator selected; invitation screenshot and signup link checked, three focused tests passed, zero page errors and build OK. No registration, approval, payment or publication performed.

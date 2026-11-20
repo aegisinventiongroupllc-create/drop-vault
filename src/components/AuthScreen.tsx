@@ -12,7 +12,7 @@ import { logActivity } from "@/lib/activityLog";
 import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
-import { isCreatorSignup } from "@/lib/foundingInvitation";
+import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
 
 interface AuthScreenProps {
   onAdmin: () => void;
@@ -37,7 +37,7 @@ export const googleReturnOrigin = (origin: string = window.location.origin): str
 };
 
 const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
-  const [mode, setMode] = useState<Mode>(() => isCreatorSignup(window.location.search) ? "signup" : "login");
+  const [mode, setMode] = useState<Mode>(() => isCreatorSignup(window.location.search) || isCustomerSignup(window.location.search) ? "signup" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

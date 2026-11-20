@@ -98,6 +98,10 @@
   }
 }
 
+/* Public invitation keeps DTT pink independent of a member’s private vault. */
+.dtt-founding-invitation, .dtt-customer-waitlist { --primary: var(--consent-pink); --ring: var(--consent-pink); }
+.dtt-waitlist-ticket { border: 1px solid hsl(var(--primary)); border-radius: 8px; background: hsl(var(--card) / .92); box-shadow: var(--neon-glow-sm); }
+
 .welcome-reward { border-color: hsl(var(--dashboard-outline)); box-shadow: var(--reward-shadow), var(--dashboard-outline-rest); }
 .reward-main-coin { animation: reward-coin-slow-spin 12s cubic-bezier(.35, 0, .25, 1) both; }
 @keyframes reward-coin-slow-spin { from { transform: perspective(700px) rotateY(0deg); } to { transform: perspective(700px) rotateY(720deg); } }
