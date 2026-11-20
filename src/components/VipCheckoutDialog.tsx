@@ -39,7 +39,7 @@ export default function VipCheckoutDialog({ pass, onClose, onCreated }: { pass: 
     <section role="dialog" aria-modal="true" aria-labelledby="vip-checkout-title" className="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-lg border border-gold/40 bg-card p-5 space-y-4">
       <h2 id="vip-checkout-title" className="font-display font-bold text-gold">{pass.name} CHECKOUT</h2>
       <p className="text-xl font-bold text-foreground">${pass.price.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">USD · one-time payment</span></p>
-      <p className="text-sm text-muted-foreground">TryBit checkout is available for testing, not evidence of approved live payments. Written provider approval and live payment verification remain unverified. Testing may involve real funds; follow only a provider-authorized test method.</p>
+      <p className="text-sm text-muted-foreground">We’re preparing TryBit payments for launch. This checkout is for provider-authorized testing only, not live sales. Testing may use real funds; do not pay unless your test method is authorized by the provider.</p>
       <p className="text-sm text-muted-foreground">Limited to 1,000 worldwide across Pro and Elite combined. First come, first served. Your pass activates only after DTT verifies payment.</p>
       <p className="text-sm text-muted-foreground">{pass.id === "ELITE_PASS" ? "Only a purchased Elite VIP pass activated after verified payment grants a 90/10 split on the agreed custom-request price." : "Pro keeps the standard 85/15 split on custom requests; it does not grant the Elite 90/10 request benefit."} Customer-paid request fees are separate. This benefit concerns paid custom requests, not tips.</p>
       <RefundDisputeNotice />

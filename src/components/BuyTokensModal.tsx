@@ -172,7 +172,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
 
   const handleStartCheckout = async () => {
     if (isEntryPass && !entryOffer?.open) { setError("Customer entry checkout is not open."); return; }
-    if (!cryptoEnabled) { setError("TryBit checkout is unavailable."); return; }
+    if (!cryptoEnabled) { setError("TryBit payments are being prepared for launch; crypto checkout is not open yet."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     if (!(await requireSession())) return;
     setStep("processing");
@@ -292,8 +292,8 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
             </div>
             <p role="status" className="text-xs text-muted-foreground text-center">
               {checkingPayments ? "Checking payment availability…" : !cardEnabled && !cryptoEnabled
-                ? "Checkout is unavailable. Payment approval and verification are pending. No payment will be taken."
-                : !cardEnabled ? "CCBill card checkout is unavailable." : !cryptoEnabled ? "TryBit checkout is unavailable." : ""}
+                ? "We’re getting payments ready for launch. Checkout is not open yet; no payment will be taken."
+                : !cardEnabled ? "CCBill card payments are being prepared for launch; card checkout is not open yet." : !cryptoEnabled ? "TryBit payments are being prepared for launch; crypto checkout is not open yet." : ""}
             </p>
 
             {/* Order summary — shown for both methods */}
@@ -328,10 +328,10 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
                 <div className="bg-primary/5 border-2 border-primary rounded-xl p-4 text-center neon-glow-sm">
                   <p className="text-[10px] text-muted-foreground font-bold tracking-wider mb-1">PAYING WITH</p>
                   <p className="text-2xl font-bold text-primary">LTC · USDT</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">TryBit checkout testing — live approval unverified</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">TryBit · preparing for launch · test checkout</p>
                 </div>
                 <div className="bg-secondary/50 border border-border rounded-lg p-3 text-center space-y-1">
-                  <p className="text-[10px] text-muted-foreground">You'll be redirected to TryBit checkout. Checkout availability does not establish approved live payments. Written provider approval and live payment verification remain unverified. Testing may involve real funds; follow only a provider-authorized test method.</p>
+                  <p className="text-[10px] text-muted-foreground">TryBit payments are being prepared for launch. This checkout is for provider-authorized testing only, not live sales. Testing may use real funds; do not pay unless your test method is authorized by the provider.</p>
                   <p className="text-[10px] text-muted-foreground">Crypto transactions are <span className="text-foreground font-bold">irreversible</span>. Refund exceptions follow the DTT Refund Policy and applicable law.</p>
                 </div>
               </>

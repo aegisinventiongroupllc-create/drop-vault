@@ -1,5 +1,9 @@
 # Roadmap
 
+## Welcoming pre-launch payment wording — November 20
+- [x] Replace repetitive payment-approval warning copy across signup, invitation, countdown, waiting list, revenue details and canonical payment policies with clear preparing-for-launch wording; retain verified-only activation and explicit real-funds test warnings.
+- [x] Invitation → free creator signup and About payment wording checked on desktop/390px phone with zero page errors; 84 focused checks passed and preview build OK. No payment settings, spending or publication. Updated English wording uses existing translation fallback; reviewed all-language coverage remains outstanding below.
+
 ## Controlled launch load-test planning — November 20
 - [x] Owner selected no spending yet; completed read-only source, current database-health, query/index and recorded-usage review without generating load or changing paid resources.
 - [x] Prepare staged launch test plan with likely bottlenecks, isolated test requirements, privacy/payment safeguards, stop thresholds and explicit future approval gates.

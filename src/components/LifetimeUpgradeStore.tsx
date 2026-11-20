@@ -81,7 +81,7 @@ export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string
             <p className="text-xs font-semibold text-primary">{inv?.by_type?.[p.id]?.remaining ?? "—"} / 500 remaining worldwide</p>
             <ul className="text-xs text-muted-foreground space-y-1">{p.perks.map((x) => <li key={x}>• {x}</li>)}</ul>
             <Button variant="gold" className="w-full" disabled={!creatorId || failed || left === null || inv?.by_type?.[p.id]?.remaining == null || !enabled || owned !== "NONE" || !!checkout || soldOut || inv?.by_type?.[p.id]?.remaining === 0} onClick={() => setSelected(p)}>
-              {owned === p.id ? "OWNED" : owned !== "NONE" ? "PASS ALREADY OWNED" : checkout ? "CHECKOUT IN PROGRESS" : soldOut || inv?.by_type?.[p.id]?.remaining === 0 ? "SOLD OUT" : !enabled ? "CHECKOUT UNAVAILABLE" : `BUY ${p.name}`}
+              {owned === p.id ? "OWNED" : owned !== "NONE" ? "PASS ALREADY OWNED" : checkout ? "CHECKOUT IN PROGRESS" : soldOut || inv?.by_type?.[p.id]?.remaining === 0 ? "SOLD OUT" : !enabled ? "PREPARING FOR LAUNCH" : `BUY ${p.name}`}
             </Button>
           </div>
         ))}

@@ -15,12 +15,12 @@ const CreatorPaymentOverview = () => (
           <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">Available creator earnings are paid manually in Litecoin (LTC) to the creator’s saved Litecoin address. Bank transfers and payouts to debit or credit cards are not offered. No fixed wallet-arrival date is promised.</dd>
         </div>
         <div>
-          <dt className="text-sm font-semibold text-foreground">Debit and credit cards — pending</dt>
-          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">Customer debit-card and credit-card checkout is pending provider approval and payment verification. These methods are not currently offered as approved live payments; availability is shown at checkout.</dd>
+          <dt className="text-sm font-semibold text-foreground">Card payments · preparing for launch</dt>
+          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">We’re getting CCBill card payments ready for launch. Live card checkout is not open yet. You can create your account and complete free private setup now.</dd>
         </div>
         <div>
-          <dt className="text-sm font-semibold text-foreground">TryBit — testing status</dt>
-          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">TryBit checkout may be available for testing. That does not establish written provider approval for live payments. A genuine purchase-to-payout journey remains unverified. Access and credits require verified payment; a test invoice alone grants neither.</dd>
+          <dt className="text-sm font-semibold text-foreground">TryBit payments · preparing for launch</dt>
+          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">We’re preparing TryBit payments and the payout process for launch. Live payments will open after approval and final checks. Free creator setup is open now; paid access and credits activate only after verified payment.</dd>
         </div>
         <div className="sm:col-span-2">
           <dt className="text-sm font-semibold text-foreground">Disputes and chargebacks</dt>

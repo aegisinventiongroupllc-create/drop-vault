@@ -86,7 +86,7 @@ export default function CustomerLaunchWaitlist() {
           <p translate="no" className="notranslate break-all font-mono text-xs">{ticket.number}</p>
           <p className="text-xs text-muted-foreground">Joined {new Date(ticket.joinedAt).toLocaleDateString()} · {COUNTRIES.find(c => c.code === ticket.country)?.name ?? ticket.country}</p>
           <p className="text-sm">You believed in DTT before launch. Your lifetime yearly rate is saved.</p>
-          <p className="text-xs text-muted-foreground">Not an invoice or access pass. No payment due today. Payment invitations are not active yet; they must wait until DTT has approved payments ready.</p>
+          <p className="text-xs text-muted-foreground">Your ticket confirms your waiting-list membership, not payment or access. Nothing is due today. We’re getting payments ready for launch; payment invitations are not open yet.</p>
           <Button variant="outline" className="w-full" onClick={downloadTicket}>SAVE MY DTT TICKET</Button>
         </div>
       </article>}

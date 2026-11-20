@@ -24,6 +24,6 @@ export default function CreatorLaunchCountdown({ compact = false, audience = "cr
     {!time.complete && <div role="timer" aria-label="Time until January 1, 2027 at midnight in New York" className="mx-auto grid w-full max-w-xs grid-cols-4 gap-2 px-3 tabular-nums">
       {([[time.days, "DAYS"], [time.hours, "HOURS"], [time.minutes, "MINUTES"], [time.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span className="block text-2xl font-bold text-foreground">{String(value).padStart(2, "0")}</span><span className="text-[10px] text-muted-foreground">{label}</span></div>)}
     </div>}
-    <p className="mx-auto mt-3 max-w-sm px-4 text-xs text-muted-foreground">{audience === "customer" ? "Launching January 1, 2027. Customer payments remain closed until launch and payment readiness are confirmed." : "Launching January 1, 2027. Private creator setup is open; paid launch requires payment approval and working payouts."}</p>
+    <p className="mx-auto mt-3 max-w-sm px-4 text-xs text-muted-foreground">{audience === "customer" ? "Launching January 1, 2027. We’re getting payments ready for launch. Join the customer waiting list free; no payment is due now." : "Launching January 1, 2027. Start your free private creator setup now while we get payments and payouts ready for launch. Sales are not open yet."}</p>
   </section>;
 }

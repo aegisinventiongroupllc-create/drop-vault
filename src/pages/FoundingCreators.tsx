@@ -59,7 +59,7 @@ export default function FoundingCreators() {
           <h2 id="customer-invitation" className="mt-2 text-2xl font-semibold">Your DTT ticket starts here.</h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Join the customer waiting list free before launch. Lock in $10 a year for life instead of $20 for annual entry to DTT’s global twerking feed when viewing opens.</p>
           <Button variant="outline" size="lg" asChild className="mt-5 h-auto min-h-12 max-w-full whitespace-normal border-primary text-primary"><Link to={CUSTOMER_WAITLIST_URL}>GET MY CUSTOMER TICKET</Link></Button>
-          <p className="mt-3 text-xs text-muted-foreground">18+ only. Nothing charged today. Paid creator libraries require separate Bit-Tokens. Payment invitations must wait for approved payments.</p>
+          <p className="mt-3 text-xs text-muted-foreground">18+ only. Nothing charged today. Paid creator libraries require separate Bit-Tokens. We’re getting payments ready for launch; payment invitations are not open yet.</p>
         </div>
       </section>
       <section className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14" aria-labelledby="founding-offer">
@@ -74,7 +74,7 @@ export default function FoundingCreators() {
           <div className="border-l-2 border-gold pl-5">
             <p className="text-lg font-semibold text-foreground">What 91% means</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">A Bit-Token has ${FOUNDING_OFFER.tokenValueUsd} spending value. A qualifying vault unlock at 91% allocates $18.20 to the creator and $1.80 to DTT, before applicable adjustments and your taxes. It is not 91% of the checkout price.</p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests have separate terms. Payouts are planned as manual Litecoin (LTC) payments; paid launch still requires approved payments and working payouts.</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests have separate terms. Payouts are planned as manual Litecoin (LTC) payments. We’re preparing payments and payouts for launch; sales are not open yet.</p>
           </div>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function FoundingCreators() {
             ["03", "Get reviewed", "DTT reviews your evidence and founding eligibility. Public content and paid access remain gated until the required approvals are complete."],
           ].map(([number, title, text]) => <div key={number} className="border-t border-border pt-4"><span className="text-sm font-semibold text-primary">{number}</span><h3 className="mt-2 text-lg font-semibold">{title}</h3><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{text}</p></div>)}
         </div>
-        <p className="mt-8 text-sm leading-relaxed text-muted-foreground">Launching January 1, 2027 at midnight in New York. Private creator onboarding is open now; payment approval, verified transactions, working payouts and content clearance are still required for paid launch. Signing up does not activate sales or earnings.</p>
+        <p className="mt-8 text-sm leading-relaxed text-muted-foreground">Launching January 1, 2027 at midnight in New York. Start your free private creator setup now while we get payments and payouts ready for launch. Sales will open after payment approval and final checks; publishing also requires identity and content clearance.</p>
         <div className="mt-8 flex flex-col items-start gap-4">
           <Button variant="neon" size="lg" asChild className="h-auto min-h-12 max-w-full whitespace-normal"><Link to={CREATOR_SIGNUP_URL}>START FREE CREATOR SETUP</Link></Button>
           <p className="text-sm text-muted-foreground">Questions or feedback? <a className="break-all text-primary underline" href="mailto:dropthatthingmedia@gmail.com">dropthatthingmedia@gmail.com</a></p>
