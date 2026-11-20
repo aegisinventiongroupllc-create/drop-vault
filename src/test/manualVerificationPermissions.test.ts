@@ -24,4 +24,17 @@ describe.skipIf(!db)("manual verification permissions", () => {
     expect(rows[0].public).toBe(false);
     expect(Number(rows[0].file_size_limit)).toBe(10485760);
   });
+  it("keeps DTT manual identity evidence private with a 10 MB limit", async () => {
+    if (!db) throw Error("Database required");
+    const rows = await db`SELECT public,file_size_limit FROM storage.buckets WHERE id='creator-2257-records'`;
+    expect(rows[0].public).toBe(false);
+    expect(Number(rows[0].file_size_limit)).toBe(10485760);
+  });
+  it("retains immutable identity audit events with no member edits", async () => {
+    if (!db) throw Error("Database required");
+    const rows = await db`SELECT has_table_privilege('authenticated','public.creator_identity_events','INSERT') AS insert, has_table_privilege('authenticated','public.creator_identity_events','UPDATE') AS update, has_table_privilege('authenticated','public.creator_identity_events','DELETE') AS delete`;
+    expect(rows[0]).toEqual({ insert: false, update: false, delete: false });
+    const triggers = await db`SELECT count(*)::int AS count FROM pg_trigger WHERE tgrelid='public.creator_identity_events'::regclass AND NOT tgisinternal AND tgenabled <> 'D' AND tgfoid='public.keep_identity_events_immutable()'::regprocedure`;
+    expect(triggers[0].count).toBeGreaterThan(0);
+  });
 });

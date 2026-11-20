@@ -1,9 +1,14 @@
 # Roadmap
 
+## DTT manual verification onboarding check
+- [x] Remove Persona from creator verification while retaining private DTT manual review and content-clearance requirements.
+- [x] Private 10 MB ID bucket confirmed. Temporary creator submitted three synthetic images, read pending status after reload, downloaded own evidence; retained evidence resisted deletion, self-approval and cross-account upload were blocked. Actor/timestamp/pending audit confirmed and immutable event trigger checked; 36 focused tests passed.
+- [x] Normal creator category and agreement flow reached dashboard, then verification on desktop/phone. Private photo draft uploaded, reloaded, opened as branded preview and deleted. No real identities or approvals; actual long-video transfer, camera/device capture, administrator review UI and genuine legal/provider acceptance remain unverified. Manual review is not certified liveness or bulletproof compliance; not published.
+
 ## X cover and spinning-globe pinned post
 - [x] Create a globe-free 1500×500 pink-galaxy cover with centered requested wording and crop-safe placement.
 - [x] Prepare a creator-invitation post and instructions to upload and pin it; do not post to X or promise earnings.
-- [ ] Deliver the spinning-globe video after the animation task returns and verify its reported motion/audio checks.
+- [x] Animation task returned the actual app globe rotating in place, 15.5 seconds at 1080×1080 with instrumental music. Agent checked frames/motion/audio; main agent confirmed codecs/duration and a mid-video frame. Ready for owner upload; not posted to X.
 
 ## Pink-globe main entrance
 - [x] Show the existing pink-globe countdown entrance on the home page and direct creator invitation visits; support /index without a missing-page screen.
