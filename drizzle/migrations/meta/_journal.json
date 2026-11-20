@@ -813,6 +813,13 @@
       "when": 1795010137683,
       "tag": "0115_private_security_access_events",
       "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1795134360347,
+      "tag": "0116_restrict_request_split_percent",
+      "breakpoints": true
     }
   ]
 }
