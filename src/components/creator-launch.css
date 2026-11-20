@@ -1,0 +1,7 @@
+.creator-launch { --primary: var(--consent-pink); min-height: 340px; }
+.launch-globe { height: 160px; display: flex; align-items: center; justify-content: center; }
+.launch-galaxy { transform-origin: 50% 38%; animation: launch-galaxy-expand 3s ease-out both; }
+.launch-globe-celebrate { animation: launch-globe-release 3s ease-out both; }
+@keyframes launch-galaxy-expand { from { transform: scale(.05); opacity: 0; } to { transform: scale(1); opacity: .75; } }
+@keyframes launch-globe-release { 0% { transform: scale(1); } 35% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .launch-galaxy, .launch-globe-celebrate, .creator-launch .globe-breathe { animation: none; } }

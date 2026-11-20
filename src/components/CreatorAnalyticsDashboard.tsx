@@ -35,6 +35,8 @@ import CreatorConsentWithdrawal from "@/components/CreatorConsentWithdrawal";
 import CreatorWelcomeBack from "@/components/CreatorWelcomeBack";
 import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
+import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
+import CreatorVipInterest from "@/components/CreatorVipInterest";
 import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorCalendar from "@/components/CreatorCalendar";
@@ -545,6 +547,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   return (
     <div className="dtt-dashboard mobile-scroll-shell relative isolate">
       {!adminPreview && <PersonalSkyBackdrop />}
+      <CreatorLaunchCountdown />
+      {!adminPreview && <CreatorVipInterest creatorId={authUserId} />}
       {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">{kycStatus === "rejected" ? "Account Verification Declined — Publishing and draft uploads are unavailable." : "Account Verification Pending — You can upload and organize private drafts now, but your profile and library will remain hidden from the public until your ID is verified."}</p><div className="flex flex-wrap gap-3"><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("drafts")}>PRIVATE DRAFTS</Button></div></div>}
       {activeSection === "drafts" && authUserId && <div className="px-4"><CreatorDrafts userId={authUserId} approved={uploadEligible} /></div>}
       {authUserId && <FoundingCongrats userId={authUserId} />}

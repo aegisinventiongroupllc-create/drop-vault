@@ -1,5 +1,9 @@
 .dtt-intro { transition: opacity .7s ease; }
 .dtt-intro-out { opacity: 0; pointer-events: none; }
+.dtt-intro-launch { position: absolute; bottom: calc(100% + 14px); left: 50%; transform: translateX(-50%); width: min(320px, calc(100vw - 40px)); letter-spacing: 0; }
+.dtt-intro-new-year .dtt-intro-sky { animation: dtt-new-year-burst 3s ease-out both; }
+@keyframes dtt-new-year-burst { from { transform: scale(.08); opacity: .2; } to { transform: scale(1.1); opacity: 1; } }
+@media (max-height: 650px) { .dtt-intro-launch { bottom: calc(100% + 4px); } .dtt-intro-launch p:last-child { display: none; } }
 
 .dtt-intro-nebula {
   background:

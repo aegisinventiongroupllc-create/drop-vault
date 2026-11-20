@@ -5,6 +5,7 @@ import { getTargetLang } from "@/components/AutoTranslator";
 import skyCluster from "@/assets/brb/stars-cluster.jpg";
 import "./launch-intro.css";
 import { useIntroEntryReady } from "@/hooks/useIntroEntryReady";
+import { launchCountdown } from "@/lib/launchCountdown";
 
 /** Saved caption translations — no AI calls, readable before sign-in. */
 export const INTRO_CAPTIONS: Record<string, string> = {
@@ -144,6 +145,11 @@ function Sparkles() {
  * stays at its settled size and position, rotating without an entrance effect.
  */
 export default function LaunchIntro() {
+  const [countdown, setCountdown] = useState(() => launchCountdown());
+  useEffect(() => {
+    const timer = window.setInterval(() => setCountdown(launchCountdown()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
   const [leaving, setLeaving] = useState(false);
   const entryReady = useIntroEntryReady(show);
@@ -234,7 +240,7 @@ export default function LaunchIntro() {
 
   return (
     <div
-      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${entryReady ? "dtt-intro-entry-ready" : ""} ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
+      className={`dtt-intro fixed inset-0 z-[230] flex items-center justify-center overflow-hidden bg-background ${countdown.complete ? "dtt-intro-new-year" : ""} ${entryReady ? "dtt-intro-entry-ready" : ""} ${leaving ? "dtt-intro-out" : ""} ${reduced ? "dtt-intro-still" : ""} ${ready ? "dtt-intro-ready" : ""}`}
       role="status" aria-label="Drop That Thing™"
       onClick={(e) => { if (entryReady && !(e.target as Element).closest("[data-intro-keep]")) setLeaving(true); }}
     >
@@ -245,7 +251,16 @@ export default function LaunchIntro() {
       <div className="dtt-intro-nebula absolute inset-0" aria-hidden />
       {!reduced && <Sparkles />}
       <div className="relative flex flex-col items-center gap-5 px-6 text-center">
-        <div ref={globeRef} className="dtt-intro-globe"><EntryPassGlobe size={size} solid sharp motionless={reduced} /></div>
+        <div ref={globeRef} className="dtt-intro-globe">
+          <div className="dtt-intro-launch" data-intro-keep>
+            <p className="font-display text-sm font-bold text-primary">{countdown.complete ? "HAPPY NEW YEAR!" : "NEW YEAR’S LAUNCH"}</p>
+            {!countdown.complete && <div role="timer" aria-label="New Year's launch countdown, New York midnight" className="mx-auto mt-2 grid max-w-xs grid-cols-4 gap-3 tabular-nums">
+              {([[countdown.days, "DAYS"], [countdown.hours, "HOURS"], [countdown.minutes, "MINUTES"], [countdown.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span className="block text-xl font-bold text-foreground">{String(value).padStart(2, "0")}</span><span className="text-[9px] text-foreground/80">{label}</span></div>)}
+            </div>}
+            <p className="mt-2 text-[10px] text-foreground/80">January 1, 2027 · Midnight in New York</p>
+          </div>
+          <EntryPassGlobe size={size} solid sharp motionless={reduced} />
+        </div>
         <div className="flex flex-col items-center gap-2">
           <h1 ref={titleRef} className="dtt-intro-title notranslate font-black uppercase text-primary" translate="no" aria-label="Drop That Thing™">
             <span className="dtt-intro-word" aria-hidden="true">Drop</span>{" "}

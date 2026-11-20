@@ -1266,6 +1266,27 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_vip_interest: {
+        Row: {
+          created_at: string
+          creator_id: string
+          id: number
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          id?: never
+          pass_type: Database["public"]["Enums"]["vip_pass_type"]
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          id?: never
+          pass_type?: Database["public"]["Enums"]["vip_pass_type"]
+        }
+        Relationships: []
+      }
       creator_wallets: {
         Row: {
           created_at: string
@@ -3114,6 +3135,13 @@ export type Database = {
         Returns: boolean
       }
       my_reaction_setting: { Args: never; Returns: boolean }
+      my_vip_interest: {
+        Args: {
+          _action?: string
+          _pass?: Database["public"]["Enums"]["vip_pass_type"]
+        }
+        Returns: Json
+      }
       participant_object_evidence: {
         Args: { _bucket: string; _path: string }
         Returns: {

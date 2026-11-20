@@ -11,6 +11,7 @@ import ContentLabelChoices from "./ContentLabelChoices";
 import ContentLabelingNotice from "@/components/ContentLabelingNotice";
 import AdaptiveTagChoices from "@/components/AdaptiveTagChoices";
 import type { AdaptiveTag } from "@/lib/adaptiveTags";
+import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 
 interface PostAuthRolePickerProps {
   email?: string;
@@ -45,6 +46,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
 
         {pickingSide ? (
           <div className="flex flex-col gap-3 w-full">
+            <CreatorLaunchCountdown />
             <label className="text-left text-sm font-semibold text-foreground">Profile Category
               <select required value={category} disabled={busy} onChange={event => setCategory(event.target.value as CreatorCategory)} className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
                 <option value="" disabled>Select category</option>

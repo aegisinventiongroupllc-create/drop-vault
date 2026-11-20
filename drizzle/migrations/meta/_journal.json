@@ -820,6 +820,20 @@
       "when": 1795134360347,
       "tag": "0116_restrict_request_split_percent",
       "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1795135262837,
+      "tag": "0117_creator_vip_interest_queue",
+      "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1795135316925,
+      "tag": "0118_restrict_vip_interest_direct_writes",
+      "breakpoints": true
     }
   ]
 }

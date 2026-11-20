@@ -1,5 +1,12 @@
 # Roadmap
 
+## New Year countdown and VIP interest
+- [x] Put New Year's Launch and countdown above the main entrance globe; desktop/mobile entrance and simulated New Year greeting verified. Entry/language controls preserved; not published.
+- [ ] One-hour payment invitations and automatic slot handoff remain blocked on approved, verified VIP payment readiness and safe provider-confirmed invoice expiration; current TryBit invoices use a two-hour payment window, debit VIP checkout is not implemented. Owner chose inside-DTT notifications, not email. Midnight in-app readiness notice added, but it does not claim an active payment invitation or expire unpaid interest.
+- [x] Added the existing pink globe countdown to creator setup/dashboard, with a scoped galaxy celebration at New York midnight January 1, 2027; payment gates unchanged.
+- [x] Added private creator-only numbered Pro/Elite waiting-list choices, switching/leaving and truthful congratulations; no inventory or benefits granted. Inherited direct write grants revoked and verified.
+- [x] Thirteen focused countdown/waiting-list/existing checkout tests passed; seven rerun after final changes. Temporary signed-in creator joined and read back position #1 after reload/consents, switched to Elite on mobile. Public New Year transition verified separately; build OK. Existing repeated creator agreement on reload observed, not changed. Temporary account removed by managed test cleanup; no real identity approval, payment or publication.
+
 ## Persona Sandbox retest — November 19
 - [x] Clarified private creator onboarding can start before payment readiness; paid launch still requires verified payments and a working payout process. No payment settings changed.
 - [x] Fixed and deployed the documented Persona HTTPS link hostname check; five privacy/redirect regression tests pass and build OK. Temporary creator opened Persona's hosted screen, which explicitly confirmed Sandbox and DTT Media LLC. Persona's documented synthetic actions completed/approved only that Sandbox inquiry; DTT CHECK TEST STATUS and reload read back approved with no page errors. Real DTT account remains unsubmitted/is_verified=false with zero identity submissions. No real identity data, creator approval, payment changes or publication.
