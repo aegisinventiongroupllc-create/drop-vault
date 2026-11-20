@@ -1,5 +1,10 @@
 # Roadmap
 
+## Shareable founding-creator invitation
+- [x] Added /founding-creators with the limited lifetime 91/9 offer, adult/residence/content eligibility, private pre-launch status and branded sharing.
+- [x] Phone/desktop page and signup link verified; mandatory consents lead to free registration with Creator selected. Ten focused tests passed; no account, approval or payment changes. New copy uses English fallback where saved translations are unavailable; translation review remains outstanding.
+- [x] Saved without publishing; public invitation address becomes available after publication.
+
 ## Waiting-list income and creator recruitment review
 - [x] Locate private CUSTOMER WAITING LIST and check current account count; explain free interest versus money received.
 - [x] Added clearly hypothetical $10 annual-entry sales scenarios without changing prices, payments or earnings splits; concrete calculations tested. Real administrator UI walkthrough remains unverified without an authorized admin session.

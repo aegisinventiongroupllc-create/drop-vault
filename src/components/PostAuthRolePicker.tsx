@@ -12,6 +12,7 @@ import ContentLabelingNotice from "@/components/ContentLabelingNotice";
 import AdaptiveTagChoices from "@/components/AdaptiveTagChoices";
 import type { AdaptiveTag } from "@/lib/adaptiveTags";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
+import { isCreatorSignup } from "@/lib/foundingInvitation";
 
 interface PostAuthRolePickerProps {
   email?: string;
@@ -19,7 +20,7 @@ interface PostAuthRolePickerProps {
 }
 
 const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
-  const [pickingSide, setPickingSide] = useState(false);
+  const [pickingSide, setPickingSide] = useState(() => isCreatorSignup(window.location.search));
   const [category, setCategory] = useState<CreatorCategory | "">("");
   const [labels, setLabels] = useState<string[]>([]);
   const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
