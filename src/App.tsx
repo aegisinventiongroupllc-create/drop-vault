@@ -2,7 +2,7 @@ import AutoTranslator from "@/components/AutoTranslator";
 import LanguageTransition from "@/components/LanguageTransition";
 import SiteLanguagePicker from "@/components/SiteLanguagePicker";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,11 +24,6 @@ import Pricing from "./pages/Pricing.tsx";
 import EntryPassGate from "./components/EntryPassGate";
 import PersonaTest from "./pages/PersonaTest";
 import FoundingCreators from "./pages/FoundingCreators";
-
-function RoutedLaunchIntro() {
-  const { pathname } = useLocation();
-  return pathname === "/founding-creators" ? null : <LaunchIntro />;
-}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,10 +50,11 @@ const App = () => (
             <SiteLanguagePicker />
             <VipFogMachine />
             <BeRightBack />
-            <RoutedLaunchIntro />
+            <LaunchIntro />
             <GeoGate>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/index" element={<Index />} />
                 <Route path="/founding-creators" element={<FoundingCreators />} />
                 <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />

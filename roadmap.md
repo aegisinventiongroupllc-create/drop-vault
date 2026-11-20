@@ -1,5 +1,9 @@
 # Roadmap
 
+## Pink-globe main entrance
+- [x] Show the existing pink-globe countdown entrance on the home page and direct creator invitation visits; support /index without a missing-page screen.
+- [x] Verified /, /index and /founding-creators arrival on desktop and phone, then entered the invitation and opened customer signup without replaying the entrance. No page errors or phone overflow; three-second entry test passed and build OK. Existing account and safety gates unchanged; not published.
+
 ## Pink-galaxy invitation and customer tickets
 - [ ] Refresh the creator invitation with DTT’s existing pink galaxy, stronger twerking-focused wording, and separate creator/customer signup actions.
 - [ ] Display and download an account-linked waiting-list ticket, preserving $10/year for life and private admin records; do not create invoices or access before payment readiness.
