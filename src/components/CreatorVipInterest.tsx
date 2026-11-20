@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { LAUNCH_AT } from "@/lib/launchCountdown";
+import { vipInterestTicket, vipInterestTicketText, type VipInterestEntry } from "@/lib/vipInterestTicket";
 
 type Pass = "PRO_PASS" | "ELITE_PASS";
-type Interest = { capacity: number; joined: number; entry: { pass_type: Pass; position: number } | null };
+type Interest = { capacity: number; joined: number; entry: VipInterestEntry | null };
 
 export default function CreatorVipInterest({ creatorId }: { creatorId: string | null }) {
   const [status, setStatus] = useState<Interest | null>(null);
@@ -37,11 +38,25 @@ export default function CreatorVipInterest({ creatorId }: { creatorId: string | 
     finally { setBusy(false); }
   };
   const full = !!status && status.joined >= status.capacity && !status.entry;
+  const downloadTicket = () => {
+    if (!status?.entry) return;
+    const url = URL.createObjectURL(new Blob([vipInterestTicketText(status.entry)], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = "DTT-VIP-waiting-list-ticket.txt"; link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   return <section className="mx-auto w-full max-w-xl border-y border-gold/30 px-4 py-4 space-y-3" aria-label="VIP launch waiting list">
     <h3 className="font-display text-sm font-bold text-gold">VIP LAUNCH WAITING LIST</h3>
-    <p className="text-xs text-muted-foreground">1,000 VIP passes worldwide, Pro and Elite combined. Join free to register your interest; this is not a guaranteed pass reservation. Purchase availability and verified payment determine activation.</p>
+    <p className="text-xs text-muted-foreground">500 Pro + 500 Elite passes worldwide—1,000 total. Join free, choose your pass and receive your DTT ticket. Purchase availability and verified payment determine activation; a waiting-list ticket does not reserve paid inventory.</p>
     {status?.entry && <p role="status" className="text-sm font-semibold text-primary">Your waiting-list position: #{status.entry.position} of {status.capacity.toLocaleString()} · {status.entry.pass_type === "PRO_PASS" ? "Pro Pass" : "Elite Pass"}</p>}
     {status?.entry && <p className="text-sm text-gold">Congratulations! You’re on the list. After verified payment, {status.entry.pass_type === "PRO_PASS" ? "Pro offers a 92/8" : "Elite offers a 93/7"} vault revenue split instead of the standard 90/10. Earnings are not guaranteed.</p>}
+    {status?.entry && <article aria-label="DTT VIP waiting-list ticket" className="rounded-lg border border-dashed border-gold/50 bg-background/60 p-4 space-y-2">
+      <h4 className="font-display font-semibold text-gold">YOUR DTT™ VIP TICKET</h4>
+      <p translate="no" className="notranslate font-mono text-xs">{vipInterestTicket(status.entry)}</p>
+      <p className="text-xs text-muted-foreground">Saved {new Date(status.entry.joined_at).toLocaleDateString()} · Your interest is recorded for the founder.</p>
+      <p className="text-xs text-muted-foreground">Free waiting-list receipt · Not an invoice or active VIP pass.</p>
+      <Button variant="outline" className="w-full" disabled={busy} onClick={downloadTicket}>SAVE MY VIP TICKET</Button>
+    </article>}
     <p className="text-xs text-foreground">{newYear ? "Happy New Year! " : ""}Payment invitations and the one-hour deadline are not active. Joining does not start a payment timer. Crypto or debit availability will depend on approved payment options; your place will not expire while payment is unavailable.</p>
     {status && !status.entry && <p className="text-xs text-muted-foreground">{status.joined.toLocaleString()} / {status.capacity.toLocaleString()} waiting-list places taken.</p>}
     {full && <p role="status" className="text-sm text-gold">The VIP waiting list is full.</p>}

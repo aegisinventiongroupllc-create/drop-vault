@@ -1,5 +1,13 @@
 # Roadmap
 
+## November 20 creator readiness and dashboard additions
+- [x] Reviewed onboarding, media gates, VIP purchases and owner visibility; owner breakdown prepared. Real approved long-video/teaser playback, consenting-adult review, approved payment-to-payout journey, recovery/backup rehearsal and complete language review remain launch-evidence blockers.
+- [x] Enforced 500 Pro and 500 Elite worldwide under the existing locked 1,000 counter, with type-specific availability. Added account-saved VIP tickets/downloads, congratulations and private paginated VIP owner records; no unpaid benefits or inventory holds.
+- [x] Added an exciting shared 2027–2028 virtual Bit-Token mine concept to creator/customer dashboards and customer waiting page, with no active mining/rewards or promised release.
+- [x] Temporary signed-in creator joined Pro, downloaded ticket, switched Elite, reloaded the same ticket and left; phone/desktop checked with no errors/overflow. Temporary admin RPC read back an unpaid ticket. Temporary customer joined, downloaded/reloaded $10/year-for-life ticket and saw future plans. All 134 focused tests passed, preview build OK; no real approvals, payments or publication. Real owner password-panel walkthrough remains unverified without owner participation.
+- [x] Owner confirmed five per category per country across Women, Men, Trans Women and Trans Men; preserve existing approved-award congratulations and grants.
+- [x] Owner requested exciting mining-only announcement; keep other unnamed future features off the dashboard.
+
 ## DTT manual verification onboarding check
 - [x] Remove Persona from creator verification while retaining private DTT manual review and content-clearance requirements.
 - [x] Private 10 MB ID bucket confirmed. Temporary creator submitted three synthetic images, read pending status after reload, downloaded own evidence; retained evidence resisted deletion, self-approval and cross-account upload were blocked. Actor/timestamp/pending audit confirmed and immutable event trigger checked; 36 focused tests passed.
@@ -16,7 +24,7 @@
 
 ## Pink-galaxy invitation and customer tickets
 - [ ] Refresh the creator invitation with DTT’s existing pink galaxy, stronger twerking-focused wording, and separate creator/customer signup actions.
-- [ ] Display and download an account-linked waiting-list ticket, preserving $10/year for life and private admin records; do not create invoices or access before payment readiness.
+- [x] Display and download an account-linked waiting-list ticket, preserving $10/year for life and private admin records; no invoices or access before payment readiness. Signed-in customer ticket download/reload checked November 20.
 - [ ] Verify customer ticket save/reload/download and creator/customer signup paths on desktop and phone; run focused tests and commit without publishing.
 
 ## Clarify creator signup versus customer waiting list

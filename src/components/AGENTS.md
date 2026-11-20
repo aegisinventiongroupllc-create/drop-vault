@@ -7,3 +7,5 @@
 - Intro entry readiness uses a shared timer hook to gate text visibility and dismissal together. Why: hidden prompts must not permit premature entry.
 - Hide the global language pill only when an unobscured page selector exists; never let open-menu selections start dragging. Why: retain pre-entry language access without duplicates.
 - Fifth-video access uses its own server purchase and the existing atomic unlock/escrow; signing filters unpaid fifth videos and storage applies a restrictive entitlement rule. Why: regular or annual access must never bypass its separate payment.
+- VIP waiting-list tickets use saved queue identity, never purchase inventory; owner lists use role-verified paginated RPCs and distinguish interest from receipt-verified ownership. Why: downloaded tickets cannot grant benefits or disclose other creators.
+- Future-world announcements are passive and shared by creator, customer and prelaunch views, with no token claim actions. Why: concepts must not imply funded rewards or active mining.

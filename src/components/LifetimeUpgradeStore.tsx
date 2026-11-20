@@ -22,7 +22,7 @@ export function passesRemaining(cap: number, sold: number) {
 }
 
 export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string | null }) {
-  const [inv, setInv] = useState<{ cap: number; remaining: number } | null>(null);
+  const [inv, setInv] = useState<{ cap: number; remaining: number; by_type?: Partial<Record<typeof VIP_PASSES[number]["id"], { cap: number; remaining: number }>> } | null>(null);
   const [owned, setOwned] = useState<string>("NONE");
   const [failed, setFailed] = useState(false);
   const [enabled, setEnabled] = useState(false);
@@ -44,7 +44,7 @@ export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string
         if (!result.data || result.data.cap == null) throw new Error("Availability unavailable.");
         if (cancelled) return;
         setFailed(false); setError("");
-        setInv({ cap: result.data.cap, remaining: result.data.remaining });
+        setInv({ cap: result.data.cap, remaining: result.data.remaining, by_type: result.data.by_type });
         setOwned(result.data.owned); setCheckout(result.data.checkout); setEnabled(result.data.enabled === true);
       } catch (e) { if (!cancelled) { setFailed(true); setError(e instanceof Error ? e.message : "Availability unavailable."); } }
       finally { if (!cancelled) setChecking(false); }
@@ -78,15 +78,16 @@ export default function LifetimeUpgradeStore({ creatorId }: { creatorId?: string
               <span className="font-display font-bold tracking-wider text-foreground">{p.name}</span>
               <span className="text-gold font-bold">${p.price.toLocaleString()}</span>
             </div>
+            <p className="text-xs font-semibold text-primary">{inv?.by_type?.[p.id]?.remaining ?? "—"} / 500 remaining worldwide</p>
             <ul className="text-xs text-muted-foreground space-y-1">{p.perks.map((x) => <li key={x}>• {x}</li>)}</ul>
-            <Button variant="gold" className="w-full" disabled={!creatorId || failed || left === null || !enabled || owned !== "NONE" || !!checkout || soldOut} onClick={() => setSelected(p)}>
-              {owned === p.id ? "OWNED" : owned !== "NONE" ? "PASS ALREADY OWNED" : checkout ? "CHECKOUT IN PROGRESS" : soldOut ? "SOLD OUT" : !enabled ? "CHECKOUT UNAVAILABLE" : `BUY ${p.name}`}
+            <Button variant="gold" className="w-full" disabled={!creatorId || failed || left === null || inv?.by_type?.[p.id]?.remaining == null || !enabled || owned !== "NONE" || !!checkout || soldOut || inv?.by_type?.[p.id]?.remaining === 0} onClick={() => setSelected(p)}>
+              {owned === p.id ? "OWNED" : owned !== "NONE" ? "PASS ALREADY OWNED" : checkout ? "CHECKOUT IN PROGRESS" : soldOut || inv?.by_type?.[p.id]?.remaining === 0 ? "SOLD OUT" : !enabled ? "CHECKOUT UNAVAILABLE" : `BUY ${p.name}`}
             </Button>
           </div>
         ))}
       </div>
       <p className="text-xs font-semibold text-gold">🎂 New VIP pass batch every year on the founder's birthday — May 1 at midnight (New York time). Next batch: {nextVipBatch().toLocaleDateString(undefined, { dateStyle: "long" })}.</p>
-      <p className="text-[10px] text-muted-foreground">1,000 worldwide across Pro and Elite combined. First come, first served. Pending invoices reserve a place; unpaid expiry must be confirmed by TryBit.</p>
+      <p className="text-[10px] text-muted-foreground">500 Pro and 500 Elite worldwide, 1,000 total. First come, first served. Pending invoices reserve a place; unpaid expiry must be confirmed by TryBit.</p>
       <p className="text-xs leading-relaxed text-muted-foreground">{REFUND_SUMMARY}</p>
       <Button variant="outline" size="sm" disabled={checking} onClick={() => setRefresh(n => n + 1)}>{checking ? "CHECKING…" : "CHECK PAYMENT & AVAILABILITY"}</Button>
       {selected && <VipCheckoutDialog pass={selected} onClose={() => setSelected(null)} onCreated={() => { setSelected(null); setRefresh(n => n + 1); }} />}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { isBlockedCountry } from "@/lib/restrictedCountries";
 import CreatorLaunchCountdown from "./CreatorLaunchCountdown";
+import DttFutureAnnouncement from "./DttFutureAnnouncement";
 import LegalFooter from "./LegalFooter";
 import { getTargetLang } from "./AutoTranslator";
 import { CREATOR_SIGNUP_URL } from "@/lib/foundingInvitation";
@@ -97,6 +98,7 @@ export default function CustomerLaunchWaitlist() {
       <p className="my-3 text-left text-xs text-muted-foreground">DTT administrators can see your account email, chosen country, language and joining date. We do not collect your street address.</p>
       {error && <p role="alert" className="my-3 text-sm text-destructive">{error}</p>}
       <Button variant="neon" disabled={busy || !country} onClick={() => void join()} className="w-full">{busy ? "PLEASE WAIT…" : joined ? "UPDATE MY COUNTRY" : "JOIN FREE & GET MY DTT TICKET"}</Button>
+      <div className="mt-6"><DttFutureAnnouncement /></div>
       <Button variant="ghost" className="mt-4" onClick={() => void supabase.auth.signOut()}>SIGN OUT</Button>
     </div>
     <LegalFooter />

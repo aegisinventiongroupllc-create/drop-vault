@@ -1,4 +1,5 @@
 import FoundingCreatorsBoard from "@/components/FoundingCreatorsBoard";
+import DttFutureAnnouncement from "@/components/DttFutureAnnouncement";
 import DttToken from "@/components/DttToken";
 import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import RequestDelivery from "@/components/RequestDelivery";
@@ -266,6 +267,8 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
           </div>
         </section>
       )}
+
+      <DttFutureAnnouncement />
 
       {/* Expiration notification */}
       {notification && (

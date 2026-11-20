@@ -24,7 +24,10 @@ describe.skipIf(!db)("private VIP interest", () => {
       const [retry] = await sql`SELECT pg_temp.my_vip_interest('join','PRO_PASS') AS r`;
       const [change] = await sql`SELECT pg_temp.my_vip_interest('join','ELITE_PASS') AS r`;
       expect(first.r.entry.position).toBe(1); expect(retry.r.entry.position).toBe(1);
-      expect(change.r.entry).toEqual({ pass_type: "ELITE_PASS", position: 1 }); expect(change.r.joined).toBe(1);
+      expect(change.r.entry).toMatchObject({ pass_type: "ELITE_PASS", position: 1, ticket_id: first.r.entry.ticket_id, joined_at: first.r.entry.joined_at }); expect(change.r.joined).toBe(1);
+      expect(first.r.entry.ticket_id).toBe("1");
+      const [reload] = await sql`SELECT pg_temp.my_vip_interest('status') AS r`;
+      expect(reload.r.entry).toEqual(change.r.entry);
       const [benefits] = await sql`SELECT count(*)::int AS n FROM pg_temp.creator_split_settings`;
       expect(benefits.n).toBe(0);
     });

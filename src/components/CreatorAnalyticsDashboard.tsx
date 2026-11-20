@@ -1,4 +1,5 @@
 import FoundingCongrats from "@/components/FoundingCongrats";
+import DttFutureAnnouncement from "@/components/DttFutureAnnouncement";
 import ContentEmojiReactions from "@/components/ContentEmojiReactions";
 import CreatorReactionSetting from "@/components/CreatorReactionSetting";
 import CreatorAgreementModal, { CREATOR_AGREEMENT_TEXT, CREATOR_AGREEMENT_VERSION } from "@/components/CreatorAgreementModal";
@@ -686,6 +687,8 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           </div>
         )}
       </div>}
+
+      <DttFutureAnnouncement />
 
       {/* Strategy Tip */}
       {activeSection === "media" && <div className="mx-4 mb-4">

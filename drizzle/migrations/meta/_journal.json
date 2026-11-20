@@ -869,6 +869,13 @@
       "when": 1795141378879,
       "tag": "0123_allow_owned_creator_agreement_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1795204898823,
+      "tag": "0124_vip_type_caps_and_tickets",
+      "breakpoints": true
     }
   ]
 }

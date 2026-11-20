@@ -2868,6 +2868,7 @@ export type Database = {
       }
       admin_founder_poke_top_ten: { Args: { _end_day?: string }; Returns: Json }
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
+      admin_vip_launch_list: { Args: { _offset?: number }; Returns: Json }
       apply_verified_vip_pass: {
         Args: { _payment_id: string }
         Returns: boolean

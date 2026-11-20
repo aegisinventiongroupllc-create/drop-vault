@@ -75,4 +75,35 @@ describe.skipIf(!db)("VIP isolated checkout database", () => {
       const [r] = await db`SELECT has_function_privilege(${role},${`public.${fn}`},'EXECUTE') AS ok`; expect(r.ok).toBe(false);
     }
   });
+  it.each(['PRO_PASS', 'ELITE_PASS'] as const)("limits %s to 500 worldwide while leaving the other type available", async pass => {
+    if (!db) throw Error("Database required");
+    await db.begin(async sql => {
+      await fixture(sql);
+      await sql`UPDATE pg_temp.vip_pass_inventory SET passes_sold=500`;
+      const price = pass === 'PRO_PASS' ? 1500 : 3500;
+      await sql`INSERT INTO pg_temp.vip_pass_payment_receipts(payment_id,creator_id,pass_type,amount_usd,verified_at,applied_at)
+        SELECT 'type-limit-'||n,gen_random_uuid(),${pass}::public.vip_pass_type,${price},now(),now() FROM generate_series(1,500) n`;
+      await expect(sql.savepoint(tx => tx`SELECT pg_temp.reserve_vip_checkout(${crypto.randomUUID()},${pass})`)).rejects.toThrow('This VIP pass type is sold out');
+      const other = pass === 'PRO_PASS' ? 'ELITE_PASS' : 'PRO_PASS';
+      const [available] = await sql`SELECT (pg_temp.reserve_vip_checkout(${crypto.randomUUID()},${other})).*`;
+      expect(available.pass_type).toBe(other);
+      const creator = crypto.randomUUID(), checkout = crypto.randomUUID();
+      await sql`INSERT INTO pg_temp.vip_pass_checkouts(id,creator_id,pass_type,amount_usd,status,payment_id) VALUES(${checkout},${creator},${pass},${price},'invoiced','over-type-cap')`;
+      await sql`INSERT INTO pg_temp.vip_pass_payment_receipts(payment_id,creator_id,pass_type,amount_usd,verified_at,order_id) VALUES('over-type-cap',${creator},${pass},${price},now(),${`dttvip-${checkout}`})`;
+      await expect(sql.savepoint(tx => tx`SELECT pg_temp.apply_verified_vip_pass('over-type-cap')`)).rejects.toThrow('This VIP pass type is sold out');
+      const [unchanged] = await sql`SELECT count(*)::integer n FROM pg_temp.vip_pass_payment_receipts WHERE pass_type=${pass} AND applied_at IS NOT NULL`;
+      expect(unchanged.n).toBe(500);
+      const [noBenefit] = await sql`SELECT count(*)::integer n FROM pg_temp.creator_split_settings WHERE creator_id=${creator}`;
+      expect(noBenefit.n).toBe(0);
+    });
+  });
+  it("blocks non-admin access to the private VIP list", async () => {
+    if (!db) throw Error("Database required");
+    await db.begin(async sql => {
+      await sql`SELECT set_config('request.jwt.claim.sub',${crypto.randomUUID()},true)`;
+      await expect(sql.savepoint(tx => tx`SELECT public.admin_vip_launch_list(0)`)).rejects.toMatchObject({ code: '42501' });
+    });
+    const [grants] = await db`SELECT has_function_privilege('anon','public.admin_vip_launch_list(integer)','EXECUTE') ok`;
+    expect(grants.ok).toBe(false);
+  });
 });

@@ -3,6 +3,7 @@ import AdminFoundingCreators from "@/components/AdminFoundingCreators";
 import AdminYearEndAwards from "@/components/AdminYearEndAwards";
 import AdminSecurityEvents from "@/components/AdminSecurityEvents";
 import AdminCustomerWaitlist from "@/components/AdminCustomerWaitlist";
+import AdminVipLaunchList from "@/components/AdminVipLaunchList";
 import AdminFounderPokes from "@/components/AdminFounderPokes";
 import AdminSuggestions from "@/components/AdminSuggestions";
 import AdminGlobeStyle from "@/components/AdminGlobeStyle";
@@ -63,7 +64,7 @@ const PLATFORM_FEES = [
 ];
 
 
-type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention" | "yearend" | "security" | "waitlist" | "pokes";
+type Section = "verification" | "analytics" | "creators" | "revenue" | "legal" | "payouts" | "requests" | "suggestions" | "countries" | "health" | "demand" | "powerweek" | "founding" | "flow" | "globe" | "retention" | "yearend" | "security" | "waitlist" | "pokes" | "vip";
 
 interface FinanceWallet {
   user_id: string;
@@ -306,6 +307,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
   const sections: { id: Section; label: string }[] = [
     { id: "countries", label: "COUNTRIES" },
     { id: "waitlist", label: "CUSTOMER WAITING LIST" },
+    { id: "vip", label: "VIP WAITING LIST" },
     { id: "pokes", label: "CREATOR POKES" },
     { id: "founding", label: "FOUNDING 5" },
     { id: "yearend", label: "YEAR-END AWARDS" },
@@ -369,6 +371,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       {/* Creator Verification Queue */}
       {activeSection === "security" && <AdminSecurityEvents />}
       {activeSection === "waitlist" && <AdminCustomerWaitlist />}
+      {activeSection === "vip" && <AdminVipLaunchList />}
       {activeSection === "pokes" && <AdminFounderPokes />}
       {activeSection === "verification" && (
         <div className="px-4 space-y-4">
