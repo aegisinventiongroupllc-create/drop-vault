@@ -6,6 +6,7 @@ import { isBlockedCountry } from "@/lib/restrictedCountries";
 import CreatorLaunchCountdown from "./CreatorLaunchCountdown";
 import LegalFooter from "./LegalFooter";
 import { getTargetLang } from "./AutoTranslator";
+import { CREATOR_SIGNUP_URL } from "@/lib/foundingInvitation";
 
 export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
@@ -31,11 +32,27 @@ export default function CustomerLaunchWaitlist() {
     } catch { setError("Your spot was not saved. Please check your country and try again."); }
     finally { setBusy(false); }
   };
+  const startCreatorSignup = async () => {
+    setBusy(true); setError("");
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      setError("You could not be signed out. Please try again to start creator signup.");
+      setBusy(false);
+      return;
+    }
+    window.location.assign(CREATOR_SIGNUP_URL);
+  };
   return <main className="min-h-[100dvh] bg-background text-foreground">
     <div className="mx-auto max-w-md px-5 pb-10 pt-14 text-center">
       <h1 className="font-display text-2xl font-bold text-primary">DTT™ CUSTOMER WAITING LIST</h1>
+      <p className="mt-3 text-sm text-muted-foreground">For fans waiting to watch creators. You’re signed in to a customer account.</p>
+      <div className="mt-5 border-y border-border py-5">
+        <h2 className="text-lg font-semibold">Here to become a creator?</h2>
+        <p className="mb-4 mt-2 text-sm text-muted-foreground">Creator setup is open now and free. Sign out here, then create or sign in to your creator account. The $10 yearly offer below is for customers, not creator signup.</p>
+        <Button variant="outline" disabled={busy} onClick={() => void startCreatorSignup()} className="h-auto min-h-12 w-full whitespace-normal">SIGN OUT & START CREATOR SIGNUP</Button>
+      </div>
       <CreatorLaunchCountdown audience="customer" />
-      <p className="mb-5 text-sm text-muted-foreground">The vault is not open to customers yet. Join free before launch to lock in $10 yearly entry for life instead of the standard $20. Nothing is charged today; creator access uses separate Bit-Tokens.</p>
+      <p className="mb-5 text-sm text-muted-foreground">Customer viewing opens after launch and payment readiness are confirmed. Join free before launch to lock in $10 yearly entry for life instead of the standard $20. Nothing is charged today. Watching a creator’s paid library requires separate Bit-Tokens.</p>
       {joined && <p role="status" className="mb-5 text-sm font-semibold text-gold">Congratulations, founding customer! Your entry rate is $10 a year for life—not the standard $20. Your early-supporter rate is saved to this account; each paid pass lasts 365 days.</p>}
       <label htmlFor="waitlist-country" className="mb-2 block text-left text-sm">Your country</label>
       <select id="waitlist-country" value={country} onChange={e => setCountry(e.target.value)} className="h-12 w-full rounded-lg border border-border bg-background px-3 text-foreground">

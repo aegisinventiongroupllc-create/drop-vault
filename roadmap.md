@@ -1,5 +1,9 @@
 # Roadmap
 
+## Clarify creator signup versus customer waiting list
+- [x] Identified the signed-in customer screen clearly, distinguished customer annual entry from free creator setup, and added an explicit sign-out-to-creator-signup action without changing account roles.
+- [x] Real signed-in customer clicked the new action on a phone, passed the existing entry consents and reached free registration with Creator selected; invitation screenshot and signup link checked, three focused tests passed, zero page errors and build OK. No registration, approval, payment or publication performed.
+
 ## Shareable founding-creator invitation
 - [x] Added /founding-creators with the limited lifetime 91/9 offer, adult/residence/content eligibility, private pre-launch status and branded sharing.
 - [x] Phone/desktop page and signup link verified; mandatory consents lead to free registration with Creator selected. Ten focused tests passed; no account, approval or payment changes. New copy uses English fallback where saved translations are unavailable; translation review remains outstanding.

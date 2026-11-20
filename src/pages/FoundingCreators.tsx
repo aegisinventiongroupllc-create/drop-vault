@@ -41,11 +41,12 @@ export default function FoundingCreators() {
         <div className="mx-auto max-w-2xl">
           <p className="mb-4 text-sm font-semibold text-gold">Founding creator invitation · 18+ only</p>
           <h1 className="font-display text-3xl font-bold leading-tight sm:text-5xl notranslate" translate="no">Drop That Thing<span className="text-primary">™</span></h1>
-          <p className="mx-auto mt-5 max-w-lg text-lg leading-relaxed">Your content. Your audience. A place to build something of your own.</p>
+          <h2 className="mx-auto mt-5 max-w-lg text-2xl font-semibold">Become a DTT creator</h2>
+          <p className="mx-auto mt-3 max-w-lg text-lg leading-relaxed">Your content. Your audience. A place to build something of your own.</p>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Join DTT’s adult creator marketplace before launch. Set up privately, explore your creator tools, and help shape what comes next.</p>
           <div className="mt-6 flex flex-col items-center gap-3">
             <Button variant="neon" size="lg" asChild className="h-auto min-h-12 max-w-full whitespace-normal"><Link to={CREATOR_SIGNUP_URL}>START FREE CREATOR SETUP</Link></Button>
-            <p className="text-xs text-muted-foreground">Free account and private setup. No purchase required to begin.</p>
+            <p className="text-xs text-muted-foreground">For creators, not the customer waiting list. Free account and private setup. No purchase required to begin.</p>
           </div>
           <CreatorLaunchCountdown compact />
         </div>
