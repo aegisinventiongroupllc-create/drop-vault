@@ -1,5 +1,10 @@
 # Roadmap
 
+## Controlled launch load-test planning — November 20
+- [x] Owner selected no spending yet; completed read-only source, current database-health, query/index and recorded-usage review without generating load or changing paid resources.
+- [x] Prepare staged launch test plan with likely bottlenecks, isolated test requirements, privacy/payment safeguards, stop thresholds and explicit future approval gates.
+- [ ] Execute load tests only after owner approves the exact environment, workload and cost ceiling; blocked by no-spending decision, isolation, provider limits and monitoring readiness.
+
 ## November 20 creator readiness and dashboard additions
 - [x] Reviewed onboarding, media gates, VIP purchases and owner visibility; owner breakdown prepared. Real approved long-video/teaser playback, consenting-adult review, approved payment-to-payout journey, recovery/backup rehearsal and complete language review remain launch-evidence blockers.
 - [x] Enforced 500 Pro and 500 Elite worldwide under the existing locked 1,000 counter, with type-specific availability. Added account-saved VIP tickets/downloads, congratulations and private paginated VIP owner records; no unpaid benefits or inventory holds.
