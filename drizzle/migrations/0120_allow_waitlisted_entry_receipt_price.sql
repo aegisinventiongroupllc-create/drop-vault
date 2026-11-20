@@ -1,0 +1,2 @@
+ALTER TABLE public.entry_pass_payment_receipts DROP CONSTRAINT entry_pass_payment_receipts_amount_usd_check;
+ALTER TABLE public.entry_pass_payment_receipts ADD CONSTRAINT entry_pass_payment_receipts_amount_usd_check CHECK (amount_usd IN (10,20));

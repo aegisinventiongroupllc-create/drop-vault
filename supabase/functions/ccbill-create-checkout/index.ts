@@ -5,6 +5,7 @@ import { encodeHex } from "jsr:@std/encoding@1/hex";
 import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
 import { checkoutConsentValid } from "../_shared/checkoutConsent.ts";
 import { tokenBundleTotal } from "../_shared/tokenPricing.ts";
+import { customerCheckoutOpen, entryPriceFor } from "../_shared/customerLaunch.ts";
 
 // Server-side price catalog. The browser may only pick a package, never a price.
 const TOKEN_PACKAGES: Record<string, { price: string; tokens: number }> = {
@@ -41,6 +42,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
+    if (body?.package === "entry_pass" && !customerCheckoutOpen()) return json({ error: "Customer entry opens after New Year launch. Join the free waiting list; no payment is due today." }, 409);
     if (body?.probe === true) return json({ enabled });
     if (!enabled) return json({ error: "Card checkout is unavailable pending processor approval and verified checkout.", enabled: false }, 503);
 
@@ -58,11 +60,13 @@ Deno.serve(async (req) => {
     if(!(await checkoutConsentValid(createClient(backendUrl,serviceKey),body?.consent_receipt,userData.user.id)))return json({error:"Fresh age and checkout affirmation required"},403);
 
     const q = Number(body?.quantity);
-    const pkg = String(body?.package ?? "") === "custom"
+    const selected = String(body?.package ?? "") === "custom"
       ? (Number.isInteger(q) && q >= 1 && q <= 100 ? { price: tokenBundleTotal(q).toFixed(2), tokens: q } : undefined)
       : TOKEN_PACKAGES[String(body?.package ?? "")];
-    if (!pkg) return json({ error: "Unknown token package" }, 400);
+    if (!selected) return json({ error: "Unknown token package" }, 400);
+    const pkg = { ...selected };
     const isEntryPass = String(body?.package ?? "") === "entry_pass";
+    if (isEntryPass) pkg.price = (await entryPriceFor(createClient(backendUrl, serviceKey), userData.user.id)).toFixed(2);
 
     const formDigest = await md5(`${pkg.price}${INITIAL_PERIOD}${CURRENCY_USD}${cfg.salt}`);
     const params = new URLSearchParams({

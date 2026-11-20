@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
 import { RefundDisputeNotice, REFUND_SUMMARY, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
+import { useCustomerEntryOffer } from "@/hooks/useCustomerEntryOffer";
 
 const FINAL_SALE_TEXT = `I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. ${REFUND_SUMMARY} My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.`;
 
@@ -27,6 +28,8 @@ interface Checkout {
 
 const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTokensModalProps) => {
   const isEntryPass = mode === "entry_pass";
+  const entryOffer = useCustomerEntryOffer();
+  const entryPrice = entryOffer?.amount ?? ENTRY_PASS_PRICE_USD;
   const isRequest = mode === "custom_request";
   const [quantity, setQuantity] = useState<number>(DEFAULT_PURCHASE_TOKENS);
   const setQty = (n: number) => setQuantity(Math.max(1, Math.min(100, Math.round(n) || 1)));
@@ -71,6 +74,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
   };
 
   const handleCardCheckout = async () => {
+    if (isEntryPass && !entryOffer?.open) { setError("Customer entry checkout is not open."); return; }
     if (!cardEnabled) { setError("Card checkout is unavailable."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     try {
@@ -167,6 +171,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
   };
 
   const handleStartCheckout = async () => {
+    if (isEntryPass && !entryOffer?.open) { setError("Customer entry checkout is not open."); return; }
     if (!cryptoEnabled) { setError("TryBit checkout is unavailable."); return; }
     if (!allAgreed) { setError("Please confirm you agree to the policies before paying."); return; }
     if (!(await requireSession())) return;
@@ -210,7 +215,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
                   <span className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-gold-foreground">E</span>
                   <span className="font-semibold text-foreground">Vault Entry Pass — 1 Year</span>
                 </div>
-                <span className="text-lg font-bold text-primary">${ENTRY_PASS_PRICE_USD}</span>
+                <span className="text-lg font-bold text-primary">${entryPrice}</span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-1 ml-11">
                 One pass covers the discovery floor for 365 days. Bit-Tokens to unlock creators are bought separately.
@@ -296,7 +301,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
               <p className="text-[10px] font-bold tracking-wider text-muted-foreground">YOUR ORDER</p>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{isRequest ? "Accepted custom request" : isEntryPass ? "Vault Entry Pass" : `${quantity} Bit-Token${quantity !== 1 ? "s" : ""}`}</span>
-                <span className="font-bold text-foreground">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
+                <span className="font-bold text-foreground">${isEntryPass ? entryPrice : invoiceAmount}</span>
               </div>
               {!isRequest && !isEntryPass && TRANSACTION_FEE_USD > 0 && (
                 <div className="flex justify-between text-sm">
@@ -306,7 +311,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
               )}
               <div className="flex justify-between border-t border-border pt-1 text-sm font-bold">
                 <span className="text-foreground">Total charged today</span>
-                <span className="text-primary">${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</span>
+                <span className="text-primary">${isEntryPass ? entryPrice : invoiceAmount}</span>
               </div>
               {isRequest && request && <p className="text-xs text-muted-foreground">${request.amountUsd.toFixed(2)} agreed price + $1 DTT fee + $4 processing allowance. This allowance is DTT pricing, not a verified provider charge. Delivery is due within 48 hours after verified payment; delivered media access lasts 14 days.</p>}
               {!isRequest && !isEntryPass && <><p className="text-xs text-muted-foreground">Each token has $20 spending value. No additional DTT checkout fee.</p>{invoiceAmount < quantity * TOKEN_INVOICE_USD && <p className="text-xs text-primary">Bundle savings: ${quantity * TOKEN_INVOICE_USD - invoiceAmount}</p>}<details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD} in service and processing. Included amounts are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment.</p></details></>}
@@ -360,7 +365,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
                         Remember my card for future purchases (optional). Your card is stored securely by CCBill — never on DTT servers.
                       </span>
                     </label>
-                    <Button variant="neon" className="w-full" disabled={!allAgreed} onClick={handleCardCheckout}>PAY WITH CARD — ${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}</Button>
+                    <Button variant="neon" className="w-full" disabled={!allAgreed || (isEntryPass && !entryOffer?.open)} onClick={handleCardCheckout}>PAY WITH CARD — ${isEntryPass ? entryPrice : invoiceAmount}</Button>
                   </>
                 ) : (
                   <div className="bg-secondary/30 border border-dashed border-border rounded-xl p-3 text-center">
@@ -399,7 +404,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
             </label>
 
             {payMethod === "crypto" && (
-              <Button variant="neon" className="w-full" disabled={!allAgreed || !cryptoEnabled || checkingPayments} onClick={handleStartCheckout}>{cryptoEnabled ? `GENERATE PAYMENT — $${isEntryPass ? ENTRY_PASS_PRICE_USD : invoiceAmount}` : "CHECKOUT UNAVAILABLE"}</Button>
+              <Button variant="neon" className="w-full" disabled={!allAgreed || !cryptoEnabled || checkingPayments || (isEntryPass && !entryOffer?.open)} onClick={handleStartCheckout}>{cryptoEnabled ? `GENERATE PAYMENT — $${isEntryPass ? entryPrice : invoiceAmount}` : "CHECKOUT UNAVAILABLE"}</Button>
             )}
             <Button variant="outline" className="w-full" onClick={() => { if (isRequest) onClose(); else setStep("select"); setError(null); }}>BACK</Button>
           </div>

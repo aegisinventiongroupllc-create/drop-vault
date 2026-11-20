@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { validTokenReceiptPrice } from "../_shared/tokenPricing.ts";
+import { entryPriceFor } from "../_shared/customerLaunch.ts";
 
 // CCBill webhooks are unsigned, so we (1) only accept CCBill's published IP ranges,
 // (2) re-check the billed amount against our own price catalog, and
@@ -78,7 +79,7 @@ Deno.serve(async (req) => {
   // Vault Entry Pass sales: $20 flat, no tokens.
   if (field("dtt_pkg") === "entry_pass") {
     if (!/^[0-9a-f-]{36}$/i.test(userId) || !transactionId) return ok({ error: "invalid sale" }, 400);
-    if (!Number.isFinite(billed) || billed !== 20) {
+    if (!Number.isFinite(billed) || ![10,20].includes(billed) || (billed === 10 && await entryPriceFor(supabase, userId) !== 10)) {
       console.error("ccbill pass amount mismatch", { transactionId, billed });
       return ok({ error: "amount mismatch" }, 400);
     }

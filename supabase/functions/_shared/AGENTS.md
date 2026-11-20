@@ -1,2 +1,3 @@
 # Shared security rules
+- Customer entry checkout rejects pre-launch attempts and resolves lifetime annual waitlist pricing server-side; receipt verification matches exact invoiced price and credit rechecks discount eligibility. Why: preserve paid access without trusting client discounts or early purchases.
 - Security denial notifications use the fixed server-side recipient, persist the denied event before sending, and deduplicate by kind/UTC window through managed email idempotency; notification failures never authorize requests. Why: prevent recipient injection, mailbox flooding and fail-open access without an email queue.

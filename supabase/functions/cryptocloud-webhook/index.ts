@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
         if (error) throw new Error("Could not record verified payment");
       }, async () => {
         const { error } = await supabase.rpc("credit_entry_pass", {
-          _user_id: receipt.user_id, _payment_id: receipt.payment_id, _amount_usd: 20, _method: "crypto",
+          _user_id: receipt.user_id, _payment_id: receipt.payment_id, _amount_usd: Number(receipt.amount_usd), _method: "crypto",
         });
         if (error) throw new Error("Could not grant verified entry pass");
       });

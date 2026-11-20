@@ -21,14 +21,14 @@ export function verifyEntryPassInvoice(receipt: PassReceipt, value: unknown): bo
   const paid = Number(invoice.amount_paid);
   const due = Number(invoice.amount_to_pay);
   return receipt.method === "crypto"
-    && Number(receipt.amount_usd) === ENTRY_PASS_AMOUNT_USD
+    && [10, ENTRY_PASS_AMOUNT_USD].includes(Number(receipt.amount_usd))
     && receipt.currency === "USD"
     && invoiceKey(invoice.uuid) === invoiceKey(receipt.payment_id)
     && invoice.order_id === receipt.order_id
     && invoice.fiat_currency === "USD"
     && invoice.test_mode === false
     && (invoice.status === "paid" || invoice.status === "overpaid")
-    && Number.isFinite(amount) && amount === ENTRY_PASS_AMOUNT_USD
+    && Number.isFinite(amount) && amount === Number(receipt.amount_usd)
     && Number.isFinite(paid) && Number.isFinite(due) && due > 0 && paid >= due;
 }
 

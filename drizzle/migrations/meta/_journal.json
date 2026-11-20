@@ -834,6 +834,27 @@
       "when": 1795135316925,
       "tag": "0118_restrict_vip_interest_direct_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1795139024129,
+      "tag": "0119_customer_launch_waitlist",
+      "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1795139180127,
+      "tag": "0120_allow_waitlisted_entry_receipt_price",
+      "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1795139504966,
+      "tag": "0121_lifetime_customer_waitlist_entry_offer",
+      "breakpoints": true
     }
   ]
 }

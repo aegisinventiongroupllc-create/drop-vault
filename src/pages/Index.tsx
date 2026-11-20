@@ -34,6 +34,8 @@ import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useEntryPass } from "@/hooks/useEntryPass";
 import EntryPassGate from "@/components/EntryPassGate";
+import CustomerLaunchWaitlist from "@/components/CustomerLaunchWaitlist";
+import { customerPrelaunch } from "@/lib/customerLaunch";
 import { Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "dtt_user_prefs";
@@ -86,6 +88,8 @@ const Index = () => {
   const [verified, setVerified] = useState(false);
   useEffect(()=>{let active=true;void verifyEntryConsent().then(valid=>{if(active)setVerified(valid);});return()=>{active=false;};},[]);
   const [role, setRole] = useState<UserRole | null>(savedPrefs?.role ?? null);
+  const [prelaunch, setPrelaunch] = useState(() => customerPrelaunch());
+  useEffect(() => { const timer = window.setInterval(() => setPrelaunch(customerPrelaunch()), 1000); return () => window.clearInterval(timer); }, []);
   const [email, setEmail] = useState(savedPrefs?.email ?? "");
   const [preference, setPreference] = useState<GenderPreference | null>(savedPrefs?.preference ?? savedPrefs?.vault ?? null);
   const [vault, setVault] = useState<VaultType | null>(savedPrefs?.vault ?? null);
@@ -428,6 +432,9 @@ const Index = () => {
       </div>
     );
   }
+
+  // Stop customers before preferences, discovery and every entry checkout.
+  if (role === "customer" && prelaunch) return <CustomerLaunchWaitlist />;
 
   // Customer preference screen — goes directly to feed after selection
   if (role === "customer" && (!preference || editingPreference)) {

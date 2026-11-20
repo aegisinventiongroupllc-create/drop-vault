@@ -5,9 +5,14 @@ import BuyTokensModal from "@/components/BuyTokensModal";
 import { ENTRY_PASS_PRICE_USD } from "@/lib/tokenEconomy";
 import EntryPassGlobe from "@/components/EntryPassGlobe";
 import { ENTRY_SUMMARY } from "@/i18n/entryCatalog";
+import { useCustomerEntryOffer } from "@/hooks/useCustomerEntryOffer";
+import { customerPrelaunch } from "@/lib/customerLaunch";
+import { Navigate } from "react-router-dom";
 
 const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
   const [open, setOpen] = useState(false);
+  const offer = useCustomerEntryOffer();
+  const price = offer?.amount ?? ENTRY_PASS_PRICE_USD;
 
   // Pink globe here too, matching the sign-in page; restore the default tone when leaving.
   useEffect(() => {
@@ -20,7 +25,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
     };
   }, []);
 
-
+  if (customerPrelaunch()) return <Navigate to="/" replace />;
   return (
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden">
       <div
@@ -38,7 +43,8 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
 
         <div className="space-y-2">
           <p className="text-[11px] font-bold tracking-[0.35em] text-gold">VAULT ENTRY PASS</p>
-          <h1 className="font-display text-3xl font-bold tracking-wider">{`$${ENTRY_PASS_PRICE_USD} / YEAR`}</h1>
+          <h1 className="font-display text-3xl font-bold">{offer ? `$${price} / YEAR` : "CHECKING YOUR ENTRY OFFER…"}</h1>
+          {price === 10 && <p className="text-sm text-gold">Founding customer rate · $10 yearly for life</p>}
           <p className="text-sm text-muted-foreground leading-relaxed">
             {ENTRY_SUMMARY}
           </p>
@@ -60,12 +66,12 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
           </div>
           <div className="flex justify-between border-t border-border pt-3 text-xs font-bold">
             <span className="text-muted-foreground">Your entry pass</span>
-            <span className="text-primary">${ENTRY_PASS_PRICE_USD}.00 / year</span>
+            <span className="text-primary">${price}.00 / year</span>
           </div>
         </div>
 
-        <Button variant="neon" className="w-full font-bold tracking-wider" onClick={() => setOpen(true)}>
-          {`GET MY ENTRY PASS — $${ENTRY_PASS_PRICE_USD}`}
+        <Button variant="neon" disabled={!offer?.open} className="w-full font-bold tracking-wider" onClick={() => setOpen(true)}>
+          {`GET MY ENTRY PASS — $${price}`}
         </Button>
 
         <a href="/pricing" className="block text-[11px] font-semibold uppercase text-primary underline">

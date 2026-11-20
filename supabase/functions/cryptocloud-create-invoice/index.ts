@@ -3,6 +3,7 @@ import { priceAgreedRequest } from "../_shared/customRequestPayment.ts";
 import { liveCheckoutEnabled } from "../_shared/paymentReadiness.ts";
 import { checkoutConsentValid } from "../_shared/checkoutConsent.ts";
 import { tokenBundleTotal } from "../_shared/tokenPricing.ts";
+import { customerCheckoutOpen, entryPriceFor } from "../_shared/customerLaunch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,6 +84,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
+    if (body?.kind === "entry_pass" && !customerCheckoutOpen()) return json({ error: "Customer entry opens after New Year launch. Join the free waiting list; no payment is due today." }, 409);
     const enabled = liveCheckoutEnabled({
       credentialsPresent: Boolean(SHOP_ID && API_KEY),
       webhookSecret: Deno.env.get("CRYPTOCLOUD_SECRET_KEY") ?? "",
@@ -120,7 +122,7 @@ Deno.serve(async (req) => {
       if (!requestPrice) return json({ error: "This request is not ready for payment" }, 409);
     }
     if (isCustomRequest && !requestPrice) return json({ error: "This request is not ready for payment" }, 409);
-    const priced = requestPrice ? { amount_usd: requestPrice.amount_usd, tokens: 0 } : priceRequest(body);
+    const priced = body?.kind === "entry_pass" ? { amount_usd: await entryPriceFor(server, userId), tokens: 0 } : requestPrice ? { amount_usd: requestPrice.amount_usd, tokens: 0 } : priceRequest(body);
     if ("error" in priced) return json({ error: priced.error }, 400);
 
     const { amount_usd, tokens } = priced;

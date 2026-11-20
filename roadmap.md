@@ -1,5 +1,11 @@
 # Roadmap
 
+## Customer pre-launch waiting list
+- [x] Customers stop before preferences/discovery/entry checkout at the countdown waiting screen; direct entry preview redirects and both deployed checkout services reject early entry payments. Creator private setup stays open.
+- [x] Added private account-linked country/language/join date records and CUSTOMER WAITING LIST in admin with country totals, filtering and 50-row pages. Server-role checks deny customers; anonymous reads and direct member writes denied. Admin UI with a real administrator remains unverified; isolated admin read rule tested.
+- [x] Pre-launch customers get $10 annual entry for life, including renewals, versus standard $20. Server-resolved price, exact receipt matching and verified-only credit preserved; congratulations confirms account-linked yearly rate, not free lifetime access or creator content.
+- [x] 35 focused tests passed. Temporary signed-in customer joined, saved US and read lifetime $10 offer after reload on desktop/384x629; both real early checkout requests returned 409; authenticated admin-list request denied. Temporary creator completed category/label and agreements, reached VERIFY and PRIVATE DRAFTS on phone/desktop; zero page errors. No real ID/content, payment or approvals submitted; build OK. Nothing published.
+
 ## Creator launch experience review
 - [x] Checked desktop, 390px phone and 754x235 short entrance; made short screens scrollable, remounted globe on resize to prevent cropping and restored midnight burst precedence. Clarified required category/labels, launch target, free joining and inactive payment deadline; moved optional interest to Analytics with a setup shortcut. Approval/payment rules unchanged.
 - [x] Temporary signed-in creator selected Women/Dance through normal setup, joined Pro, switched to Elite, reloaded and read back #2, then left successfully. Desktop/mobile screenshots and zero page errors; 16 focused countdown/label/queue/checkout tests passed. Genuine ID/content clearance and approved payment invitations remain unverified and blocked as below. Public support address unified; not published.

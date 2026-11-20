@@ -1487,6 +1487,27 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_launch_waitlist: {
+        Row: {
+          country: string
+          joined_at: string
+          language: string
+          user_id: string
+        }
+        Insert: {
+          country: string
+          joined_at?: string
+          language?: string
+          user_id: string
+        }
+        Update: {
+          country?: string
+          joined_at?: string
+          language?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       data_retention_policies: {
         Row: {
           basis: string
@@ -2823,6 +2844,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_customer_launch_waitlist: {
+        Args: { _country?: string; _offset?: number }
+        Returns: Json
+      }
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       apply_verified_vip_pass: {
         Args: { _payment_id: string }
@@ -2913,6 +2938,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      customer_entry_price: { Args: { _user_id: string }; Returns: number }
       fifth_video_storage_access: {
         Args: { _bucket: string; _path: string }
         Returns: boolean
@@ -3133,6 +3159,11 @@ export type Database = {
       mark_custom_request_paid: {
         Args: { _payment_id: string; _request_id: string }
         Returns: boolean
+      }
+      my_customer_entry_offer: { Args: never; Returns: Json }
+      my_customer_launch_waitlist: {
+        Args: { _action?: string; _country?: string; _language?: string }
+        Returns: Json
       }
       my_reaction_setting: { Args: never; Returns: boolean }
       my_vip_interest: {
