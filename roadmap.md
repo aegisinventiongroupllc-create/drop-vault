@@ -1,5 +1,10 @@
 # Roadmap
 
+## X cover and spinning-globe pinned post
+- [x] Create a globe-free 1500×500 pink-galaxy cover with centered requested wording and crop-safe placement.
+- [x] Prepare a creator-invitation post and instructions to upload and pin it; do not post to X or promise earnings.
+- [ ] Deliver the spinning-globe video after the animation task returns and verify its reported motion/audio checks.
+
 ## Pink-globe main entrance
 - [x] Show the existing pink-globe countdown entrance on the home page and direct creator invitation visits; support /index without a missing-page screen.
 - [x] Verified /, /index and /founding-creators arrival on desktop and phone, then entered the invitation and opened customer signup without replaying the entrance. No page errors or phone overflow; three-second entry test passed and build OK. Existing account and safety gates unchanged; not published.
