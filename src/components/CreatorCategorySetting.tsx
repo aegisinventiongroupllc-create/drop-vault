@@ -7,6 +7,7 @@ import { validContentLabels } from "@/lib/contentLabels";
 import ContentLabelingNotice from "./ContentLabelingNotice";
 import AdaptiveTagChoices from "./AdaptiveTagChoices";
 import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
+import CreatorDebutBadge from "./CreatorDebutBadge";
 
 export default function CreatorCategorySetting() {
   const [category, setCategory] = useState<CreatorCategory | "">("");
@@ -45,5 +46,6 @@ export default function CreatorCategorySetting() {
     <ContentLabelingNotice />
     <Button variant="outline" disabled={busy || !category || !validContentLabels(labels)} onClick={() => void save()}>SAVE CATEGORY</Button>
     {message && <p role="status" className="text-xs text-muted-foreground">{message}</p>}
+    <CreatorDebutBadge editable />
   </section>;
 }

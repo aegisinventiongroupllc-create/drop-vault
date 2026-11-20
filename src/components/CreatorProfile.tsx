@@ -28,6 +28,7 @@ import { PurchaseAccessNotice } from "@/components/PurchaseAccessNotice";
 import { spendableTokens } from "@/lib/accessEscrow";
 import AdaptiveTagBadges from "@/components/AdaptiveTagBadges";
 import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
+import CreatorDebutBadge from "./CreatorDebutBadge";
 
 interface Vault {
   name: string;
@@ -261,6 +262,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
             </div>
             <p className="text-sm text-muted-foreground mt-1">Content Creator</p>
             <AdaptiveTagBadges tags={adaptiveTags} />
+            <CreatorDebutBadge creatorId={creatorId} />
             <span aria-hidden="true" className="block h-2" />
           </div>
         </div>

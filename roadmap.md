@@ -1,5 +1,10 @@
 # Roadmap
 
+## First-platform badge and publication — November 20
+- [x] Added optional creator-owned public debut badge in profile settings and customer profile; actual control save and public read after reload checked with a temporary creator. Full dashboard navigation remains unverified; control tests cover opt-in/removal.
+- [x] Added the new-creator invitation to the silent mobile video; checked its closing frame.
+- [x] Security scan completed with warnings but no critical findings; permission tests, preview build and commit checked before requesting publication.
+
 ## Welcoming pre-launch payment wording — November 20
 - [x] Replace repetitive payment-approval warning copy across signup, invitation, countdown, waiting list, revenue details and canonical payment policies with clear preparing-for-launch wording; retain verified-only activation and explicit real-funds test warnings.
 - [x] Invitation → free creator signup and About payment wording checked on desktop/390px phone with zero page errors; 84 focused checks passed and preview build OK. No payment settings, spending or publication. Updated English wording uses existing translation fallback; reviewed all-language coverage remains outstanding below.

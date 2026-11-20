@@ -744,6 +744,36 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_debut_badges: {
+        Row: {
+          first_platform: boolean
+          user_id: string
+        }
+        Insert: {
+          first_platform?: boolean
+          user_id: string
+        }
+        Update: {
+          first_platform?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_debut_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "creator_debut_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       creator_drafts: {
         Row: {
           created_at: string

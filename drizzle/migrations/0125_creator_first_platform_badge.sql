@@ -1,0 +1,10 @@
+CREATE TABLE public.creator_debut_badges (user_id uuid PRIMARY KEY REFERENCES public.profiles(user_id) ON DELETE CASCADE, first_platform boolean NOT NULL DEFAULT false);
+GRANT SELECT ON public.creator_debut_badges TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.creator_debut_badges TO authenticated;
+GRANT ALL ON public.creator_debut_badges TO service_role;
+ALTER TABLE public.creator_debut_badges ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public creator declaration" ON public.creator_debut_badges FOR SELECT TO anon, authenticated USING (public.has_role(user_id, 'creator'));
+CREATE POLICY "Creator adds own declaration" ON public.creator_debut_badges FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() AND public.has_role(auth.uid(), 'creator'));
+CREATE POLICY "Creator updates own declaration" ON public.creator_debut_badges FOR UPDATE TO authenticated USING (user_id = auth.uid() AND public.has_role(auth.uid(), 'creator')) WITH CHECK (user_id = auth.uid() AND public.has_role(auth.uid(), 'creator'));
+CREATE POLICY "Creator removes own declaration" ON public.creator_debut_badges FOR DELETE TO authenticated USING (user_id = auth.uid() AND public.has_role(auth.uid(), 'creator'));
+COMMENT ON TABLE public.creator_debut_badges IS 'Optional self-declared first creator platform; not verified identity/history and grants no entitlements.';

@@ -876,6 +876,20 @@
       "when": 1795204898823,
       "tag": "0124_vip_type_caps_and_tickets",
       "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1795218373466,
+      "tag": "0125_creator_first_platform_badge",
+      "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1795218682030,
+      "tag": "0126_debut_badge_explicit_public_read_only",
+      "breakpoints": true
     }
   ]
 }
