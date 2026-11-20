@@ -10,8 +10,17 @@ export const CREATOR_AGREEMENT_TEXT =
   `${CHARGEBACK_EARNINGS} ${DISPUTE_SUMMARY} Refunds and creator-departure Bit-cent credits follow the Refund Policy. ` +
   "I may leave at any time and DTT may suspend accounts that break the Creator & Purchase Rules or Terms of Service.";
 
-const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
+const CreatorAgreementModal = ({ onAgree }: { onAgree: () => Promise<void> }) => {
   const [agreed, setAgreed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const save = async () => {
+    if (!agreed || busy) return;
+    setBusy(true); setError("");
+    try { await onAgree(); }
+    catch { setError("Your agreement could not be saved. Please retry."); }
+    finally { setBusy(false); }
+  };
   return (
     <div className="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-card border border-border rounded-2xl overflow-hidden">
@@ -32,11 +41,12 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => void }) => {
             <p>Breaking the Creator &amp; Purchase Rules or Terms of Service may lead to suspension.</p>
           </div>
           <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
+            <input type="checkbox" checked={agreed} disabled={busy} onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5 w-4 h-4 rounded border-border accent-primary" />
             <span className="text-xs text-foreground">I have read and agree to the DTT Creator Agreement.</span>
           </label>
-          <Button variant="neon" className="w-full" disabled={!agreed} onClick={onAgree}>AGREE &amp; CONTINUE</Button>
+          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+          <Button variant="neon" className="w-full" disabled={!agreed || busy} onClick={() => void save()}>{busy ? "SAVING…" : "AGREE & CONTINUE"}</Button>
         </div>
       </div>
     </div>

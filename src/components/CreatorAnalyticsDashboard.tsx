@@ -526,15 +526,16 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   }
 
   if (!adminPreview && safetyChecked && authUserId && !creatorAgreed) {
-    return <CreatorAgreementModal onAgree={() => {
-      setCreatorAgreed(true);
-      supabase.from("legal_consents").insert({
+    return <CreatorAgreementModal onAgree={async () => {
+      const { error } = await supabase.from("legal_consents").insert({
         user_id: authUserId,
         consent_type: "creator_agreement",
         consent_text: CREATOR_AGREEMENT_TEXT,
         terms_version: CREATOR_AGREEMENT_VERSION,
         user_agent: navigator.userAgent,
-      }).then(() => {});
+      });
+      if (error) throw error;
+      setCreatorAgreed(true);
     }} />;
   }
 

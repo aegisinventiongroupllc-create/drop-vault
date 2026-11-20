@@ -1,5 +1,11 @@
 # Roadmap
 
+## Waiting-list income and creator recruitment review
+- [x] Locate private CUSTOMER WAITING LIST and check current account count; explain free interest versus money received.
+- [x] Added clearly hypothetical $10 annual-entry sales scenarios without changing prices, payments or earnings splits; concrete calculations tested. Real administrator UI walkthrough remains unverified without an authorized admin session.
+- [x] Temporary signed-in creator completed setup on phone and desktop. Fixed rejected creator-agreement saving with creator-owned record permission and wait/retry; one record and reload confirmed. Identity, participant consent and publication checks preserved; no real documents, media or approval used.
+- [x] Explained DTT's offer, practical profitability priorities and remaining launch blockers without income guarantees or advertising expenditure; owner review saved in Files. Twelve focused checks passed; build OK. Genuine verification/content/payment/payout still needs consenting adults and provider-authorized transactions.
+
 ## Daily creator pokes
 - [ ] Add one recorded poke per creator per New York day, a wink receipt and dashboard participation tip.
 - [ ] Add private admin top 10 for a rolling 365-day window, ordered by participation with country and latest poke.
