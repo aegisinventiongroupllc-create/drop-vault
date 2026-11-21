@@ -42,14 +42,21 @@ export async function createCustomerTicketImage(ticket: CustomerWaitlistTicket, 
   };
   ctx.fillStyle = color("--background"); ctx.fillRect(0, 0, 1080, 1560);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 480); ctx.clip();
-  const scale = Math.max(1080 / sky.width, 480 / sky.height);
-  ctx.drawImage(sky, (1080 - sky.width * scale) / 2, (480 - sky.height * scale) / 2, sky.width * scale, sky.height * scale);
+  // The shared sky image contains a globe. Use only its globe-free left
+  // starfield, alternating mirrored strips so the ticket has one globe.
+  for (let i = 0; i < 3; i++) {
+    ctx.save();
+    ctx.translate(i * 360 + (i % 2 ? 360 : 0), 0);
+    if (i % 2) ctx.scale(-1, 1);
+    ctx.drawImage(sky, 0, 0, sky.width * .24, sky.height, 0, 0, 360, 480);
+    ctx.restore();
+  }
   ctx.fillStyle = color("--background", .35); ctx.fillRect(0, 0, 1080, 480);
   ctx.restore();
-  ctx.drawImage(globe, 720, 70, 280, 280);
+  ctx.drawImage(globe, 535, 10, 460, 460);
   text("DTT™", 90, 170, 86, "--foreground", 700, display);
   text("DROP THAT THING™", 90, 240, 30, "--foreground", 600);
-  text("FOUNDING CUSTOMER", 90, 386, 36, "--foreground", 600);
+  text("FOUNDING CUSTOMER", 90, 386, 29, "--foreground", 600);
   text("Your front-row start.", 90, 440, 30);
   ctx.fillStyle = color("--consent-pink"); ctx.fillRect(50, 490, 980, 3);
   text("YOUR SAVED ANNUAL ENTRY", 90, 573, 26, "--consent-pink", 600);
