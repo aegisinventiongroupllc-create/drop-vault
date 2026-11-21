@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut, verifyAdminPasscode } from "@/lib/adminSession";
+import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
@@ -88,19 +88,8 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     setAdminError("");
     const trimmed = email.trim();
     // Navigation only: the destination still requires server-verified access.
-    if (isAdminSignInShortcut(mode, trimmed)) {
+    if (isAdminSignInShortcut(mode, trimmed) || isAdminAccessCode(mode, trimmed)) {
       window.location.assign("/admin-access");
-      return;
-    }
-    // Staff access code (verified on the server, never stored in the app)
-    if (isAdminAccessCode(mode, trimmed)) {
-      setLoading(true);
-      try {
-        if (await verifyAdminPasscode(trimmed)) onAdmin();
-        else setAdminError("Access code not accepted. Check the code and try again.");
-      } finally {
-        setLoading(false);
-      }
       return;
     }
 
