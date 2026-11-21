@@ -205,11 +205,14 @@ export async function createLockScreenVideo(element: HTMLElement, signal: AbortS
     ctx.drawImage(globe.canvas, cx - gw * s / 2, cy - gh * s / 2, gw * s, gh * s);
     ctx.globalAlpha = 1;
   };
+  // Halo uses the galaxy's own tint so it blends with the chosen sky.
+  const tintEl = element.querySelector<HTMLElement>(".galaxy-photo-tint");
+  const rgb = (tintEl && /\d+\D+\d+\D+\d+/.exec(getComputedStyle(tintEl).backgroundColor)?.[0].split(/\D+/).join(",")) || "255,60,170";
   const draw: Frame = (ctx, t) => {
     drawWallpaperSky(ctx, background, t);
     const breath = globeBreath(t) - 1;
     ctx.save();
-    ctx.shadowColor = `rgba(255,60,170,${.3 + breath * 6})`; ctx.shadowBlur = (20 + breath * 300) * (width / 720);
+    ctx.shadowColor = `rgba(${rgb},${.3 + breath * 6})`; ctx.shadowBlur = (20 + breath * 300) * (width / 720);
     ctx.imageSmoothingQuality = "high";
     drawGlobe(ctx, t, 1);
     ctx.restore();

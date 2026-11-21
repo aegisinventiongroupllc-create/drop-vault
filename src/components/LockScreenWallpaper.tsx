@@ -66,7 +66,7 @@ export default function LockScreenWallpaper() {
           <div className="absolute inset-0 bg-background/25" data-wallpaper-shade />
           <div className="absolute inset-0 flex items-center justify-center pl-[5%]" data-wallpaper-globe>
             <GlobeOverrideContext.Provider value={{ tone: theme.globe ?? ENTRY_GLOBE.tone, borderTone: theme.globeBorder ?? ENTRY_GLOBE.borderTone, whiteLights: true }}>
-              <MiniGlobe size={144} speed={(2 * Math.PI) / WALLPAPER_VIDEO.seconds} lights backdrop={false} cameraDistance={3.8} sharp exportable frameController={globeFrames} />
+              <MiniGlobe size={200} speed={(2 * Math.PI) / WALLPAPER_VIDEO.seconds} lights backdrop={false} cameraDistance={3.8} sharp exportable frameController={globeFrames} />
             </GlobeOverrideContext.Provider>
           </div>
         </div>
@@ -78,6 +78,7 @@ export default function LockScreenWallpaper() {
           if (error) { setAttempt(n => n + 1); return; }
           if (blob) void saveLockScreenImage(blob).catch(() => setError("Your image couldn’t be saved. Please retry."));
         }}>{error ? "RETRY" : blob ? "SAVE STILL IMAGE INSTEAD" : "PREPARING…"}</Button>
+        {recording && <p role="status" className="text-center text-xs text-muted-foreground">Keep this window open while your spinning globe is made — it can take up to 3 minutes.</p>}
         {recording && <Button variant="ghost" onClick={() => recordingAbort.current?.abort()}>CANCEL</Button>}
         {videoUrl && <video src={videoUrl} controls autoPlay loop muted playsInline className="mx-auto w-28" aria-label="Spinning wallpaper video" />}
       </DialogContent>
