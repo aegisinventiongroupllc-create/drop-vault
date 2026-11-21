@@ -1,6 +1,6 @@
 # Project architecture rules
 - Email-field admin shortcuts navigate to protected sign-in only; never grant privileges or replace server verification. Why: convenience must not expose administrative records.
-- Pages show the pink EntryPassGlobe (thin edge ring) for everyone; personal globes appear only in the country-picker icon/explorer, color designer and signed-in idle. Why: consistent branding.
+- Pages use pink EntryPassGlobe; personal globes only in country picker, color designer, signed-in idle. Why: branding.
 - ShareQrCode preserves finder patterns, central branding, high correction, outer glow and quiet-zone PNG exports. Why: protect scanning and motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
 - Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
