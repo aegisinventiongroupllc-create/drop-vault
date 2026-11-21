@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sharing and QR walkthrough — November 21
+- [x] Actual temporary creator completed category/agreements/name setup and opened MY PAGE; library copy/share fallback/download worked at desktop/mobile sizes with no overflow or page errors. X popup opened with correct creator URL but X itself returned a browser network error, so actual posting/native phone sharing remain unverified. On-screen and downloaded 1024px branded QR both decoded to the exact creator URL.
+- [x] Actual temporary customer followed that creator address through adult consent/account choice, joined the waitlist, copied/downloaded the link and reloaded with ticket/link retained; mobile country update persisted without repeated celebration or an unlock control. Fourteen focused tests passed and preview build OK. Corrected literal underscore matching to prevent links resolving a different handle, aligned link validation with signup, and labeled the library back control. No publication or payments.
+
 ## Creator library sharing — November 21
 - [x] Add working creator addresses and library/dashboard share, copy, X and save-link controls; remember a single device link through customer signup and the prelaunch waiting list without exposing media or granting access.
 - [x] Seven focused tests passed; actual temporary customer followed a creator address, completed consent/account selection, joined the waitlist, copied/downloaded the creator link and reloaded with ticket/link retained. Phone/desktop screenshots showed no overflow or page errors; preview build OK. Library/dashboard controls share the same verified actions; native phone share sheet and actual X posting remain device/account checks. No publication or payment.

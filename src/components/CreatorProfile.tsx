@@ -30,6 +30,7 @@ import AdaptiveTagBadges from "@/components/AdaptiveTagBadges";
 import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 import CreatorDebutBadge from "./CreatorDebutBadge";
 import CreatorShareActions from "./CreatorShareActions";
+import { creatorNamePattern } from "@/lib/creatorSharing";
 
 interface Vault {
   name: string;
@@ -96,7 +97,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       const { data, error } = await supabase
         .from("public_profiles")
         .select("user_id, avatar_config, profile_photo_path, vault_side, adaptive_tags")
-        .ilike("display_name", creatorName)
+        .ilike("display_name", creatorNamePattern(creatorName))
         .limit(1)
         .maybeSingle();
       if (!cancel) {
@@ -251,9 +252,9 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
           <LivingProfileBackdrop image={profileBackdrop} />
           <div className="absolute inset-0 bg-background/30 pointer-events-none" />
           <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
-            <button onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
+            <Button variant="ghost" size="icon" aria-label="Back from creator library" title="Back" onClick={onBack} className="w-9 h-9 rounded-full bg-background/60 backdrop-blur flex items-center justify-center text-foreground">
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
             <WalletIndicator />
           </div>
 

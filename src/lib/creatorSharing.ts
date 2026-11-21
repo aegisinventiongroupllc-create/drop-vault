@@ -3,7 +3,12 @@ const SAVED_CREATOR_KEY = "dtt_saved_creator_link";
 export function creatorHandle(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const handle = value.trim().replace(/^@/, "");
-  return /^[A-Za-z0-9_.]{3,24}$/.test(handle) ? handle : null;
+  return /^[A-Za-z0-9_][A-Za-z0-9_.]{2,23}$/.test(handle) ? handle : null;
+}
+
+/** Match literal handles case-insensitively, never SQL LIKE wildcards. */
+export function creatorNamePattern(value: string): string {
+  return value.replace(/[\\%_]/g, character => `\\${character}`);
 }
 
 export function creatorShareUrl(value: unknown): string | null {
