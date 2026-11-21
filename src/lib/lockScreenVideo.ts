@@ -161,12 +161,12 @@ export async function captureWallpaperSky(element: HTMLElement): Promise<HTMLCan
     const cover = Math.max(w / photo.naturalWidth, h / photo.naturalHeight);
     const pw = photo.naturalWidth * cover, ph = photo.naturalHeight * cover;
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
-    ctx.filter = "contrast(1.2) saturate(1.45) brightness(1.02)";
+    ctx.filter = "contrast(1.14) saturate(1.22) brightness(.92)";
     ctx.drawImage(photo, (w - pw) / 2, (h - ph) / 2, pw, ph);
     ctx.filter = "none";
     const tint = element.querySelector<HTMLElement>(".galaxy-photo-tint");
     if (tint) {
-      ctx.globalCompositeOperation = "color"; ctx.globalAlpha = .6;
+      ctx.globalCompositeOperation = "color"; ctx.globalAlpha = .85;
       ctx.fillStyle = getComputedStyle(tint).backgroundColor; ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
     }

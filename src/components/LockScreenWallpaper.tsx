@@ -63,9 +63,10 @@ export default function LockScreenWallpaper() {
         <DialogDescription>Your own Be Right Back galaxy and spinning globe — no words. When it’s ready, tap ADD TO LOCK SCREEN and choose “Set as wallpaper” (or save to Gallery, then ⋮ → Set as wallpaper → Lock screen).</DialogDescription>
         <div ref={scene} aria-label="Lock-screen artwork" className="relative isolate mx-auto aspect-[9/19.5] w-full max-w-[252px] shrink-0 overflow-hidden bg-background">
           <GalaxyReel scope="brb" styleOverride={sky.style} toneOverride={sky.tone ?? (theme.brbStyle || theme.starStyle ? "" : ENTRY_GLOBE.tone)} />
+          <div className="absolute inset-0 bg-background/25" data-wallpaper-shade />
           <div className="absolute inset-0 flex items-center justify-center pl-[5%]" data-wallpaper-globe>
             <GlobeOverrideContext.Provider value={{ tone: theme.globe ?? ENTRY_GLOBE.tone, borderTone: theme.globeBorder ?? ENTRY_GLOBE.borderTone, whiteLights: true }}>
-              <MiniGlobe size={180} speed={(2 * Math.PI) / WALLPAPER_VIDEO.seconds} lights backdrop={false} cameraDistance={3.8} dotScale={1.2} glintBoost={2.6} sharp exportable frameController={globeFrames} />
+              <MiniGlobe size={144} speed={(2 * Math.PI) / WALLPAPER_VIDEO.seconds} lights backdrop={false} cameraDistance={3.8} sharp exportable frameController={globeFrames} />
             </GlobeOverrideContext.Provider>
           </div>
         </div>
