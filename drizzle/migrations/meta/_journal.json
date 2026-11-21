@@ -918,6 +918,13 @@
       "when": 1795222921474,
       "tag": "0130_deny_public_view_receipts_and_default_role_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1795267747181,
+      "tag": "0131_protect_creator_media_views",
+      "breakpoints": true
     }
   ]
 }
