@@ -1,6 +1,6 @@
-export default function DttFutureAnnouncement() {
+export default function DttFutureAnnouncement({ expanded = false }: { expanded?: boolean }) {
   return <section aria-label="DTT future plans" className="mx-auto w-full max-w-xl border-y border-primary/30 px-4 py-4 text-left">
-    <details>
+    <details open={expanded || undefined}>
       <summary className="cursor-pointer font-display text-sm font-semibold text-primary">DTT’S NEXT CHAPTER · GALAXY GAMING & BIT-TOKEN MINE</summary>
       <div className="mt-3 space-y-2 text-sm">
         <p className="text-foreground">Imagine flying through DTT’s pink galaxy—exploring new worlds, connecting with creators and customers, and playing together among the stars.</p>
