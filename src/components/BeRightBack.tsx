@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 import GalaxyReel from "@/components/GalaxyReel";
 import MiniGlobe from "@/components/MiniGlobe";
+import IdleCountdown from "@/components/IdleCountdown";
 
 const IDLE_MS = 60_000;
 
 /**
  * "Be right back" screen: after a minute with no mouse, keys or touch, a
  * full-screen spinning globe fades in like a phone lock screen (no lock).
- * Any activity brings the app straight back.
+ * Two clicks/taps return to the app; Escape remains keyboard accessible.
  *
  * Visitors who haven't signed up yet always see the original DTT galaxy
  * (Star cluster) and entry-pass pink globe. Signed-in members see the globe
@@ -21,6 +22,7 @@ const BeRightBack = () => {
   const [signedIn, setSignedIn] = useState(false);
   const timer = useRef<number>();
   const hold = useRef(0);
+  const lastTap = useRef<number | null>(null);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
@@ -35,17 +37,24 @@ const BeRightBack = () => {
     };
     const back = (event: Event) => {
       if (Date.now() < hold.current) return;
-      // Mouse movement must not dismiss the screen before a ship can be clicked.
-      if (away && event.type === "mousemove") return;
       if (event.target instanceof Element && event.target.closest("[data-idle-interactive]")) {
-        if (!(event instanceof KeyboardEvent && event.key === "Escape")) return;
+        return;
+      }
+      if (away) {
+        if (event instanceof KeyboardEvent && event.key === "Escape") {
+          lastTap.current = null;
+        } else if (event.type === "click") {
+          const now = Date.now();
+          if (lastTap.current === null || now - lastTap.current > 700) { lastTap.current = now; return; }
+          lastTap.current = null;
+        } else return;
       }
       setAway(false);
       reset();
     };
-    const events: (keyof WindowEventMap)[] = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "wheel"];
+    const events: (keyof WindowEventMap)[] = ["mousemove", "click", "keydown", "touchstart", "scroll", "wheel"];
     events.forEach((e) => window.addEventListener(e, back, { passive: true }));
-    const preview = () => { hold.current = Date.now() + 1500; setAway(true); };
+    const preview = () => { hold.current = Date.now() + 1500; lastTap.current = null; setAway(true); };
     window.addEventListener("dtt-brb-preview", preview);
     reset();
     return () => {
@@ -69,6 +78,7 @@ const BeRightBack = () => {
             <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>
           </div>
         ) : <EntryPassGlobe size={220} solid />}
+        <IdleCountdown />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>

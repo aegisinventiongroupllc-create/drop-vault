@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dial
 import { shouldCelebrateWaitlistJoin } from "@/lib/waitlistCelebration";
 import { savedCreator } from "@/lib/creatorSharing";
 import CreatorShareActions from "./CreatorShareActions";
+import LockScreenWallpaper from "./LockScreenWallpaper";
 
 export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
@@ -98,6 +99,7 @@ export default function CustomerLaunchWaitlist() {
         <CreatorShareActions creatorName={creatorLink} />
       </section>}
       <CreatorLaunchCountdown audience="customer" />
+      <div className="mb-6"><LockScreenWallpaper /></div>
       {!joined && <div className="mb-6 space-y-2"><p className="text-3xl font-semibold text-foreground">$10 <span className="text-base">/ year for life</span></p><p className="text-sm text-foreground/80">Join before launch for half the standard $20 yearly entry to the global twerking feed.</p><p className="text-xs text-foreground/70">365 days per paid pass. Nothing due today. Creator libraries use separate Bit-Tokens.</p></div>}
       {ticket && <article ref={ticketRef} tabIndex={-1} aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
         <div className="border-b border-dashed border-primary/50 px-5 py-4">

@@ -11,6 +11,7 @@ import { SKY_BACKDROPS } from "@/lib/skyBackdrops";
 import { toast } from "@/hooks/use-toast";
 import FoldBox from "@/components/FoldBox";
 import DashboardStarsPicker from "@/components/DashboardStarsPicker";
+import LockScreenWallpaper from "@/components/LockScreenWallpaper";
 
 const SWATCHES = ["#ff0080", "#3b82f6", "#c0c0c0", "#fbbf24", "#22c55e", "#a855f7", "#ef4444", "#14b8a6", "#000000", "#0f0f0f", "#1e293b", "#ffffff"];
 
@@ -107,6 +108,7 @@ const DashboardColorPicker = forwardRef<DashboardColorPickerHandle>((_, ref) => 
           {open ? "HIDE COLORS" : "SHOW COLORS"}
         </Button>
       </div>
+      <LockScreenWallpaper />
       {open && (
         <>
           {THEME_PARTS.map((p) => (

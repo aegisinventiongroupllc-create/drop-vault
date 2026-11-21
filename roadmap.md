@@ -1,5 +1,12 @@
 # Roadmap
 
+## Personal phone lock screens — November 21
+- [x] Added creator/customer/admin wallpaper saving with saved galaxy and globe only; no countdown or Be Right Back words in phone artwork. Explicit untinted sky choices are retained.
+- [x] Added gentle galaxy drift, spinning globe and country glints to silent local MP4; image fallback and Samsung Gallery installation instructions included.
+- [x] Verified temporary signed-in customer exported PNG and silent H.264 720×1560 MP4 (9.9 seconds, 0.5 MB); inspected changing globe frames and phone save controls. Physical Galaxy S25 Gallery installation and full passcode-protected admin entry remain unverified; shared button is added to admin and creator appearance controls.
+- [x] Desktop two-click and mobile two-tap return passed; movement/scroll/typing cannot dismiss idle screen, Escape remains accessible and live countdown stays in-app.
+- [x] Eleven focused tests passed, screenshots inspected, no page errors/overflow and preview build OK. Not published; no native app or off-app live countdown.
+
 ## First-time waiting-list review — November 21
 - [x] Fresh temporary customer completed adult consent, customer selection, free US join, first-only celebration, PNG download, Canada update and reload on 384px phone and 1280px desktop. No page errors or horizontal overflow. Clarified supported-country discovery, verified-payment access and launch invitations; added status retry and disabled unchanged-country saves. Ticket image inspected; native phone sharing and actual new-signup email delivery remain unverified.
 - [x] Added WAITLIST to the administrator portal, reusing the protected customer list with alphabetical clickable country totals and pagination reset. Owner's verified admin account read real private country totals, Canada records and all-country restoration on phone/desktop; sending remained locked. Full portal entry still requires the owner's private passcode, so its complete password-to-tab journey was not exercised or bypassed.

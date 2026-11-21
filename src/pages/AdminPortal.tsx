@@ -1,5 +1,6 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminCustomerWaitlist from "@/components/AdminCustomerWaitlist";
+import LockScreenWallpaper from "@/components/LockScreenWallpaper";
 import AdminFoundingCreators from "@/components/AdminFoundingCreators";
 import AdminYearEndAwards from "@/components/AdminYearEndAwards";
 import AdminFinanceBreakdown, { type FinanceCategory } from "@/components/AdminFinanceBreakdown";
@@ -399,6 +400,7 @@ const AdminPortal = () => {
             <Button variant={countrySection === "founding" ? "gold" : "outline"} onClick={() => setCountrySection("founding")}>FOUNDING 5</Button>
             <Button variant={countrySection === "yearend" ? "gold" : "outline"} onClick={() => setCountrySection("yearend")}>YEAR-END AWARDS</Button>
           </nav>
+          <LockScreenWallpaper />
           {countrySection === "countries" && <section className="py-4 border-y border-border"><AdminCountries onOpenCreator={setSelectedCreator} /></section>}
           {countrySection === "waitlist" && <div className="border-y border-border py-4"><AdminCustomerWaitlist /></div>}
           {countrySection === "founding" && <section className="py-4 border-y border-border"><AdminFoundingCreators /></section>}
