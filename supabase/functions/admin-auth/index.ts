@@ -69,7 +69,6 @@ Deno.serve(async (req) => {
     return json({ ok: true, token_hash: tokenHash, email });
   } catch (failure) {
     console.error("admin-auth session mint failed", failure);
-    // The passcode is still valid; the client falls back to asking for account sign-in.
-    return json({ ok: true });
+    return json({ ok: false, error: 'Administrator session could not be opened. Please retry.' }, 503);
   }
 });

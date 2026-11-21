@@ -1,5 +1,6 @@
 import AdminCountries from "@/components/AdminCountries";
 import AdminCustomerWaitlist from "@/components/AdminCustomerWaitlist";
+import AdminVipLaunchList from '@/components/AdminVipLaunchList';
 import LockScreenWallpaper from "@/components/LockScreenWallpaper";
 import AdminFoundingCreators from "@/components/AdminFoundingCreators";
 import AdminYearEndAwards from "@/components/AdminYearEndAwards";
@@ -17,7 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 
-import { getAdminPasscode, isAdminUnlocked, startAdminDashboardPreview } from "@/lib/adminSession";
+import { getAdminPasscode, isAdminUnlocked, startAdminDashboardPreview, ensureAdminAccountSession } from "@/lib/adminSession";
 
 const ADMIN_ENTRY_PATH = "/admin-access";
 
@@ -73,7 +74,11 @@ interface Stats {
 const AdminPortal = () => {
   const navigate = useNavigate();
   const [countrySection, setCountrySection] = useState<"countries" | "founding" | "yearend" | "waitlist" | null>(null);
-  const [authed] = useState(() => isAdminUnlocked());
+  const [authed, setAuthed] = useState(false);
+  const [accessReady, setAccessReady] = useState(false);
+  const [accessError, setAccessError] = useState(false);
+  const [accessAttempt, setAccessAttempt] = useState(0);
+  const [waitlistAudience, setWaitlistAudience] = useState<'customers' | 'creators'>('customers');
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -157,10 +162,17 @@ const AdminPortal = () => {
 
 
   useEffect(() => {
-    if (!authed) {
+    let active = true;
+    if (!isAdminUnlocked()) {
       navigate(ADMIN_ENTRY_PATH, { replace: true });
+      return;
     }
-  }, [authed, navigate]);
+    setAccessReady(false); setAccessError(false);
+    void ensureAdminAccountSession().then(ok => {
+      if (active) { setAuthed(ok); setAccessError(!ok); setAccessReady(true); }
+    }).catch(() => { if (active) { setAccessError(true); setAccessReady(true); } });
+    return () => { active = false; };
+  }, [navigate, accessAttempt]);
 
   const loadStats = async () => {
     setLoading(true);
@@ -339,7 +351,8 @@ const AdminPortal = () => {
     navigate(ADMIN_ENTRY_PATH, { replace: true });
   };
 
-  if (!authed) return null;
+  if (!accessReady) return <main className="min-h-screen grid place-items-center bg-background text-foreground"><p role="status">Opening your administrator dashboard…</p></main>;
+  if (accessError || !authed) return <main className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-6 text-foreground"><p role="alert">Your administrator session could not be restored. Please retry.</p><Button onClick={() => setAccessAttempt(n => n + 1)}>RETRY ADMIN ACCESS</Button><Button variant="outline" onClick={() => navigate(ADMIN_ENTRY_PATH)}>RETURN TO ADMIN ACCESS</Button></main>;
 
   if (selectedCreator) {
     return <AdminCreatorDetail creator={selectedCreator} onBack={() => { setSelectedCreator(null); loadFinance(); }} />;
@@ -402,7 +415,7 @@ const AdminPortal = () => {
           </nav>
           <LockScreenWallpaper />
           {countrySection === "countries" && <section className="py-4 border-y border-border"><AdminCountries onOpenCreator={setSelectedCreator} /></section>}
-          {countrySection === "waitlist" && <div className="border-y border-border py-4"><AdminCustomerWaitlist /></div>}
+          {countrySection === "waitlist" && <div className="border-y border-border py-4 space-y-5"><nav aria-label="Waiting lists" className="flex flex-wrap gap-2"><Button variant={waitlistAudience === 'customers' ? 'default' : 'outline'} onClick={() => setWaitlistAudience('customers')}>CUSTOMERS BY COUNTRY</Button><Button variant={waitlistAudience === 'creators' ? 'gold' : 'outline'} onClick={() => setWaitlistAudience('creators')}>CREATOR VIP WAITING LIST</Button></nav>{waitlistAudience === 'customers' ? <AdminCustomerWaitlist /> : <AdminVipLaunchList />}</div>}
           {countrySection === "founding" && <section className="py-4 border-y border-border"><AdminFoundingCreators /></section>}
           {countrySection === "yearend" && <section className="py-4 border-y border-border"><AdminYearEndAwards /></section>}
           {/* Platform Overview */}

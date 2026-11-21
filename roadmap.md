@@ -1,5 +1,10 @@
 # Roadmap
 
+## Admin lists and review access — November 21
+- [x] Administrator WAITLIST now switches between customers by country and creator VIP waiting-list/paid records; saved account lists and server pagination retained.
+- [x] Older valid-code tabs automatically restore a verified admin account before dashboard/private views mount; token exchange or role failures never count as successful access. Removed the separate account-login instruction from identity review; genuine expired access returns to administrator entry.
+- [x] Owner's managed account opened actual private identity review and both list views at mobile/desktop sizes with no errors; 25 focused tests and preview build passed, admin-auth deployed. Full current-code login remains unverified because the current private code was unavailable; a synthetic rejected-code probe may produce a test security alert. Frontend not published.
+
 ## Signup progress emails — November 21
 - [x] Added identified account-creation, email-confirmation, creator-details and saved customer waitlist notifications to admin@dttmediallc.com; trusted success milestones are server-read, per-account/event deduplicated and scoped to new accounts.
 - [x] Signed-in account choice/category/agreement/waitlist/ticket errors report only an allowlisted step, labeled as browser-reported rather than a verified cause; no passwords, raw errors, identity documents or private media included.

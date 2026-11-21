@@ -51,25 +51,41 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
     if (!response.ok) return false;
     const data: unknown = await response.json();
     if (!data || typeof data !== "object" || !("ok" in data) || data.ok !== true) return false;
+    // A valid passcode also signs the visitor into the administrator account, so
+    // private identity records open without a second login. The account session —
+    // never the passcode alone — is what the server checks for those records.
+    const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
+    if (!tokenHash) return false;
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+    if (error) return false;
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return false;
+    const { data: admin, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+    if (roleError || admin !== true) return false;
     try {
       sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
       sessionStorage.setItem(ADMIN_PASSCODE_KEY, code);
       localStorage.setItem(ADMIN_OVERRIDE_KEY, "1");
     } catch {}
-    // A valid passcode also signs the visitor into the administrator account, so
-    // private identity records open without a second login. The account session —
-    // never the passcode alone — is what the server checks for those records.
-    const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
-    if (tokenHash) {
-      try {
-        const { supabase } = await import("@/integrations/supabase/client");
-        await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-      } catch { /* The passcode preview still works; account sign-in stays available. */ }
-    }
     return true;
   } catch {
     return false;
   }
+}
+
+/** Upgrade an older valid-code tab to a real administrator session before mounting private views. */
+export async function ensureAdminAccountSession(): Promise<boolean> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!error && user) {
+      const { data, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+      if (!roleError && data === true) return true;
+    }
+  }
+  return verifyAdminPasscode(getAdminPasscode());
 }
 
 export function getAdminPasscode(): string {

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { identityAge } from "@/lib/identityVerification";
 import { validIdentityExpiry } from "@/lib/creatorDraftRules";
 import { Link } from "react-router-dom";
+import { ensureAdminAccountSession, isAdminUnlocked } from '@/lib/adminSession';
 interface Row { id: string; user_id: string; legal_first_name: string; legal_last_name: string; date_of_birth: string; id_front_path: string; id_back_path: string; selfie_path: string; status: string; reviewer_notes: string | null; reviewed_at: string | null; submitted_at: string; email?: string; display_name?: string; country?: string; document_expires_on?: string; document_type?: string; issuing_country?: string; document_number?: string; }
 const REASONS = ["Blurry photo", "Expired document", "Unreadable document details", "Holding note missing date", "Holding note missing username", "ID or face does not match", "Under 18"];
 export default function AdminVerifications() {
@@ -40,6 +41,11 @@ export default function AdminVerifications() {
     let active = true;
     const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session && isAdminUnlocked()) {
+        const restored = await ensureAdminAccountSession();
+        if (active) setAccess(restored ? 'admin' : 'signed-out');
+        return;
+      }
       if (!session) { if (active) setAccess("signed-out"); return; }
       const { data, error } = await supabase.rpc("has_role", { _user_id: session.user.id, _role: "admin" });
       if (active) setAccess(!error && data === true ? "admin" : "denied");
@@ -89,7 +95,7 @@ export default function AdminVerifications() {
     } catch(failure) { toast.error(failure instanceof Error ? failure.message : "Export failed"); }
   };
   if (access === "loading") return <p className="text-muted-foreground">Checking administrator access…</p>;
-  if (access !== "admin") return <section className="space-y-3 py-6"><h2 className="font-bold">CREATOR VERIFICATIONS</h2><p className="text-muted-foreground">{access === "signed-out" ? "Sign in with your administrator account to review private identity documents. An access code alone cannot open these records." : "This account does not have administrator privileges."}</p>{access === "signed-out" && <Button asChild variant="outline"><Link to="/">ACCOUNT SIGN-IN</Link></Button>}</section>;
+  if (access !== "admin") return <section className="space-y-3 py-6"><h2 className="font-bold">CREATOR VERIFICATIONS</h2><p className="text-muted-foreground">{access === "signed-out" ? "Your administrator session has expired. Return to administrator access to reopen your dashboard." : "This account does not have administrator privileges."}</p>{access === "signed-out" && <Button asChild variant="outline"><Link to="/admin-access">RETURN TO ADMIN ACCESS</Link></Button>}</section>;
   return <section className="space-y-5">
     <header className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold text-lg">DTT AGE VERIFICATION</h2><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>void exportPage()} disabled={loading || !rows.length}>EXPORT THIS PAGE</Button><Button variant="outline" onClick={load} disabled={loading}>REFRESH</Button></div></header>
     <div className="border-y border-border py-3 space-y-1"><p className="font-semibold text-sm">Human review queue</p><p className="text-sm text-muted-foreground">These submissions contain creator-provided details and private evidence, not specialist-verified results. Automatic ID, face and liveness checks are not connected. Your final review remains required.</p></div>
