@@ -31,7 +31,7 @@ const LegalFooter = () => {
 
   return (
     <>
-      <footer className="py-5 px-4 text-center border-t border-border mt-auto">
+      <footer className="pt-5 pb-20 sm:pb-5 px-4 text-center border-t border-border mt-auto">
         <DttShareQr />
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-2">
           {links.map((l, i) => (
@@ -54,6 +54,9 @@ const LegalFooter = () => {
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
           <span className="notranslate" translate="no">Drop That Thing™ · DTT™</span> is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
+        </p>
+        <p className="mt-3 text-xs leading-relaxed text-foreground/80">
+          Investor &amp; partnership inquiries: <a href="mailto:admin@dttmediallc.com" translate="no" className="notranslate block sm:inline text-primary hover:underline">admin@dttmediallc.com</a>
         </p>
       </footer>
 
@@ -104,7 +107,7 @@ const AboutDtt = () => (
     <p><strong className="text-foreground">How payment works.</strong> Bit-Tokens cost $25 for one, $120 for five or $230 for ten, with service and processing included and no additional DTT checkout fee. Each token retains $20 spending value and gives 14 days of access to one creator's vault. Custom quantities combine ten-token bundles, then five-token bundles, then singles. Access ends automatically unless renewed. The $20 entry pass lasts 365 days; creator unlocks are purchased separately. Payments are being prepared for launch. Live checkout will open after provider approval and final checks. Paid access and tokens activate only after verified payment. Bit-Tokens are used only on DTT and cannot be withdrawn, traded or transferred.</p>
     <p><strong className="text-foreground">How creators are paid.</strong> A standard token unlock pays $18: 90% of the $20 token value. One Bit-Token costs $25, including $20 spending value and $5 in included processor and DTT fees. The first 5 qualifying approved creators in each category—Women, Men, Trans Women and Trans Men—per country (20 places total) receive a straight 91/9 split ($18.20) for life after verified identity, reviewed residence and category setup, and may also buy a VIP pass. Existing awards keep their original split. Pro Pass pays 92% ($18.40) and Elite Pass pays 93% ($18.60). Without a pass, each 100,000 paid followers starts a seven-day 92% Power Week, then the normal split resumes. The only lifetime 95/5 split ($19) goes to one winner per country each year across all four categories, based on the most unique paid library followers at year-end UTC, with administrator confirmation required before the award is applied. Custom requests split 85/15 for standard, founding, Pro and year-end award creators. Only a purchased Elite VIP pass activated after verified payment grants 90/10 on the agreed request price; vault awards do not change request splits. Customer-paid request fees are separate. VIP passes are limited to 1,000 worldwide and require verified payment. Payouts are processed manually in Litecoin (LTC).</p>
     <p><strong className="text-foreground">Safety.</strong> Every visitor must confirm they are 18 or older. Every creator must submit adult-ID evidence and a holding photo for private manual approval before uploading. Holding photos are not automated liveness checks. All new creator media is permanently watermarked. Illegal content, minors and non-consensual content are strictly prohibited and reported as required by law.</p>
-    <p>Contact: <a href="mailto:admin@dttmediallc.com" className="text-primary hover:underline">admin@dttmediallc.com</a></p>
+    <p><strong className="text-foreground">Investor &amp; partnership inquiries:</strong> <a href="mailto:admin@dttmediallc.com" translate="no" className="notranslate block sm:inline text-primary hover:underline">admin@dttmediallc.com</a></p>
   </SectionShell>
 );
 

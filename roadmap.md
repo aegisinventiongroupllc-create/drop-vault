@@ -1,5 +1,10 @@
 # Roadmap
 
+## Reel partnership invitation — November 21
+- [x] Added a mailto investor/partnership contact beneath the shared legal footer and in About DTT, without changing legal policies. Desktop/mobile links and About view checked; email remains unbroken with space above the phone language control, no overflow or page errors, preview build OK. Not published.
+- [x] Added “Partnership inquiries: admin@dttmediallc.com” during the final four seconds of the latest delivered reel, preserving creator signup, the existing globe footage and silent format; originals unchanged.
+- [x] Saved versioned 720×1280, 24fps, 30-second MP4 (7.7 MB, fast-start, full decode passed) and X caption (239 weighted characters) in Files and added both to the existing DTT X launch kit (upload status pending). Inspected all seven scenes and final-screen text. No X posting, generation spending or app publication.
+
 ## DTT email verification presentation — November 21
 - [x] Branded signup and unconfirmed-login email prompts and the /verify-email return page with the shared pink globe, slow waiting-list galaxy and requested runway note; confirmation success requires an auth-service-verified email.
 - [x] Twelve focused tests passed for both signup roles, resend/retry, unconfirmed login, verified/missing-link states and existing Google/account selection. Desktop/384px phone checked with a real confirmed account and an intercepted unconfirmed-login response; continuation returned to normal entry gates, zero page errors or horizontal overflow, preview build OK. No real emails sent, actual inbox/link delivery and new copy’s full reviewed translations remain unverified; not published.
