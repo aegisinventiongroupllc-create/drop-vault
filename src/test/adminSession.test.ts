@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_SESSION_KEY, isAdminAccessCode, isAdminSignInShortcut, previewNeedsSignIn, verifyAdminPasscode } from "@/lib/adminSession";
 
+const verifyOtp = vi.fn().mockResolvedValue({ data: {}, error: null });
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { verifyOtp: (...args: unknown[]) => verifyOtp(...args) } } }));
+
+// The test runner's AbortSignal lacks timeout(); fetch is stubbed so a plain signal is fine.
+if (typeof AbortSignal.timeout !== "function") {
+  (AbortSignal as unknown as { timeout: (ms: number) => AbortSignal }).timeout = () => new AbortController().signal;
+}
+
 afterEach(() => { vi.unstubAllGlobals(); sessionStorage.clear(); localStorage.clear(); });
 describe("admin access failure handling", () => {
   it("accepts seven-digit login codes for server verification without granting access", () => {
@@ -38,5 +46,19 @@ describe("admin access failure handling", () => {
   it("requires an explicit server approval", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: "true" }))));
     expect(await verifyAdminPasscode("000000")).toBe(false);
+  });
+  it("signs into the administrator account when the server returns a token hash", async () => {
+    verifyOtp.mockClear();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, token_hash: "hash-123" }))));
+    expect(await verifyAdminPasscode("0524171")).toBe(true);
+    expect(verifyOtp).toHaveBeenCalledWith({ token_hash: "hash-123", type: "magiclink" });
+    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBe("1");
+  });
+  it("still unlocks the passcode preview when no token hash is returned", async () => {
+    verifyOtp.mockClear();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }))));
+    expect(await verifyAdminPasscode("0524171")).toBe(true);
+    expect(verifyOtp).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBe("1");
   });
 });

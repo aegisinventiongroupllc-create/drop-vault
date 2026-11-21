@@ -56,6 +56,16 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
       sessionStorage.setItem(ADMIN_PASSCODE_KEY, code);
       localStorage.setItem(ADMIN_OVERRIDE_KEY, "1");
     } catch {}
+    // A valid passcode also signs the visitor into the administrator account, so
+    // private identity records open without a second login. The account session —
+    // never the passcode alone — is what the server checks for those records.
+    const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
+    if (tokenHash) {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+      } catch { /* The passcode preview still works; account sign-in stays available. */ }
+    }
     return true;
   } catch {
     return false;
