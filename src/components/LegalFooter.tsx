@@ -50,7 +50,7 @@ const LegalFooter = () => {
           © {new Date().getFullYear()} DTT Media LLC. All Rights Reserved. Must be 18+ to enter.
         </p>
         <p className="text-[10px] text-muted-foreground/70 leading-relaxed mt-1">
-          Payments and payouts are being prepared for launch. Free private creator setup is open now. Creator payouts are planned in Litecoin (LTC).
+          Credit and debit card processing is being prepared for launch. Free private creator setup is open now. Creator payouts are planned in Litecoin (LTC).
         </p>
         <p className="text-[10px] text-muted-foreground/60 leading-relaxed mt-1">
           <span className="notranslate" translate="no">Drop That Thing™ · DTT™</span> is operated by DTT Media LLC · Registered in the United States · Support: <a href="mailto:dropthatthingmedia@gmail.com" className="text-primary hover:underline">dropthatthingmedia@gmail.com</a>
