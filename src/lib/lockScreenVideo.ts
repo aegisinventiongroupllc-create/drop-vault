@@ -1,6 +1,6 @@
 import { toCanvas } from "html-to-image";
 
-export const WALLPAPER_VIDEO = { width: 720, height: 1560, fps: 24, seconds: 10 } as const;
+export const WALLPAPER_VIDEO = { width: 720, height: 1560, fps: 24, seconds: 30 } as const;
 
 /** Silent local H.264 MP4 for Samsung Gallery; no media or account data leaves the browser. */
 export async function createLockScreenVideo(element: HTMLElement, signal: AbortSignal, progress: (percent: number) => void): Promise<Blob> {

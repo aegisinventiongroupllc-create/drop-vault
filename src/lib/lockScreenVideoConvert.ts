@@ -13,7 +13,7 @@ export async function convertWallpaperToMp4(input: Blob, signal: AbortSignal, pr
     await encoder.load({ coreURL, wasmURL, classWorkerURL });
     encoder.on("progress", event => progress(Math.min(99, 76 + Math.round(event.progress * 23))));
     await encoder.writeFile("wallpaper.webm", new Uint8Array(await input.arrayBuffer()));
-    const result = await encoder.exec(["-i", "wallpaper.webm", "-t", "10", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-pix_fmt", "yuv420p", "-threads", "1", "-movflags", "+faststart", "wallpaper.mp4"], 120_000);
+    const result = await encoder.exec(["-i", "wallpaper.webm", "-t", "30", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-pix_fmt", "yuv420p", "-threads", "1", "-movflags", "+faststart", "wallpaper.mp4"], 120_000);
     if (result !== 0) throw new Error("MP4 preparation failed. Try the still image.");
     const output = await encoder.readFile("wallpaper.mp4");
     if (!(output instanceof Uint8Array) || !output.length) throw new Error("MP4 preparation failed. Please retry.");
