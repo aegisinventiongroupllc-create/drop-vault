@@ -25,7 +25,7 @@ export async function createCustomerTicketImage(ticket: CustomerWaitlistTicket, 
   const display = css.getPropertyValue("--font-display").trim();
   const text = (value: string, x: number, y: number, size: number, ink = "--foreground", weight = 400, family = body) => {
     ctx.font = `${weight} ${size}px ${family}`;
-    ctx.fillStyle = color(ink);
+    ctx.fillStyle = ink === "--muted-foreground" ? color("--foreground", .78) : color(ink);
     ctx.fillText(value, x, y);
   };
   const wrap = (value: string, y: number, size = 27, ink = "--muted-foreground") => {

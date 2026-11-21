@@ -11,3 +11,4 @@
 - VIP waiting-list tickets use saved queue identity, never purchase inventory; owner lists use role-verified paginated RPCs and distinguish interest from receipt-verified ownership. Why: downloaded tickets cannot grant benefits or disclose other creators.
 - Future-world announcements are passive and shared by creator, customer and prelaunch views, with no token claim actions. Why: concepts must not imply funded rewards or active mining.
 - Customer tickets pre-render locally as branded PNGs before the save gesture; use native file sharing on supported phones. Why: preserve private membership data and reliable mobile saving without granting access.
+- Waiting-list invitations use a singleton cutoff campaign, private account notices and bounded email batches with durable idempotency; server checks admin, launch and provider readiness. Why: invite everyone without browser-authorized charges, duplicate campaigns or unbounded mail requests.

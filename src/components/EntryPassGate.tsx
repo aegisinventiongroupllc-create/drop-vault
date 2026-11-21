@@ -8,6 +8,7 @@ import { ENTRY_SUMMARY } from "@/i18n/entryCatalog";
 import { useCustomerEntryOffer } from "@/hooks/useCustomerEntryOffer";
 import { customerPrelaunch } from "@/lib/customerLaunch";
 import { Navigate } from "react-router-dom";
+import CustomerPaymentInvitation from "./CustomerPaymentInvitation";
 
 const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -37,6 +38,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
       />
 
       <div className="w-full max-w-md space-y-6 text-center relative">
+        <CustomerPaymentInvitation />
         <div className="relative mx-auto h-32 w-32 select-none">
           <EntryPassGlobe />
         </div>

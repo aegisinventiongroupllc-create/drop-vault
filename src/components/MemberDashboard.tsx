@@ -1,5 +1,6 @@
 import FoundingCreatorsBoard from "@/components/FoundingCreatorsBoard";
 import DttFutureAnnouncement from "@/components/DttFutureAnnouncement";
+import CustomerPaymentInvitation from "@/components/CustomerPaymentInvitation";
 import DttToken from "@/components/DttToken";
 import PersonalSkyBackdrop from "@/components/PersonalSkyBackdrop";
 import RequestDelivery from "@/components/RequestDelivery";
@@ -252,6 +253,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
   return (
     <div className="dtt-dashboard mobile-scroll-shell relative isolate flex flex-col">
       <PersonalSkyBackdrop />
+      <CustomerPaymentInvitation />
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground tracking-wider font-display">{libraryTitle}</h1>
         <WalletIndicator />

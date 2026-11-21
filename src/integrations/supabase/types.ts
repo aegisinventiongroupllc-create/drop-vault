@@ -1556,6 +1556,45 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_waitlist_campaign: {
+        Row: {
+          id: boolean
+          started_at: string
+          started_by: string
+        }
+        Insert: {
+          id?: boolean
+          started_at?: string
+          started_by: string
+        }
+        Update: {
+          id?: boolean
+          started_at?: string
+          started_by?: string
+        }
+        Relationships: []
+      }
+      customer_waitlist_delivery: {
+        Row: {
+          attempted_at: string | null
+          sent_at: string | null
+          state: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string | null
+          sent_at?: string | null
+          state?: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string | null
+          sent_at?: string | null
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       data_retention_policies: {
         Row: {
           basis: string
@@ -2896,6 +2935,7 @@ export type Database = {
         Args: { _country?: string; _offset?: number }
         Returns: Json
       }
+      admin_customer_waitlist_campaign_status: { Args: never; Returns: Json }
       admin_founder_poke_top_ten: { Args: { _end_day?: string }; Returns: Json }
       admin_lift_ban: { Args: { _user_id: string }; Returns: boolean }
       admin_vip_launch_list: { Args: { _offset?: number }; Returns: Json }
@@ -2989,6 +3029,13 @@ export type Database = {
         Returns: boolean
       }
       customer_entry_price: { Args: { _user_id: string }; Returns: number }
+      customer_waitlist_campaign_batch: {
+        Args: never
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       fifth_video_storage_access: {
         Args: { _bucket: string; _path: string }
         Returns: boolean
@@ -3215,6 +3262,7 @@ export type Database = {
         Args: { _action?: string; _country?: string; _language?: string }
         Returns: Json
       }
+      my_customer_waitlist_invitation: { Args: never; Returns: Json }
       my_founder_poke: { Args: { _send?: boolean }; Returns: Json }
       my_reaction_setting: { Args: never; Returns: boolean }
       my_vip_interest: {
@@ -3478,6 +3526,10 @@ export type Database = {
         Returns: number
       }
       spend_access_token: { Args: { _user: string }; Returns: string }
+      start_customer_waitlist_campaign: {
+        Args: { _actor: string }
+        Returns: undefined
+      }
       submit_creator_identity: {
         Args: {
           _dob: string

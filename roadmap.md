@@ -1,5 +1,11 @@
 # Roadmap
 
+## Ticket quality and owner payment invitations — November 21
+- [x] Inspected actual account ticket downloads at 384px phone and 1280px desktop sizes; one bright globe, no clipping, and improved small-print contrast.
+- [x] Added confirmed email plus account invitations with durable batches, private progress and locked prelaunch sending; existing list shows 5 accounts, full 55-account pagination tested in isolation.
+- [x] Tested launch locks, provider readiness, server-only writes, account notice ownership and 25-recipient claims without duplicates; deployed sending rejects signed-in non-admin with 403. No real invitations, invoices, charges or publication.
+- [ ] Owner's signed-in administrator walkthrough and actual launch email delivery remain blocked until owner session participation and verified launch/payment readiness; native phone sharing requires a real device.
+
 ## Pink downloaded ticket and future galaxy gaming — November 21
 - [x] Replace the plain-text customer download with a locally rendered pink-galaxy/globe PNG; preserve account-linked offer and receipt-only meaning, with ready-before-save mobile sharing.
 - [x] Expand the shared future announcement with space battles, galaxy exploration and the Bit-Token mine; no active game, rewards, payments or promised release.

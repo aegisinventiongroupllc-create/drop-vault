@@ -890,6 +890,20 @@
       "when": 1795218682030,
       "tag": "0126_debut_badge_explicit_public_read_only",
       "breakpoints": true
+    },
+    {
+      "idx": 127,
+      "version": "7",
+      "when": 1795220126202,
+      "tag": "0127_customer_waitlist_payment_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1795220276624,
+      "tag": "0128_restrict_waitlist_campaign_writes_and_batch_conflict",
+      "breakpoints": true
     }
   ]
 }

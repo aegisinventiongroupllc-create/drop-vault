@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import { COUNTRIES } from "./GlobalPassport";
 import { waitlistEntryForecast } from "@/lib/waitlistForecast";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 type Data = { total: number; countries: { country: string; total: number }[]; entries: { user_id: string; email: string | null; country: string; language: string; joined_at: string }[] };
 const name = (code: string) => COUNTRIES.find(c => c.code === code)?.name ?? code;
 export default function AdminCustomerWaitlist() {
@@ -12,6 +13,31 @@ export default function AdminCustomerWaitlist() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [confirmSend, setConfirmSend] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [progress, setProgress] = useState<{ started: boolean; sent: number; failed: number; pending: number } | null>(null);
+  useEffect(() => {
+    let active = true;
+    void supabase.functions.invoke('waitlist-payment-invitations', { body: { action: 'status' } }).then(({ data, error }) => { if (active) setReady(!error && data?.enabled === true); });
+    void supabase.rpc('admin_customer_waitlist_campaign_status').then(({ data, error }) => { if (active && !error) setProgress(data as unknown as typeof progress); });
+    return () => { active = false; };
+  }, [refresh]);
+  const sendInvitations = async () => {
+    setConfirmSend(false); setSending(true); setError('');
+    try {
+      // Bounded work; large lists resume without resending completed emails.
+      for (let batch = 0; batch < 20; batch++) {
+        const { data, error } = await supabase.functions.invoke('waitlist-payment-invitations', { body: { action: 'send', confirm: true } });
+        if (error || data?.error) throw new Error('Sending is not available. Check launch and payment readiness, then retry. Saved progress is retained.');
+        const status = await supabase.rpc('admin_customer_waitlist_campaign_status');
+        if (status.error) throw new Error('Could not refresh invitation progress. Please refresh the list.');
+        setProgress(status.data as unknown as typeof progress);
+        if (!data.processed || data.processed < 25) break;
+      }
+    } catch (error) { setError(error instanceof Error ? error.message : 'Invitations could not be sent.'); }
+    finally { setSending(false); setRefresh(n => n + 1); }
+  };
   const forecast = waitlistEntryForecast(data?.total ?? 0);
   const dollars = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
   useEffect(() => {
@@ -26,6 +52,13 @@ export default function AdminCustomerWaitlist() {
   }, [country, offset, refresh]);
   return <section className="space-y-4 px-4 pb-8">
     <h2 className="font-display text-lg font-bold">CUSTOMER WAITING LIST</h2>
+    <div className="space-y-3 border-y border-border py-4">
+      <h3 className="font-semibold">Launch payment invitations</h3>
+      <p className="text-sm text-muted-foreground">Invite all eligible waiting-list customers, across every country, by email and inside DTT. No invoices, automatic charges or access grants.</p>
+      <Button variant="neon" disabled={!ready || sending || !data?.total || (progress?.started === true && progress.pending === 0)} className="h-auto min-h-12 w-full whitespace-normal sm:w-auto" onClick={() => setConfirmSend(true)}>{sending ? 'SENDING INVITATIONS…' : progress?.started ? 'CONTINUE SENDING PAY NOW INVITATIONS' : 'SEND PAY NOW TO ALL WAITING CUSTOMERS'}</Button>
+      {!ready && <p className="text-xs text-muted-foreground">Locked until New Year launch and verified payment readiness. No emails are sent now.</p>}
+      {progress?.started && <p role="status" className="text-sm">{progress.sent} emails sent · {progress.pending} remaining · {progress.failed} failed, suppressed or missing email. Account invitations remain available to eligible customers.</p>}
+    </div>
     <div className="flex flex-wrap items-center gap-3">
       <label htmlFor="admin-waitlist-country">Country</label>
       <select id="admin-waitlist-country" className="max-w-full rounded-lg border border-border bg-background p-2" value={country} onChange={e => { setCountry(e.target.value); setOffset(0); }}>
@@ -55,5 +88,6 @@ export default function AdminCustomerWaitlist() {
       </article>)}</div>
       <div className="flex items-center justify-between gap-3"><Button variant="outline" disabled={!offset || busy} onClick={() => setOffset(n => Math.max(0, n - 50))}>PREVIOUS</Button><span className="text-xs">{data.total ? offset + 1 : 0}–{Math.min(offset + 50, data.total)} of {data.total}</span><Button variant="outline" disabled={offset + 50 >= data.total || busy} onClick={() => setOffset(n => n + 50)}>NEXT</Button></div>
     </>}
+    <Dialog open={confirmSend} onOpenChange={setConfirmSend}><DialogContent><DialogTitle>Invite all waiting customers to pay?</DialogTitle><DialogDescription>This sends an email and adds an account invitation across all countries—not just the country currently selected. Each customer chooses whether to buy their $10 annual entry. Email usage charges may apply; large lists continue in batches with saved progress.</DialogDescription><Button variant="neon" onClick={() => void sendInvitations()}>CONFIRM & SEND INVITATIONS</Button></DialogContent></Dialog>
   </section>;
 }
