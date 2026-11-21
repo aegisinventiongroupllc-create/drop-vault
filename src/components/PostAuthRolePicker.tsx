@@ -16,14 +16,16 @@ import { isCreatorSignup } from "@/lib/foundingInvitation";
 
 interface PostAuthRolePickerProps {
   email?: string;
+  existingCreator?: { category: CreatorCategory; labels: string[] };
+  initialAdaptiveTags?: AdaptiveTag[];
   onSelect: (role: UserRole, creatorSide?: VaultType, labels?: string[], adaptiveTags?: AdaptiveTag[]) => Promise<void>;
 }
 
-const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
+const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveTags = [] }: PostAuthRolePickerProps) => {
   const [pickingSide, setPickingSide] = useState(() => isCreatorSignup(window.location.search));
-  const [category, setCategory] = useState<CreatorCategory | "">("");
-  const [labels, setLabels] = useState<string[]>([]);
-  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>([]);
+  const [category, setCategory] = useState<CreatorCategory | "">(existingCreator?.category ?? "");
+  const [labels, setLabels] = useState<string[]>(existingCreator?.labels ?? []);
+  const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>(initialAdaptiveTags);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const submit = async (role: UserRole) => { setBusy(true); setError(""); try { await onSelect(role, category || undefined, labels, adaptiveTags); } catch { setError("Couldn’t save your profile. Please retry."); } finally { setBusy(false); } };
@@ -76,7 +78,8 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
               variant="neon"
               size="lg"
               className="w-full text-base font-semibold gap-2"
-              onClick={() => setPickingSide(true)}
+              disabled={busy}
+              onClick={() => existingCreator && validContentLabels(existingCreator.labels) ? void submit("creator") : setPickingSide(true)}
             >
               <Star className="w-5 h-5" />
               {ct.im_creator}
@@ -95,6 +98,7 @@ const PostAuthRolePicker = ({ email, onSelect }: PostAuthRolePickerProps) => {
             </Button>
           </div>
         )}
+        {!pickingSide && error && <p role="alert" className="text-xs text-destructive">{error}</p>}
 
       </div>
       <LegalFooter />

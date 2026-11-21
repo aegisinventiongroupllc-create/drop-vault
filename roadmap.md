@@ -1,5 +1,9 @@
 # Roadmap
 
+## Creator/customer login destinations — November 21
+- [x] Fresh password/Google sign-in offers account selection before restoring an old customer destination; saved creators continue without repeating category setup. Explicit signup intent can reopen selection without automatically changing roles.
+- [x] Temporary member completed real password sign-in, switched Customer → Creator, completed required creator agreements and reached the dashboard, then returned as Creator without repeating setup and switched back to Customer. Both destinations survived reload; phone/desktop screenshots checked with zero page errors. Fourteen focused tests and preview build passed; approval/payment gates intact. Not published.
+
 ## Ticket quality and owner payment invitations — November 21
 - [x] Inspected actual account ticket downloads at 384px phone and 1280px desktop sizes; one bright globe, no clipping, and improved small-print contrast.
 - [x] Added confirmed email plus account invitations with durable batches, private progress and locked prelaunch sending; existing list shows 5 accounts, full 55-account pagination tested in isolation.

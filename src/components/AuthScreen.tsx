@@ -13,6 +13,7 @@ import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut, v
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
+import { requestAccountSelection, cancelAccountSelection } from "@/lib/accountSelection";
 
 interface AuthScreenProps {
   onAdmin: () => void;
@@ -149,6 +150,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         setPassword("");
       } else {
         clearAdminDashboardPreview();
+        requestAccountSelection();
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmed,
           password,
@@ -159,6 +161,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         // Session listener in Index.tsx handles redirect.
       }
     } catch (e: any) {
+      cancelAccountSelection();
       const msg = e?.message ?? "Something went wrong.";
       toast({ title: "Authentication failed", description: msg, variant: "destructive" });
     } finally {
@@ -287,6 +290,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
               setLoading(true);
               try {
                 clearAdminDashboardPreview();
+                requestAccountSelection();
                 const result = await lovable.auth.signInWithOAuth("google", {
                   redirect_uri: googleReturnOrigin(),
                   extraParams: { prompt: "select_account" },
@@ -296,6 +300,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
                 onExitPreview?.();
                 await logActivity("login", "Google");
               } catch (error) {
+                cancelAccountSelection();
                 toast({ title: "Google sign-in failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });
               } finally {
                 setLoading(false);

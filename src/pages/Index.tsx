@@ -36,6 +36,8 @@ import { useEntryPass } from "@/hooks/useEntryPass";
 import EntryPassGate from "@/components/EntryPassGate";
 import CustomerLaunchWaitlist from "@/components/CustomerLaunchWaitlist";
 import { customerPrelaunch } from "@/lib/customerLaunch";
+import { consumeAccountSelection } from "@/lib/accountSelection";
+import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
 import { Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "dtt_user_prefs";
@@ -119,6 +121,7 @@ const Index = () => {
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  const [creatorSetup, setCreatorSetup] = useState<{ category: CreatorCategory; labels: string[] } | undefined>();
   const [editingPreference, setEditingPreference] = useState(false);
   const [adaptivePreferences, setAdaptivePreferences] = useState<AdaptiveTag[]>([]);
   // Owner shortcut: triple-tap the DTT logo to preview the sign-in page while signed in
@@ -150,17 +153,21 @@ const Index = () => {
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
+      const chooseAfterLogin = consumeAccountSelection();
       const { data, error } = await supabase
         .from("account_preferences")
         .select("account_type, customer_preference, content_categories, adaptive_preferences")
         .eq("user_id", userId)
         .maybeSingle();
+      if (hydratedUserId !== userId) return;
       if (error) console.error("Failed to restore account preference", error);
       const preferenceRow = data as AccountPreference | null;
       setAdaptivePreferences(parseAdaptiveTags(preferenceRow?.adaptive_preferences));
       const dbRole = preferenceRow?.account_type ?? null;
       const chosen = dbRole === "creator" || dbRole === "customer";
-      setRoleChosen(chosen);
+      const explicitSignupSwitch = (isCreatorSignup(window.location.search) && dbRole !== "creator") ||
+        (isCustomerSignup(window.location.search) && dbRole !== "customer");
+      setRoleChosen(chosen && !chooseAfterLogin && !explicitSignupSwitch);
       if (userEmail) setEmail(userEmail);
       if (chosen) {
         setRole(dbRole);
@@ -170,7 +177,11 @@ const Index = () => {
             .select("vault_side, content_labels")
             .eq("user_id", userId)
             .maybeSingle();
+          if (hydratedUserId !== userId) return;
           const side: VaultType = isCreatorCategory(prof?.vault_side) ? prof.vault_side : "women";
+          if (isCreatorCategory(prof?.vault_side) && prof.content_labels?.length) {
+            setCreatorSetup({ category: prof.vault_side, labels: prof.content_labels });
+          }
           if (!isCreatorCategory(prof?.vault_side) || !prof.content_labels?.length) setRoleChosen(false);
           setVault(side);
           setPreference(side);
@@ -202,6 +213,7 @@ const Index = () => {
         if (hydratedUserId !== userId) {
           hydratedUserId = userId;
           setCreatorFeed(false);
+          setCreatorSetup(undefined);
           setAdaptivePreferences([]);
           setEditingPreference(false);
           setSelectedCreator(null);
@@ -398,6 +410,8 @@ const Index = () => {
     return (
       <PostAuthRolePicker
         email={email}
+        existingCreator={creatorSetup}
+        initialAdaptiveTags={adaptivePreferences}
         onSelect={async (chosenRole, creatorSide, labels, adaptiveTags) => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
@@ -417,6 +431,7 @@ const Index = () => {
             // Reset any stale customer preference so the "what are you looking for" screen shows
             setPreference(null);
             setVault(null);
+            savePrefs({ email, role: "customer" });
           }
           setRole(chosenRole);
           setRoleChosen(true);
