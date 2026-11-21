@@ -60,7 +60,7 @@ const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, back
   return (
     <span className="relative inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
       {backdrop && size >= 100 && <GalaxyReel className="rounded-full" />}
-      <Canvas frameloop={frameloop} camera={{ position: [0, 0, cameraDistance], fov: 40 }} dpr={sharp ? [1, Math.min(3, window.devicePixelRatio || 1)] : [1, 2]} gl={{ antialias: true, alpha: true, preserveDrawingBuffer: exportable }}>
+      <Canvas frameloop={frameloop} camera={{ position: [0, 0, cameraDistance], fov: 40 }} dpr={exportable ? 5 : sharp ? [1, Math.min(3, window.devicePixelRatio || 1)] : [1, 2]} gl={{ antialias: true, alpha: true, preserveDrawingBuffer: exportable }}>
         <SpinningGlobe speed={speed} lights={lights} size={size} style={style} dotScale={dotScale} glintBoost={glintBoost} pulse={pulse} absolute={!!frameController} />
         <Atmosphere />
         {frameController && <FrameBridge controller={frameController} onLoop={setLoop} />}

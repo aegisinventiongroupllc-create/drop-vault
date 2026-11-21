@@ -4,7 +4,7 @@ import { toBlob } from "html-to-image";
 export async function createLockScreenImage(element: HTMLElement): Promise<Blob> {
   await document.fonts.ready;
   if (!element.querySelector("canvas")) throw new Error("The globe is still loading. Please retry.");
-  const blob = await toBlob(element, { pixelRatio: 1080 / element.clientWidth, cacheBust: false, skipFonts: true });
+  const blob = await toBlob(element, { pixelRatio: 1440 / element.clientWidth, cacheBust: false, skipFonts: true });
   if (!blob) throw new Error("Wallpaper could not be created. Please retry.");
   return blob;
 }

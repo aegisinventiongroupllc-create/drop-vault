@@ -1,6 +1,6 @@
 import type { GlobeFrameController } from "@/components/MiniGlobe";
 
-export const WALLPAPER_VIDEO = { width: 720, height: 1560, fps: 24, seconds: 30 } as const;
+export const WALLPAPER_VIDEO = { width: 1080, height: 2340, fps: 30, seconds: 30 } as const;
 /** Final second blends into the opening frame so the restart has no visible jump. */
 export const LOOP_BLEND_SECONDS = 1;
 /** Shooting stars finish well inside the loop so none are cut at the restart. */
@@ -27,6 +27,7 @@ const shooters = (() => {
 export function drawWallpaperSky(ctx: CanvasRenderingContext2D, background: CanvasImageSource, t: number) {
   const { width: w, height: h, seconds } = WALLPAPER_VIDEO;
   const loop = (t / seconds) * Math.PI * 2;
+  const k = w / 720;
   const shiftX = Math.sin(loop) * w * .012, shiftY = Math.cos(loop) * h * .006;
   ctx.globalAlpha = 1;
   ctx.drawImage(background, -w * .03 + shiftX, -h * .02 + shiftY, w * 1.06, h * 1.04);
@@ -35,12 +36,12 @@ export function drawWallpaperSky(ctx: CanvasRenderingContext2D, background: Canv
   for (const star of twinkles) {
     const s = .5 + .5 * Math.sin(loop * star.cycles + star.phase);
     const a = .15 + .85 * s * s * s;
-    const x = star.x * w, y = star.y * h, r = star.r * 2.4;
+    const x = star.x * w, y = star.y * h, r = star.r * 2.4 * k;
     const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
     glow.addColorStop(0, `rgba(255,235,248,${a})`); glow.addColorStop(1, "rgba(255,120,200,0)");
     ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2); ctx.fill();
     if (star.glint && a > .55) {
-      ctx.strokeStyle = `rgba(255,245,252,${(a - .55) * 1.8})`; ctx.lineWidth = 1.2;
+      ctx.strokeStyle = `rgba(255,245,252,${(a - .55) * 1.8})`; ctx.lineWidth = 1.2 * k;
       ctx.beginPath(); ctx.moveTo(x - r * 9, y); ctx.lineTo(x + r * 9, y); ctx.moveTo(x, y - r * 9); ctx.lineTo(x, y + r * 9); ctx.stroke();
     }
   }
@@ -53,11 +54,11 @@ export function drawWallpaperSky(ctx: CanvasRenderingContext2D, background: Canv
     const tail = len * .55;
     const trail = ctx.createLinearGradient(hx, hy, hx - dx * tail, hy - dy * tail);
     trail.addColorStop(0, `rgba(255,255,255,${life})`); trail.addColorStop(.25, `rgba(255,170,225,${life * .7})`); trail.addColorStop(1, "rgba(255,90,190,0)");
-    ctx.strokeStyle = trail; ctx.lineWidth = 5; ctx.lineCap = "round";
+    ctx.strokeStyle = trail; ctx.lineWidth = 5 * k; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - dx * tail, hy - dy * tail); ctx.stroke();
-    const head = ctx.createRadialGradient(hx, hy, 0, hx, hy, 22);
+    const head = ctx.createRadialGradient(hx, hy, 0, hx, hy, 22 * k);
     head.addColorStop(0, `rgba(255,255,255,${life})`); head.addColorStop(1, "rgba(255,150,220,0)");
-    ctx.fillStyle = head; ctx.beginPath(); ctx.arc(hx, hy, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = head; ctx.beginPath(); ctx.arc(hx, hy, 22 * k, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 }
@@ -71,15 +72,15 @@ async function encodeExact(canvas: HTMLCanvasElement, draw: Frame, signal: Abort
   if (typeof VideoEncoder === "undefined" || typeof VideoFrame === "undefined") return null;
   const { width, height, fps, seconds } = WALLPAPER_VIDEO;
   let codec = "";
-  for (const candidate of ["avc1.640028", "avc1.4d0028", "avc1.420028"]) {
-    try { if ((await VideoEncoder.isConfigSupported({ codec: candidate, width, height, bitrate: 6_000_000, framerate: fps })).supported) { codec = candidate; break; } } catch { /* try next */ }
+  for (const candidate of ["avc1.640033", "avc1.4d0033", "avc1.420033", "avc1.640032"]) {
+    try { if ((await VideoEncoder.isConfigSupported({ codec: candidate, width, height, bitrate: 18_000_000, framerate: fps })).supported) { codec = candidate; break; } } catch { /* try next */ }
   }
   if (!codec) return null;
   const { Muxer, ArrayBufferTarget } = await import("mp4-muxer");
   const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width, height, frameRate: fps }, fastStart: "in-memory" });
   let failure: unknown = null;
   const encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failure = e; } });
-  encoder.configure({ codec, width, height, bitrate: 6_000_000, framerate: fps, avc: { format: "avc" } });
+  encoder.configure({ codec, width, height, bitrate: 18_000_000, framerate: fps, avc: { format: "avc" } });
   const ctx = canvas.getContext("2d")!;
   const frames = fps * seconds;
   try {
@@ -159,12 +160,13 @@ export async function captureWallpaperSky(element: HTMLElement): Promise<HTMLCan
     const photo = await loadImage(url);
     const cover = Math.max(w / photo.naturalWidth, h / photo.naturalHeight);
     const pw = photo.naturalWidth * cover, ph = photo.naturalHeight * cover;
-    ctx.filter = "contrast(1.14) saturate(1.22) brightness(.92)";
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.filter = "contrast(1.2) saturate(1.45) brightness(1.02)";
     ctx.drawImage(photo, (w - pw) / 2, (h - ph) / 2, pw, ph);
     ctx.filter = "none";
     const tint = element.querySelector<HTMLElement>(".galaxy-photo-tint");
     if (tint) {
-      ctx.globalCompositeOperation = "color"; ctx.globalAlpha = .85;
+      ctx.globalCompositeOperation = "color"; ctx.globalAlpha = .6;
       ctx.fillStyle = getComputedStyle(tint).backgroundColor; ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
     }
@@ -207,7 +209,8 @@ export async function createLockScreenVideo(element: HTMLElement, signal: AbortS
     drawWallpaperSky(ctx, background, t);
     const breath = globeBreath(t) - 1;
     ctx.save();
-    ctx.shadowColor = `rgba(255,60,170,${.3 + breath * 6})`; ctx.shadowBlur = 20 + breath * 300;
+    ctx.shadowColor = `rgba(255,60,170,${.3 + breath * 6})`; ctx.shadowBlur = (20 + breath * 300) * (width / 720);
+    ctx.imageSmoothingQuality = "high";
     drawGlobe(ctx, t, 1);
     ctx.restore();
     const blend = (t - (seconds - LOOP_BLEND_SECONDS)) / LOOP_BLEND_SECONDS;
