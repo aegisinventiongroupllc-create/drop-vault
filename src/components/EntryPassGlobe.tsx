@@ -15,7 +15,6 @@ export default function EntryPassGlobe({ size = 128, solid = false, sharp = fals
         <GlobeOverrideContext.Provider value={ENTRY_GLOBE}>
           <MiniGlobe size={size} speed={motionless ? 0 : 0.15} lights backdrop={false} cameraDistance={solid ? 3.8 : 3.2} sharp={sharp} dotScale={bright ? 1.4 : undefined} glintBoost={bright ? 1.5 : undefined} />
         </GlobeOverrideContext.Provider>
-        <span aria-hidden className="globe-edge-ring" style={{ inset: solid ? "var(--globe-ring-inset-solid, 9.5%)" : "var(--globe-ring-inset, 9.5%)" }} />
       </div>
       <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT<sup className="self-center text-[10px] tracking-normal -translate-y-2">™</sup></p>
     </div>
