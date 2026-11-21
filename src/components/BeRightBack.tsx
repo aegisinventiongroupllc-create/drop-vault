@@ -3,6 +3,7 @@ import EntryPassGlobe, { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import { supabase } from "@/integrations/supabase/client";
 
 import GalaxyReel from "@/components/GalaxyReel";
+import MiniGlobe from "@/components/MiniGlobe";
 
 const IDLE_MS = 60_000;
 
@@ -12,8 +13,8 @@ const IDLE_MS = 60_000;
  * Any activity brings the app straight back.
  *
  * Visitors who haven't signed up yet always see the original DTT galaxy
- * (Star cluster). Idle skies blend with the entry-pass pink globe, without
- * changing members' saved dashboard colors or backdrop selections.
+ * (Star cluster) and entry-pass pink globe. Signed-in members see the globe
+ * and idle sky they designed, which follow their account to every device.
  */
 const BeRightBack = () => {
   const [away, setAway] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("brb"));
@@ -58,11 +59,16 @@ const BeRightBack = () => {
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 overflow-hidden bg-background animate-in fade-in duration-700" role="status" aria-label="Be right back">
       {signedIn
-        ? <GalaxyReel scope="brb" seconds={240} toneOverride={ENTRY_GLOBE.tone} />
+        ? <GalaxyReel scope="brb" seconds={240} />
         : <GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} />}
       <div className="absolute inset-0 bg-background/25" aria-hidden />
       <div className="relative flex flex-col items-center gap-6 p-6">
-        <EntryPassGlobe size={220} solid />
+        {signedIn ? (
+          <div className="relative inline-flex select-none globe-breathe" data-testid="personal-brb-globe">
+            <MiniGlobe size={220} speed={0.15} lights backdrop={false} cameraDistance={3.8} />
+            <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>
+          </div>
+        ) : <EntryPassGlobe size={220} solid />}
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>
       </div>
     </div>

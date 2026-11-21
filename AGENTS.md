@@ -1,6 +1,6 @@
 # Project architecture rules
 - Email-field admin shortcuts navigate to protected sign-in only; never grant privileges or replace server verification. Why: convenience must not expose administrative records.
-- Entry and idle share EntryPassGlobe; idle opacity, tint and framing are scoped, never saved. Why: avoid star bleed and cropping without changing entry or dashboard choices.
+- Visitors get EntryPassGlobe on entry/idle; signed-in idle uses the synced personal globe/sky. Why: personal idle screens.
 - ShareQrCode preserves finder patterns, central branding, high correction, outer glow and quiet-zone PNG exports. Why: protect scanning and motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.
 - Admin finance uses server-verified guards and stable paginated allowlisted queries matching overview filters; mark accepted requests unconfirmed. Why: protect records without changing balances.
