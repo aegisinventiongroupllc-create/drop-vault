@@ -1,5 +1,10 @@
 # Roadmap
 
+## Country planets and galaxy fighters — November 21
+- [x] Expand the shared About/dashboard gaming concept with country planets, cross-country warp travel, best-of-three battles and a proposed 14-day creator-access reward; retain optional participation and funding/approval safeguards.
+- [x] Describe creator/customer fighter avatars and creator-only generated jets for gaming use, without launching generation, battles or rewards or incurring costs.
+- [x] Checked the expanded About section at 384px phone and 1280px desktop sizes: readable text, no text overflow and no page errors; preview build OK. Fighter design remains a future concept unless the owner chooses a working design tool. No spending or publication.
+
 ## Creator/customer login destinations — November 21
 - [x] Fresh password/Google sign-in offers account selection before restoring an old customer destination; saved creators continue without repeating category setup. Explicit signup intent can reopen selection without automatically changing roles.
 - [x] Temporary member completed real password sign-in, switched Customer → Creator, completed required creator agreements and reached the dashboard, then returned as Creator without repeating setup and switched back to Customer. Both destinations survived reload; phone/desktop screenshots checked with zero page errors. Fourteen focused tests and preview build passed; approval/payment gates intact. Not published.
