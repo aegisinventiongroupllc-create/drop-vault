@@ -1874,6 +1874,32 @@ export type Database = {
         }
         Relationships: []
       }
+      media_view_receipts: {
+        Row: {
+          media_id: string
+          viewed_on: string
+          viewer_id: string
+        }
+        Insert: {
+          media_id: string
+          viewed_on?: string
+          viewer_id: string
+        }
+        Update: {
+          media_id?: string
+          viewed_on?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_view_receipts_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "creator_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       participant_consents: {
         Row: {
           consent_text: string

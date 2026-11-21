@@ -904,6 +904,20 @@
       "when": 1795220276624,
       "tag": "0128_restrict_waitlist_campaign_writes_and_batch_conflict",
       "breakpoints": true
+    },
+    {
+      "idx": 129,
+      "version": "7",
+      "when": 1795222827012,
+      "tag": "0129_scope_identity_roles_and_media_view_counts",
+      "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1795222921474,
+      "tag": "0130_deny_public_view_receipts_and_default_role_checks",
+      "breakpoints": true
     }
   ]
 }

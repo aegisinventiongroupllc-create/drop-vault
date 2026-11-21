@@ -1,5 +1,10 @@
 # Roadmap
 
+## Selected security findings — November 21
+- [x] Restricted foreign identity-reference probing without allowing evidence deletion; private role checks are owner/admin/service-scoped, with only already-public profile roles discoverable.
+- [x] Active cleared teaser view counts require an authorized signed-in viewer and deduplicate per viewer/media/UTC day; receipts deny all client reads/writes.
+- [x] Reviewed the nine selected privileged-function reports: public aggregates/legal contacts/badges/founder labels and account-bound purchase/reaction results do not expose private table rows. Fan identifiers and spending remain creator/admin/self-only. Preserve intended features and leave all unselected findings unchanged.
+
 ## Country planets and galaxy fighters — November 21
 - [x] Expand the shared About/dashboard gaming concept with country planets, cross-country warp travel, best-of-three battles and a proposed 14-day creator-access reward; retain optional participation and funding/approval safeguards.
 - [x] Describe creator/customer fighter avatars and creator-only generated jets for gaming use, without launching generation, battles or rewards or incurring costs.
