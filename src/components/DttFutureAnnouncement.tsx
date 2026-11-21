@@ -9,8 +9,8 @@ export default function DttFutureAnnouncement({ expanded = false }: { expanded?:
           <p className="text-foreground">Picture each country represented by its own planet, home to its creators. Customers from around the world could travel at warp speed between planets to explore, connect and challenge creators in friendly space combat.</p>
         </div>
         <div className="space-y-1">
-          <h3 className="font-display font-semibold text-primary">Best of three · a chance to win 14 days</h3>
-          <p className="text-foreground">The battle concept: win two of three rounds against a participating creator for a chance to earn 14 days of access to that creator’s content. Participation would be optional; any future reward would need funded, approved rules and DTT’s age and content safeguards.</p>
+          <h3 className="font-display font-semibold text-primary">Best of three · win prizes</h3>
+          <p className="text-foreground">The battle concept: win two of three rounds against a participating creator to win prizes. Battles would be free to join and optional; any future prizes would follow official contest rules and DTT’s age and content safeguards.</p>
         </div>
         <div className="space-y-1">
           <h3 className="font-display font-semibold text-primary">Your galaxy fighter</h3>
