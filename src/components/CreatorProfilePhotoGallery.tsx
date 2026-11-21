@@ -17,7 +17,7 @@ type CreatorPhoto = {
 
 const signedUrlCache = new Map<string, string>();
 
-const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: string; onActiveChange?: (path?: string) => void }) => {
+const CreatorProfilePhotoGallery = ({ creatorId, uploadAllowed = false, onPrepareDrafts, onActiveChange }: { creatorId: string; uploadAllowed?: boolean; onPrepareDrafts?: () => void; onActiveChange?: (path?: string) => void }) => {
   const [photos, setPhotos] = useState<CreatorPhoto[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -52,6 +52,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
   useEffect(() => { void loadPhotos(); }, [creatorId]);
 
   const uploadPhoto = async (file: File) => {
+    if (!uploadAllowed) return;
     const video = file.type.startsWith("video/");
     if (!video && !file.type.startsWith("image/")) {
       toast({ title: "Choose a portrait", description: "Use a photo or a smile video lasting five seconds or less.", variant: "destructive" });
@@ -137,10 +138,13 @@ const CreatorProfilePhotoGallery = ({ creatorId, onActiveChange }: { creatorId: 
         if (file) void uploadPhoto(file);
         event.target.value = "";
       }} />
-      <Button type="button" variant="outline" className="w-full border-primary/50" disabled={busy} onClick={() => inputRef.current?.click()}>
+      {uploadAllowed ? <Button type="button" variant="outline" className="w-full border-primary/50" disabled={busy} onClick={() => inputRef.current?.click()}>
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
         ADD PHOTO OR 5-SECOND SMILE
-      </Button>
+      </Button> : <div className="space-y-2 border-y border-border py-3">
+        <p className="text-xs text-muted-foreground">This profile gallery opens after DTT approves your identity. You can prepare photos and videos now in private drafts; nothing is shown to customers.</p>
+        {onPrepareDrafts && <Button type="button" variant="outline" className="w-full" onClick={onPrepareDrafts}>PREPARE PRIVATE PHOTOS & VIDEOS</Button>}
+      </div>}
 
       {photos.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border p-5 text-center text-xs text-muted-foreground">Add a clear photo of yourself. Participant review is required before it becomes public.</p>

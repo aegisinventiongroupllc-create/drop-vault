@@ -1,5 +1,11 @@
 # Roadmap
 
+## Creator and customer onboarding walkthrough — November 21
+- [x] Walked entry/signup validation and temporary signed-in accounts on phone/desktop; real password logins restored Creator → dashboard and Customer → saved waiting-list ticket with zero page errors. Hosted settings read confirms email/Google enabled, signup enabled and email confirmation required; actual new-signup inbox and Google callback remain unverified.
+- [x] Creator category/labels, safety and agreement completed; private handle/country persisted. Corrected public portrait upload before approval to offer private preparation instead; direct file handler also gates it. Private branded synthetic photo and short-video drafts uploaded, previewed and survived reload; Pro interest joined/downloaded/reloaded/left. Creator verification reached final review with synthetic preview files, without submitting or approving an identity.
+- [x] Customer joined free with US country, downloaded a real PNG ticket and restored it without congratulations or checkout. Optional synthetic-face customer portrait generated/account-saved/read back after reload in isolated settings UI; ordinary prelaunch waiting-list gate remained intact. Thirty-nine focused tests passed; updated preview build OK; no real identity approval, payments or publication.
+- [ ] Genuine new-signup confirmation inbox/Google return, real adult identity/admin and participant review, approved long-video/teaser/customer playback, receipt-verified payments/LTC payouts, device camera/native sharing, full translation/legal review and isolated load/recovery rehearsal require external evidence or owner/provider participation; not certified ready by these temporary-account checks.
+
 ## Visitor branding and welcoming signup — November 21
 - [x] Hosting badge is hidden and publication is public. Published entrance and creator/customer entry links showed DTT-only text on phone/desktop; screenshot's Lovable header and progress notification belong to the owner's editor, not the public site. Google-hosted branding and email delivery were not exercised.
 - [x] Signup now says “I confirm I’m 18 or older and agree to DTT’s Terms of Service.” Simplified its validation prompt; mandatory checkbox, consent records, identity review and payment rules unchanged.

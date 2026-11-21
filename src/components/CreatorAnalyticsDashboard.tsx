@@ -817,7 +817,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
           {authUserId && (
             <div className="bg-card border border-border rounded-xl p-4">
-              <CreatorProfilePhotoGallery creatorId={authUserId} onActiveChange={setProfilePhotoPath} />
+              <CreatorProfilePhotoGallery creatorId={authUserId} uploadAllowed={uploadEligible} onPrepareDrafts={() => setActiveSection("drafts")} onActiveChange={setProfilePhotoPath} />
               <CreatorBackdropPicker />
             </div>
           )}
