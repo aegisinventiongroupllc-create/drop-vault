@@ -35,6 +35,8 @@ export async function logActivity(
   metadata?: Record<string, unknown>,
 ) {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 

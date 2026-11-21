@@ -3,6 +3,7 @@ import { template as creatorApproved } from './creator-approved.tsx'
 import { template as creatorDeclined } from './creator-declined.tsx'
 import { template as securityAccessDenied } from './security-access-denied.tsx'
 import { template as customerPayNow } from './customer-pay-now.tsx'
+import { template as creatorSignupStarted } from './creator-signup-started.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -26,4 +27,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'creator-declined': creatorDeclined,
   'security-access-denied': securityAccessDenied,
   'customer-pay-now': customerPayNow,
+  'creator-signup-started': creatorSignupStarted,
 }

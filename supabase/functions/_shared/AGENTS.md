@@ -1,4 +1,5 @@
 # Shared security rules
+- Creator-start notices use verified auth events or authenticated account IDs, server-read account type and per-account email idempotency; sending never gates signup. Why: prevent spoofed identities, repeated notices and failed confirmations.
 - Customer entry checkout rejects pre-launch attempts and resolves lifetime annual waitlist pricing server-side; receipt verification matches exact invoiced price and credit rechecks discount eligibility. Why: preserve paid access without trusting client discounts or early purchases.
 - Security denial notifications use the fixed server-side recipient, persist the denied event before sending, and deduplicate by kind/UTC window through managed email idempotency; notification failures never authorize requests. Why: prevent recipient injection, mailbox flooding and fail-open access without an email queue.
 - Waitlist invitation sending rechecks launch and verified provider readiness, authorizes administrators server-side and uses account-scoped idempotency; notices never generate invoices or credit access. Why: invitation retries must not charge or upgrade customers.

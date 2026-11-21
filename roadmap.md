@@ -1,5 +1,11 @@
 # Roadmap
 
+## Signup alerts and destinations — November 21
+- [x] Recorded alert was a rejected admin code, not proof of a successful intrusion; actor is unknown. Preserved all denial notifications and admin protection; skipped unnecessary signed-out activity user lookup.
+- [x] Temporary signed-in account reached Customer → free prelaunch waitlist and Creator → private setup/dashboard on phone; corrected explicit customer intent inheriting creator setup. Fresh creator confirmation retains creator setup; focused routing tests passed.
+- [x] Creator-start email uses server-read account type, fixed admin@dttmediallc.com recipient and per-account idempotency; ignores accounts predating rollout. Deployed auth hook/notification/preview; actual test creator notice logged sent at 23:15:56 UTC, inbox arrival unverified.
+- [x] Removed explicit category list only from the pictured About earnings paragraph; account categories and founding eligibility unchanged. Phone/desktop About checked, no page errors; 33 focused tests and preview build passed. Frontend not published; genuine new-signup confirmation inbox remains unverified.
+
 ## Personal phone lock screens — November 21
 - [x] Added creator/customer/admin wallpaper saving with saved galaxy and globe only; no countdown or Be Right Back words in phone artwork. Explicit untinted sky choices are retained.
 - [x] Lock-screen video is alive like Be Right Back: exact one-turn 30s spin, stronger country sparkles, twinkling stars, shooting stars, globe breathing, seamless loop.

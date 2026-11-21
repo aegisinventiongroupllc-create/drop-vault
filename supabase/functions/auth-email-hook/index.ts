@@ -7,6 +7,7 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { sendCreatorSignupNotice } from '../_shared/creatorSignupEmail.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -123,20 +124,25 @@ async function handlePreview(req: Request): Promise<Response> {
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
-  apiKey: Deno.env.get('LOVABLE_API_KEY')!,
+  apiKey: Deno.env.get('LOVABLE_API_KEY') ?? '',
   from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
     signup: {
       subject: 'Confirm your email',
-      render: (data) =>
-        React.createElement(SignupEmail, {
+      render: async (data) => {
+        // The SDK verified this auth event before invoking render. Notification
+        // failures must never prevent the creator receiving their confirmation.
+        try { await sendCreatorSignupNotice({ email: data.email }); }
+        catch { console.error('Creator signup notice unavailable'); }
+        return React.createElement(SignupEmail, {
           siteName: SITE_NAME,
           siteUrl: SITE_URL,
           recipient: data.email,
           confirmationUrl: data.url,
-        }),
+        });
+      },
     },
     invite: {
       subject: "You've been invited",

@@ -122,6 +122,7 @@ const Index = () => {
   const [roleHydrated, setRoleHydrated] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [roleChosen, setRoleChosen] = useState<boolean>(false);
+  const [needsAccountSelection, setNeedsAccountSelection] = useState(false);
   const [creatorSetup, setCreatorSetup] = useState<{ category: CreatorCategory; labels: string[] } | undefined>();
   const [editingPreference, setEditingPreference] = useState(false);
   const [adaptivePreferences, setAdaptivePreferences] = useState<AdaptiveTag[]>([]);
@@ -163,6 +164,7 @@ const Index = () => {
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
       const chooseAfterLogin = consumeAccountSelection();
+      setNeedsAccountSelection(chooseAfterLogin);
       const { data, error } = await supabase
         .from("account_preferences")
         .select("account_type, customer_preference, content_categories, adaptive_preferences")
@@ -173,6 +175,11 @@ const Index = () => {
       const preferenceRow = data as AccountPreference | null;
       setAdaptivePreferences(parseAdaptiveTags(preferenceRow?.adaptive_preferences));
       const dbRole = preferenceRow?.account_type ?? null;
+      if (dbRole === "creator") {
+        void supabase.functions.invoke("creator-signup-notification", { body: {} }).then(({ error }) => {
+          if (error) console.warn("Creator signup notice could not be sent");
+        });
+      }
       const chosen = dbRole === "creator" || dbRole === "customer";
       const explicitSignupSwitch = (isCreatorSignup(window.location.search) && dbRole !== "creator") ||
         (isCustomerSignup(window.location.search) && dbRole !== "customer");
@@ -421,11 +428,17 @@ const Index = () => {
         email={email}
         existingCreator={creatorSetup}
         initialAdaptiveTags={adaptivePreferences}
+        initialRole={needsAccountSelection || isCustomerSignup(window.location.search) ? null : role}
         onSelect={async (chosenRole, creatorSide, labels, adaptiveTags) => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
             throw error;
+          }
+          if (chosenRole === "creator") {
+            void supabase.functions.invoke("creator-signup-notification", { body: {} }).then(({ error }) => {
+              if (error) console.warn("Creator signup notice could not be sent");
+            });
           }
           if (chosenRole === "creator") {
             const side: VaultType = isCreatorCategory(creatorSide) ? creatorSide : "women";

@@ -11,6 +11,13 @@ vi.mock("@/i18n/creator", () => ({ useCreatorText: () => ({
 }) }));
 afterEach(cleanup);
 
+it("keeps a newly confirmed creator in creator setup instead of customer selection", () => {
+  render(<PostAuthRolePicker onSelect={vi.fn()} initialRole="creator" />);
+  expect(screen.getByRole("combobox")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Customer" })).toBeNull();
+  expect(screen.getByRole("button", { name: "CONTINUE" })).toBeDisabled();
+});
+
 it("sends a returning creator straight through with saved category and labels", async () => {
   const select = vi.fn().mockResolvedValue(undefined);
   render(<PostAuthRolePicker onSelect={select} existingCreator={{ category: "women", labels: ["twerking"] }} />);

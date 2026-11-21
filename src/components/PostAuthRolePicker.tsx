@@ -18,11 +18,12 @@ interface PostAuthRolePickerProps {
   email?: string;
   existingCreator?: { category: CreatorCategory; labels: string[] };
   initialAdaptiveTags?: AdaptiveTag[];
+  initialRole?: UserRole | null;
   onSelect: (role: UserRole, creatorSide?: VaultType, labels?: string[], adaptiveTags?: AdaptiveTag[]) => Promise<void>;
 }
 
-const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveTags = [] }: PostAuthRolePickerProps) => {
-  const [pickingSide, setPickingSide] = useState(() => isCreatorSignup(window.location.search));
+const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveTags = [], initialRole }: PostAuthRolePickerProps) => {
+  const [pickingSide, setPickingSide] = useState(() => isCreatorSignup(window.location.search) || initialRole === "creator");
   const [category, setCategory] = useState<CreatorCategory | "">(existingCreator?.category ?? "");
   const [labels, setLabels] = useState<string[]>(existingCreator?.labels ?? []);
   const [adaptiveTags, setAdaptiveTags] = useState<AdaptiveTag[]>(initialAdaptiveTags);
