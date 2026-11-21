@@ -17,11 +17,12 @@ Deno.serve(async req => {
     const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!url || !key) return json({ error: 'Invitations unavailable' }, 503);
     const server = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data: session, error: authError } = await server.auth.getUser((req.headers.get('Authorization') ?? '').replace(/^Bearer /, ''));
-    if (authError || !session.user) return json({ error: 'Sign in required' }, 401);
-    const { data: admin, error: roleError } = await server.rpc('has_role', { _user_id: session.user.id, _role: 'admin' });
-    if (roleError || admin !== true) return json({ error: 'Administrator account required' }, 403);
     const body = await req.json().catch(() => null);
+    const { data: session, error: authError } = await server.auth.getUser((req.headers.get('Authorization') ?? '').replace(/^Bearer /, ''));
+    // Status for non-admins is simply "locked": no data revealed, no crash in passcode previews.
+    if (authError || !session.user) return body?.action === 'status' ? json({ enabled: false }) : json({ error: 'Sign in required' }, 401);
+    const { data: admin, error: roleError } = await server.rpc('has_role', { _user_id: session.user.id, _role: 'admin' });
+    if (roleError || admin !== true) return body?.action === 'status' ? json({ enabled: false }) : json({ error: 'Administrator account required' }, 403);
     if (!body || !['status','send'].includes(body.action) || (body.action === 'send' && body.confirm !== true)) return json({ error: 'Confirm the invitation action' }, 400);
     const enabled = ready();
     if (body.action === 'status') return json({ enabled });
