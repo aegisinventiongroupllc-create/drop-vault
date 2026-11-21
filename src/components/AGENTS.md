@@ -1,5 +1,5 @@
 # Component architecture rules
-- Lock-screen artwork exports saved sky/globe locally as PNG or bounded silent H.264 MP4; WebGL buffer retention is export-only. Why: Samsung supports video wallpaper, but browsers cannot install it or run off-app clocks.
+- Lock-screen artwork exports saved sky/globe locally as PNG or bounded silent H.264 MP4 rendered frame-by-frame at exact times (WebCodecs, real-time recorder fallback) with loop-periodic motion; WebGL buffer retention and frame stepping are export-only. Why: wall-clock recording stalls or speeds up the globe and breaks the loop; browsers cannot install wallpaper.
 - Creator share links carry validated handles only and enter the normal consent/account/prelaunch/entry gates; device bookmarks never grant media access. Why: preserve referrals without public paid-media bypasses.
 - Fresh password/Google sign-in requests account selection before saved customer routing; consume intent once and persist choices through the existing server RPC. Why: a prior customer choice must not trap creator logins on the waiting page.
 - Customer waiting-list celebration is transient after first successful joining; reloads and country updates only restore the saved ticket. Why: membership state must not replay a signup celebration.

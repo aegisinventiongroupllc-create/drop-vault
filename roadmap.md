@@ -2,6 +2,7 @@
 
 ## Personal phone lock screens — November 21
 - [x] Added creator/customer/admin wallpaper saving with saved galaxy and globe only; no countdown or Be Right Back words in phone artwork. Explicit untinted sky choices are retained.
+- [x] Lock-screen video is alive like Be Right Back: exact one-turn 30s spin, stronger country sparkles, twinkling stars, shooting stars, globe breathing, seamless loop.
 - [x] Added gentle galaxy drift, spinning globe and country glints to silent local MP4; image fallback and Samsung Gallery installation instructions included.
 - [x] Verified temporary signed-in customer exported PNG and silent H.264 720×1560 MP4 (9.9 seconds, 0.5 MB); inspected changing globe frames and phone save controls. Physical Galaxy S25 Gallery installation and full passcode-protected admin entry remain unverified; shared button is added to admin and creator appearance controls.
 - [x] Desktop two-click and mobile two-tap return passed; movement/scroll/typing cannot dismiss idle screen, Escape remains accessible and live countdown stays in-app.
