@@ -11,8 +11,8 @@ const CreatorPaymentOverview = () => (
           <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">A standard vault unlock earns $18: 90% of the $20 Bit-Token spending value. Vault-access earnings are held for each 14-day access period, then released to the available payout balance. Release is not an instant wallet payment.</dd>
         </div>
         <div>
-          <dt className="text-sm font-semibold text-foreground">Manual Litecoin payouts</dt>
-          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">Available creator earnings are paid manually in Litecoin (LTC) to the creator’s saved Litecoin address. Bank transfers and payouts to debit or credit cards are not offered. No fixed wallet-arrival date is promised.</dd>
+          <dt className="text-sm font-semibold text-foreground">Crypto or bank payouts · planned</dt>
+          <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">Creator payouts are planned through a crypto processor, including Litecoin (LTC), or into the creator’s bank account. Options depend on provider approval, country availability and final payout checks. No fixed arrival date is promised.</dd>
         </div>
         <div>
           <dt className="text-sm font-semibold text-foreground">Card payments · preparing for launch</dt>
