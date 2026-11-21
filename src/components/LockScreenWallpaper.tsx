@@ -58,7 +58,7 @@ export default function LockScreenWallpaper() {
         <div ref={scene} aria-label="Lock-screen artwork" className="relative isolate mx-auto aspect-[9/19.5] w-full max-w-[252px] shrink-0 overflow-hidden bg-background">
           <GalaxyReel scope="brb" styleOverride={sky.style} toneOverride={sky.tone ?? (theme.brbStyle || theme.starStyle ? "" : ENTRY_GLOBE.tone)} />
           <div className="absolute inset-0 bg-background/25" />
-          <div className="absolute inset-x-0 top-[40%] flex flex-col items-center px-4" data-wallpaper-globe>
+          <div className="absolute inset-0 flex items-center justify-center px-4" data-wallpaper-globe>
             <GlobeOverrideContext.Provider value={{ tone: theme.globe ?? ENTRY_GLOBE.tone, borderTone: theme.globeBorder ?? ENTRY_GLOBE.borderTone, whiteLights: true }}>
               <MiniGlobe size={180} speed={0.15} lights backdrop={false} cameraDistance={3.8} exportable />
             </GlobeOverrideContext.Provider>
