@@ -198,12 +198,12 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
   return (
     <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center overscroll-contain">
       <div className="w-full max-w-md bg-card border border-border rounded-t-2xl sm:rounded-2xl max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <Button type="button" variant="ghost" size="sm" className="gap-2 px-2" onClick={onClose}>
+        <div className="flex items-center justify-between gap-2 p-4 border-b border-border">
+          <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-2 px-2" onClick={onClose}>
             <ArrowLeft className="h-4 w-4" />
-            GO BACK TO DASHBOARD
+            BACK
           </Button>
-          <h2 className="text-sm font-bold text-foreground font-display tracking-wider">{isRequest ? "REQUEST PAYMENT" : isEntryPass ? "VAULT ENTRY PASS" : "BUY COINS"}</h2>
+          <h2 className="min-w-0 text-center text-sm font-bold text-foreground font-display tracking-wider">{isRequest ? "REQUEST PAYMENT" : isEntryPass ? "VAULT ENTRY PASS" : "BUY COINS"}</h2>
           <a href="/pricing" className="text-[10px] font-semibold uppercase text-primary underline">Pricing</a>
         </div>
 

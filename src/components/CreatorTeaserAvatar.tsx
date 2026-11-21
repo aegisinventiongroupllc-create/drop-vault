@@ -1,3 +1,4 @@
+import { PurchaseAccessNotice } from "@/components/PurchaseAccessNotice";
 import { signTeaser, signTeasers } from "@/lib/teaserUrls";
 import ProtectedVideo from "@/components/ProtectedVideo";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,9 +13,9 @@ import { isPlaybackInterruption } from "@/lib/teaserPlayback";
 import "./creator-portrait.css";
 
 /** Creator face that spins like a coin over their latest teaser; tap to watch full screen. */
-export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConfig, photoPath, unlocked, unlocking, onUnlock, canUnlock = false, isMen, toss, audio, onSequenceComplete }: {
+export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConfig, photoPath, unlocked, unlocking, onUnlock, canUnlock = false, isMen, toss, audio, onSequenceComplete, accessAck, onAccessAckChange }: {
   creatorId: string | null; creatorName: string; avatarConfig: unknown; photoPath: string | null;
-  unlocked: boolean; unlocking: boolean; onUnlock: () => void; canUnlock?: boolean; isMen?: boolean;
+  unlocked: boolean; unlocking: boolean; onUnlock: () => void; canUnlock?: boolean; accessAck?: boolean; onAccessAckChange?: (v: boolean) => void; isMen?: boolean;
   toss?: { id: number; count: number; preview: boolean } | null; audio?: AudioContext | null; onSequenceComplete?: () => void;
 }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -102,17 +103,18 @@ export default function CreatorTeaserAvatar({ creatorId, creatorName, avatarConf
           </Button>
           {failed && <div role="alert" className="absolute inset-x-0 bottom-10 p-6 bg-background/90 text-center text-muted-foreground">This browser couldn't play the teaser. Try a browser that supports MP4 video.</div>}
           {gate && !unlocked && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/75 backdrop-blur-xl px-6 text-center">
+            <div className="absolute inset-0 overflow-y-auto bg-background/75 backdrop-blur-xl"><div className="flex min-h-full flex-col items-center justify-center gap-4 px-6 py-16 text-center">
               <ProfileAvatar config={avatarConfig} creatorPhotoPath={photoPath} label={creatorName} className="h-20 w-20" />
               <h3 className="font-display text-2xl font-bold tracking-wider text-foreground">
                 UNLOCK {isMen ? "HIS" : "HER"} LIBRARY
               </h3>
               <p className="text-sm text-muted-foreground">{canUnlock ? `Drop 1 Bit-Token to finish this teaser and open @${creatorName}'s full library for 14 days.` : "Library coming soon. Paid unlocks are not available."}</p>
-              <Button variant="neon" size="lg" disabled={unlocking || !canUnlock} onClick={onUnlock}>
-                {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : `DROP 1 BIT-TOKEN — UNLOCK @${creatorName.toUpperCase()}`}
+              {canUnlock && onAccessAckChange && <div className="w-full max-w-sm text-left"><PurchaseAccessNotice id="teaser-access-ack" checked={!!accessAck} onChange={onAccessAckChange} /></div>}
+              <Button variant="neon" size="lg" className="h-auto max-w-full whitespace-normal py-3 text-center" disabled={unlocking || !canUnlock} onClick={onUnlock}>
+                {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : "DROP 1 BIT-TOKEN — UNLOCK 14 DAYS"}
               </Button>
               <button className="text-xs text-muted-foreground underline" onClick={() => { setFull(false); setGate(false); }}>Not now</button>
-            </div>
+            </div></div>
           )}
         </div>, document.body
       )}

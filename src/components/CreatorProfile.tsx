@@ -86,17 +86,20 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
   const { balance, bitCents, refresh: refreshBalance } = useTokenBalance();
   const { subs, refresh: refreshSubs } = useSubscriptions();
 
+  const [profileState, setProfileState] = useState<"loading" | "ready" | "missing" | "error">("loading");
   // Resolve creator by display_name
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const { data } = await supabase
+      setProfileState("loading");
+      const { data, error } = await supabase
         .from("public_profiles")
         .select("user_id, avatar_config, profile_photo_path, vault_side, adaptive_tags")
         .ilike("display_name", creatorName)
         .limit(1)
         .maybeSingle();
       if (!cancel) {
+        setProfileState(error ? "error" : data ? "ready" : "missing");
         setCreatorId(data?.user_id ?? null);
         setAvatarConfig(data?.avatar_config ?? null);
         setProfilePhotoPath(data?.profile_photo_path ?? null);
@@ -255,7 +258,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
           {/* Avatar, name and role sit on the extended backdrop */}
           <div className="relative z-[5] flex flex-col items-center pt-14 px-4 text-center">
-            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} isMen={isMen} toss={toss} onSequenceComplete={finishSequence} />
+            <CreatorTeaserAvatar creatorId={creatorId} creatorName={creatorName} avatarConfig={avatarConfig} photoPath={profilePhotoPath} unlocked={isUnlocked} unlocking={unlocking} onUnlock={() => handleUnlock()} canUnlock={libraryAvailable} accessAck={accessAck} onAccessAckChange={setAccessAck} isMen={isMen} toss={toss} onSequenceComplete={finishSequence} />
             <div className="mt-3 flex items-center justify-center gap-2">
               <h2 className="text-xl font-bold text-foreground">@{creatorName}</h2>
               {vipBadge && <span title="Elite VIP pass holder" className="text-xs font-semibold text-gold">VERIFIED VIP</span>}
@@ -409,8 +412,8 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
             {vaultError ? <p role="alert" className="text-sm text-destructive py-4">{vaultError}</p> : vaultCount === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-6">This creator hasn't added any long-form videos yet.</p>
-            ) : vaultItems.length === 0 ? (
-              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            ) : vaultItems.length === 0 ? (vaultLoading ?
+              <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div> : <div role="status" className="py-6 text-center text-xs text-muted-foreground">No playable items are available right now. <Button variant="link" size="sm" onClick={() => setMediaRevision(n => n + 1)}>Try again</Button></div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {vaultItems.filter(v => v.library_slot !== "early_access").map((v) => (
@@ -442,13 +445,13 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               {unlocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               EXTEND +14 DAYS — 1 BIT-TOKEN
             </Button>
-            <Button variant="outline" size="lg" className="w-full mt-2 gap-2" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
-              KEEP THIS CREATOR FOR A YEAR — 26 BIT-TOKENS
+            <Button variant="outline" size="lg" className="w-full mt-2 gap-2 h-auto whitespace-normal py-3" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
+              KEEP FOR A YEAR — 26 BIT-TOKENS
             </Button>
             <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
           </>
         ) : !libraryAvailable ? (
-          <p role="status" className="py-6 text-center text-sm text-muted-foreground">{vaultCount === 0 ? "Library coming soon. Paid unlocks are unavailable until content is added." : countError ? "The library could not be checked. Paid unlocks are unavailable." : "Checking library availability…"}</p>
+          <p role="status" className="py-6 text-center text-sm text-muted-foreground">{vaultCount === 0 ? "Library coming soon. Paid unlocks are unavailable until content is added." : countError || profileState === "error" ? "The library could not be checked. Paid unlocks are unavailable." : profileState === "missing" ? "This creator could not be found. The link may be out of date." : "Checking library availability…"}</p>
         ) : (
           <>
             <div className="bg-card border border-border rounded-xl p-6 text-center mb-3">
@@ -456,12 +459,12 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
               <p className="text-sm font-bold text-foreground">Drop 1 DTT Bit-Token to unlock</p>
               <p className="text-xs text-muted-foreground mt-1">14 days of access to up to four regular long videos from @{creatorName}. The fifth video is purchased separately.</p>
             </div>
-            <Button variant="neon" size="lg" className="w-full text-base font-semibold gap-2" onClick={() => handleUnlock()} disabled={unlocking || !creatorId}>
+            <Button variant="neon" size="lg" className="w-full h-auto whitespace-normal py-3 text-base font-semibold gap-2" onClick={() => handleUnlock()} disabled={unlocking || !creatorId}>
               {unlocking ? <Loader2 className="w-5 h-5 animate-spin" /> : <img src={dttCoin} alt="" className="w-6 h-6 object-contain" />}
               DROP 1 BIT-TOKEN — UNLOCK 14 DAYS
             </Button>
-            <Button variant="outline" size="lg" className="w-full mt-2 gap-2" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
-              KEEP THIS CREATOR FOR A YEAR — 26 BIT-TOKENS
+            <Button variant="outline" size="lg" className="w-full mt-2 gap-2 h-auto whitespace-normal py-3" onClick={() => handleUnlock(true)} disabled={unlocking || !libraryAvailable || !creatorId}>
+              KEEP FOR A YEAR — 26 BIT-TOKENS
             </Button>
             <p className="text-center text-[10px] text-muted-foreground mt-1">26 × 14 days = 364 days ($650). Unlocking early adds time on.</p>
             <p className="text-center text-xs text-muted-foreground mt-2">

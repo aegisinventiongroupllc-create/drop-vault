@@ -40,11 +40,12 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategories
   const [hasMore,setHasMore]=useState(false);
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState("");
+  const [demandError,setDemandError]=useState("");
   const q=query.trim().toLowerCase();
-  useEffect(()=>{setOffset(0);setCreators([]);},[q,categoryKey,adaptiveKey]);
+  useEffect(()=>{setOffset(0);setCreators([]);setHasMore(false);setError("");},[q,categoryKey,adaptiveKey]);
   useEffect(()=>{
     let cancelled=false;
-    if(!q && !adaptiveTags.length){setCreators([]);setLoading(false);return;}
+    if(!q && !adaptiveTags.length){setCreators([]);setHasMore(false);setError("");setLoading(false);return;}
     setLoading(true);
     const timer=setTimeout(()=>{
       const countries=COUNTRIES.filter(c=>c.name.toLowerCase().includes(q)||c.code.toLowerCase()===q).map(c=>c.code);
@@ -63,10 +64,12 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategories
     if (!query.trim() || demandSent) return;
     const prefs = localStorage.getItem("dtt_user_prefs");
     const email = prefs ? JSON.parse(prefs).email : null;
-    await supabase.from("market_demand").insert({
+    setDemandError("");
+    const { error: demandFailure } = await supabase.from("market_demand").insert({
       keyword: query.trim().toLowerCase(),
       user_email: email,
     });
+    if (demandFailure) { setDemandError("Your request couldn’t be saved. Please try again."); return; }
     setDemandSent(true);
   };
 
@@ -120,7 +123,7 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategories
           </div>
         ))}
 
-        {hasMore && <Button variant="outline" disabled={loading} onClick={()=>setOffset(n=>n+24)}>More creators</Button>}
+        {hasMore && (q || adaptiveTags.length > 0) && <Button variant="outline" disabled={loading} onClick={()=>setOffset(n=>n+24)}>More creators</Button>}
         {noResults && (
           <div className="text-center py-8 space-y-3">
             <Lightbulb className="w-8 h-8 text-gold mx-auto" />
@@ -133,9 +136,12 @@ const GlobalSearch = ({ onCreatorClick, onClose, vault, categories, onCategories
             {demandSent ? (
               <p className="text-xs text-green-400 font-bold tracking-wider">{t.request_logged}</p>
             ) : (
-              <Button variant="neon" size="sm" onClick={handleRequestDemand}>
-                {t.request_niche}
-              </Button>
+              <>
+                <Button variant="neon" size="sm" onClick={handleRequestDemand}>
+                  {t.request_niche}
+                </Button>
+                {demandError && <p role="alert" className="text-xs text-destructive">{demandError}</p>}
+              </>
             )}
           </div>
         )}
