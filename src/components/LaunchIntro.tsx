@@ -150,7 +150,7 @@ export default function LaunchIntro() {
     const timer = window.setInterval(() => setCountdown(launchCountdown()), 1000);
     return () => window.clearInterval(timer);
   }, []);
-  const [show, setShow] = useState(() => typeof window !== "undefined" && !new URLSearchParams(location.search).has("nointro"));
+  const [show, setShow] = useState(() => typeof window !== "undefined" && location.pathname !== "/verify-email" && !new URLSearchParams(location.search).has("nointro"));
   const [leaving, setLeaving] = useState(false);
   const entryReady = useIntroEntryReady(show);
   const [lang, setLang] = useState(() => getTargetLang());

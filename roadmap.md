@@ -1,5 +1,9 @@
 # Roadmap
 
+## DTT email verification presentation — November 21
+- [x] Branded signup and unconfirmed-login email prompts and the /verify-email return page with the shared pink globe, slow waiting-list galaxy and requested runway note; confirmation success requires an auth-service-verified email.
+- [x] Twelve focused tests passed for both signup roles, resend/retry, unconfirmed login, verified/missing-link states and existing Google/account selection. Desktop/384px phone checked with a real confirmed account and an intercepted unconfirmed-login response; continuation returned to normal entry gates, zero page errors or horizontal overflow, preview build OK. No real emails sent, actual inbox/link delivery and new copy’s full reviewed translations remain unverified; not published.
+
 ## Sharing and QR walkthrough — November 21
 - [x] Actual temporary creator completed category/agreements/name setup and opened MY PAGE; library copy/share fallback/download worked at desktop/mobile sizes with no overflow or page errors. X popup opened with correct creator URL but X itself returned a browser network error, so actual posting/native phone sharing remain unverified. On-screen and downloaded 1024px branded QR both decoded to the exact creator URL.
 - [x] Actual temporary customer followed that creator address through adult consent/account choice, joined the waitlist, copied/downloaded the link and reloaded with ticket/link retained; mobile country update persisted without repeated celebration or an unlock control. Fourteen focused tests passed and preview build OK. Corrected literal underscore matching to prevent links resolving a different handle, aligned link validation with signup, and labeled the library back control. No publication or payments.

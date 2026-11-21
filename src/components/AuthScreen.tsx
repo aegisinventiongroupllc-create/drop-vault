@@ -16,6 +16,7 @@ import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
 import { requestAccountSelection, cancelAccountSelection } from "@/lib/accountSelection";
+import EmailVerification, { EMAIL_VERIFICATION_RETURN } from "./EmailVerification";
 
 interface AuthScreenProps {
   onAdmin: () => void;
@@ -48,6 +49,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
   const [loading, setLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
   const [registrationConsent, setRegistrationConsent] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string>();
 
   // Triple-tap the DROPTHATTHING logo to leave the signed-in preview of this page.
   const logoTaps = useRef(0);
@@ -134,20 +136,17 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: trimmed,
           password,
           options: {
-            emailRedirectTo: AUTH_REDIRECT_ORIGIN,
+            emailRedirectTo: EMAIL_VERIFICATION_RETURN,
             data: { role, age_terms_certified: true, age_terms_version: "2.0", age_terms_certified_at: new Date().toISOString() },
           },
         });
         if (error) throw error;
         await logActivity("signup", `New ${role} signup`, { role });
-        toast({
-          title: "Check your inbox",
-          description: "We sent you a confirmation link. Click it to activate your account, then log in.",
-        });
+        if (!data.session) setVerificationEmail(trimmed);
         setMode("login");
         setPassword("");
       } else {
@@ -164,6 +163,11 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
       }
     } catch (e: any) {
       cancelAccountSelection();
+      if (e?.code === "email_not_confirmed") {
+        setVerificationEmail(trimmed);
+        setPassword("");
+        return;
+      }
       const msg = e?.message ?? "Something went wrong.";
       toast({ title: "Authentication failed", description: msg, variant: "destructive" });
     } finally {
@@ -171,6 +175,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     }
   };
 
+  if (verificationEmail) return <EmailVerification email={verificationEmail} onBack={() => { setVerificationEmail(undefined); setMode("login"); }} />;
 
   return (
     <div className="dtt-auth-screen fixed inset-0 z-50 overflow-y-auto bg-background">

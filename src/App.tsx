@@ -24,6 +24,7 @@ import Pricing from "./pages/Pricing.tsx";
 import EntryPassGate from "./components/EntryPassGate";
 import PersonaTest from "./pages/PersonaTest";
 import FoundingCreators from "./pages/FoundingCreators";
+import EmailVerification from "./components/EmailVerification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/participant-invite" element={<ParticipantInvite />} />
                 <Route path="/persona-test" element={<PersonaTest />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<EmailVerification />} />
 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/entry-pass-preview" element={<EntryPassGate onPurchased={() => { window.location.href = "/"; }} />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
