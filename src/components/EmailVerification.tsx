@@ -72,7 +72,7 @@ export default function EmailVerification({ email, onBack }: { email?: string; o
         </div>
         <div className="mt-7 w-full border-y border-primary/30 py-5">
           <p className="text-base font-medium">This platform is your runway.</p>
-          <p className="mt-2 text-xl font-semibold text-primary">Now Go Drop That Thing!</p>
+          <p className="mt-2 text-xl font-semibold text-primary">So go drop that thing.</p>
         </div>
         <div className="mt-6 w-full max-w-sm space-y-3">
           {status === "pending" && <Button variant="neon" className="h-auto min-h-12 w-full whitespace-normal" disabled={sending || resent} onClick={() => void resend()}>{sending ? "SENDING…" : resent ? "EMAIL REQUESTED" : "RESEND CONFIRMATION EMAIL"}</Button>}
