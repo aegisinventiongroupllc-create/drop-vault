@@ -102,6 +102,16 @@ export default function CustomerLaunchWaitlist() {
         <div className="space-y-3 px-5 py-4">
           <p translate="no" className="notranslate break-all font-mono text-xs">{ticket.number}</p>
           <p className="text-xs text-muted-foreground">Joined {new Date(ticket.joinedAt).toLocaleDateString()} · {COUNTRIES.find(c => c.code === ticket.country)?.name ?? ticket.country}</p>
+          <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your founding perks</p>
+            <ul className="mt-2 list-disc space-y-1.5 pl-4 text-left text-xs text-foreground/90">
+              <li>Endless global creators twerking — one feed, every country, whenever you want.</li>
+              <li>$10 yearly entry for life — half the standard $20 rate, locked to this account forever.</li>
+              <li>Your personal founding ticket number, saved to your account and downloadable as a keepsake.</li>
+              <li>First payment invitation when checkout opens — founding members are invited before anyone else.</li>
+              <li>Front-row access to the global creator feed the moment DTT launches.</li>
+            </ul>
+          </div>
           <p className="text-xs text-muted-foreground">Waiting-list membership, not payment or access. Payments are being prepared for launch; nothing is due today.</p>
           {ticketImageError && <p role="alert" className="text-xs text-destructive">Your ticket artwork couldn’t load. Please retry.</p>}
           <Button variant="outline" className="w-full" disabled={!ticketImage && !ticketImageError} onClick={ticketImageError ? () => setTicketImageAttempt(n => n + 1) : downloadTicket}>{ticketImageError ? "RETRY TICKET" : ticketImage ? "SAVE MY DTT TICKET" : "PREPARING MY TICKET…"}</Button>
@@ -127,6 +137,13 @@ export default function CustomerLaunchWaitlist() {
     <Dialog open={celebrate} onOpenChange={setCelebrate}><DialogContent className="max-w-sm border-primary/50">
       <DialogTitle className="text-xl">Welcome to the founding list!</DialogTitle>
       <DialogDescription>Your $10 yearly entry rate for life is saved to this account. Each paid pass lasts 365 days; no payment is due today.</DialogDescription>
+      <ul className="list-disc space-y-1.5 pl-5 text-left text-sm text-foreground/90">
+        <li>Endless global creators twerking, all in one feed.</li>
+        <li>Half-price entry for life — $10 instead of $20, every year.</li>
+        <li>Your own founding ticket number, saved to your account.</li>
+        <li>First payment invitation before the public rush.</li>
+        <li>Front-row access to the global creator feed at launch.</li>
+      </ul>
       <Button variant="neon" onClick={() => setCelebrate(false)}>VIEW MY DTT TICKET</Button>
     </DialogContent></Dialog>
   </main>;

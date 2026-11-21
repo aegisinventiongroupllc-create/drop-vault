@@ -1,5 +1,8 @@
 # Roadmap
 
+## Waitlist ticket perks — November 21
+- [x] Add a founding-perks list to the customer waiting-list ticket card and first-join celebration: endless global creators twerking, $10/year for life, personal ticket number, first payment invitation, front-row launch access. Verify on phone/desktop with a temporary customer; no payment or publication changes.
+
 ## Reel partnership invitation — November 21
 - [x] Added a mailto investor/partnership contact beneath the shared legal footer and in About DTT, without changing legal policies. Desktop/mobile links and About view checked; email remains unbroken with space above the phone language control, no overflow or page errors, preview build OK. Not published.
 - [x] Added “Partnership inquiries: admin@dttmediallc.com” during the final four seconds of the latest delivered reel, preserving creator signup, the existing globe footage and silent format; originals unchanged.
