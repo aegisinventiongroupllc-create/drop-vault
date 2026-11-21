@@ -1,4 +1,5 @@
 import type { Translations } from "./types";
+import { CREATOR_EARNINGS_SUMMARY } from "@/lib/creatorEarningsDisclosure";
 
 const en: Translations = {
   age_title: "DROPTHAT",
@@ -50,7 +51,7 @@ const en: Translations = {
   tos_section6_title: "6. Bit-Token Economy",
   tos_section6_text: "Bit-Tokens cost $25 USD each ($20 value + $5 service and processing fee). Unused tokens do not expire; using one grants 14 calendar days of access to one creator. Access expires unless renewed. Refund exceptions follow the DTT Refund Policy and applicable law.",
   tos_section7_title: "7. Revenue Split",
-  tos_section7_text: "The Platform operates on a 90% Creator / 10% Platform revenue split. A temporary 95/5 incentive split is available for Creators each time they reach another 100,000 followers, lasting exactly 7 calendar days before reverting.",
+  tos_section7_text: CREATOR_EARNINGS_SUMMARY,
   tos_section8_title: "8. Account Termination",
   tos_section8_text: "The Platform reserves the right to suspend or terminate accounts that violate these Terms at any time without prior notice.",
   tos_section9_title: "9. Contact",

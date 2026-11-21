@@ -663,13 +663,14 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 text-center space-y-1">
             <p className="text-xs font-bold text-primary tracking-wider">⚡ 92/8 POWER WEEK ACTIVE</p>
             <p className="text-2xl font-bold text-primary font-mono">{countdown}</p>
-            <p className="text-[10px] text-muted-foreground">You earn $18.40 per $20 token value during Power Week. When the timer ends, you return to 90/10 ($18 per token).</p>
+            <p className="text-[10px] text-muted-foreground">Power Week uses 92/8 of the $20 token value ($18.40 to you). After seven days your applicable lifetime baseline resumes; founding and annual awards are preserved.</p>
           </div>
         )}
-        {revenueTerms.pass !== "NONE" && (
+        {revenueTerms.pass !== "NONE" && revenueTerms.vault < 95 && (
           <p className="mt-3 text-xs font-bold text-primary text-center tracking-wider">{revenueTerms.pass === "ELITE_PASS" ? "ELITE PASS · 93/7 FOR LIFE" : "PRO PASS · 92/8 FOREVER"}</p>
         )}
-        {!splitState.incentiveActive && revenueTerms.pass === "NONE" && (
+        {revenueTerms.vault === 95 && <p className="mt-3 text-xs font-bold text-gold text-center">ANNUAL COUNTRY AWARD · 95/5 FOR LIFE</p>}
+        {!splitState.incentiveActive && revenueTerms.pass === "NONE" && revenueTerms.vault < 95 && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">
               <span>Paid followers toward next 100K milestone</span>

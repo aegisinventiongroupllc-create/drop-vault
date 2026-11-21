@@ -64,7 +64,7 @@ const EntryPassGate = ({ onPurchased }: { onPurchased: () => void }) => {
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-            <span>Bit-Tokens to unlock creators are bought separately — creators keep 90%</span>
+            <span>Bit-Tokens to unlock creators are bought separately. Standard vault earnings use 90/10 of the $20 token value; founding, VIP and annual-award rates vary.</span>
           </div>
           <div className="flex justify-between border-t border-border pt-3 text-xs font-bold">
             <span className="text-muted-foreground">Your entry pass</span>

@@ -87,7 +87,7 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
       <div className="flex items-center justify-between">
         <span className="text-sm font-bold text-foreground">{r.display_name ?? "Creator"}</span>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border border-border ${sideClass}`}>
-          {r.status === "active" ? `${POWER_WEEK_SPLIT.creator}/${POWER_WEEK_SPLIT.platform}` : r.status === "ended" ? "BACK TO 90/10" : "PAID"}
+          {r.status === "active" ? `${POWER_WEEK_SPLIT.creator}/${POWER_WEEK_SPLIT.platform}` : r.status === "ended" ? "BASELINE RESUMED" : "PAID"}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2 text-center">
@@ -123,7 +123,7 @@ const AdminPowerWeeks = ({ callFinance }: { callFinance: Call }) => {
       <div className="bg-card border border-primary/30 rounded-xl p-5 text-center">
         <h3 className="text-lg font-bold text-foreground tracking-wider">POWER WEEK MONITOR</h3>
         <p className="text-xs text-muted-foreground mt-1">
-          Creators keep {POWER_WEEK_SPLIT.creator}% for 7 days, then the split goes back to 90/10 automatically.
+          Creators keep {POWER_WEEK_SPLIT.creator}% for 7 days, then their applicable lifetime baseline resumes. VIP holders do not use Power Weeks; annual 95/5 awards are never reduced.
         </p>
       </div>
 

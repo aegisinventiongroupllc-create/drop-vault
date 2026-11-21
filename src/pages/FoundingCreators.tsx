@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 import LegalFooter from "@/components/LegalFooter";
+import CreatorRevenueTerms from "@/components/CreatorRevenueTerms";
 import sky from "@/assets/dtt-pink-galaxy-share.jpg.asset.json";
 import { CREATOR_SIGNUP_URL, CUSTOMER_WAITLIST_URL, FOUNDING_INVITATION_URL, FOUNDING_OFFER } from "@/lib/foundingInvitation";
 
@@ -74,9 +75,13 @@ export default function FoundingCreators() {
           <div className="border-l-2 border-gold pl-5">
             <p className="text-lg font-semibold text-foreground">What 91% means</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">A Bit-Token has ${FOUNDING_OFFER.tokenValueUsd} spending value. A qualifying vault unlock at 91% allocates $18.20 to the creator and $1.80 to DTT, before applicable adjustments and your taxes. It is not 91% of the checkout price.</p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests have separate terms. Payouts are planned as manual Litecoin (LTC) payments. We’re preparing payments and payouts for launch; sales are not open yet.</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests use 85/15, or 90/10 only for payment-verified Elite holders. Payouts are planned as manual Litecoin (LTC) payments. We’re preparing payments and payouts for launch; sales are not open yet.</p>
           </div>
         </div>
+      </section>
+      <section className="mx-auto max-w-5xl border-t border-border px-5 py-8 sm:px-8" aria-labelledby="earnings-terms">
+        <h2 id="earnings-terms" className="mb-5 text-2xl font-bold">Your earnings, clearly explained</h2>
+        <CreatorRevenueTerms />
       </section>
       <section className="border-y border-border bg-secondary/30" aria-labelledby="eligibility">
         <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8">

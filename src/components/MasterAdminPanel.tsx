@@ -517,7 +517,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           {/* Three big numbers */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-gradient-to-br from-green-900/20 to-green-700/10 border border-green-500/30 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Creators (90%)</p>
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Recorded creator share</p>
               <p className="text-xl font-bold text-green-400">{money(finance?.totals.creator_share ?? 0)}</p>
               <p className="text-[9px] text-muted-foreground mt-1">Owed / paid to creators</p>
             </div>
@@ -527,7 +527,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
               <p className="text-[9px] text-muted-foreground mt-1">The $1s</p>
             </div>
             <div className="bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Your Cut (10%)</p>
+              <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-bold">Recorded platform share</p>
               <p className="text-xl font-bold text-primary">{money(finance?.totals.platform_share ?? 0)}</p>
               <p className="text-[9px] text-muted-foreground mt-1">Platform commission</p>
             </div>
@@ -589,7 +589,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
           <div className="bg-secondary/50 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
             <Percent className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              Dual-Bucket Revenue: $1 entry tax to Admin_Profit_Vault, then 10% commission / 90% creator split on the base amount. Both columns tracked separately.
+              Recorded fees and revenue shares are tracked separately. Vault rates: standard 90/10, founding 91/9, Pro 92/8, Elite 93/7, Power Week 92/8, confirmed annual award 95/5. Requests: 85/15, or 90/10 for payment-verified Elite. Historical amounts retain their original split.
             </p>
           </div>
         </div>
@@ -600,11 +600,11 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
         <div className="px-4 space-y-4">
           <div className="bg-card border border-primary/30 rounded-xl p-5 space-y-4">
             <div className="text-center">
-              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">PENDING TO ALL CREATORS (90%)</p>
+              <p className="text-xs font-bold tracking-wider text-muted-foreground mb-1">PENDING TO ALL CREATORS</p>
               <p className="text-3xl font-bold text-primary">
                 {money((finance?.wallets || []).reduce((s, w) => s + w.pending_balance, 0))}
               </p>
-              <p className="text-xs text-muted-foreground">Your 10% so far: {money(finance?.totals.platform_share ?? 0)}</p>
+              <p className="text-xs text-muted-foreground">Recorded platform share so far: {money(finance?.totals.platform_share ?? 0)}</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" disabled={financeLoading} onClick={fetchFinance}>
@@ -701,7 +701,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                   </div>
                 </div>
                 <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>Creator 90%: {money(r.creator_share_usd)}</span>
+                  <span>Creator recorded: {money(r.creator_share_usd)}</span>
                   <span>You: {money(r.platform_share_usd)}</span>
                 </div>
                 {r.description && <p className="text-[11px] text-muted-foreground/80 line-clamp-3">{r.description}</p>}

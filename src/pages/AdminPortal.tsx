@@ -444,11 +444,11 @@ const AdminPortal = () => {
                 <div className="text-xl font-bold mt-1">{finance?.totals?.transactions ?? 0}</div>
               </Button>
               <Button variant="outline" aria-label="View creator breakdown" onClick={() => setFinanceCategory("creator")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
-                <div className="text-muted-foreground uppercase text-[10px]">Creators owed 90%</div>
+                <div className="text-muted-foreground uppercase text-[10px]">Recorded creator share</div>
                 <div className="text-xl font-bold mt-1 text-primary">${Number(finance?.totals?.creator_share ?? 0).toFixed(2)}</div>
               </Button>
               <Button variant="outline" aria-label="View platform breakdown" onClick={() => setFinanceCategory("platform")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
-                <div className="text-muted-foreground uppercase text-[10px]">Your 10%</div>
+                <div className="text-muted-foreground uppercase text-[10px]">Recorded platform share</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.totals?.platform_share ?? 0).toFixed(2)}</div>
               </Button>
             </div>
@@ -465,7 +465,7 @@ const AdminPortal = () => {
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.purchase_fees ?? 0).toFixed(2)}</div>
               </Button>
               <Button variant="outline" aria-label="View tokens breakdown" onClick={() => setFinanceCategory("tokens")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
-                <div className="text-muted-foreground uppercase text-[10px]">$2 per-token cuts</div>
+                <div className="text-muted-foreground uppercase text-[10px]">Vault platform shares</div>
                 <div className="text-xl font-bold mt-1 text-green-400">${Number(finance?.platform_earnings?.token_cuts ?? 0).toFixed(2)}</div>
               </Button>
               <Button variant="outline" aria-label="View passes breakdown" onClick={() => setFinanceCategory("passes")} className="h-auto min-w-0 items-start flex-col whitespace-normal text-left border border-border rounded-md p-3">
@@ -482,7 +482,7 @@ const AdminPortal = () => {
               <span className="text-2xl font-bold text-green-400">${Number(finance?.platform_earnings?.total ?? 0).toFixed(2)}</span>
             </Button>
             <p className="text-[10px] text-muted-foreground mt-2">
-              CCBill's processing fee comes out of these amounts before the money reaches your bank. Creators' 90% is never touched by processor fees.
+              CCBill's processing fee comes out of these amounts before the money reaches your bank. Creator allocations use the applicable vault or request split; processor fees do not reduce the spending-value base.
             </p>
           </Card>
 
@@ -564,7 +564,7 @@ const AdminPortal = () => {
                       To: {r.creator_email || r.creator_name || "creator"} · {new Date(r.created_at).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
-                      Creator 90%: ${Number(r.creator_share_usd ?? 0).toFixed(2)} · You 10%: ${Number(r.platform_share_usd ?? 0).toFixed(2)} · {r.status}
+                      Creator recorded: ${Number(r.creator_share_usd ?? 0).toFixed(2)} · Platform recorded: ${Number(r.platform_share_usd ?? 0).toFixed(2)} · {r.status}
                     </div>
                     {r.description && <div className="text-[10px]">{r.description}</div>}
                   </div>

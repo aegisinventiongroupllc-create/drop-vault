@@ -1,5 +1,11 @@
 # Roadmap
 
+## Creator earnings wording — November 21
+- [x] Reviewed public pages, onboarding, agreements, dashboards and saved translations; corrected obsolete 95/5 Power Week and temporary founding claims, request labels and baseline/annual-award precedence. Retired obsolete saved translation keys; changed copy uses normal English fallback where not translated. Full reviewed language coverage remains a launch task.
+- [x] Payment logic and historical earnings unchanged. Thirty-nine focused disclosure, translation and isolated deployed split/award tests passed; invitation and canonical Terms checked on 384px phone and 1280px desktop with no overflow or page errors; preview build OK. Authenticated admin/dashboard presentation was source-reviewed, not walked through this turn.
+- [x] Recorded the actual rotating pink globe/countdown; delivered a new 30-second 720×1280 silent reel with all requested percentages, eligibility qualifiers and signup address. Inspected all seven message frames and decoded the full file; fast-start MP4, 5.8 MB, no audio or black frames. Last-second closing hold retained.
+- [x] Reel says “Creators first. Built to care.” rather than making an unverified first-in-the-industry claim. No paid generation, advertising spend or publication.
+
 ## Selected security findings — November 21
 - [x] Restricted foreign identity-reference probing without allowing evidence deletion; private role checks are owner/admin/service-scoped, with only already-public profile roles discoverable.
 - [x] Active cleared teaser view counts require an authorized signed-in viewer and deduplicate per viewer/media/UTC day; receipts deny all client reads/writes.

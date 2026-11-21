@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DttShareQr from "@/components/DttShareQr";
 import DttFutureAnnouncement from "@/components/DttFutureAnnouncement";
+import { CREATOR_EARNINGS_SUMMARY } from "@/lib/creatorEarningsDisclosure";
 import RestrictedCountries from "@/components/RestrictedCountries";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -166,6 +167,7 @@ export const TermsOfService = () => (
     <p><strong className="text-foreground">5. Geographic Restrictions.</strong> Use is not permitted where applicable law prohibits it or DTT excludes the market under its Restricted Countries policy. The current browser country estimate does not guarantee comprehensive enforcement. Language selection does not establish a user's location or legal eligibility.</p>
     <p><strong className="text-foreground">6. Payments & Fees.</strong> Bit-Tokens cost $25 for one, $120 for five or $230 for ten. Custom quantities combine ten-token bundles, then five-token bundles, then singles. Each token has $20 spending value and unlocks one creator for 14 days. Service and processing are included; there is no additional DTT checkout fee. The $20 Vault Entry Pass lasts 365 days. Separate purchases and network fees must be reviewed before payment. Payment services are being prepared for launch. Live checkout will open only after provider approval and final checks; unavailable methods cannot take payment. Any test checkout is for provider-authorized testing only and may involve real funds.</p>
     <p><strong className="text-foreground">7. Refunds and payment disputes.</strong> {REFUND_SUMMARY} {DISPUTE_SUMMARY} The Refund Policy provides the full terms.</p>
+    <p><strong className="text-foreground">Creator earnings.</strong> {CREATOR_EARNINGS_SUMMARY}</p>
     <p><strong className="text-foreground">8. Account Security.</strong> You are responsible for safeguarding your credentials. Notify us immediately of unauthorized access.</p>
     <p><strong className="text-foreground">9. Liability.</strong> The platform is provided "as is." DTT's total liability is limited to fees paid in the 30 days preceding a claim.</p>
     <p><strong className="text-foreground">10. Governing Law.</strong> These terms are governed by the laws of the Commonwealth of Pennsylvania, USA. Disputes are resolved by binding arbitration to the extent permitted by applicable law. This does not limit mandatory consumer rights or payment disputes under your provider’s rules.</p>
