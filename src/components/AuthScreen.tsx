@@ -1,3 +1,5 @@
+import { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
+import { GlobeOverrideContext } from "@/lib/userTheme";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -180,7 +182,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
         <div className="mb-2 w-full">
           <div className="mx-auto mb-5 flex justify-center" style={{ "--globe-tone": "#ff4da6" } as React.CSSProperties}>
-            <MiniGlobe size={124} speed={0.22} lights backdrop={false} dotScale={0.6} glintBoost={1.8} />
+            <GlobeOverrideContext.Provider value={ENTRY_GLOBE}><MiniGlobe size={124} speed={0.22} lights backdrop={false} dotScale={0.6} glintBoost={1.8} /></GlobeOverrideContext.Provider>
           </div>
           <h1 onClick={handleLogoTap} className="cursor-pointer select-none font-display text-2xl font-bold text-foreground notranslate">
             <span className="block">DROPTHAT</span><span className="block text-primary">THING™</span>

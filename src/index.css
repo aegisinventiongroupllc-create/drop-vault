@@ -369,3 +369,6 @@ html[data-dashboard-outline] .dtt-dashboard .dtt-panel:not(button, label, .fixed
 .galaxy-reel-track::after { content: none; }
 .dtt-intro-sky, .launch-galaxy { filter: contrast(1.1) saturate(1.15); }
 body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* Thin dark line exactly on the default globe's edge; pulses with it. */
+.globe-edge-ring { position: absolute; border-radius: 9999px; border: 2px solid hsl(var(--background)); pointer-events: none; }

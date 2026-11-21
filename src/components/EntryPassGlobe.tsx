@@ -11,10 +11,11 @@ export const ENTRY_GLOBE: GlobeOverride = {
 export default function EntryPassGlobe({ size = 128, solid = false, sharp = false, bright = false, motionless = false }: { size?: number; solid?: boolean; sharp?: boolean; bright?: boolean; motionless?: boolean }) {
   return (
     <div className="relative inline-flex shrink-0 select-none" data-testid="entry-pass-globe">
-      <div className={solid ? "globe-breathe" : "opacity-90 globe-breathe"}>
+      <div className={solid ? "relative globe-breathe" : "relative opacity-90 globe-breathe"}>
         <GlobeOverrideContext.Provider value={ENTRY_GLOBE}>
           <MiniGlobe size={size} speed={motionless ? 0 : 0.15} lights backdrop={false} cameraDistance={solid ? 3.8 : 3.2} sharp={sharp} dotScale={bright ? 1.4 : undefined} glintBoost={bright ? 1.5 : undefined} />
         </GlobeOverrideContext.Provider>
+        <span aria-hidden className="globe-edge-ring" style={{ inset: solid ? "var(--globe-ring-inset-solid, 10.5%)" : "var(--globe-ring-inset, 3%)" }} />
       </div>
       <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT<sup className="self-center text-[10px] tracking-normal -translate-y-2">™</sup></p>
     </div>
