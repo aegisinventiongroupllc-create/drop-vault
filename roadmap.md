@@ -1,5 +1,10 @@
 # Roadmap
 
+## First-time waiting-list review — November 21
+- [x] Fresh temporary customer completed adult consent, customer selection, free US join, first-only celebration, PNG download, Canada update and reload on 384px phone and 1280px desktop. No page errors or horizontal overflow. Clarified supported-country discovery, verified-payment access and launch invitations; added status retry and disabled unchanged-country saves. Ticket image inspected; native phone sharing and actual new-signup email delivery remain unverified.
+- [x] Added WAITLIST to the administrator portal, reusing the protected customer list with alphabetical clickable country totals and pagination reset. Owner's verified admin account read real private country totals, Canada records and all-country restoration on phone/desktop; sending remained locked. Full portal entry still requires the owner's private passcode, so its complete password-to-tab journey was not exercised or bypassed.
+- [x] Nineteen focused flow/ticket/celebration/database/invitation tests passed, screenshots inspected and preview build OK; saved without publication or payments.
+
 ## Waitlist ticket perks — November 21
 - [x] Add a founding-perks list to the customer waiting-list ticket card and first-join celebration: endless global creators twerking, $10/year for life, personal ticket number, first payment invitation, front-row launch access. Verify on phone/desktop with a temporary customer; no payment or publication changes.
 

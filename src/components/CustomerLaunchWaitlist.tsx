@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { COUNTRIES } from "@/components/GlobalPassport";
@@ -24,6 +24,9 @@ export default function CustomerLaunchWaitlist() {
   const [celebrate, setCelebrate] = useState(false);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
+  const [statusError, setStatusError] = useState(false);
+  const [statusAttempt, setStatusAttempt] = useState(0);
+  const ticketRef = useRef<HTMLElement>(null);
   const [ticket, setTicket] = useState<CustomerWaitlistTicket | null>(null);
   const [ticketImage, setTicketImage] = useState<Blob | null>(null);
   const [ticketImageError, setTicketImageError] = useState(false);
@@ -38,17 +41,20 @@ export default function CustomerLaunchWaitlist() {
   }, [ticket, ticketImageAttempt]);
   useEffect(() => {
     let active = true;
+    setBusy(true); setStatusError(false); setError("");
     void Promise.all([supabase.rpc("my_customer_launch_waitlist", { _action: "status" }), supabase.auth.getUser()]).then(([{ data, error }, { data: auth }]) => {
       if (!active) return;
-      if (error) setError("Your waiting-list status could not be loaded. Please retry.");
+      if (error) { setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); }
       else if (data && typeof data === "object" && !Array.isArray(data) && typeof data.country === "string") {
         setCountry(data.country); setJoined(true);
         setTicket(customerWaitlistTicket({ ...data, user_id: auth.user?.id }));
       }
       setBusy(false);
+    }).catch(() => {
+      if (active) { setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); setBusy(false); }
     });
     return () => { active = false; };
-  }, []);
+  }, [statusAttempt]);
   const join = async () => {
     setBusy(true); setError("");
     try {
@@ -59,6 +65,7 @@ export default function CustomerLaunchWaitlist() {
       const saved = customerWaitlistTicket(data && typeof data === "object" && !Array.isArray(data) ? { ...data, user_id: auth.user?.id } : null);
       if (!saved) throw new Error("Ticket receipt unavailable");
       setTicket(saved);
+      setCountry(saved.country);
       setCelebrate(shouldCelebrateWaitlistJoin(joined, true));
       setJoined(true);
     } catch { setError("Your spot was not saved. Please check your country and try again."); }
@@ -92,7 +99,7 @@ export default function CustomerLaunchWaitlist() {
       </section>}
       <CreatorLaunchCountdown audience="customer" />
       {!joined && <div className="mb-6 space-y-2"><p className="text-3xl font-semibold text-foreground">$10 <span className="text-base">/ year for life</span></p><p className="text-sm text-foreground/80">Join before launch for half the standard $20 yearly entry to the global twerking feed.</p><p className="text-xs text-foreground/70">365 days per paid pass. Nothing due today. Creator libraries use separate Bit-Tokens.</p></div>}
-      {ticket && <article aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
+      {ticket && <article ref={ticketRef} tabIndex={-1} aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
         <div className="border-b border-dashed border-primary/50 px-5 py-4">
           <p className="font-display text-lg font-bold text-primary notranslate" translate="no">DTT™</p>
           <h2 className="mt-2 text-lg font-semibold">Your DTT ticket</h2>
@@ -100,16 +107,17 @@ export default function CustomerLaunchWaitlist() {
           <p className="mt-2 text-xs text-muted-foreground">Annual entry · 365 days per paid pass · Saved to your account</p>
         </div>
         <div className="space-y-3 px-5 py-4">
+          <p className="text-xs text-muted-foreground">Your founding ticket number</p>
           <p translate="no" className="notranslate break-all font-mono text-xs">{ticket.number}</p>
           <p className="text-xs text-muted-foreground">Joined {new Date(ticket.joinedAt).toLocaleDateString()} · {COUNTRIES.find(c => c.code === ticket.country)?.name ?? ticket.country}</p>
-          <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <div className="border-t border-primary/30 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your founding perks</p>
             <ul className="mt-2 list-disc space-y-1.5 pl-4 text-left text-xs text-foreground/90">
-              <li>Endless global creators twerking — one feed, every country, whenever you want.</li>
+              <li>Global creators twerking — discover approved creators across DTT’s supported countries when viewing opens.</li>
               <li>$10 yearly entry for life — half the standard $20 rate, locked to this account forever.</li>
               <li>Your personal founding ticket number, saved to your account and downloadable as a keepsake.</li>
-              <li>First payment invitation when checkout opens — founding members are invited before anyone else.</li>
-              <li>Front-row access to the global creator feed the moment DTT launches.</li>
+              <li>A launch payment invitation by email and inside DTT when checkout is ready.</li>
+              <li>Your front-row start: activate annual feed entry after launch with a verified payment. Creator libraries use separate Bit-Tokens.</li>
             </ul>
           </div>
           <p className="text-xs text-muted-foreground">Waiting-list membership, not payment or access. Payments are being prepared for launch; nothing is due today.</p>
@@ -124,7 +132,8 @@ export default function CustomerLaunchWaitlist() {
       </select>
       <p className="my-3 text-left text-xs text-foreground/70">Your account, country, language and join date stay private to you and DTT administrators. No street address collected.</p>
       {error && <p role="alert" className="my-3 text-sm text-destructive">{error}</p>}
-      <Button variant={joined ? "outline" : "neon"} disabled={busy || !country} onClick={() => void join()} className="h-auto min-h-12 w-full whitespace-normal">{busy ? "PLEASE WAIT…" : joined ? "UPDATE MY COUNTRY" : "JOIN FREE & GET MY DTT TICKET"}</Button>
+      {statusError ? <Button variant="outline" disabled={busy} onClick={() => setStatusAttempt(n => n + 1)} className="w-full">RETRY WAITING LIST</Button> : <Button variant={joined ? "outline" : "neon"} disabled={busy || !country || (joined && country === ticket?.country)} onClick={() => void join()} className="h-auto min-h-12 w-full whitespace-normal">{busy ? "PLEASE WAIT…" : joined ? "UPDATE MY COUNTRY" : "JOIN FREE & GET MY DTT TICKET"}</Button>}
+      {joined && <p role="status" className="mt-3 text-xs text-foreground/80">{country === ticket?.country ? "Your ticket and $10 yearly rate are saved. We’ll invite you when launch payments open; nothing to pay now." : "Save your new country below your ticket. Your ticket number and yearly rate stay the same."}</p>}
       <section className="mt-8 border-t border-border py-5">
         <h2 className="text-base font-semibold">Joining as a creator?</h2>
         <p className="my-2 text-xs text-foreground/80">Free private creator setup is open now. Switch accounts to get started.</p>
@@ -134,15 +143,15 @@ export default function CustomerLaunchWaitlist() {
       <Button variant="ghost" className="mt-4" onClick={() => void supabase.auth.signOut()}>SIGN OUT</Button>
     </div>
     <LegalFooter />
-    <Dialog open={celebrate} onOpenChange={setCelebrate}><DialogContent className="max-w-sm border-primary/50">
+    <Dialog open={celebrate} onOpenChange={setCelebrate}><DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-sm overflow-y-auto border-primary/50" onCloseAutoFocus={event => { event.preventDefault(); ticketRef.current?.focus(); ticketRef.current?.scrollIntoView({ block: "start" }); }}>
       <DialogTitle className="text-xl">Welcome to the founding list!</DialogTitle>
       <DialogDescription>Your $10 yearly entry rate for life is saved to this account. Each paid pass lasts 365 days; no payment is due today.</DialogDescription>
       <ul className="list-disc space-y-1.5 pl-5 text-left text-sm text-foreground/90">
-        <li>Endless global creators twerking, all in one feed.</li>
+        <li>Global creators twerking — discover approved creators when viewing opens.</li>
         <li>Half-price entry for life — $10 instead of $20, every year.</li>
         <li>Your own founding ticket number, saved to your account.</li>
-        <li>First payment invitation before the public rush.</li>
-        <li>Front-row access to the global creator feed at launch.</li>
+        <li>A launch payment invitation by email and inside DTT.</li>
+        <li>Annual feed entry after launch and verified payment; creator libraries use separate Bit-Tokens.</li>
       </ul>
       <Button variant="neon" onClick={() => setCelebrate(false)}>VIEW MY DTT TICKET</Button>
     </DialogContent></Dialog>

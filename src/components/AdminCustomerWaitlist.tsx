@@ -52,6 +52,12 @@ export default function AdminCustomerWaitlist() {
   }, [country, offset, refresh]);
   return <section className="space-y-4 px-4 pb-8">
     <h2 className="font-display text-lg font-bold">CUSTOMER WAITING LIST</h2>
+    {data && <section aria-label="Waiting customers by country" className="space-y-3 border-y border-border py-4">
+      <h3 className="font-semibold">Waiting customers by country</h3>
+      <Button variant={!country ? "default" : "outline"} onClick={() => { setCountry(""); setOffset(0); }} className="h-auto min-h-11 w-full justify-between whitespace-normal"><span>ALL COUNTRIES</span><span>{data.countries.reduce((total, c) => total + c.total, 0)}</span></Button>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{[...data.countries].sort((a, b) => name(a.country).localeCompare(name(b.country))).map(c => <Button key={c.country} variant={country === c.country ? "default" : "outline"} aria-pressed={country === c.country} onClick={() => { setCountry(c.country); setOffset(0); }} className="h-auto min-h-11 min-w-0 justify-between gap-3 whitespace-normal text-left"><span className="break-words">{name(c.country)}</span><span>{c.total}</span></Button>)}</div>
+      {!data.countries.length && <p className="text-sm text-muted-foreground">No customers have joined yet.</p>}
+    </section>}
     <div className="space-y-3 border-y border-border py-4">
       <h3 className="font-semibold">Launch payment invitations</h3>
       <p className="text-sm text-muted-foreground">Invite all eligible waiting-list customers, across every country, by email and inside DTT. No invoices, automatic charges or access grants.</p>
@@ -70,7 +76,6 @@ export default function AdminCustomerWaitlist() {
     {error && <p role="alert" className="text-destructive">{error}</p>}
     {data && <>
       <p className="font-semibold text-gold">{data.total} customers{country ? ` · ${name(country)}` : " · all countries"}</p>
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">{data.countries.map(c => <span key={c.country}>{name(c.country)}: {c.total}</span>)}</div>
       <div className="space-y-3 border-y border-border py-4">
         <h3 className="font-display font-semibold">Annual entry sales scenarios</h3>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -80,13 +85,14 @@ export default function AdminCustomerWaitlist() {
         <p className="text-sm text-muted-foreground">{forecast.customers} listed accounts · $10 per paid year for founding customers. Joining is free. These are hypothetical gross sales, not payments received, a conversion prediction or family take-home income. Annual renewal is not guaranteed.</p>
         <p className="text-xs text-muted-foreground">Entry sales exclude creator purchases, tips and VIP passes. Profit also depends on payment fees, hosting, storage, refunds, operating expenses and taxes. See REVENUE for recorded financial activity.</p>
       </div>
+      <h3 className="font-semibold">{country ? `${name(country)} · customer accounts` : "Customer accounts · all countries"}</h3>
       {!data.entries.length && <p>No customers on this page yet.</p>}
       <div className="divide-y divide-border">{data.entries.map(e => <article key={e.user_id} className="py-4">
         <p className="break-all font-semibold">{e.email ?? "Account email unavailable"}</p>
         <p className="text-sm text-muted-foreground">{name(e.country)} · {e.language}</p>
         <p className="text-xs text-muted-foreground">Joined {new Date(e.joined_at).toLocaleString()}</p>
       </article>)}</div>
-      <div className="flex items-center justify-between gap-3"><Button variant="outline" disabled={!offset || busy} onClick={() => setOffset(n => Math.max(0, n - 50))}>PREVIOUS</Button><span className="text-xs">{data.total ? offset + 1 : 0}–{Math.min(offset + 50, data.total)} of {data.total}</span><Button variant="outline" disabled={offset + 50 >= data.total || busy} onClick={() => setOffset(n => n + 50)}>NEXT</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><Button variant="outline" disabled={!offset || busy} onClick={() => setOffset(n => Math.max(0, n - 50))}>PREVIOUS</Button><span className="text-xs">{data.entries.length ? offset + 1 : 0}–{Math.min(offset + data.entries.length, data.total)} of {data.total}</span><Button variant="outline" disabled={offset + 50 >= data.total || busy} onClick={() => setOffset(n => n + 50)}>NEXT</Button></div>
     </>}
     <Dialog open={confirmSend} onOpenChange={setConfirmSend}><DialogContent><DialogTitle>Invite all waiting customers to pay?</DialogTitle><DialogDescription>This sends an email and adds an account invitation across all countries—not just the country currently selected. Each customer chooses whether to buy their $10 annual entry. Email usage charges may apply; large lists continue in batches with saved progress.</DialogDescription><Button variant="neon" onClick={() => void sendInvitations()}>CONFIRM & SEND INVITATIONS</Button></DialogContent></Dialog>
   </section>;
