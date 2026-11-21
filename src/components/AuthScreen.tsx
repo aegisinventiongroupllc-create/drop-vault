@@ -127,7 +127,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
 
     const err = validate();
     if (err) { toast({ title: "Hold on", description: err, variant: "destructive" }); return; }
-    if (mode === "signup" && !registrationConsent) { toast({title:"Age certification required",description:"Confirm your age and agreement to the Terms before registering.",variant:"destructive"}); return; }
+    if (mode === "signup" && !registrationConsent) { toast({title:"Please confirm you're 18+",description:"Confirm your age and agree to the Terms of Service to create your account.",variant:"destructive"}); return; }
 
     setLoading(true);
     try {
@@ -260,7 +260,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
           )}
         </div>
 
-        {mode === "signup" && <label className="flex items-start gap-3 text-left text-sm text-muted-foreground"><Checkbox checked={registrationConsent} onCheckedChange={value=>setRegistrationConsent(value===true)} /><span>I certify under penalty of perjury that I am at least 18 years old and agree to the Terms of Service.</span></label>}
+        {mode === "signup" && <label className="flex items-start gap-3 text-left text-sm text-muted-foreground"><Checkbox checked={registrationConsent} onCheckedChange={value=>setRegistrationConsent(value===true)} /><span>I confirm I’m 18 or older and agree to DTT’s Terms of Service.</span></label>}
         {adminError && <p role="alert" className="text-sm text-destructive">{adminError}</p>}
         <Button
           variant="neon"

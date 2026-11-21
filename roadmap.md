@@ -1,5 +1,10 @@
 # Roadmap
 
+## Visitor branding and welcoming signup — November 21
+- [x] Hosting badge is hidden and publication is public. Published entrance and creator/customer entry links showed DTT-only text on phone/desktop; screenshot's Lovable header and progress notification belong to the owner's editor, not the public site. Google-hosted branding and email delivery were not exercised.
+- [x] Signup now says “I confirm I’m 18 or older and agree to DTT’s Terms of Service.” Simplified its validation prompt; mandatory checkbox, consent records, identity review and payment rules unchanged.
+- [x] Eight focused auth/account-choice tests and preview build passed. Isolated real signup form checked on phone/desktop: button disabled before confirmation, enabled after; no account or legal submission. Saved without publishing this new wording.
+
 ## Creator earnings wording — November 21
 - [x] Reviewed public pages, onboarding, agreements, dashboards and saved translations; corrected obsolete 95/5 Power Week and temporary founding claims, request labels and baseline/annual-award precedence. Retired obsolete saved translation keys; changed copy uses normal English fallback where not translated. Full reviewed language coverage remains a launch task.
 - [x] Payment logic and historical earnings unchanged. Thirty-nine focused disclosure, translation and isolated deployed split/award tests passed; invitation and canonical Terms checked on 384px phone and 1280px desktop with no overflow or page errors; preview build OK. Authenticated admin/dashboard presentation was source-reviewed, not walked through this turn.
