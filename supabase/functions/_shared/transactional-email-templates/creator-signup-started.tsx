@@ -7,7 +7,7 @@ const Email = ({ email, startedAt }: { email?: string; startedAt?: string }) => 
   <Html lang="en" dir="ltr"><Head /><Preview>A creator has started setting up their DTT account</Preview>
     <Body style={main}><Container style={container}>
       <Heading style={brand}>DTT</Heading><Heading style={heading}>A creator is getting started</Heading>
-      <Text style={text}>A creator account has started onboarding.</Text>
+      <Text style={text}>{email?.startsWith('agent-test+') ? 'TEST: a temporary automated-check account has started onboarding. This is not a real creator signup.' : 'A creator account has started onboarding.'}</Text>
       <Text style={text}>Account email: {email ?? 'See your private administrator dashboard'}<br />Account created (UTC): {startedAt ?? 'See your dashboard'}</Text>
       <Text style={text}>This is a signup notice, not an identity approval. Email confirmation, creator setup, adult identity review and content-specific consent may still be incomplete. No documents or private media are attached.</Text>
       <Button href="https://dropthatthing.com/admin-portal" style={button}>OPEN ADMIN DASHBOARD</Button>

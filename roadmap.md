@@ -1,5 +1,10 @@
 # Roadmap
 
+## Signup progress emails — November 21
+- [x] Added identified account-creation, email-confirmation, creator-details and saved customer waitlist notifications to admin@dttmediallc.com; trusted success milestones are server-read, per-account/event deduplicated and scoped to new accounts.
+- [x] Signed-in account choice/category/agreement/waitlist/ticket errors report only an allowlisted step, labeled as browser-reported rather than a verified cause; no passwords, raw errors, identity documents or private media included.
+- [x] Temporary mobile customer reproduced a controlled waitlist error, retried successfully, saved membership and switched into creator setup. Six notification requests returned 200; five managed sends verified, test identities clearly labeled, no page errors and 32 focused tests passed. Browser-close, pre-account and fully offline failures cannot reliably be attributed; real inbox arrival and genuine new signup confirmation remain unverified. Sending deployed; frontend changes not published.
+
 ## Signup alerts and destinations — November 21
 - [x] Recorded alert was a rejected admin code, not proof of a successful intrusion; actor is unknown. Preserved all denial notifications and admin protection; skipped unnecessary signed-out activity user lookup.
 - [x] Temporary signed-in account reached Customer → free prelaunch waitlist and Creator → private setup/dashboard on phone; corrected explicit customer intent inheriting creator setup. Fresh creator confirmation retains creator setup; focused routing tests passed.

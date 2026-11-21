@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CHARGEBACK_EARNINGS, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
+import { reportSignupProgress } from '@/lib/signupProgress';
 
 export const CREATOR_AGREEMENT_VERSION = "1.8";
 export const CREATOR_AGREEMENT_TEXT =
@@ -18,7 +19,7 @@ const CreatorAgreementModal = ({ onAgree }: { onAgree: () => Promise<void> }) =>
     if (!agreed || busy) return;
     setBusy(true); setError("");
     try { await onAgree(); }
-    catch { setError("Your agreement could not be saved. Please retry."); }
+    catch { void reportSignupProgress('issue', 'creator_agreement'); setError("Your agreement could not be saved. Please retry."); }
     finally { setBusy(false); }
   };
   return (

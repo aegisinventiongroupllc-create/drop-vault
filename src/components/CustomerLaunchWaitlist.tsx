@@ -17,6 +17,7 @@ import { shouldCelebrateWaitlistJoin } from "@/lib/waitlistCelebration";
 import { savedCreator } from "@/lib/creatorSharing";
 import CreatorShareActions from "./CreatorShareActions";
 import LockScreenWallpaper from "./LockScreenWallpaper";
+import { reportSignupProgress } from '@/lib/signupProgress';
 
 export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
@@ -45,14 +46,15 @@ export default function CustomerLaunchWaitlist() {
     setBusy(true); setStatusError(false); setError("");
     void Promise.all([supabase.rpc("my_customer_launch_waitlist", { _action: "status" }), supabase.auth.getUser()]).then(([{ data, error }, { data: auth }]) => {
       if (!active) return;
-      if (error) { setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); }
+      if (error) { void reportSignupProgress('issue', 'waitlist_status'); setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); }
       else if (data && typeof data === "object" && !Array.isArray(data) && typeof data.country === "string") {
         setCountry(data.country); setJoined(true);
         setTicket(customerWaitlistTicket({ ...data, user_id: auth.user?.id }));
+        void reportSignupProgress('waitlist_joined');
       }
       setBusy(false);
     }).catch(() => {
-      if (active) { setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); setBusy(false); }
+      if (active) { void reportSignupProgress('issue', 'waitlist_status'); setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); setBusy(false); }
     });
     return () => { active = false; };
   }, [statusAttempt]);
@@ -69,12 +71,13 @@ export default function CustomerLaunchWaitlist() {
       setCountry(saved.country);
       setCelebrate(shouldCelebrateWaitlistJoin(joined, true));
       setJoined(true);
-    } catch { setError("Your spot was not saved. Please check your country and try again."); }
+      void reportSignupProgress('waitlist_joined');
+    } catch { void reportSignupProgress('issue', 'waitlist_join'); setError("Your spot was not saved. Please check your country and try again."); }
     finally { setBusy(false); }
   };
   const downloadTicket = () => {
     if (!ticketImage) return;
-    void saveCustomerTicketImage(ticketImage).catch(() => setError("Your ticket could not be saved. Please try again."));
+    void saveCustomerTicketImage(ticketImage).catch(() => { void reportSignupProgress('issue', 'ticket_save'); setError("Your ticket could not be saved. Please try again."); });
   };
   const startCreatorSignup = async () => {
     setBusy(true); setError("");

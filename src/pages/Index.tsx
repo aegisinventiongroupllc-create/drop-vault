@@ -36,6 +36,7 @@ import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useEntryPass } from "@/hooks/useEntryPass";
 import EntryPassGate from "@/components/EntryPassGate";
 import CustomerLaunchWaitlist from "@/components/CustomerLaunchWaitlist";
+import { reportSignupProgress } from '@/lib/signupProgress';
 import { customerPrelaunch } from "@/lib/customerLaunch";
 import { consumeAccountSelection } from "@/lib/accountSelection";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
@@ -163,6 +164,7 @@ const Index = () => {
   // Listen for auth changes and restore the account's saved dashboard choice.
   useEffect(() => {
     const hydrateRole = async (userId: string, userEmail: string | null) => {
+      void reportSignupProgress('confirmed');
       const chooseAfterLogin = consumeAccountSelection();
       setNeedsAccountSelection(chooseAfterLogin);
       const { data, error } = await supabase
@@ -433,6 +435,7 @@ const Index = () => {
           // Persist choice
           const { error } = await supabase.rpc("set_my_account_type", { _account_type: chosenRole });
           if (error) {
+            void reportSignupProgress('issue', 'account_selection');
             throw error;
           }
           if (chosenRole === "creator") {
@@ -443,9 +446,10 @@ const Index = () => {
           if (chosenRole === "creator") {
             const side: VaultType = isCreatorCategory(creatorSide) ? creatorSide : "women";
             const { error: sideError } = await supabase.rpc("save_my_creator_discovery", { _category: side, _labels: labels ?? [] });
-            if (sideError) throw sideError;
+            if (sideError) { void reportSignupProgress('issue', 'creator_details'); throw sideError; }
             const { error: adaptiveError } = await supabase.rpc("save_my_adaptive_tags", { _tags: adaptiveTags ?? [] });
-            if (adaptiveError) throw adaptiveError;
+            if (adaptiveError) { void reportSignupProgress('issue', 'creator_details'); throw adaptiveError; }
+            void reportSignupProgress('setup_saved');
             setVault(side);
             setPreference(side);
             savePrefs({ email, role: "creator", vault: side, preference: side });
