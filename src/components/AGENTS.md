@@ -10,3 +10,4 @@
 - Fifth-video access uses its own server purchase and the existing atomic unlock/escrow; signing filters unpaid fifth videos and storage applies a restrictive entitlement rule. Why: regular or annual access must never bypass its separate payment.
 - VIP waiting-list tickets use saved queue identity, never purchase inventory; owner lists use role-verified paginated RPCs and distinguish interest from receipt-verified ownership. Why: downloaded tickets cannot grant benefits or disclose other creators.
 - Future-world announcements are passive and shared by creator, customer and prelaunch views, with no token claim actions. Why: concepts must not imply funded rewards or active mining.
+- Customer tickets pre-render locally as branded PNGs before the save gesture; use native file sharing on supported phones. Why: preserve private membership data and reliable mobile saving without granting access.

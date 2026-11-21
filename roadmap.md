@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pink downloaded ticket and future galaxy gaming — November 21
+- [x] Replace the plain-text customer download with a locally rendered pink-galaxy/globe PNG; preserve account-linked offer and receipt-only meaning, with ready-before-save mobile sharing.
+- [x] Expand the shared future announcement with space battles, galaxy exploration and the Bit-Token mine; no active game, rewards, payments or promised release.
+- [x] Signed-in customer downloaded the real saved ticket as a 1080×1560 PNG; inspected artwork and phone gaming announcement, zero page errors. Seven focused tests and preview build passed. No publication requested this turn; native phone share sheet remains device-only.
+
 ## Customer waiting-page polish — November 20
 - [x] Replaced static backdrop with the entrance pink galaxy; slow movement confirmed. Streamlined customer/creator hierarchy and ticket; phone/desktop checked without overflow.
 - [x] Congratulations appears only in a dismissible first-join pop-up. Temporary signed-in customer join, ticket reload and country update verified; 10 focused tests and preview build passed. Not published in this turn.

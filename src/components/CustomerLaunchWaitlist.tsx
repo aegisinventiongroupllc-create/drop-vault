@@ -8,7 +8,8 @@ import DttFutureAnnouncement from "./DttFutureAnnouncement";
 import LegalFooter from "./LegalFooter";
 import { getTargetLang } from "./AutoTranslator";
 import { CREATOR_SIGNUP_URL } from "@/lib/foundingInvitation";
-import { customerWaitlistTicket, ticketDownloadText, type CustomerWaitlistTicket } from "@/lib/customerWaitlistTicket";
+import { customerWaitlistTicket, type CustomerWaitlistTicket } from "@/lib/customerWaitlistTicket";
+import { createCustomerTicketImage, saveCustomerTicketImage } from "@/lib/customerTicketImage";
 import GalaxyReel from "./GalaxyReel";
 import { ENTRY_GLOBE } from "./EntryPassGlobe";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
@@ -21,6 +22,17 @@ export default function CustomerLaunchWaitlist() {
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
   const [ticket, setTicket] = useState<CustomerWaitlistTicket | null>(null);
+  const [ticketImage, setTicketImage] = useState<Blob | null>(null);
+  const [ticketImageError, setTicketImageError] = useState(false);
+  const [ticketImageAttempt, setTicketImageAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
+    setTicketImage(null); setTicketImageError(false);
+    if (ticket) void createCustomerTicketImage(ticket, COUNTRIES.find(c => c.code === ticket.country)?.name ?? ticket.country)
+      .then(blob => { if (active) setTicketImage(blob); })
+      .catch(() => { if (active) setTicketImageError(true); });
+    return () => { active = false; };
+  }, [ticket, ticketImageAttempt]);
   useEffect(() => {
     let active = true;
     void Promise.all([supabase.rpc("my_customer_launch_waitlist", { _action: "status" }), supabase.auth.getUser()]).then(([{ data, error }, { data: auth }]) => {
@@ -50,11 +62,8 @@ export default function CustomerLaunchWaitlist() {
     finally { setBusy(false); }
   };
   const downloadTicket = () => {
-    if (!ticket) return;
-    const url = URL.createObjectURL(new Blob([ticketDownloadText(ticket)], { type: "text/plain;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url; link.download = "DTT-founding-customer-ticket.txt"; link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (!ticketImage) return;
+    void saveCustomerTicketImage(ticketImage).catch(() => setError("Your ticket could not be saved. Please try again."));
   };
   const startCreatorSignup = async () => {
     setBusy(true); setError("");
@@ -86,7 +95,8 @@ export default function CustomerLaunchWaitlist() {
           <p translate="no" className="notranslate break-all font-mono text-xs">{ticket.number}</p>
           <p className="text-xs text-muted-foreground">Joined {new Date(ticket.joinedAt).toLocaleDateString()} · {COUNTRIES.find(c => c.code === ticket.country)?.name ?? ticket.country}</p>
           <p className="text-xs text-muted-foreground">Waiting-list membership, not payment or access. Payments are being prepared for launch; nothing is due today.</p>
-          <Button variant="outline" className="w-full" onClick={downloadTicket}>SAVE MY DTT TICKET</Button>
+          {ticketImageError && <p role="alert" className="text-xs text-destructive">Your ticket artwork couldn’t load. Please retry.</p>}
+          <Button variant="outline" className="w-full" disabled={!ticketImage && !ticketImageError} onClick={ticketImageError ? () => setTicketImageAttempt(n => n + 1) : downloadTicket}>{ticketImageError ? "RETRY TICKET" : ticketImage ? "SAVE MY DTT TICKET" : "PREPARING MY TICKET…"}</Button>
         </div>
       </article>}
       <label htmlFor="waitlist-country" className="mb-2 block text-left text-sm">{joined ? "Saved country" : "Your country"}</label>
