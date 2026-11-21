@@ -362,3 +362,10 @@ html[data-dashboard-outline] .dtt-dashboard .dtt-panel:not(button, label, .fixed
     box-shadow: 0 0 0 4px hsl(var(--background)), 0 0 0 6px hsl(var(--primary) / 0.7), 0 0 34px 6px hsl(var(--primary) / 0.55);
   }
 }
+
+/* HD display finish: crisper, deeper, more vivid galaxy skies on every page. */
+.galaxy-reel-track { filter: contrast(1.14) saturate(1.22) brightness(.92); }
+.galaxy-reel-track > div { image-rendering: high-quality; }
+.galaxy-reel-track::after { content: none; }
+.dtt-intro-sky, .launch-galaxy { filter: contrast(1.1) saturate(1.15); }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
