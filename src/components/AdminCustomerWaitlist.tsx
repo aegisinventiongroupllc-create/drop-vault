@@ -19,7 +19,14 @@ export default function AdminCustomerWaitlist() {
   const [progress, setProgress] = useState<{ started: boolean; sent: number; failed: number; pending: number } | null>(null);
   useEffect(() => {
     let active = true;
-    void supabase.functions.invoke('waitlist-payment-invitations', { body: { action: 'status' } }).then(({ data, error }) => { if (active) setReady(!error && data?.enabled === true); });
+    // Only ask the server when an account session exists; passcode previews stay locked instead of erroring.
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) { if (active) setReady(false); return; }
+      try {
+        const { data, error } = await supabase.functions.invoke('waitlist-payment-invitations', { body: { action: 'status' } });
+        if (active) setReady(!error && data?.enabled === true);
+      } catch { if (active) setReady(false); }
+    });
     void supabase.rpc('admin_customer_waitlist_campaign_status').then(({ data, error }) => { if (active && !error) setProgress(data as unknown as typeof progress); });
     return () => { active = false; };
   }, [refresh]);
