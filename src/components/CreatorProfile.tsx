@@ -29,6 +29,7 @@ import { spendableTokens } from "@/lib/accessEscrow";
 import AdaptiveTagBadges from "@/components/AdaptiveTagBadges";
 import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 import CreatorDebutBadge from "./CreatorDebutBadge";
+import CreatorShareActions from "./CreatorShareActions";
 
 interface Vault {
   name: string;
@@ -391,6 +392,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
 
       {/* Full Library — unlock or watch */}
       <div ref={libraryRef} className="px-4 mt-8">
+        <div className="mb-5"><CreatorShareActions creatorName={creatorName} /></div>
         <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
           Full Library

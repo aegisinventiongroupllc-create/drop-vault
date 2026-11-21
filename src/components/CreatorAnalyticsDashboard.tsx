@@ -54,6 +54,7 @@ import { useCreatorStats } from "@/hooks/useCreatorStats";
 import TeaserCarousel from "@/components/TeaserCarousel";
 import { useCreatorMedia } from "@/hooks/useCreatorMedia";
 import ShareQrCode from "@/components/ShareQrCode";
+import CreatorShareActions from "@/components/CreatorShareActions";
 import { useCreatorText } from "@/i18n/creator";
 
 
@@ -771,6 +772,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
             return (
               <div className="bg-card border border-border rounded-xl p-4 text-center">
                 <h3 className="text-sm font-bold text-foreground mb-2">SHARE MY VAULT</h3>
+                <CreatorShareActions creatorName={profileUsername || ""} />
                 <ShareQrCode value={vaultUrl} filename={`dtt-vault-${handle || "qr"}.png`} label="Creator vault QR code" />
                 <p className="text-[10px] text-muted-foreground mb-2 break-all">
                   {handle ? `dropthatthing.com/creator/${handle}` : "Set your username to personalize this link"}

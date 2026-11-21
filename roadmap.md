@@ -1,5 +1,9 @@
 # Roadmap
 
+## Creator library sharing — November 21
+- [x] Add working creator addresses and library/dashboard share, copy, X and save-link controls; remember a single device link through customer signup and the prelaunch waiting list without exposing media or granting access.
+- [x] Seven focused tests passed; actual temporary customer followed a creator address, completed consent/account selection, joined the waitlist, copied/downloaded the creator link and reloaded with ticket/link retained. Phone/desktop screenshots showed no overflow or page errors; preview build OK. Library/dashboard controls share the same verified actions; native phone share sheet and actual X posting remain device/account checks. No publication or payment.
+
 ## Creator and customer onboarding walkthrough — November 21
 - [x] Walked entry/signup validation and temporary signed-in accounts on phone/desktop; real password logins restored Creator → dashboard and Customer → saved waiting-list ticket with zero page errors. Hosted settings read confirms email/Google enabled, signup enabled and email confirmation required; actual new-signup inbox and Google callback remain unverified.
 - [x] Creator category/labels, safety and agreement completed; private handle/country persisted. Corrected public portrait upload before approval to offer private preparation instead; direct file handler also gates it. Private branded synthetic photo and short-video drafts uploaded, previewed and survived reload; Pro interest joined/downloaded/reloaded/left. Creator verification reached final review with synthetic preview files, without submitting or approving an identity.

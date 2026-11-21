@@ -5,7 +5,7 @@ import { CATEGORY_LABELS, isCreatorCategory, type CreatorCategory } from "@/lib/
 import { previewNeedsSignIn, startAdminDashboardPreview } from "@/lib/adminSession";
 import { verifyEntryConsent } from "@/lib/ageConsent";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AgeVerification from "@/components/AgeVerification";
 import LanguageToggle from "@/components/LanguageToggle";
 import GlobePicker from "@/components/GlobePicker";
@@ -27,7 +27,8 @@ import LegalPages from "@/components/LegalPages";
 import { useI18n } from "@/i18n/I18nContext";
 import type { VaultType } from "@/lib/tokenEconomy";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { rememberCreator, savedCreator } from "@/lib/creatorSharing";
 import { logActivity } from "@/lib/activityLog";
 import LegalFooter from "@/components/LegalFooter";
 import ProfileIdentityEditor from "@/components/ProfileIdentityEditor";
@@ -127,6 +128,14 @@ const Index = () => {
   // Owner shortcut: triple-tap the DTT logo to preview the sign-in page while signed in
   const [authPreview, setAuthPreview] = useState(false);
   const entryPass = useEntryPass(roleChosen && role === "customer" && Boolean(authedUserId));
+  const { creatorHandle: sharedHandle } = useParams();
+  const openedSharedCreator = useRef(false);
+  useEffect(() => { if (sharedHandle) rememberCreator(sharedHandle); }, [sharedHandle]);
+  useEffect(() => {
+    if (openedSharedCreator.current || !verified || !authedUserId || !roleChosen || role !== "customer" || prelaunch || !preference || entryPass.status !== "active") return;
+    const handle = savedCreator();
+    if (handle) { openedSharedCreator.current = true; setSelectedCreator(handle); }
+  }, [verified, authedUserId, roleChosen, role, prelaunch, preference, entryPass.status]);
 
   const updateContentPreferences = async (categories: CreatorCategory[]) => {
     const previous = preference;

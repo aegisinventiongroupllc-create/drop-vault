@@ -55,6 +55,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/index" element={<Index />} />
+                <Route path="/creator/:creatorHandle" element={<Index />} />
                 <Route path="/founding-creators" element={<FoundingCreators />} />
                 <Route path="/admin-access" element={<SecretAdmin />} />
                 <Route path="/admin-portal" element={<AdminPortal />} />

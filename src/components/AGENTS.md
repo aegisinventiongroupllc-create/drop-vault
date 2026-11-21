@@ -1,4 +1,5 @@
 # Component architecture rules
+- Creator share links carry validated handles only and enter the normal consent/account/prelaunch/entry gates; device bookmarks never grant media access. Why: preserve referrals without public paid-media bypasses.
 - Fresh password/Google sign-in requests account selection before saved customer routing; consume intent once and persist choices through the existing server RPC. Why: a prior customer choice must not trap creator logins on the waiting page.
 - Customer waiting-list celebration is transient after first successful joining; reloads and country updates only restore the saved ticket. Why: membership state must not replay a signup celebration.
 - Customer pre-launch routing precedes preferences, media and checkout; waitlist records are account-owned and admin pagination is role-verified on the server. Lifetime annual-entry discounts come from server membership offers, never browser input. Why: avoid early charges, private-list leaks and forged prices.

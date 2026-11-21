@@ -14,9 +14,12 @@ import GalaxyReel from "./GalaxyReel";
 import { ENTRY_GLOBE } from "./EntryPassGlobe";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { shouldCelebrateWaitlistJoin } from "@/lib/waitlistCelebration";
+import { savedCreator } from "@/lib/creatorSharing";
+import CreatorShareActions from "./CreatorShareActions";
 
 export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
+  const [creatorLink] = useState(savedCreator);
   const [joined, setJoined] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
   const [busy, setBusy] = useState(true);
@@ -82,6 +85,11 @@ export default function CustomerLaunchWaitlist() {
       <p className="text-xs font-semibold text-primary">DROP THAT THING™</p>
       <h1 className="mt-3 text-2xl font-semibold text-foreground">{joined ? "You’re on the list." : "Your front-row start."}</h1>
       <p className="mt-2 text-sm text-foreground/80">DTT customer waiting list · Free to join</p>
+      {creatorLink && <section aria-label="Saved creator link" className="my-6 border-y border-primary/40 py-5">
+        <h2 className="break-words text-lg font-semibold notranslate" translate="no">@{creatorLink}</h2>
+        <p className="mb-4 mt-2 text-xs text-foreground/80">This creator’s link is remembered on this device. Join the free waiting list below and save their link for later. Discovery opens at launch; library access requires separate Bit-Tokens.</p>
+        <CreatorShareActions creatorName={creatorLink} />
+      </section>}
       <CreatorLaunchCountdown audience="customer" />
       {!joined && <div className="mb-6 space-y-2"><p className="text-3xl font-semibold text-foreground">$10 <span className="text-base">/ year for life</span></p><p className="text-sm text-foreground/80">Join before launch for half the standard $20 yearly entry to the global twerking feed.</p><p className="text-xs text-foreground/70">365 days per paid pass. Nothing due today. Creator libraries use separate Bit-Tokens.</p></div>}
       {ticket && <article aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
