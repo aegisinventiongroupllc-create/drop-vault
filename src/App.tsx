@@ -58,9 +58,9 @@ const App = () => (
                 <Route path="/index" element={<Index />} />
                 <Route path="/creator/:creatorHandle" element={<Index />} />
                 <Route path="/founding-creators" element={<FoundingCreators />} />
-                <Route path="/admin-access" element={<SecretAdmin />} />
-                <Route path="/admin-portal" element={<AdminPortal />} />
-                <Route path="/admin/verifications" element={<AdminVerificationDashboard />} />
+                <Route path="/admin-access" element={<div className="dtt-admin-theme"><SecretAdmin /></div>} />
+                <Route path="/admin-portal" element={<div className="dtt-admin-theme"><AdminPortal /></div>} />
+                <Route path="/admin/verifications" element={<div className="dtt-admin-theme"><AdminVerificationDashboard /></div>} />
                 <Route path="/participant-invite" element={<ParticipantInvite />} />
                 <Route path="/persona-test" element={<PersonaTest />} />
                 <Route path="/reset-password" element={<ResetPassword />} />

@@ -99,6 +99,17 @@
 }
 
 /* Public invitation keeps DTT pink independent of a member’s private vault. */
+.dtt-admin-theme {
+  --primary: var(--consent-pink);
+  --accent: var(--consent-pink);
+  --ring: var(--consent-pink);
+  --dashboard-outline: var(--consent-pink);
+  --background: 0 0% 0%;
+  --card: 0 0% 6%;
+  --popover: 0 0% 6%;
+  --foreground: 0 0% 100%;
+  --card-foreground: 0 0% 100%;
+}
 .dtt-founding-invitation, .dtt-customer-waitlist { --primary: var(--consent-pink); --ring: var(--consent-pink); }
 .dtt-waitlist-ticket { border: 1px solid hsl(var(--primary)); border-radius: 8px; background: hsl(var(--card) / .92); box-shadow: var(--neon-glow-sm); }
 

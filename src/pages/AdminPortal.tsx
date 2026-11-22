@@ -420,12 +420,12 @@ const AdminPortal = () => {
           {countrySection === "yearend" && <section className="py-4 border-y border-border"><AdminYearEndAwards /></section>}
           {/* Platform Overview */}
           <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4">
+            <Button variant="outline" className="h-auto min-h-28 p-4 flex-col items-start text-left whitespace-normal bg-card" onClick={() => { setCountrySection("countries"); document.querySelector('nav[aria-label="Country administration"]')?.scrollIntoView({ block: "start" }); }} aria-label={`View all ${stats?.totalCreators ?? ""} creators by country`}>
               <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
-                <Users className="w-4 h-4" /> Active Creators
+                <Users className="w-4 h-4 shrink-0" /> Creator Accounts
               </div>
               <div className="text-3xl font-bold mt-2">{stats?.totalCreators ?? "—"}</div>
-            </Card>
+            </Button>
             <Card className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider">
                 <DollarSign className="w-4 h-4" /> Total Revenue

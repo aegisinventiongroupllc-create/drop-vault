@@ -1,5 +1,9 @@
 # Roadmap
 
+## Administrator pink view and creator directory — November 22
+- [x] Administrator pages use default pink without changing saved personal themes; creator count opens all accounts by country with approval status separate. Verified real administrator, 14 accounts, phone/desktop, creator detail, no overflow/page errors; 18 tests passed.
+- [ ] Change code-login account away from LEMONADE: waiting for owner to confirm whether to use the Aegis/FOXY RED account. No account or privilege changes made.
+
 ## Admin lists and review access — November 21
 - [x] Administrator WAITLIST now switches between customers by country and creator VIP waiting-list/paid records; saved account lists and server pagination retained.
 - [x] Older valid-code tabs automatically restore a verified admin account before dashboard/private views mount; token exchange or role failures never count as successful access. Removed the separate account-login instruction from identity review; genuine expired access returns to administrator entry.
