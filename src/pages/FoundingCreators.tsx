@@ -75,7 +75,7 @@ export default function FoundingCreators() {
           <div className="border-l-2 border-gold pl-5">
             <p className="text-lg font-semibold text-foreground">What 91% means</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">A Bit-Token has ${FOUNDING_OFFER.tokenValueUsd} spending value. A qualifying vault unlock at 91% allocates $18.20 to the creator and $1.80 to DTT, before applicable adjustments and your taxes. It is not 91% of the checkout price.</p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests use 85/15, or 90/10 only for payment-verified Elite holders. Payouts are planned as manual Litecoin (LTC) payments. We’re preparing payments and payouts for launch; sales are not open yet.</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">This is a revenue split, not a salary or promised income. Custom requests use 85/15, or 90/10 only for payment-verified Elite holders. Creator payouts are planned through a crypto processor, including Litecoin (LTC), or into the creator’s bank account, subject to provider approval, country availability and final payout checks. We’re preparing payments and payouts for launch; sales are not open yet.</p>
           </div>
         </div>
       </section>
