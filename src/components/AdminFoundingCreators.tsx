@@ -80,7 +80,7 @@ const AdminFoundingCreators = () => {
       <div className="flex flex-wrap justify-between items-center gap-2"><h2 className="font-bold">FOUNDING 5 BY COUNTRY</h2><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>REFRESH</Button></div>
       <Input aria-label="Search founding countries" placeholder="Search country…" value={query} onChange={(e) => setQuery(e.target.value)} />
       <p className="text-xs text-muted-foreground">
-        The first 5 qualifying approved creators in each category—Women, Men, Trans Women and Trans Men—per country receive 91/9 for life: 20 places per country. Verified identity, reviewed residence and category setup are required. Slots are permanent and never reshuffle; existing awards keep their original split.
+        The first 5 qualifying approved creators in each category per country receive 91/9 for life: 20 places per country. Verified identity, reviewed residence and category setup are required. Slots are permanent and never reshuffle; existing awards keep their original split.
       </p>
       {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}

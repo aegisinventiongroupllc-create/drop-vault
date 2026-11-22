@@ -39,7 +39,7 @@ const FoundingCreatorsBoard = ({ onCreatorClick, vaults = ["women", "men"] }: { 
   return (
     <div className="px-4 space-y-3">
       <h2 className="font-bold text-gold">FOUNDING CREATORS</h2>
-      <p className="text-xs text-muted-foreground">The first 5 qualifying approved creators in each category—Women, Men, Trans Women and Trans Men—per country receive 91/9 for life.</p>
+      <p className="text-xs text-muted-foreground">The first 5 qualifying approved creators in each category per country receive 91/9 for life.</p>
       <Input aria-label="Search countries" placeholder="Search country…" value={query} onChange={(e) => setQuery(e.target.value)} />
       {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
       {!loading && groups.length === 0 && <p className="text-xs text-muted-foreground">No founding creators yet.</p>}
