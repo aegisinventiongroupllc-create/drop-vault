@@ -85,9 +85,6 @@ const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveT
               <Star className="w-5 h-5" />
               {ct.im_creator}
             </Button>
-            <p className="text-center text-xs font-bold tracking-widest text-primary">
-              {ct.founding}
-            </p>
             <Button
               variant="outline"
               size="lg"

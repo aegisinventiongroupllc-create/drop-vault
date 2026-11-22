@@ -7,7 +7,7 @@ vi.mock("@/components/CreatorLaunchCountdown", () => ({ default: () => null }));
 vi.mock("@/i18n/creator", () => ({ useCreatorText: () => ({
   signed_in: "Signed in", signed_in_as: (email: string) => email,
   who_are_you: "Choose account", which_vault: "Category", im_creator: "Creator",
-  im_customer: "Customer", founding: "Founding places", back: "Back",
+  im_customer: "Customer", back: "Back",
 }) }));
 afterEach(cleanup);
 
