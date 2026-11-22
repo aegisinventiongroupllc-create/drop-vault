@@ -19,13 +19,23 @@ Deno.serve(async (req) => {
 
   try {
     if (!ADMIN_PASSCODE) return json({ error: "Admin access is not configured" }, 503);
-    const passcode = req.headers.get("x-admin-passcode") ?? "";
-    if (passcode !== ADMIN_PASSCODE) return json({ error: "Invalid admin passcode" }, 401);
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Access requires the admin passcode OR a server-verified administrator
+    // account session, so a stale saved code can never lock out a signed-in admin.
+    const passcode = req.headers.get("x-admin-passcode") ?? "";
+    if (passcode !== ADMIN_PASSCODE) {
+      const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+      const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } };
+      const { data: isAdmin } = user
+        ? await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
+        : { data: false };
+      if (isAdmin !== true) return json({ error: "Invalid admin passcode" }, 401);
+    }
 
     const body = await req.json().catch(() => ({}));
     const action = body?.action as string;

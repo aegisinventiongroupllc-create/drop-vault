@@ -38,47 +38,64 @@ export function previewNeedsSignIn(preview: boolean, verified: boolean, authRead
   return preview && verified && authReady && !userId;
 }
 
+/** Drop saved admin credentials after the server rejects them, so every screen stops retrying a dead code. */
+export function clearStoredAdminCredentials(): void {
+  try {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    sessionStorage.removeItem(ADMIN_PASSCODE_KEY);
+    localStorage.removeItem(ADMIN_OVERRIDE_KEY);
+  } catch { /* Storage may be unavailable. */ }
+}
+
 /** The access code is never stored in the app bundle — it is verified server-side. */
 export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
   const code = passcode.trim();
   if (!code) return false;
-  try {
-    // A rejected code is an expected sign-in outcome, not an uncaught function error.
-    // Keep the server's 401 response and access checks intact.
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({ passcode: code }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    if (!response.ok) return false;
-    const data: unknown = await response.json();
-    if (!data || typeof data !== "object" || !("ok" in data) || data.ok !== true) return false;
-    // A valid passcode also signs the visitor into the administrator account, so
-    // private identity records open without a second login. The account session —
-    // never the passcode alone — is what the server checks for those records.
-    const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
-    if (!tokenHash) return false;
-    const { supabase } = await import("@/integrations/supabase/client");
-    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-    if (error) return false;
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) return false;
-    const { data: admin, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
-    if (roleError || admin !== true) return false;
+  // Remember whether this attempt replayed the saved code; a server rejection then
+  // clears the saved code instead of letting every admin screen retry it and 401.
+  const replayingStoredCode = code === getAdminPasscode();
+  const attempt = async (): Promise<boolean> => {
     try {
-      sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
-      sessionStorage.setItem(ADMIN_PASSCODE_KEY, code);
-      localStorage.setItem(ADMIN_OVERRIDE_KEY, "1");
-    } catch {}
-    return true;
-  } catch {
-    return false;
-  }
+      // A rejected code is an expected sign-in outcome, not an uncaught function error.
+      // Keep the server's 401 response and access checks intact.
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ passcode: code }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!response.ok) return false;
+      const data: unknown = await response.json();
+      if (!data || typeof data !== "object" || !("ok" in data) || data.ok !== true) return false;
+      // A valid passcode also signs the visitor into the administrator account, so
+      // private identity records open without a second login. The account session —
+      // never the passcode alone — is what the server checks for those records.
+      const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
+      if (!tokenHash) return false;
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+      if (error) return false;
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) return false;
+      const { data: admin, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+      if (roleError || admin !== true) return false;
+      try {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        sessionStorage.setItem(ADMIN_PASSCODE_KEY, code);
+        localStorage.setItem(ADMIN_OVERRIDE_KEY, "1");
+      } catch {}
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const ok = await attempt();
+  if (!ok && replayingStoredCode) clearStoredAdminCredentials();
+  return ok;
 }
 
 /** Upgrade an older valid-code tab to a real administrator session before mounting private views. */

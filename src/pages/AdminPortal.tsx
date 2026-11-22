@@ -302,9 +302,12 @@ const AdminPortal = () => {
     try {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/legal-logs${search ? `?search=${encodeURIComponent(search)}` : ""}`;
+      // Send the administrator account token when one exists so access does not
+      // depend on a saved passcode alone.
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           "x-admin-passcode": getAdminPasscode(),
         },
       });

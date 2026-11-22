@@ -57,6 +57,20 @@ describe("admin access failure handling", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     expect(await verifyAdminPasscode("000000")).toBe(false);
   });
+  it("clears a saved code the server rejects so screens stop retrying it", async () => {
+    sessionStorage.setItem('dtt_admin_passcode', 'old-code');
+    sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: "Invalid admin passcode" }), { status: 401 })));
+    expect(await verifyAdminPasscode("old-code")).toBe(false);
+    expect(sessionStorage.getItem('dtt_admin_passcode')).toBeNull();
+    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
+  });
+  it("keeps the saved code when a different manual entry fails", async () => {
+    sessionStorage.setItem('dtt_admin_passcode', 'saved-code');
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: "Invalid admin passcode" }), { status: 401 })));
+    expect(await verifyAdminPasscode("wrong-entry")).toBe(false);
+    expect(sessionStorage.getItem('dtt_admin_passcode')).toBe('saved-code');
+  });
   it("requires an explicit server approval", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: "true" }))));
     expect(await verifyAdminPasscode("000000")).toBe(false);
