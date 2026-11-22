@@ -1,5 +1,10 @@
 # Roadmap
 
+## Creator signup to owner approval — November 22
+- [ ] Walk creator account setup and private ID submission, then read the submission in the owner's review queue on phone and desktop.
+- [ ] Fix any reproduced blockers, test failed/retried submissions and approval restrictions, and verify saved status after reload.
+- [ ] Keep real identity approval and inbox delivery separate from synthetic test evidence; do not publish or approve a test identity.
+
 ## Administrator pink view and creator directory — November 22
 - [x] Administrator pages use default pink without changing saved personal themes; creator count opens all accounts by country with approval status separate. Verified real administrator, 14 accounts, phone/desktop, creator detail, no overflow/page errors; 18 tests passed.
 - [ ] Change code-login account away from LEMONADE: waiting for owner to confirm whether to use the Aegis/FOXY RED account. No account or privilege changes made.
