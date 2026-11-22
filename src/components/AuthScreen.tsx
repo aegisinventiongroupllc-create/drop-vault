@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import type { UserRole } from "@/components/RoleSelection";
 import { logActivity } from "@/lib/activityLog";
 
-import { clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut } from "@/lib/adminSession";
+import { adminLoginDestination, clearAdminDashboardPreview, isAdminAccessCode, isAdminSignInShortcut } from "@/lib/adminSession";
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
@@ -87,9 +87,17 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     if (loading) return;
     setAdminError("");
     const trimmed = email.trim();
-    // Navigation only: the destination still requires server-verified access.
+    // Existing verified administrators go straight to their dashboard.
     if (isAdminSignInShortcut(mode, trimmed) || isAdminAccessCode(mode, trimmed)) {
-      window.location.assign("/admin-access");
+      setLoading(true);
+      try {
+        const destination = await adminLoginDestination(mode, trimmed);
+        if (destination) window.location.assign(destination);
+      } catch {
+        setAdminError("Couldn't check administrator access. Please try again.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ADMIN_SESSION_KEY, isAdminAccessCode, isAdminSignInShortcut, previewNeedsSignIn, verifyAdminPasscode, ensureAdminAccountSession } from "@/lib/adminSession";
+import { ADMIN_SESSION_KEY, adminLoginDestination, isAdminAccessCode, isAdminSignInShortcut, previewNeedsSignIn, verifyAdminPasscode, ensureAdminAccountSession } from "@/lib/adminSession";
 
 const verifyOtp = vi.fn().mockResolvedValue({ data: {}, error: null });
 const getUser = vi.fn().mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null });
@@ -14,6 +14,17 @@ if (typeof AbortSignal.timeout !== "function") {
 
 afterEach(() => { vi.unstubAllGlobals(); sessionStorage.clear(); localStorage.clear(); });
 describe("admin access failure handling", () => {
+  it("opens the dashboard for the requested shortcut only with verified administrator access", async () => {
+    expect(isAdminSignInShortcut("login", "052417")).toBe(true);
+    expect(isAdminSignInShortcut("signup", "052417")).toBe(false);
+    expect(isAdminSignInShortcut("forgot", "052417")).toBe(false);
+    expect(await adminLoginDestination("login", "052417")).toBe("/admin-portal");
+    getSession.mockResolvedValueOnce({ data: { session: null } });
+    expect(await adminLoginDestination("login", "052417")).toBe("/admin-access");
+    hasRole.mockResolvedValueOnce({ data: false, error: null });
+    expect(await adminLoginDestination("login", "052417")).toBe("/admin-access");
+    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
+  });
   it("accepts seven-digit login codes for server verification without granting access", () => {
     expect(isAdminAccessCode("login", "0123456")).toBe(true);
     expect(isAdminAccessCode("login", " 0123456 ")).toBe(true);

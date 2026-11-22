@@ -1,5 +1,5 @@
 # Project architecture rules
-- Email-field admin shortcuts navigate to protected sign-in only; never grant privileges or replace server verification. Why: convenience must not expose administrative records.
+- Email-field admin shortcuts open the dashboard only after restoring server-verified administrator access; otherwise open protected sign-in and never grant privileges. Why: convenience must not expose administrative records.
 - Pages use pink EntryPassGlobe; personal globes only in country picker, color designer, signed-in idle. Why: branding.
 - ShareQrCode preserves finder patterns, central branding, high correction, outer glow and quiet-zone PNG exports. Why: protect scanning and motion accessibility.
 - Crypto credits require server authorization, matching verified receipts and merchant reconciliation; credit idempotently. Why: unpaid calls/retries cannot grant access.

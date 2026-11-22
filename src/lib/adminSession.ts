@@ -18,7 +18,14 @@ export function startAdminDashboardPreview(role: "creator" | "customer"): void {
 
 /** A navigation shortcut, never an administrator credential. */
 export function isAdminSignInShortcut(mode: string, value: string): boolean {
-  return mode === "login" && value.trim() === "143";
+  return mode === "login" && ["143", "052417"].includes(value.trim());
+}
+
+/** Shortcuts reuse verified staff sessions; they never authorize a visitor. */
+export async function adminLoginDestination(mode: string, value: string): Promise<string | null> {
+  if (!isAdminSignInShortcut(mode, value) && !isAdminAccessCode(mode, value)) return null;
+  if (await ensureAdminAccountSession()) return "/admin-portal";
+  return "/admin-access";
 }
 
 /** Numeric access codes are candidates only; the server decides validity. */

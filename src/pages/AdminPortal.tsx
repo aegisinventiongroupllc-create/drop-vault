@@ -18,7 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import AdminVerifications from "@/components/AdminVerifications";
 import AdminCreatorDetail from "@/components/AdminCreatorDetail";
 
-import { getAdminPasscode, isAdminUnlocked, startAdminDashboardPreview, ensureAdminAccountSession } from "@/lib/adminSession";
+import { getAdminPasscode, startAdminDashboardPreview, ensureAdminAccountSession } from "@/lib/adminSession";
 
 const ADMIN_ENTRY_PATH = "/admin-access";
 
@@ -163,12 +163,9 @@ const AdminPortal = () => {
 
   useEffect(() => {
     let active = true;
-    if (!isAdminUnlocked()) {
-      navigate(ADMIN_ENTRY_PATH, { replace: true });
-      return;
-    }
     setAccessReady(false); setAccessError(false);
     void ensureAdminAccountSession().then(ok => {
+      if (active && !ok) { navigate(ADMIN_ENTRY_PATH, { replace: true }); return; }
       if (active) { setAuthed(ok); setAccessError(!ok); setAccessReady(true); }
     }).catch(() => { if (active) { setAccessError(true); setAccessReady(true); } });
     return () => { active = false; };
