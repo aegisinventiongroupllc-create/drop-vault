@@ -9,6 +9,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { createQrSwipe, QR_SWIPE } from "@/lib/qrSwipe";
 import { creatorShareUrl } from "@/lib/creatorSharing";
 import { loadTheme } from "@/lib/userTheme";
+import GlobeOrbitMenu from "@/components/GlobeOrbitMenu";
+import { openGlobeDestination, type GlobeRole } from "@/lib/globeMenu";
 
 const IDLE_MS = 60_000;
 
@@ -29,17 +31,20 @@ const BeRightBack = () => {
   const lastTap = useRef<number | null>(null);
   const [creatorUrl, setCreatorUrl] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
+  const [role, setRole] = useState<GlobeRole | null>(null);
   const qrTone = (signedIn && loadTheme().globe) || ENTRY_GLOBE.tone;
 
   // Creators only: look up their own share link for the corner-swipe QR.
   useEffect(() => {
-    if (!signedIn) { setCreatorUrl(null); return; }
+    if (!signedIn) { setCreatorUrl(null); setRole(null); return; }
     let active = true;
     void (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const id = session?.user.id;
       if (!id) return;
       const { data: pref } = await supabase.from("account_preferences").select("account_type").eq("user_id", id).maybeSingle();
+      if (!active) return;
+      setRole(pref?.account_type === "creator" ? "creator" : pref?.account_type === "customer" ? "customer" : null);
       if (pref?.account_type !== "creator") return;
       const { data: profile } = await supabase.from("profiles").select("display_name").eq("user_id", id).maybeSingle();
       if (active) setCreatorUrl(creatorShareUrl(profile?.display_name));
@@ -122,10 +127,13 @@ const BeRightBack = () => {
             </div>
           </div>
         ) : signedIn ? (
-          <div className="relative inline-flex select-none globe-breathe" data-testid="personal-brb-globe">
-            <MiniGlobe size={220} speed={0.15} lights backdrop={false} cameraDistance={3.8} />
-            <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>
-          </div>
+          <GlobeOrbitMenu key={String(away)} role={role} tone={qrTone} size={220}
+            onPick={(id) => { lastTap.current = null; setAway(false); window.setTimeout(() => openGlobeDestination(id), 0); }}>
+            <div className="relative inline-flex select-none globe-breathe" data-testid="personal-brb-globe">
+              <MiniGlobe size={220} speed={0.15} lights backdrop={false} cameraDistance={3.8} />
+              <p translate="no" className="notranslate absolute inset-0 flex items-center justify-center font-display text-3xl font-bold tracking-[0.35em] text-primary">DTT</p>
+            </div>
+          </GlobeOrbitMenu>
         ) : <EntryPassGlobe size={220} solid />}
         <IdleCountdown />
         <p className="text-sm font-black uppercase tracking-[0.4em] text-foreground/80 animate-pulse">Be right back</p>

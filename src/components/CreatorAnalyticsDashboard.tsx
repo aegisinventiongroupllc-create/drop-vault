@@ -38,7 +38,7 @@ import CreatorEarningsBreakdown from "@/components/CreatorEarningsBreakdown";
 import LifetimeUpgradeStore from "@/components/LifetimeUpgradeStore";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 import CreatorVipInterest from "@/components/CreatorVipInterest";
-import CreatorFounderPoke from "@/components/CreatorFounderPoke";
+import { GLOBE_NAV_EVENT, GLOBE_OPEN_EVENT } from "@/lib/globeMenu";
 import { useRevenueTerms } from "@/hooks/useRevenueTerms";
 import CreatorRequestsPanel from "@/components/CreatorRequestsPanel";
 import CreatorCalendar from "@/components/CreatorCalendar";
@@ -101,6 +101,13 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
 
   const [activeSection, setActiveSection] = useState<Section>("verification");
   const [reactionRevision, setReactionRevision] = useState(0);
+  // Globe menu: the Be Right Back globe picks the section; sign-in starts on the globe.
+  useEffect(() => {
+    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["overview", "verification", "requests", "media", "messages", "calendar", "drafts"].includes(id)) { setActiveSection(id as Section); window.scrollTo({ top: 0 }); } };
+    window.addEventListener(GLOBE_NAV_EVENT, go);
+    if (!adminPreview) window.dispatchEvent(new Event(GLOBE_OPEN_EVENT));
+    return () => window.removeEventListener(GLOBE_NAV_EVENT, go);
+  }, [adminPreview]);
   const [profileUsername, setProfileUsername] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"none" | "pending" | "verified" | "failed">("none");
   const [idUploaded, setIdUploaded] = useState(false);
@@ -619,24 +626,12 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
         </div>
       </div>
 
-      {/* Section tabs */}
-      <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
-        {sections.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setActiveSection(s.id)}
-            className={`px-4 py-2 rounded-full text-xs font-bold tracking-widest whitespace-nowrap transition-all ${
-              activeSection === s.id
-                ? "bg-primary text-primary-foreground neon-glow-sm"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+      {/* Destinations live on the globe menu */}
+      <div className="flex items-center justify-between gap-2 px-4 mb-4">
+        <span className="text-xs font-black tracking-[0.3em] text-primary">{sections.find((s) => s.id === activeSection)?.label ?? "MESSAGES"}</span>
+        <button onClick={() => window.dispatchEvent(new Event(GLOBE_OPEN_EVENT))} className="rounded-full border border-primary/40 bg-primary/15 px-4 py-2 text-xs font-bold tracking-widest text-primary">OPEN GLOBE MENU</button>
       </div>
 
-      {!adminPreview && authUserId && <CreatorFounderPoke key={authUserId} creatorId={authUserId} />}
       {!adminPreview && activeSection === "overview" && <CreatorVipInterest creatorId={authUserId} />}
       {/* Payment Split Banner */}
       {activeSection === "overview" && <div className="mx-4 mb-4 bg-card border border-primary/30 rounded-xl p-4">

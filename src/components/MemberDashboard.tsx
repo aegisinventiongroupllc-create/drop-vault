@@ -9,6 +9,7 @@ import PermanentVault from "@/components/PermanentVault";
 import { allowedVaults, type CustomerPreference } from "@/lib/customerPreference";
 import { CATEGORY_LABELS, isCreatorCategory } from "@/lib/creatorCategories";
 import SuggestionBox from "@/components/SuggestionBox";
+import { GLOBE_NAV_EVENT, GLOBE_OPEN_EVENT } from "@/lib/globeMenu";
 import { useState, useEffect, useCallback } from "react";
 import { Bell, RefreshCw, Compass, Heart, Vault } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,12 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
   const [payRequest, setPayRequest] = useState<CustomRequestRow | null>(null);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages" | "founding">("library");
+  useEffect(() => {
+    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["library", "permanent", "requests", "messages", "founding"].includes(id)) { setActiveTab(id as typeof activeTab); window.scrollTo({ top: 0 }); } };
+    window.addEventListener(GLOBE_NAV_EVENT, go);
+    window.dispatchEvent(new Event(GLOBE_OPEN_EVENT));
+    return () => window.removeEventListener(GLOBE_NAV_EVENT, go);
+  }, []);
   const [, setTick] = useState(0);
   useEffect(() => {
     if (sessionStorage.getItem("dtt_open_buy") === "1") {
@@ -306,21 +313,10 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
       {/* Top-up history */}
       <TokenPurchaseHistory />
 
-      {/* Tabs */}
-      <div className="flex gap-2 px-4 mb-4 overflow-x-auto">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold tracking-widest transition-all ${
-              activeTab === t.id
-                ? "bg-primary text-primary-foreground neon-glow-sm"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Destinations live on the globe menu */}
+      <div className="flex items-center justify-between gap-2 px-4 mb-4">
+        <span className="text-xs font-black tracking-[0.3em] text-primary">{tabs.find((t) => t.id === activeTab)?.label}</span>
+        <button onClick={() => window.dispatchEvent(new Event(GLOBE_OPEN_EVENT))} className="rounded-full border border-primary/40 bg-primary/15 px-4 py-2 text-xs font-bold tracking-widest text-primary">OPEN GLOBE MENU</button>
       </div>
 
       {/* Library View */}
