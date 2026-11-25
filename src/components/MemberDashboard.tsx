@@ -64,8 +64,9 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
   const [payRequest, setPayRequest] = useState<CustomRequestRow | null>(null);
   const [renewCreator, setRenewCreator] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "permanent" | "requests" | "messages" | "founding">("library");
+  const [tabHistory, setTabHistory] = useState<Array<"library" | "permanent" | "requests" | "messages" | "founding">>([]);
   useEffect(() => {
-    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["library", "permanent", "requests", "messages", "founding"].includes(id)) { setActiveTab(id as typeof activeTab); window.scrollTo({ top: 0 }); } };
+    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["library", "permanent", "requests", "messages", "founding"].includes(id)) { setActiveTab((prev) => { if (prev !== id) setTabHistory((h) => [...h.slice(-19), prev]); return id as typeof prev; }); window.scrollTo({ top: 0 }); } };
     window.addEventListener(GLOBE_NAV_EVENT, go);
     window.dispatchEvent(new Event(GLOBE_OPEN_EVENT));
     return () => window.removeEventListener(GLOBE_NAV_EVENT, go);
@@ -315,6 +316,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
 
       {/* Destinations live on the globe menu */}
       <div className="flex items-center justify-between gap-2 px-4 mb-4">
+        <button onClick={() => { const prev = tabHistory[tabHistory.length - 1]; if (prev) { setTabHistory((h) => h.slice(0, -1)); setActiveTab(prev); window.scrollTo({ top: 0 }); } else window.dispatchEvent(new Event(GLOBE_OPEN_EVENT)); }} aria-label="Go back" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-bold tracking-widest text-foreground">BACK</button>
         <span className="text-xs font-black tracking-[0.3em] text-primary">{tabs.find((t) => t.id === activeTab)?.label}</span>
         <button onClick={() => window.dispatchEvent(new Event(GLOBE_OPEN_EVENT))} className="rounded-full border border-primary/40 bg-primary/15 px-4 py-2 text-xs font-bold tracking-widest text-primary">OPEN GLOBE MENU</button>
       </div>
