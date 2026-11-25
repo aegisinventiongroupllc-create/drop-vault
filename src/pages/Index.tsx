@@ -1,3 +1,4 @@
+import AdminPinkBackdrop from "@/components/AdminPinkBackdrop";
 import { allowedVaults } from "@/lib/customerPreference";
 import { parseAdaptiveTags, type AdaptiveTag } from "@/lib/adaptiveTags";
 import ContentFilterMenu from "@/components/ContentFilterMenu";
@@ -285,7 +286,8 @@ const Index = () => {
   }
   if (adminCreatorPreview && verified && authReady) {
     return (
-      <div className="min-h-[100dvh]">
+      <div className="relative isolate min-h-[100dvh]">
+        <AdminPinkBackdrop />
         <div className="fixed top-0 left-0 right-0 z-[70] bg-primary text-primary-foreground flex items-center justify-between px-4 py-2">
           <span className="text-[10px] font-bold tracking-widest">ADMIN PREVIEW — CREATOR VIEW</span>
           <button onClick={exitCreatorPreview} className="text-[10px] font-bold tracking-widest underline">
@@ -319,7 +321,8 @@ const Index = () => {
   if (adminCustomerPreview && verified && authReady) {
     const previewVault = vault ?? "women";
     return (
-      <div className="min-h-[100dvh] overflow-x-hidden">
+      <div className="relative isolate min-h-[100dvh] overflow-x-hidden">
+        <AdminPinkBackdrop />
         <div className="fixed top-0 left-0 right-0 z-[70] bg-primary text-primary-foreground flex items-center justify-between px-4 py-2">
           <span className="text-[10px] font-bold tracking-widest">ADMIN PREVIEW — CUSTOMER VIEW</span>
           <button onClick={exitCustomerPreview} className="text-[10px] font-bold tracking-widest underline">

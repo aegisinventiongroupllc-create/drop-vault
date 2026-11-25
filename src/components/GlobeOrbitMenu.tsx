@@ -18,7 +18,7 @@ const GlobeOrbitMenu = ({ role, tone, size, children, onPick }: Props) => {
     if (!open || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0; let prev = performance.now();
     const tick = (now: number) => {
-      if (!drag.current) setRotation((r) => r + (now - prev) * 0.00025);
+      if (!drag.current) setRotation((r) => r - (now - prev) * 0.00025);
       prev = now; raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -35,7 +35,7 @@ const GlobeOrbitMenu = ({ role, tone, size, children, onPick }: Props) => {
         const d = drag.current; if (!d || !open) return;
         const dx = e.clientX - d.x;
         if (Math.abs(dx) > 6) d.moved = true;
-        setRotation(d.r + dx / 90);
+        setRotation(d.r - dx / 110);
       }}
       onPointerUp={(e) => {
         const d = drag.current; drag.current = null;
@@ -52,9 +52,9 @@ const GlobeOrbitMenu = ({ role, tone, size, children, onPick }: Props) => {
         return (
           <button key={item.id} type="button" data-orbit-item aria-label={item.label}
             onClick={() => onPick(item.id)}
-            className="absolute left-1/2 top-1/2 flex flex-col items-center gap-1 animate-in fade-in zoom-in-50 duration-500"
-            style={{ transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px) scale(${scale})`, zIndex: p.depth > 0 ? 20 : 0, opacity: p.depth > 0 ? 1 : 0.45 }}>
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border backdrop-blur-sm"
+            className="absolute left-1/2 top-1/2 flex flex-col items-center gap-1"
+            style={{ transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px) scale(${scale})`, zIndex: Math.round((p.depth + 1) * 10), opacity: 0.45 + (p.depth + 1) * 0.275, willChange: "transform" }}>
+            <span className="flex h-12 animate-in fade-in duration-500 w-12 items-center justify-center rounded-full border backdrop-blur-sm"
               style={{ borderColor: tone, color: `color-mix(in srgb, ${tone} ${mix}%, white)`, background: `color-mix(in srgb, ${tone} 22%, transparent)`, boxShadow: `0 0 18px color-mix(in srgb, ${tone} 70%, transparent)` }}>
               <Icon className="h-6 w-6" />
             </span>
