@@ -69,7 +69,7 @@ const PWAInstallPrompt = () => {
     if (!deferredPrompt) {
       toast.info(/iPad|iPhone|iPod/.test(navigator.userAgent)
         ? "Apple requires Safari’s Share menu → Add to Home Screen. This website cannot open Apple’s install dialog."
-        : "This browser has not offered installation. Open dropthatthing.com directly in Chrome or Edge; if available, use its Install app menu.");
+        : "Open dropthatthing.com in Chrome, tap the ⋮ menu at the top right, then tap “Add to home screen” → Install. (It cannot install from inside the editor preview.)");
       return;
     }
     try {

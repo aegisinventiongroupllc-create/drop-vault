@@ -41,6 +41,7 @@ import { reportSignupProgress } from '@/lib/signupProgress';
 import { customerPrelaunch } from "@/lib/customerLaunch";
 import { consumeAccountSelection } from "@/lib/accountSelection";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
+import { clearSignupIntent } from "@/lib/signupIntent";
 import { Loader2 } from "lucide-react";
 
 const STORAGE_KEY = "dtt_user_prefs";
@@ -462,6 +463,7 @@ const Index = () => {
             setVault(null);
             savePrefs({ email, role: "customer" });
           }
+          clearSignupIntent();
           setRole(chosenRole);
           setRoleChosen(true);
         }}

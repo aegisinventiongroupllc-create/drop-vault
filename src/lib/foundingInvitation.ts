@@ -1,9 +1,10 @@
-/** Presentation intent only; account roles and approval remain server-verified. */
+import { readSignupIntent } from "@/lib/signupIntent";
+/** Presentation intent only; account roles and approval remain server-verified. The sign-up screen choice wins over links. */
 export function isCreatorSignup(search: string): boolean {
-  return new URLSearchParams(search).get("signup") === "creator";
+  return readSignupIntent(search) === "creator";
 }
 export function isCustomerSignup(search: string): boolean {
-  return new URLSearchParams(search).get("signup") === "customer";
+  return readSignupIntent(search) === "customer";
 }
 export const CREATOR_SIGNUP_URL = "/?signup=creator&nointro=1";
 export const CUSTOMER_WAITLIST_URL = "/?signup=customer&nointro=1";

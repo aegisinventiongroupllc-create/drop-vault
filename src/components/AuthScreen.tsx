@@ -15,6 +15,7 @@ import { adminLoginDestination, clearAdminDashboardPreview, isAdminAccessCode, i
 import LegalFooter from "@/components/LegalFooter";
 import MiniGlobe from "@/components/MiniGlobe";
 import { isCreatorSignup, isCustomerSignup } from "@/lib/foundingInvitation";
+import { setSignupIntent } from "@/lib/signupIntent";
 import { requestAccountSelection, cancelAccountSelection } from "@/lib/accountSelection";
 import EmailVerification, { EMAIL_VERIFICATION_RETURN } from "./EmailVerification";
 
@@ -148,7 +149,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         setPassword("");
       } else {
         clearAdminDashboardPreview();
-        requestAccountSelection();
+        requestAccountSelection(); if (mode === "signup") setSignupIntent(role);
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmed,
           password,
@@ -200,7 +201,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               type="button"
-              onClick={() => setRole("customer")}
+              onClick={() => { setRole("customer"); setSignupIntent("customer"); }}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold tracking-widest transition-all border ${
                 role === "customer" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border"
               }`}
@@ -209,7 +210,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
             </Button>
             <Button
               type="button"
-              onClick={() => setRole("creator")}
+              onClick={() => { setRole("creator"); setSignupIntent("creator"); }}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold tracking-widest transition-all border ${
                 role === "creator" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border"
               }`}
