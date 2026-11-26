@@ -14,6 +14,7 @@ vi.mock("@/lib/activityLog", () => ({ logActivity: vi.fn() }));
 vi.mock("@/lib/adminSession", () => ({ isAdminSignInShortcut: () => false, isAdminAccessCode: () => false, clearAdminDashboardPreview: vi.fn() }));
 
 beforeEach(() => {
+  sessionStorage.clear();
   vi.clearAllMocks();
   window.history.replaceState({}, "", "/verify-email?confirmed=true");
   mocks.getSession.mockResolvedValue({ data: { session: null } });

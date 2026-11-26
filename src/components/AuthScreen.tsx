@@ -42,7 +42,7 @@ export const googleReturnOrigin = (origin: string = window.location.origin): str
 };
 
 const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
-  const [mode, setMode] = useState<Mode>(() => isCreatorSignup(window.location.search) || isCustomerSignup(window.location.search) ? "signup" : "login");
+  const [mode, setMode] = useState<Mode>(() => ["creator", "customer"].includes(new URLSearchParams(window.location.search).get("signup") ?? "") ? "signup" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -149,7 +149,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         setPassword("");
       } else {
         clearAdminDashboardPreview();
-        requestAccountSelection(); if (mode === "signup") setSignupIntent(role);
+        requestAccountSelection();
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmed,
           password,
