@@ -52,7 +52,7 @@ const SpinningGlobe = ({ speed, lights, size, style, dotScale, glintBoost, pulse
 };
 
 // Small spinning blue globe; optional slow spin and white country lights.
-const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, backdrop = true, dotScale, glintBoost, pulse = 0, cameraDistance = 3.2, sharp = false, exportable = false, frameController }: { frameController?: MutableRefObject<GlobeFrameController | null>; exportable?: boolean; sharp?: boolean; size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle; backdrop?: boolean; dotScale?: number; glintBoost?: number; pulse?: number; cameraDistance?: number }) => {
+const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, backdrop = true, dotScale, glintBoost, pulse = 0, cameraDistance = 3.2, sharp = false, exportable = false, frameController, lowPower = false }: { lowPower?: boolean; frameController?: MutableRefObject<GlobeFrameController | null>; exportable?: boolean; sharp?: boolean; size?: number; speed?: number; lights?: boolean; styleOverride?: GlobeStyle; backdrop?: boolean; dotScale?: number; glintBoost?: number; pulse?: number; cameraDistance?: number }) => {
   const autoStyle = useGlobeStyle();
   const style = styleOverride ?? autoStyle;
   // Held in state so parent re-renders during export never restart the live loop.
@@ -60,7 +60,7 @@ const MiniGlobe = ({ size = 22, speed = 0.6, lights = false, styleOverride, back
   return (
     <span className="relative inline-block shrink-0 pointer-events-none" style={{ width: size, height: size }} aria-hidden>
       {backdrop && size >= 100 && <GalaxyReel className="rounded-full" />}
-      <Canvas frameloop={frameloop} camera={{ position: [0, 0, cameraDistance], fov: 40 }} dpr={exportable ? 5 : sharp ? [1, Math.min(3, window.devicePixelRatio || 1)] : [1, 2]} gl={{ antialias: true, alpha: true, preserveDrawingBuffer: exportable }}>
+      <Canvas frameloop={frameloop} camera={{ position: [0, 0, cameraDistance], fov: 40 }} dpr={exportable ? 5 : lowPower ? 1 : sharp ? [1, Math.min(3, window.devicePixelRatio || 1)] : [1, 2]} gl={{ antialias: !lowPower, powerPreference: lowPower ? "low-power" : "default", alpha: true, preserveDrawingBuffer: exportable }}>
         <SpinningGlobe speed={speed} lights={lights} size={size} style={style} dotScale={dotScale} glintBoost={glintBoost} pulse={pulse} absolute={!!frameController} />
         <Atmosphere />
         {frameController && <FrameBridge controller={frameController} onLoop={setLoop} />}

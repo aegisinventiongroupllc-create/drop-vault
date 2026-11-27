@@ -10,8 +10,8 @@ export default function PersonalSkyBackdrop() {
   useEffect(() => { const update = () => setTheme(loadTheme()); window.addEventListener("dtt-theme", update); return () => window.removeEventListener("dtt-theme", update); }, []);
   return <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true" data-testid="personal-dashboard-sky">
     <GalaxyReel scope="brb" seconds={240} />
-    <div className="absolute inset-0 flex items-center justify-center opacity-40"><MiniGlobe size={320} speed={0.15} lights backdrop={false} cameraDistance={3.8} /></div>
-    <div className="absolute inset-0 bg-background/55" />
+    <div className="absolute inset-0 flex items-center justify-center opacity-75" style={{ transform: "translateZ(0)" }}><MiniGlobe size={320} speed={0.05} lowPower lights backdrop={false} cameraDistance={3.8} /></div>
+    <div className="absolute inset-0 bg-background/40" />
     {theme.dashboardStars && <TwinklingStars color={theme.dashboardStarTone} />}
   </div>;
 }

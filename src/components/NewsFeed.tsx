@@ -60,7 +60,7 @@ function PostCard({ post, me, tone, onTip, onUnlock }: { post: Post; me: string 
     if (error) { setLiked(!next); setLikes(n => n + (next ? -1 : 1)); }
   };
   const share = async () => { await navigator.clipboard?.writeText(postLink(window.location.origin, post.id)); toast.success("Post link copied"); };
-  return <article className="rounded-2xl border bg-card/80 p-4 backdrop-blur-sm space-y-3" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, boxShadow: `0 0 18px color-mix(in srgb, ${tone} 18%, transparent)` }}>
+  return <article className="rounded-2xl border bg-card/90 p-4 space-y-3" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, boxShadow: `0 0 18px color-mix(in srgb, ${tone} 18%, transparent)` }}>
     <header className="flex items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-foreground" style={{ background: `color-mix(in srgb, ${tone} 35%, transparent)` }}>{name.slice(0, 1).toUpperCase()}</div>
       <div className="min-w-0 flex-1">
@@ -118,6 +118,7 @@ export default function NewsFeed({ role, countryFilter, onOpenCreator }: { role:
   const { tone } = usePersonalGlobe();
   const [me, setMe] = useState<string | null>(null);
   const [category, setCategory] = useState<FeedCategory>(() => (localStorage.getItem("dtt_feed_category") as FeedCategory) || "women");
+  const [showCats, setShowCats] = useState(() => localStorage.getItem("dtt_feed_cats_hidden") !== "1");
   const [tab, setTab] = useState<FeedTab>("latest");
   const [posts, setPosts] = useState<Post[]>([]);
   const [offset, setOffset] = useState(0);
@@ -141,9 +142,10 @@ export default function NewsFeed({ role, countryFilter, onOpenCreator }: { role:
       <h2 className="font-display text-lg font-bold tracking-wider text-foreground">NEWS FEED</h2>
       <span className="text-xs font-bold text-muted-foreground">{country === "WW" ? "🌐 WORLDWIDE" : `${flagOf(country)} ${country}`}</span>
     </div>
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label="Category page">
+    <button onClick={() => { const n = !showCats; setShowCats(n); localStorage.setItem("dtt_feed_cats_hidden", n ? "0" : "1"); }} aria-expanded={showCats} className="text-[11px] font-bold tracking-widest" style={{ color: tone }}>{showCats ? "HIDE CATEGORIES ▲" : `SHOW CATEGORIES ▼ · ${FEED_CATEGORIES.find(c => c.id === category)?.label}`}</button>
+    {showCats && <div className="flex flex-wrap gap-2" role="tablist" aria-label="Category page">
       {FEED_CATEGORIES.map(c => <button key={c.id} role="tab" aria-selected={category === c.id} onClick={() => setCategory(c.id)} className="rounded-full border px-3 py-1 text-[11px] font-bold tracking-widest text-foreground" style={pill(category === c.id)}>{c.label}</button>)}
-    </div>
+    </div>}
     <div className="flex gap-4 text-xs font-bold tracking-widest" role="tablist" aria-label="Feed order">
       {(["trending", "following", "latest"] as FeedTab[]).map(t => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={tab === t ? "underline underline-offset-4" : "text-muted-foreground"} style={tab === t ? { color: tone } : undefined}>{t === "following" ? (role === "customer" ? "MY GIRLS / FOLLOWING" : "FOLLOWING") : t.toUpperCase()}</button>)}
     </div>
