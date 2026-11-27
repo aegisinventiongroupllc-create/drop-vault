@@ -13,6 +13,7 @@ import AdaptiveTagChoices from "@/components/AdaptiveTagChoices";
 import type { AdaptiveTag } from "@/lib/adaptiveTags";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
 import GalaxyReel from "@/components/GalaxyReel";
+import MiniGlobe from "@/components/MiniGlobe";
 import { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import { isCreatorSignup } from "@/lib/foundingInvitation";
 
@@ -36,7 +37,7 @@ const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveT
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-      <div className="pointer-events-none fixed inset-0" aria-hidden="true"><GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} /><div className="absolute inset-0 bg-background/45" /></div>
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true"><GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} /><div className="absolute inset-0 flex items-center justify-center opacity-75" style={{ transform: "translateZ(0)" }}><MiniGlobe size={320} speed={0.05} lowPower lights backdrop={false} cameraDistance={3.8} /></div><div className="absolute inset-0 bg-background/40" /></div>
       <div className="relative flex min-h-full flex-col">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
         <div>
@@ -53,7 +54,8 @@ const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveT
 
         {pickingSide ? (
           <div className="flex flex-col gap-3 w-full">
-            <CreatorLaunchCountdown compact />
+            <CreatorLaunchCountdown compact hideGlobe />
+            <div className="rounded-lg border border-primary/40 bg-card/70 p-3 text-left text-sm text-foreground"><p className="font-semibold text-primary">Create your own colored globe and galaxy to show your personality and show it off to fans.</p><p className="mt-1 text-muted-foreground">You can also add it to your phone's lock screen and set it as your Be Right Back screen — your spot in DTT Space City.</p></div>
             <p className="text-left text-sm text-foreground">Set up your creator profile privately. Identity review and approval of everyone appearing in your content are required before publishing.</p>
             <label className="text-left text-sm font-semibold text-foreground">Profile Category
               <select required value={category} disabled={busy} onChange={event => setCategory(event.target.value as CreatorCategory)} className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
