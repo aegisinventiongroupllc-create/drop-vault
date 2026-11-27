@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import IdentityDatePicker from "@/components/IdentityDatePicker";
 import { identityAge, validIdentityImage } from "@/lib/identityVerification";
 import SelfieCamera from "@/components/SelfieCamera";
+import { countryOptions } from "@/lib/countryOptions";
 import { canContinueVerification, DTT_VERIFICATION_STEPS } from "@/lib/dttVerificationSteps";
 
+const COUNTRIES = countryOptions();
 type Status = "unsubmitted" | "pending" | "flagged" | "approved" | "rejected";
 export default function CreatorIdVerification({ userId, onApproved }: { userId: string; onApproved?: () => void }) {
   const [status, setStatus] = useState<Status>("unsubmitted");
@@ -89,19 +91,19 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   if (loading) return <p className="text-muted-foreground">Loading verification…</p>;
   if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">Your documents were approved by DTT. Content uploads are available subject to account requirements.</p></div>;
   return <div className="space-y-4">
-    <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">Private identity review · Final decision by DTT</p><p className="text-sm text-muted-foreground">Founding creator eligibility requires a current government photo ID showing your actual residential address and country. A passport’s issuing country or nationality alone does not qualify. DTT checks the private ID before assigning a country slot.</p></header>
+    <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">4 quick steps, about 5 minutes. Have your government photo ID ready.</p><ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1"><li>Type your name and birthday exactly as on your ID</li><li>Take a photo of the front and back of your ID</li><li>Take a selfie holding your ID and a note that says "Drop That Thing", today's date and your username</li><li>Check everything and submit — DTT reviews it privately</li></ol></header>
     {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} Public publishing remains locked.</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}</div> : <>
       {status === "rejected" && <div role="alert" className="border border-destructive rounded-md p-3 text-sm"><p className="font-bold text-destructive">Submission declined</p><p className="text-foreground whitespace-pre-wrap">{notes}</p></div>}
       <ol aria-label="Verification progress" className="grid grid-cols-2 gap-2 sm:grid-cols-4">{DTT_VERIFICATION_STEPS.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined} className={`border-b-2 py-2 text-sm ${step === index ? "border-primary text-primary font-semibold" : "border-border text-muted-foreground"}`}>{index + 1}. {label}</li>)}</ol>
       <h4 className="font-semibold" tabIndex={-1}>Step {step + 1} · {DTT_VERIFICATION_STEPS[step]}</h4>
       {step === 0 && <div className="space-y-4">
       <label className="block text-sm text-muted-foreground">Full Legal Name<Input aria-label="Full Legal Name" value={name} maxLength={160} onChange={e => setName(e.target.value)} /></label>
-      <div className="space-y-2"><p className="text-sm text-muted-foreground">Date of Birth</p><IdentityDatePicker value={dob} onChange={setDob} /></div>
+      <div className="space-y-2"><p className="text-sm text-muted-foreground">Date of Birth</p><IdentityDatePicker value={dob} onChange={setDob} /><p className="text-xs text-muted-foreground">You must be 18 or older.</p></div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="text-sm">Document type<select aria-label="Document type" className="w-full rounded-md border border-border bg-secondary p-2" value={documentType} onChange={e => setDocumentType(e.target.value)}><option value="drivers_license">Driver's license</option><option value="passport">Passport</option><option value="national_id">National ID</option><option value="other">Other government ID</option></select></label>
-        <label className="text-sm">Issuing country code<Input aria-label="Issuing country code" maxLength={2} value={issuingCountry} onChange={e => setIssuingCountry(e.target.value.toUpperCase().replace(/[^A-Z]/g,""))} /></label>
-        <label className="text-sm">Document number<Input aria-label="Document number" maxLength={100} value={documentNumber} onChange={e => setDocumentNumber(e.target.value)} /></label>
-        <label className="text-sm">Expiration date<Input aria-label="Expiration date" type="date" value={expires} onChange={e => setExpires(e.target.value)} /></label>
+        <label className="text-sm">Document type<select aria-label="Document type" className="h-12 w-full rounded-md border border-border bg-secondary px-3 text-base" value={documentType} onChange={e => setDocumentType(e.target.value)}><option value="drivers_license">Driver's license</option><option value="passport">Passport</option><option value="national_id">National ID</option><option value="other">Other government ID</option></select></label>
+        <label className="text-sm">Country on your ID<select aria-label="Country on your ID" className="h-12 w-full rounded-md border border-border bg-secondary px-3 text-base" value={issuingCountry} onChange={e => setIssuingCountry(e.target.value)}><option value="">Choose country</option>{COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}</select></label>
+        <label className="text-sm">ID number<Input aria-label="Document number" placeholder="As printed on your ID" maxLength={100} value={documentNumber} onChange={e => setDocumentNumber(e.target.value)} /></label>
+        <div className="text-sm sm:col-span-2 space-y-1"><p>ID expiration date</p><IdentityDatePicker label="Expiration date" mode="expiry" value={expires} onChange={setExpires} /></div>
       </div>
       </div>}
       {(["front", "back", "selfie"] as const).filter(slot => step === 1 ? slot !== "selfie" : step === 2 ? slot === "selfie" : false).map(slot => <div key={slot} className="space-y-2">
@@ -120,6 +122,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
         {expires < new Date().toISOString().slice(0, 10) && <p role="alert" className="text-gold text-sm">This document has expired. Your submission will be flagged for further review.</p>}
         <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">DTT human review</h5><p className="text-sm text-muted-foreground">Your documents are submitted privately to DTT. An authorized reviewer checks your identity, age and evidence before making a recorded decision. This is manual review, not automated biometric or liveness verification. Publishing also requires content-specific age and consent clearance for everyone shown.</p></div>
       </div>}
+      {step === 0 && !canContinue && <p className="text-xs text-muted-foreground">Fill in every box above to continue.</p>}
       <div className="flex gap-3">{step > 0 && <Button variant="outline" disabled={busy} onClick={() => setStep(current => current - 1)}>BACK</Button>}{step < 3 ? <Button variant="neon" className="flex-1" disabled={!canContinue || busy} onClick={() => setStep(current => current + 1)}>CONTINUE</Button> : <Button variant="neon" className="flex-1" disabled={busy || !canContinue} onClick={submit}>{busy ? "SUBMITTING…" : "SUBMIT FOR DTT REVIEW"}</Button>}</div>
     </>}
     <p className="text-xs text-muted-foreground">Documents are private and accessible only to you and authorized DTT administrators.</p>
