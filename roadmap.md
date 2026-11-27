@@ -1,5 +1,9 @@
 # Roadmap
 
+## Investor plan customer experience — November 27
+- [x] Expanded customer signup, entry/library pricing, discovery, dashboard, request checkout/status and personal-world perks; founder story remains once.
+- [x] Added first-person openness to help, feedback and new ideas. Saved investor plan v3; visually checked all 13 pages, fixed crowded table headers and verified pricing text.
+
 ## Creator-set custom request menus — November 27
 - [x] Add verified-creator menu controls (six options, $25 minimum), open offers, 85/15 dollar checkout plus the confirmed $5 buyer fee, and receipt-only paid orders with selected turnaround days; vault/feed and existing Elite token requests preserved. Bunny request copies retain original private files and 30-second signing; no media or payments fabricated.
 - [x] Add onboarding perks and versioned investor plan without repeated founder reasoning. Real signed-in unapproved write denied; isolated phone/desktop menu save/reload and $46/$39.10/$6.90/$51 review checked with no page errors. Deployed functions and database tests passed; request publication after final commit.
