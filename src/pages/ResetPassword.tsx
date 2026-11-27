@@ -35,11 +35,11 @@ const ResetPassword = () => {
 
   const handleUpdate = async () => {
     if (password.length < 6) {
-      toast({ title: "Too short", description: "Password must be at least 6 characters.", variant: "destructive" });
+      toast({ title: "Too short", description: "Password must be at least 6 characters.", variant: "brand" });
       return;
     }
     if (password !== confirm) {
-      toast({ title: "Passwords don't match", description: "Please re-enter the same password.", variant: "destructive" });
+      toast({ title: "Passwords don't match", description: "Please re-enter the same password.", variant: "brand" });
       return;
     }
     setLoading(true);
@@ -50,7 +50,7 @@ const ResetPassword = () => {
       toast({ title: "Password updated", description: "You're all set. Taking you to your dashboard…" });
       setTimeout(() => navigate("/"), 800);
     } catch (e: any) {
-      toast({ title: "Couldn't update password", description: e?.message ?? "Try again.", variant: "destructive" });
+      toast({ title: "Couldn't update password", description: e?.message ?? "Try again.", variant: "brand" });
     } finally {
       setLoading(false);
     }
