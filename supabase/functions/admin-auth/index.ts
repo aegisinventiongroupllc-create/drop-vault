@@ -1,6 +1,6 @@
 // Verifies the admin passcode server-side so it never has to live in the website bundle.
-// A valid passcode also signs the visitor into the administrator account, so private
-// records still require a real account session and never open on a passcode alone.
+// The passcode is a second factor for an already signed-in administrator account;
+// it never creates or opens a session by itself.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { recordSecurityDenial } from "../_shared/securityAccessEvents.ts";
 
@@ -36,39 +36,29 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: "Invalid access code" });
   }
 
-  // Mint a one-time sign-in link for the administrator account. The client exchanges
-  // the token_hash for a real session, so private identity records stay behind an
-  // account session and the passcode itself never opens them.
+  // The passcode is only a second factor: the caller must already be signed in to an
+  // account that holds the admin role. No session or sign-in link is ever minted here.
   try {
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
-    const { data: roleRows, error: roleError } = await admin
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "admin")
-      .order("created_at", { ascending: true })
-      .limit(1);
+    const { data: userData, error: userError } = jwt ? await admin.auth.getUser(jwt) : { data: null, error: null };
+    const userId = userData?.user?.id;
+    if (userError || !userId) {
+      await recordSecurityDenial("admin_code_without_session", "admin-auth");
+      return json({ ok: false, error: "Sign in to your administrator account first", needs_sign_in: true });
+    }
+    const { data: isAdmin, error: roleError } = await admin.rpc("has_role", { _user_id: userId, _role: "admin" });
     if (roleError) throw roleError;
-    const adminUserId = roleRows?.[0]?.user_id;
-    if (!adminUserId) throw new Error("No administrator account is configured");
-
-    const { data: userData, error: userError } = await admin.auth.admin.getUserById(adminUserId);
-    if (userError) throw userError;
-    const email = userData?.user?.email;
-    if (!email) throw new Error("Administrator account has no email");
-
-    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-    });
-    if (linkError) throw linkError;
-    const tokenHash = linkData?.properties?.hashed_token;
-    if (!tokenHash) throw new Error("Could not create a sign-in link");
-
-    return json({ ok: true, token_hash: tokenHash, email });
+    if (isAdmin !== true) {
+      await recordSecurityDenial("admin_code_non_admin", "admin-auth");
+      return json({ ok: false, error: "Invalid access code" });
+    }
+    return json({ ok: true });
   } catch (failure) {
-    console.error("admin-auth session mint failed", failure);
-    return json({ ok: false, error: 'Administrator session could not be opened. Please retry.' }, 503);
+    console.error("admin-auth check failed", failure);
+    return json({ ok: false, error: 'Administrator access could not be checked. Please retry.' }, 503);
   }
 });

@@ -75,40 +75,37 @@ describe("admin access failure handling", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: "true" }))));
     expect(await verifyAdminPasscode("000000")).toBe(false);
   });
-  it("signs into the administrator account when the server returns a token hash", async () => {
+  it("unlocks a signed-in administrator after server approval without minting a session", async () => {
     verifyOtp.mockClear();
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, token_hash: "hash-123" }))));
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    vi.stubGlobal("fetch", fetchMock);
+    getSession.mockResolvedValueOnce({ data: { session: { access_token: "user-jwt", user: { id: 'admin-1' } } } });
     expect(await verifyAdminPasscode("0123456")).toBe(true);
-    expect(verifyOtp).toHaveBeenCalledWith({ token_hash: "hash-123", type: "magiclink" });
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe("Bearer user-jwt");
+    expect(verifyOtp).not.toHaveBeenCalled();
     expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBe("1");
   });
-  it("does not unlock an incomplete passcode-only session", async () => {
-    verifyOtp.mockClear();
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }))));
+  it("never accepts the code without an account session", async () => {
+    getSession.mockResolvedValueOnce({ data: { session: null } });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
     expect(await verifyAdminPasscode("0123456")).toBe(false);
-    expect(verifyOtp).not.toHaveBeenCalled();
-    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
-  });
-  it('does not unlock when the one-time account sign-in fails', async () => {
-    verifyOtp.mockResolvedValueOnce({ data: {}, error: { message: 'Expired' } });
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, token_hash: 'expired-test-hash' }))));
-    expect(await verifyAdminPasscode('0123456')).toBe(false);
-    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
   it('requires server-verified administrator role after account sign-in', async () => {
     hasRole.mockResolvedValueOnce({ data: false, error: null });
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, token_hash: 'test-hash' }))));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, }))));
     expect(await verifyAdminPasscode('0123456')).toBe(false);
     expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBeNull();
   });
   it('restores an existing administrator without asking for another login', async () => {
     expect(await ensureAdminAccountSession()).toBe(true);
   });
-  it('upgrades a code-only tab through real account sign-in', async () => {
-    getSession.mockResolvedValueOnce({ data: { session: null } });
+  it('does not open a code-only tab without account sign-in', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
     sessionStorage.setItem('dtt_admin_passcode', '0123456');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, token_hash: 'test-restore-hash' }))));
-    expect(await ensureAdminAccountSession()).toBe(true);
-    expect(sessionStorage.getItem(ADMIN_SESSION_KEY)).toBe('1');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }))));
+    expect(await ensureAdminAccountSession()).toBe(false);
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'admin-1' } } } });
   });
 });

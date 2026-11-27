@@ -58,12 +58,16 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
     try {
       // A rejected code is an expected sign-in outcome, not an uncaught function error.
       // Keep the server's 401 response and access checks intact.
+      // The passcode is only a second factor for an already signed-in admin account.
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return false;
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-auth`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ passcode: code }),
         signal: AbortSignal.timeout(15_000),
@@ -71,14 +75,6 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
       if (!response.ok) return false;
       const data: unknown = await response.json();
       if (!data || typeof data !== "object" || !("ok" in data) || data.ok !== true) return false;
-      // A valid passcode also signs the visitor into the administrator account, so
-      // private identity records open without a second login. The account session —
-      // never the passcode alone — is what the server checks for those records.
-      const tokenHash = "token_hash" in data && typeof data.token_hash === "string" ? data.token_hash : "";
-      if (!tokenHash) return false;
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-      if (error) return false;
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) return false;
       const { data: admin, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
