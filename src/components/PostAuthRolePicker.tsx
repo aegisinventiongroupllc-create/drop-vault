@@ -12,6 +12,8 @@ import ContentLabelingNotice from "@/components/ContentLabelingNotice";
 import AdaptiveTagChoices from "@/components/AdaptiveTagChoices";
 import type { AdaptiveTag } from "@/lib/adaptiveTags";
 import CreatorLaunchCountdown from "@/components/CreatorLaunchCountdown";
+import GalaxyReel from "@/components/GalaxyReel";
+import { ENTRY_GLOBE } from "@/components/EntryPassGlobe";
 import { isCreatorSignup } from "@/lib/foundingInvitation";
 
 interface PostAuthRolePickerProps {
@@ -34,7 +36,8 @@ const PostAuthRolePicker = ({ email, onSelect, existingCreator, initialAdaptiveT
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
-      <div className="flex min-h-full flex-col">
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true"><GalaxyReel scope="brb" seconds={240} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} /><div className="absolute inset-0 bg-background/45" /></div>
+      <div className="relative flex min-h-full flex-col">
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-1">
