@@ -255,7 +255,7 @@ const Index = () => {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       const signedInId = session?.user?.id;
-      if (event === "SIGNED_IN" && signedInId) {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && signedInId) {
         const flag = `dtt_admin_routed_${signedInId}`;
         const previewing = localStorage.getItem("dtt_admin_view_as_creator") === "1" || localStorage.getItem("dtt_admin_view_as_customer") === "1";
         if (!previewing && sessionStorage.getItem(flag) !== "1") {
