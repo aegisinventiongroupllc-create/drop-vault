@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { COUNTRIES } from "./GlobalPassport";
 import { waitlistEntryForecast } from "@/lib/waitlistForecast";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
+import { customerWaitlistTicket } from '@/lib/customerWaitlistTicket';
 type Data = { total: number; countries: { country: string; total: number }[]; entries: { user_id: string; email: string | null; country: string; language: string; joined_at: string }[] };
 const name = (code: string) => COUNTRIES.find(c => c.code === code)?.name ?? code;
 export default function AdminCustomerWaitlist() {
@@ -98,6 +99,7 @@ export default function AdminCustomerWaitlist() {
         <p className="break-all font-semibold">{e.email ?? "Account email unavailable"}</p>
         <p className="text-sm text-muted-foreground">{name(e.country)} · {e.language}</p>
         <p className="text-xs text-muted-foreground">Joined {new Date(e.joined_at).toLocaleString()}</p>
+        <p className="notranslate break-all font-mono text-xs" translate="no">{customerWaitlistTicket(e)?.number ?? "Ticket unavailable"}</p>
       </article>)}</div>
       <div className="flex flex-wrap items-center justify-between gap-3"><Button variant="outline" disabled={!offset || busy} onClick={() => setOffset(n => Math.max(0, n - 50))}>PREVIOUS</Button><span className="text-xs">{data.entries.length ? offset + 1 : 0}–{Math.min(offset + data.entries.length, data.total)} of {data.total}</span><Button variant="outline" disabled={offset + 50 >= data.total || busy} onClick={() => setOffset(n => n + 50)}>NEXT</Button></div>
     </>}

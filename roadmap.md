@@ -1,5 +1,12 @@
 # Roadmap
 
+## Identity-verified waiting lists and founding clarification — November 27
+- [x] New customer tickets require server-recorded manual adult/face approval; existing ticket identities and country updates preserved. Private account/email/ticket linkage reused, administrator list now displays ticket number. DTT now, Persona later; sandbox never approves.
+- [x] Added private silent recorded face evidence to new customer/creator submissions: left/right 3 seconds each, up/down 2 seconds each, with initial 2-second face view, explicit consent and manual confirmation. Private 10MB storage, immutable evidence, owner/admin-only reads; no certified liveness claims.
+- [x] Owner confirmed keeping 91/9, five qualifying creators per category/country; permanent prior awards and residence verification unchanged.
+- [x] Added explicit FOUNDING CREATOR · 91/9 FOR LIFE to server-backed dashboard rate. Admin review separates customer/creator queues by country and chronological submission, previews private face video and requires human confirmation. Existing VIP queue retains position/email/country/ticket and unpaid/paid distinctions. 51 tests passed, build OK, review function deployed.
+- [ ] Full genuine submission → administrator review → customer ticket/creator approval remains unverified: available session is not administrator; synthetic phone camera capture reached review without uploading identity or granting approval. Verified real non-admin access denial. Live Persona remains deferred by owner; frontend not published.
+
 ## Concise investor presentation — November 27
 - [x] Built an 11-slide DTT-branded presentation at /investors with customer/creator benefits, itemized menu pricing, conditional VIP scenarios, trust, growth, Space City and founder invitation; speaker notes retain detail.
 - [x] Desktop navigation, overview, saved notes and fullscreen passed; phone swipe and no horizontal overflow passed, no page errors. All 11 exported pages inspected, corrected VIP footer overlap and language control intrusion. Build OK; marketplace access unchanged. Not published.

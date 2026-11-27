@@ -670,6 +670,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
           <p className="mt-3 text-xs font-bold text-primary text-center tracking-wider">{revenueTerms.pass === "ELITE_PASS" ? "ELITE PASS · 93/7 FOR LIFE" : "PRO PASS · 92/8 FOREVER"}</p>
         )}
         {revenueTerms.vault === 95 && <p className="mt-3 text-xs font-bold text-gold text-center">ANNUAL COUNTRY AWARD · 95/5 FOR LIFE</p>}
+        {revenueTerms.vault === 91 && <p className="mt-3 text-xs font-bold text-primary text-center">FOUNDING CREATOR · 91/9 FOR LIFE</p>}
         {!splitState.incentiveActive && revenueTerms.pass === "NONE" && revenueTerms.vault < 95 && (
           <div className="mt-3 space-y-2">
             <div className="flex justify-between text-[10px] text-muted-foreground">

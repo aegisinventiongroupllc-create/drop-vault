@@ -8,10 +8,12 @@ import { identityAge, validIdentityImage } from "@/lib/identityVerification";
 import SelfieCamera from "@/components/SelfieCamera";
 import { countryOptions } from "@/lib/countryOptions";
 import { canContinueVerification, DTT_VERIFICATION_STEPS } from "@/lib/dttVerificationSteps";
+import FaceReviewCapture from "./FaceReviewCapture";
+import { validFaceReview } from "@/lib/faceReview";
 
 const COUNTRIES = countryOptions();
 type Status = "unsubmitted" | "pending" | "flagged" | "approved" | "rejected";
-export default function CreatorIdVerification({ userId, onApproved }: { userId: string; onApproved?: () => void }) {
+export default function CreatorIdVerification({ userId, onApproved, audience = "creator" }: { userId: string; onApproved?: () => void; audience?: "creator" | "customer" }) {
   const [status, setStatus] = useState<Status>("unsubmitted");
   const [notes, setNotes] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -20,6 +22,8 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   const [files, setFiles] = useState<{ front?: File; back?: File; selfie?: File }>({});
   const [previews, setPreviews] = useState<{ front?: string; back?: string; selfie?: string }>({});
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [faceVideo, setFaceVideo] = useState<File>();
+  const [faceConsent, setFaceConsent] = useState(false);
   const [expires, setExpires] = useState("");
   const [documentType, setDocumentType] = useState("drivers_license");
   const [issuingCountry, setIssuingCountry] = useState("");
@@ -31,7 +35,10 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const { data, error } = await supabase.from("profiles").select("verification_status,verification_reviewer_notes,legal_first_name,legal_last_name,date_of_birth,display_name").eq("user_id", userId).maybeSingle();
+      const { data: profile, error: profileError } = await supabase.from("profiles").select("verification_status,verification_reviewer_notes,legal_first_name,legal_last_name,date_of_birth,display_name").eq("user_id", userId).maybeSingle();
+      const review = audience === "customer" ? await supabase.from("dtt_identity_reviews").select("status,reviewer_notes,legal_first_name,legal_last_name,date_of_birth").eq("user_id", userId).eq("audience", "customer").order("submitted_at", { ascending: false }).limit(1).maybeSingle() : null;
+      const error = profileError ?? review?.error;
+      const data = profile ? { ...profile, ...(audience === "customer" ? { verification_status: review?.data?.status ?? "unsubmitted", verification_reviewer_notes: review?.data?.reviewer_notes ?? null, legal_first_name: review?.data?.legal_first_name ?? "", legal_last_name: review?.data?.legal_last_name ?? "", date_of_birth: review?.data?.date_of_birth ?? null } : {}) } : null;
       if (!active) return;
       if (error) toast.error("Could not load identity status");
       if (data) {
@@ -48,7 +55,7 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
     const timer = window.setInterval(load, 15000);
     window.addEventListener("focus", load);
     return () => { active = false; clearInterval(timer); window.removeEventListener("focus", load); };
-  }, [userId]);
+  }, [userId, audience]);
   useEffect(() => { if (status === "approved") onApproved?.(); }, [status, onApproved]);
   useEffect(() => {
     const next = { front: files.front ? URL.createObjectURL(files.front) : undefined, back: files.back ? URL.createObjectURL(files.back) : undefined, selfie: files.selfie ? URL.createObjectURL(files.selfie) : undefined };
@@ -62,37 +69,44 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
   };
   const submit = async () => {
     const age = identityAge(dob);
-    if (name.trim().length < 2 || name.trim().length > 160 || age === null || age < 18 || !files.front || !files.back || !files.selfie || !expires || !/^[A-Z]{2}$/.test(issuingCountry) || !documentNumber.trim()) { toast.error("Enter your legal name, adult date of birth, document details and all three photos."); return; }
+    if (name.trim().length < 2 || name.trim().length > 160 || age === null || age < 18 || !files.front || !files.back || !files.selfie || !validFaceReview(faceVideo) || !faceConsent || !expires || !/^[A-Z]{2}$/.test(issuingCountry) || !documentNumber.trim()) { toast.error("Complete the document details, three clear photos and private face check."); return; }
     setBusy(true);
     const uploaded: string[] = [];
+    const documentBucket = audience === "creator" ? "creator-2257-records" : "dtt-identity-review";
+    let facePath: string | undefined;
     try {
       for (const [slot, file] of [["front", files.front], ["back", files.back], ["selfie", files.selfie]] as const) {
         const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
         const path = `${userId}/${crypto.randomUUID()}-${slot}.${ext}`;
-        const { error } = await supabase.storage.from("creator-2257-records").upload(path, file, { upsert: false, contentType: file.type });
+        const { error } = await supabase.storage.from(documentBucket).upload(path, file, { upsert: false, contentType: file.type });
         if (error) throw error;
         uploaded.push(path);
       }
       const [front, back, selfie] = uploaded;
       if (!front || !back || !selfie) throw new Error("Three photos are required.");
-      const { error } = await supabase.rpc("submit_creator_identity_v2", { _full_name: name.trim(), _dob: dob, _front: front, _back: back, _selfie: selfie, _expires: expires, _type: documentType, _country: issuingCountry, _number: documentNumber.trim() });
+      if (!faceVideo) throw new Error("Face video required");
+      facePath = `${userId}/${crypto.randomUUID()}-face.${faceVideo.type === "video/mp4" ? "mp4" : "webm"}`;
+      const faceUpload = await supabase.storage.from("dtt-identity-review").upload(facePath, faceVideo, { upsert: false, contentType: faceVideo.type });
+      if (faceUpload.error) throw faceUpload.error;
+      const { error } = await supabase.rpc("submit_dtt_identity", { _audience: audience, _full_name: name.trim(), _dob: dob, _front: front, _back: back, _selfie: selfie, _face: facePath, _expires: expires, _type: documentType, _country: issuingCountry, _number: documentNumber.trim(), _consent: faceConsent });
       if (error) throw error;
-      setStatus(expires < new Date().toISOString().slice(0,10) ? "flagged" : "pending"); setFiles({}); toast.success("Submitted for review");
+      setStatus(expires < new Date().toISOString().slice(0,10) ? "flagged" : "pending"); setFiles({}); setFaceVideo(undefined); toast.success("Submitted for review");
     } catch (error) {
       if (uploaded.length) {
-        const cleanup = await supabase.storage.from("creator-2257-records").remove(uploaded);
+        const cleanup = await supabase.storage.from(documentBucket).remove(uploaded);
         if (cleanup.error) toast.error("Submission failed and photo cleanup could not finish. Contact DTT support.");
       }
+      if (facePath) { const cleanup = await supabase.storage.from("dtt-identity-review").remove([facePath]); if (cleanup.error) toast.error("Face-video cleanup could not finish. Contact DTT support."); }
       toast.error("Submission failed", { description: error instanceof Error ? error.message : "Please try again." });
     } finally { setBusy(false); }
   };
   const details = { name, dob, expires, issuingCountry, documentNumber };
-  const canContinue = canContinueVerification(step, details, files);
+  const canContinue = canContinueVerification(step, details, files) && (step < 2 || (validFaceReview(faceVideo) && faceConsent));
   if (loading) return <p className="text-muted-foreground">Loading verification…</p>;
-  if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">Your documents were approved by DTT. Content uploads are available subject to account requirements.</p></div>;
+  if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">{audience === "customer" ? "Your adult identity was approved by DTT. You can now join the customer waiting list and receive your ticket." : "Your documents were approved by DTT. Content uploads are available subject to account requirements."}</p></div>;
   return <div className="space-y-4">
-    <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">4 quick steps, about 5 minutes. Have your government photo ID ready.</p><ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1"><li>Type your name and birthday exactly as on your ID</li><li>Take a photo of the front and back of your ID</li><li>Take a selfie holding your ID and a note that says "Drop That Thing", today's date and your username</li><li>Check everything and submit — DTT reviews it privately</li></ol></header>
-    {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} Public publishing remains locked.</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}</div> : <>
+    <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">4 steps. Have a clear, current state ID, government photo ID or passport ready.</p><ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1"><li>Type your name and birthday exactly as on your ID</li><li>Photograph both sides of your ID; for a passport, use the photo-details page and signature page</li><li>Take a holding-ID photo with your dated DTT note, then record the guided face movements</li><li>Check everything and submit — DTT reviews it privately</li></ol></header>
+    {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} {audience === "customer" ? "Your ticket becomes available after DTT approves your adult identity." : "Public publishing remains locked."}</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}<Button variant="outline" className="mt-3" onClick={() => window.dispatchEvent(new Event("focus"))}>CHECK REVIEW STATUS</Button></div> : <>
       {status === "rejected" && <div role="alert" className="border border-destructive rounded-md p-3 text-sm"><p className="font-bold text-destructive">Submission declined</p><p className="text-foreground whitespace-pre-wrap">{notes}</p></div>}
       <ol aria-label="Verification progress" className="grid grid-cols-2 gap-2 sm:grid-cols-4">{DTT_VERIFICATION_STEPS.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined} className={`border-b-2 py-2 text-sm ${step === index ? "border-primary text-primary font-semibold" : "border-border text-muted-foreground"}`}>{index + 1}. {label}</li>)}</ol>
       <h4 className="font-semibold" tabIndex={-1}>Step {step + 1} · {DTT_VERIFICATION_STEPS[step]}</h4>
@@ -116,11 +130,13 @@ export default function CreatorIdVerification({ userId, onApproved }: { userId: 
         </label>
         {slot === "selfie" && <Button variant="outline" onClick={() => setCameraOpen(true)}>TAKE HOLDING-ID PHOTO</Button>}
       </div>)}
+      {step === 2 && <FaceReviewCapture onCapture={(file, consent) => { setFaceVideo(file); setFaceConsent(consent); }} />}
       {step === 3 && <div className="space-y-4">
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div><dt className="text-sm text-muted-foreground">Full legal name</dt><dd className="break-words">{name}</dd></div><div><dt className="text-sm text-muted-foreground">Date of birth</dt><dd>{dob}</dd></div><div><dt className="text-sm text-muted-foreground">Document</dt><dd>{documentType.replace(/_/g, " ")} · {issuingCountry}</dd></div><div><dt className="text-sm text-muted-foreground">Expires</dt><dd>{expires}</dd></div></dl>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{(["front", "back", "selfie"] as const).map(slot => <figure key={slot}>{previews[slot] && <img src={previews[slot]} alt={`Review ${slot} photo`} className="h-40 w-full object-contain border border-border rounded-md" />}<figcaption className="text-sm text-muted-foreground mt-2">{slot === "front" ? "ID front" : slot === "back" ? "ID back" : "Holding photo"}</figcaption></figure>)}</div>
         {expires < new Date().toISOString().slice(0, 10) && <p role="alert" className="text-gold text-sm">This document has expired. Your submission will be flagged for further review.</p>}
-        <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">DTT human review</h5><p className="text-sm text-muted-foreground">Your documents are submitted privately to DTT. An authorized reviewer checks your identity, age and evidence before making a recorded decision. This is manual review, not automated biometric or liveness verification. Publishing also requires content-specific age and consent clearance for everyone shown.</p></div>
+        <p className="text-sm text-success">Private face-movement video included for human review.</p>
+        <div className="border-y border-border py-3 space-y-1"><h5 className="font-semibold text-sm">DTT human review</h5><p className="text-sm text-muted-foreground">Your documents and silent face video are submitted privately to DTT. A reviewer checks readable ID details, age and face evidence before recording a decision. Head movements do not automatically prove identity or certified liveness. {audience === "creator" ? "Publishing also requires content-specific clearance for everyone shown." : "Approval allows a waiting-list ticket, not paid media access."}</p></div>
       </div>}
       {step === 0 && !canContinue && <p className="text-xs text-muted-foreground">Fill in every box above to continue.</p>}
       <div className="flex gap-3">{step > 0 && <Button variant="outline" disabled={busy} onClick={() => setStep(current => current - 1)}>BACK</Button>}{step < 3 ? <Button variant="neon" className="flex-1" disabled={!canContinue || busy} onClick={() => setStep(current => current + 1)}>CONTINUE</Button> : <Button variant="neon" className="flex-1" disabled={busy || !canContinue} onClick={submit}>{busy ? "SUBMITTING…" : "SUBMIT FOR DTT REVIEW"}</Button>}</div>

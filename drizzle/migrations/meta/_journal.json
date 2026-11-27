@@ -967,6 +967,20 @@
       "when": 1795744527933,
       "tag": "0137_revoke_inherited_menu_anonymous_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 138,
+      "version": "7",
+      "when": 1795745855950,
+      "tag": "0138_dtt_manual_customer_creator_face_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1795746029673,
+      "tag": "0139_retain_existing_customer_tickets_and_identity_evidence",
+      "breakpoints": true
     }
   ]
 }

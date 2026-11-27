@@ -1,4 +1,5 @@
 # Project architecture rules
+- DTT manual customer/creator face evidence is privately retained with immutable submission fields; server review confirms age and face separately, gates only new customer tickets, and preserves legacy tickets/creator records. Why: motion capture is not certified liveness and customer approval must never authorize creator publishing.
 - Investor slides use a separate informational route, fixed-resolution scaling and a shared registry for viewing, presenting and printing; they never query accounts or grant marketplace access. Why: keep investor sharing separate from protected product flows.
 - Email-field admin shortcuts open the dashboard only after restoring server-verified administrator access; otherwise open protected sign-in and never grant privileges. Why: convenience must not expose administrative records.
 - Pages use pink EntryPassGlobe; personal globes only in country picker, color designer, signed-in idle. Why: branding.

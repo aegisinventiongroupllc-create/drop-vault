@@ -18,9 +18,12 @@ import { savedCreator } from "@/lib/creatorSharing";
 import CreatorShareActions from "./CreatorShareActions";
 import LockScreenWallpaper from "./LockScreenWallpaper";
 import { reportSignupProgress } from '@/lib/signupProgress';
+import CreatorIdVerification from './CreatorIdVerification';
 
 export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [identityApproved, setIdentityApproved] = useState(false);
   const [creatorLink] = useState(savedCreator);
   const [joined, setJoined] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -46,6 +49,7 @@ export default function CustomerLaunchWaitlist() {
     setBusy(true); setStatusError(false); setError("");
     void Promise.all([supabase.rpc("my_customer_launch_waitlist", { _action: "status" }), supabase.auth.getUser()]).then(([{ data, error }, { data: auth }]) => {
       if (!active) return;
+      setUserId(auth.user?.id ?? null);
       if (error) { void reportSignupProgress('issue', 'waitlist_status'); setStatusError(true); setError("Your waiting-list status could not be loaded. Please retry."); }
       else if (data && typeof data === "object" && !Array.isArray(data) && typeof data.country === "string") {
         setCountry(data.country); setJoined(true);
@@ -104,6 +108,7 @@ export default function CustomerLaunchWaitlist() {
       <CreatorLaunchCountdown audience="customer" />
       <div className="mb-6"><LockScreenWallpaper /></div>
       {!joined && <div className="mb-6 space-y-2"><p className="text-3xl font-semibold text-foreground">$10 <span className="text-base">/ year for life</span></p><p className="text-sm text-foreground/80">Join before launch for half the standard $20 yearly entry to the global twerking feed.</p><p className="text-xs text-foreground/70">365 days per paid pass. Nothing due today. Creator libraries use separate Bit-Tokens.</p></div>}
+      {!joined && userId && <section className="mb-6 text-left" aria-label="Verify before receiving your ticket"><p className="mb-4 text-sm text-foreground">Before receiving a DTT ticket, submit your private ID and face check for DTT’s adult-identity review.</p><CreatorIdVerification userId={userId} audience="customer" onApproved={() => setIdentityApproved(true)} /></section>}
       {ticket && <article ref={ticketRef} tabIndex={-1} aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
         <div className="border-b border-dashed border-primary/50 px-5 py-4">
           <p className="font-display text-lg font-bold text-primary notranslate" translate="no">DTT™</p>
@@ -138,9 +143,9 @@ export default function CustomerLaunchWaitlist() {
         <option value="">Select your country</option>
         {COUNTRIES.filter(c => c.code !== "GLOBAL" && !isBlockedCountry(c.code)).map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
       </select>
-      <p className="my-3 text-left text-xs text-foreground/70">Your account, country, language and join date stay private to you and DTT administrators. No street address collected.</p>
+      <p className="my-3 text-left text-xs text-foreground/70">Your account, country, language, joining date and identity evidence stay private to you and authorized DTT administrators. Addresses printed on ID documents are not published.</p>
       {error && <p role="alert" className="my-3 text-sm text-destructive">{error}</p>}
-      {statusError ? <Button variant="outline" disabled={busy} onClick={() => setStatusAttempt(n => n + 1)} className="w-full">RETRY WAITING LIST</Button> : <Button variant={joined ? "outline" : "neon"} disabled={busy || !country || (joined && country === ticket?.country)} onClick={() => void join()} className="h-auto min-h-12 w-full whitespace-normal">{busy ? "PLEASE WAIT…" : joined ? "UPDATE MY COUNTRY" : "JOIN FREE & GET MY DTT TICKET"}</Button>}
+      {statusError ? <Button variant="outline" disabled={busy} onClick={() => setStatusAttempt(n => n + 1)} className="w-full">RETRY WAITING LIST</Button> : <Button variant={joined ? "outline" : "neon"} disabled={busy || !country || (!joined && !identityApproved) || (joined && country === ticket?.country)} onClick={() => void join()} className="h-auto min-h-12 w-full whitespace-normal">{busy ? "PLEASE WAIT…" : joined ? "UPDATE MY COUNTRY" : identityApproved ? "JOIN FREE & GET MY DTT TICKET" : "DTT APPROVAL REQUIRED FOR TICKET"}</Button>}
       {joined && <p role="status" className="mt-3 text-xs text-foreground/80">{country === ticket?.country ? "Your ticket and $10 yearly rate are saved. We’ll invite you when launch payments open; nothing to pay now." : "Save your new country below your ticket. Your ticket number and yearly rate stay the same."}</p>}
       <section className="mt-8 border-t border-border py-5">
         <h2 className="text-base font-semibold">Joining as a creator?</h2>

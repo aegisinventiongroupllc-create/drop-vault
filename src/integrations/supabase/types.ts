@@ -1721,6 +1721,96 @@ export type Database = {
         }
         Relationships: []
       }
+      dtt_identity_reviews: {
+        Row: {
+          audience: string
+          capture_consent_version: string
+          capture_consented_at: string
+          country: string | null
+          creator_username: string | null
+          creator_verification_id: string | null
+          date_of_birth: string
+          document_bucket: string
+          document_expires_on: string
+          document_number: string
+          document_type: string
+          face_confirmed: boolean
+          face_video_path: string
+          id: string
+          id_back_path: string
+          id_front_path: string
+          identity_confirmed: boolean
+          issuing_country: string
+          legal_first_name: string
+          legal_last_name: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          selfie_path: string
+          status: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          audience: string
+          capture_consent_version?: string
+          capture_consented_at?: string
+          country?: string | null
+          creator_username?: string | null
+          creator_verification_id?: string | null
+          date_of_birth: string
+          document_bucket: string
+          document_expires_on: string
+          document_number: string
+          document_type: string
+          face_confirmed?: boolean
+          face_video_path: string
+          id?: string
+          id_back_path: string
+          id_front_path: string
+          identity_confirmed?: boolean
+          issuing_country: string
+          legal_first_name: string
+          legal_last_name?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path: string
+          status?: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          audience?: string
+          capture_consent_version?: string
+          capture_consented_at?: string
+          country?: string | null
+          creator_username?: string | null
+          creator_verification_id?: string | null
+          date_of_birth?: string
+          document_bucket?: string
+          document_expires_on?: string
+          document_number?: string
+          document_type?: string
+          face_confirmed?: boolean
+          face_video_path?: string
+          id?: string
+          id_back_path?: string
+          id_front_path?: string
+          identity_confirmed?: boolean
+          issuing_country?: string
+          legal_first_name?: string
+          legal_last_name?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          selfie_path?: string
+          status?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       entry_pass_payment_receipts: {
         Row: {
           amount_usd: number
@@ -3204,12 +3294,17 @@ export type Database = {
         Returns: boolean
       }
       customer_entry_price: { Args: { _user_id: string }; Returns: number }
+      customer_identity_approved: { Args: { _user: string }; Returns: boolean }
       customer_waitlist_campaign_batch: {
         Args: never
         Returns: {
           email: string
           user_id: string
         }[]
+      }
+      dtt_review_evidence_referenced: {
+        Args: { _path: string }
+        Returns: boolean
       }
       fifth_video_storage_access: {
         Args: { _bucket: string; _path: string }
@@ -3547,6 +3642,18 @@ export type Database = {
         }
         Returns: string
       }
+      review_dtt_identity: {
+        Args: {
+          _confirmed: boolean
+          _face_confirmed: boolean
+          _id: string
+          _notes: string
+          _residence_confirmed?: boolean
+          _residence_country?: string
+          _status: string
+        }
+        Returns: string
+      }
       review_participant_content: {
         Args: {
           _confirmed: boolean
@@ -3750,6 +3857,23 @@ export type Database = {
           _country: string
           _dob: string
           _expires: string
+          _front: string
+          _full_name: string
+          _number: string
+          _selfie: string
+          _type: string
+        }
+        Returns: string
+      }
+      submit_dtt_identity: {
+        Args: {
+          _audience: string
+          _back: string
+          _consent: boolean
+          _country: string
+          _dob: string
+          _expires: string
+          _face: string
           _front: string
           _full_name: string
           _number: string

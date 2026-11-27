@@ -5,10 +5,10 @@ import { sendTemplateEmail } from "../_shared/transactional-email-templates/send
 import { recordSecurityDenial } from "../_shared/securityAccessEvents.ts";
 const json = (body: unknown, status=200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type":"application/json" } });
 const schema = z.discriminatedUnion("action", [
- z.object({ action:z.literal("list"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
- z.object({ action:z.literal("export"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
- z.object({ action:z.literal("signed_urls"), id:z.string().uuid() }),
- z.object({ action:z.literal("decide"), id:z.string().uuid(), status:z.enum(["approved","rejected","flagged"]), notes:z.string().trim().max(1000).default(""), confirmed:z.boolean().default(false), residence_country:z.string().regex(/^[A-Z]{2}$/).nullable().default(null), residence_confirmed:z.boolean().default(false) })
+ z.object({ action:z.literal("list"), audience:z.enum(["creator","customer"]).default("creator"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
+ z.object({ action:z.literal("export"), audience:z.enum(["creator","customer"]).default("creator"), filter:z.enum(["pending","flagged","approved","rejected","all"]).default("pending"), offset:z.number().int().min(0).max(100000).default(0), country:z.string().regex(/^[A-Z]{2}$/).optional(), query:z.string().trim().max(100).default("") }),
+ z.object({ action:z.literal("signed_urls"), audience:z.enum(["creator","customer"]).default("creator"), id:z.string().uuid() }),
+ z.object({ action:z.literal("decide"), audience:z.enum(["creator","customer"]).default("creator"), id:z.string().uuid(), status:z.enum(["approved","rejected","flagged"]), notes:z.string().trim().max(1000).default(""), confirmed:z.boolean().default(false), face_confirmed:z.boolean().default(false), residence_country:z.string().regex(/^[A-Z]{2}$/).nullable().default(null), residence_confirmed:z.boolean().default(false) })
 ]);
 Deno.serve(async req => {
  if(req.method==="OPTIONS") return new Response("ok",{headers:corsHeaders});
@@ -28,13 +28,19 @@ Deno.serve(async req => {
  const service=createClient(url,serviceKey);
  if(body.action==="list" || body.action==="export") {
  const columns="id,user_id,legal_first_name,legal_last_name,date_of_birth,id_front_path,id_back_path,selfie_path,status,reviewer_notes,reviewed_at,submitted_at,country,creator_username,document_expires_on,document_type,issuing_country,residence_country,residence_id_confirmed";
- let query=service.from("creator_verifications").select(body.action==="export"?`${columns},document_number,reviewer_id,identity_confirmed`:columns,{count:"exact"}).order("country").order("submitted_at",{ascending:true}).order("id");
+ let query=service.from(body.audience === "customer" ? "dtt_identity_reviews" : "creator_verifications").select(body.audience === "customer" ? "*" : body.action==="export"?`${columns},document_number,reviewer_id,identity_confirmed`:columns,{count:"exact"}).order("country").order("submitted_at",{ascending:true}).order("id");
+ if(body.audience === "customer") query=query.eq("audience","customer");
  if(body.filter!=="all") query=query.eq("status",body.filter);
  if(body.country) query=query.eq("country",body.country);
  if(body.query) { const search=body.query.replace(/[^\p{L}\p{N}@ _-]/gu,""); if(search) query=query.or(`legal_first_name.ilike.%${search}%,legal_last_name.ilike.%${search}%,creator_username.ilike.%${search}%`); }
  const {data,error,count}=await query.range(body.offset,body.offset+24);
  if(error) return json({error:"Unable to load records"},500);
  if(body.action==="export") {
+ if(body.audience === "customer") {
+  const logged=await service.from("activity_logs").insert({user_id:user.id,user_role:"admin",action_type:"customer_identity_export",action_detail:"Exported private customer identity page",metadata:{offset:body.offset},activity_date:new Date().toISOString().slice(0,10)});
+  if(logged.error)return json({error:"Could not record export access"},500);
+  return json({records:data??[],total:count??0,notice:"Private human review records; not certified liveness."});
+ }
  const recordIds=(data??[]).map(row=>row.id);
  const creatorIds=[...new Set((data??[]).map(row=>row.user_id))];
  const {data:events,error:eventError}=await service.from("creator_identity_events").select("*").in("verification_id",recordIds).order("created_at").limit(1000);
@@ -47,24 +53,34 @@ Deno.serve(async req => {
  const ids=[...new Set((data??[]).map(row=>row.user_id))];
  const {data:profiles}=ids.length?await service.from("profiles").select("user_id,email,display_name,country").in("user_id",ids):{data:[]};
  const byId=new Map((profiles??[]).map(p=>[p.user_id,p]));
- return json({rows:(data??[]).map(row=>({...row,email:byId.get(row.user_id)?.email,display_name:row.creator_username??byId.get(row.user_id)?.display_name,country:row.country??byId.get(row.user_id)?.country})),total:count??0});
+ const {data:faceRows,error:faceError}=body.audience === "creator" && data?.length ? await service.from("dtt_identity_reviews").select("id,creator_verification_id,face_video_path").in("creator_verification_id",data.map(row=>row.id)) : {data:[],error:null};
+ if(faceError)return json({error:"Face-review records unavailable"},500);
+ const faceMap=new Map((faceRows??[]).map(row=>[row.creator_verification_id,row]));
+ return json({rows:(data??[]).map(row=>({...row,face_video_path:body.audience === "customer" ? row.face_video_path : faceMap.get(row.id)?.face_video_path,email:byId.get(row.user_id)?.email,display_name:row.creator_username??byId.get(row.user_id)?.display_name,country:row.country??byId.get(row.user_id)?.country})),total:count??0});
  }
  if(body.action==="signed_urls") {
- const {data:row,error}=await service.from("creator_verifications").select("user_id,document_bucket,id_front_path,id_back_path,selfie_path").eq("id",body.id).single();
+ const {data:row,error}=await service.from(body.audience === "customer" ? "dtt_identity_reviews" : "creator_verifications").select(body.audience === "customer" ? "user_id,document_bucket,id_front_path,id_back_path,selfie_path,face_video_path,audience" : "user_id,document_bucket,id_front_path,id_back_path,selfie_path").eq("id",body.id).single();
  if(error||!row) return json({error:"Record not found"},404);
- if(!["identity-documents","id-verifications","creator-2257-records"].includes(row.document_bucket)) return json({error:"Invalid evidence bucket"},400);
+ if(body.audience === "customer" && row.audience !== "customer")return json({error:"Record not found"},404);
+ if(!["identity-documents","id-verifications","creator-2257-records","dtt-identity-review"].includes(row.document_bucket)) return json({error:"Invalid evidence bucket"},400);
  const paths=[row.id_front_path,row.id_back_path,row.selfie_path].filter(path=>!!path&&path.startsWith(`${row.user_id}/`));
  const logged=await service.from("activity_logs").insert({user_id:user.id,user_role:"admin",action_type:"identity_document_view",action_detail:"Opened private creator identity evidence",metadata:{verification_id:body.id},activity_date:new Date().toISOString().slice(0,10)});
  if(logged.error)return json({error:"Could not record private document access"},500);
  const {data,error:signError}=await service.storage.from(row.document_bucket).createSignedUrls(paths,300);
  if(signError) return json({error:"Unable to open private images"},500);
- return json({urls:Object.fromEntries((data??[]).filter(item=>item.signedUrl).map(item=>[item.path,item.signedUrl]))});
+ const {data:face,error:faceError}=body.audience === "creator" ? await service.from("dtt_identity_reviews").select("face_video_path").eq("creator_verification_id",body.id).maybeSingle() : {data:{face_video_path:row.face_video_path},error:null};
+ if(faceError)return json({error:"Face-review unavailable"},500);
+ let faceUrl: string | undefined;
+ if(face?.face_video_path?.startsWith(`${row.user_id}/`)) { const signed=await service.storage.from("dtt-identity-review").createSignedUrl(face.face_video_path,300); if(signed.error)return json({error:"Cannot open face video"},500);faceUrl=signed.data?.signedUrl; }
+ return json({urls:{...Object.fromEntries((data??[]).filter(item=>item.signedUrl).map(item=>[item.path,item.signedUrl])),...(faceUrl && face?.face_video_path ? {[face.face_video_path]:faceUrl} : {})}});
  }
- const {data:creatorId,error}=await client.rpc("review_creator_identity_with_residence",{_id:body.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed,_residence_country:body.residence_country,_residence_confirmed:body.residence_confirmed});
+ const {data:faceRecord,error:faceLookupError}=body.audience === "customer" ? await service.from("dtt_identity_reviews").select("id").eq("id",body.id).eq("audience","customer").maybeSingle() : await service.from("dtt_identity_reviews").select("id").eq("creator_verification_id",body.id).maybeSingle();
+ if(faceLookupError || (body.audience === "customer" && !faceRecord))return json({error:"Review unavailable"},400);
+ const {data:creatorId,error}=faceRecord ? await client.rpc("review_dtt_identity",{_id:faceRecord.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed,_face_confirmed:body.face_confirmed,_residence_country:body.residence_country,_residence_confirmed:body.residence_confirmed}) : await client.rpc("review_creator_identity_with_residence",{_id:body.id,_status:body.status,_notes:body.notes,_confirmed:body.confirmed,_residence_country:body.residence_country,_residence_confirmed:body.residence_confirmed});
  if(error) return json({error:error.message},400);
  const {data:profile}=await service.from("profiles").select("email,display_name").eq("user_id",creatorId).maybeSingle();
  let notification="unavailable";
- if(body.status!=="flagged" && profile?.email) {
+ if(body.audience === "creator" && body.status!=="flagged" && profile?.email) {
  try { const result=await sendTemplateEmail(body.status==="approved"?"creator-approved":"creator-declined",profile.email,{templateData:{name:profile.display_name??undefined,reason:body.notes},idempotencyKey:`creator-review-${body.id}-${body.status}`}); notification=result.sent?"sent":"suppressed"; }
  catch {notification="failed";}
  }
