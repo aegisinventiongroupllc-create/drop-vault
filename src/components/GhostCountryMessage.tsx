@@ -3,6 +3,7 @@ import { Globe, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { COUNTRIES } from "@/components/GlobalPassport";
 import { supabase } from "@/integrations/supabase/client";
+import { adminRequestHeaders, ensureAdminAccountSession } from "@/lib/adminSession";
 
 interface GhostCountryMessageProps {
   countryCode: string;
@@ -19,10 +20,12 @@ const GhostCountryMessage = ({ countryCode }: GhostCountryMessageProps) => {
     if (!request.trim()) return;
     const keyword = `${countryName}: ${request.trim()}`;
     try {
+      // Demand stats accept saves only from a signed-in administrator account.
+      if (!(await ensureAdminAccountSession())) { setSubmitted(true); return; }
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       await fetch(`https://${projectId}.supabase.co/functions/v1/market-demand`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await adminRequestHeaders(),
         body: JSON.stringify({ keyword }),
       });
     } catch {
