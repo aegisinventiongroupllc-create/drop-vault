@@ -105,7 +105,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     // Forgot password — only email needed
     if (mode === "forgot") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-        toast({ title: "Hold on", description: "Please enter a valid email address.", variant: "destructive" });
+        toast({ title: "Hold on", description: "Please enter a valid email address.", variant: "brand" });
         return;
       }
       setLoading(true);
@@ -120,7 +120,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         });
         setMode("login");
       } catch (e: any) {
-        toast({ title: "Couldn't send reset link", description: e?.message ?? "Try again.", variant: "destructive" });
+        toast({ title: "Couldn't send reset link", description: e?.message ?? "Try again.", variant: "brand" });
       } finally {
         setLoading(false);
       }
@@ -128,8 +128,8 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
     }
 
     const err = validate();
-    if (err) { toast({ title: "Hold on", description: err, variant: "destructive" }); return; }
-    if (mode === "signup" && !registrationConsent) { toast({title:"Please confirm you're 18+",description:"Confirm your age and agree to the Terms of Service to create your account.",variant:"destructive"}); return; }
+    if (err) { toast({ title: "Hold on", description: err, variant: "brand" }); return; }
+    if (mode === "signup" && !registrationConsent) { toast({title:"Please confirm you're 18+",description:"Confirm your age and agree to the Terms of Service to create your account.",variant:"brand"}); return; }
 
     setLoading(true);
     try {
@@ -166,8 +166,9 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
         setPassword("");
         return;
       }
-      const msg = e?.message ?? "Something went wrong.";
-      toast({ title: "Authentication failed", description: msg, variant: "destructive" });
+      const raw = e?.message ?? "Something went wrong.";
+      const msg = /invalid login credentials/i.test(raw) ? "That email and password don't match. Check your password and try again." : raw;
+      toast({ title: "Let's try that again", description: msg, variant: "brand" });
     } finally {
       setLoading(false);
     }
@@ -306,7 +307,7 @@ const AuthScreen = ({ onAdmin, onExitPreview }: AuthScreenProps) => {
                 await logActivity("login", "Google");
               } catch (error) {
                 cancelAccountSelection();
-                toast({ title: "Google sign-in failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });
+                toast({ title: "Google sign-in failed", description: error instanceof Error ? error.message : "Try again.", variant: "brand" });
               } finally {
                 setLoading(false);
               }
