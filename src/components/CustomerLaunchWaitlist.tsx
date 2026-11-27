@@ -123,6 +123,9 @@ export default function CustomerLaunchWaitlist() {
               <li>Your personal founding ticket number, saved to your account and downloadable as a keepsake.</li>
               <li>A launch payment invitation by email and inside DTT when checkout is ready.</li>
               <li>Your front-row start: activate annual feed entry after launch with a verified payment. Creator libraries use separate Bit-Tokens.</li>
+              <li>A clean News Feed made for fans — no hashtag spam, no repost chains, no bot noise. Just one simple column of real, age-verified creators.</li>
+              <li>Pick your country and the creator page you like, and only those creators show up. Nothing mixed in that you didn’t choose.</li>
+              <li>Like, comment, share and tip creators right from their posts, and peek at blurred vault previews before you unlock.</li>
             </ul>
           </div>
           <p className="text-xs text-muted-foreground">Waiting-list membership, not payment or access. Payments are being prepared for launch; nothing is due today.</p>

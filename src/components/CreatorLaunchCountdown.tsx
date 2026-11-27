@@ -22,7 +22,7 @@ export default function CreatorLaunchCountdown({ compact = false, audience = "cr
     </div>}
     {(!compact || time.complete) && <h2 className="my-3 font-display text-lg font-bold text-primary" role={time.complete ? "status" : undefined}>{time.complete ? "HAPPY NEW YEAR!" : "DTT™ LAUNCH COUNTDOWN"}</h2>}
     {!time.complete && <div role="timer" aria-label="Time until January 1, 2027 at midnight in New York" className="mx-auto grid w-full max-w-xs grid-cols-4 gap-2 px-3 tabular-nums">
-      {([[time.days, "DAYS"], [time.hours, "HOURS"], [time.minutes, "MINUTES"], [time.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span key={value} className="diamond-digit block text-2xl font-bold">{String(value).padStart(2, "0")}</span><span className="text-[10px] text-muted-foreground">{label}</span></div>)}
+      {([[time.days, "DAYS"], [time.hours, "HOURS"], [time.minutes, "MINUTES"], [time.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span key={value} className="diamond-digit block text-4xl font-extrabold">{String(value).padStart(2, "0")}</span><span className="text-[10px] text-muted-foreground">{label}</span></div>)}
     </div>}
     <p className="mx-auto mt-3 max-w-sm px-4 text-xs text-muted-foreground">{audience === "customer" ? "Launching January 1, 2027. We’re getting payments ready for launch. Join the customer waiting list free; no payment is due now." : "Launching January 1, 2027. Start your free private creator setup now while we get payments and payouts ready for launch. Sales are not open yet."}</p>
   </section>;
