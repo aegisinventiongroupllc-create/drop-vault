@@ -6,6 +6,8 @@ import { FACE_REVIEW_SECONDS, faceReviewAt, validFaceReview } from "@/lib/faceRe
 export default function FaceReviewCapture({ onCapture }: { onCapture: (file: File | undefined, consent: boolean) => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
+  const capturedStream = useRef<MediaStream | null>(null);
+  const mounted = useRef(true);
   const recorder = useRef<MediaRecorder | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const frame = useRef<number>();
@@ -19,9 +21,14 @@ export default function FaceReviewCapture({ onCapture }: { onCapture: (file: Fil
     if (timer.current) clearInterval(timer.current);
     if (frame.current !== undefined) cancelAnimationFrame(frame.current);
     stream.current?.getTracks().forEach(track => track.stop());
+    capturedStream.current?.getTracks().forEach(track => track.stop());
+    capturedStream.current = null;
     stream.current = null;
   };
-  useEffect(() => () => { if (recorder.current?.state === "recording") { recorder.current.onstop = null; recorder.current.stop(); } cleanup(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; if (recorder.current) { recorder.current.onstop = null; recorder.current.ondataavailable = null; if (recorder.current.state === "recording") recorder.current.stop(); } cleanup(); };
+  }, []);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   const camera = async () => {
     setError(""); setPreview(""); onCapture(undefined, consent);
@@ -29,12 +36,13 @@ export default function FaceReviewCapture({ onCapture }: { onCapture: (file: Fil
       if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") throw new Error("This browser cannot record the face check. Try an up-to-date Chrome or Safari browser.");
       cleanup();
       const next = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 24 } }, audio: false });
+      if (!mounted.current) { next.getTracks().forEach(track => track.stop()); return; }
       stream.current = next;
       if (!video.current) { cleanup(); return; }
       video.current.srcObject = next;
       await video.current.play();
       setReady(true);
-    } catch (e) { cleanup(); setError(e instanceof Error ? e.message : "Camera unavailable. Allow camera access and retry."); }
+    } catch (e) { cleanup(); if (mounted.current) { setReady(false); setError(e instanceof Error ? e.message : "Camera unavailable. Allow camera access and retry."); } }
   };
   const record = () => {
     const source = video.current;
@@ -49,17 +57,21 @@ export default function FaceReviewCapture({ onCapture }: { onCapture: (file: Fil
     if (!mime) { cleanup(); setRecording(false); setReady(false); setError("Recording is unsupported. Try another browser."); return; }
     try {
       const captured = canvas.captureStream(24);
+      capturedStream.current = captured;
       const r = new MediaRecorder(captured, { mimeType: mime, videoBitsPerSecond: 900000 });
       recorder.current = r;
       const chunks: Blob[] = []; let cancelled = false;
-      r.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
+      let bytes = 0;
+      r.ondataavailable = event => { bytes += event.data.size; if (bytes > 10485760) { cancelled = true; if (r.state === "recording") r.stop(); return; } if (event.data.size) chunks.push(event.data); };
       const started = performance.now();
       r.onstop = () => {
+        if (!mounted.current) { cleanup(); chunks.length = 0; return; }
         const duration = (performance.now() - started) / 1000;
         cleanup(); captured.getTracks().forEach(track => track.stop()); setRecording(false); setReady(false);
         if (cancelled || duration < FACE_REVIEW_SECONDS - .15) { setError("Capture was interrupted. Keep this screen open and try again."); return; }
         const type = mime.startsWith("video/mp4") ? "video/mp4" : "video/webm";
         const file = new File(chunks, `dtt-face-review.${type === "video/mp4" ? "mp4" : "webm"}`, { type });
+        chunks.length = 0;
         if (!validFaceReview(file)) { setError("Face video could not be saved. Please retry."); return; }
         setPreview(URL.createObjectURL(file)); onCapture(file, true);
       };

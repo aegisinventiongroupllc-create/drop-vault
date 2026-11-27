@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { COUNTRIES } from "@/components/GlobalPassport";
@@ -24,6 +24,7 @@ export default function CustomerLaunchWaitlist() {
   const [country, setCountry] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [identityApproved, setIdentityApproved] = useState(false);
+  const identityReady = useCallback(() => { setIdentityApproved(true); setStatusAttempt(n => n + 1); }, []);
   const [creatorLink] = useState(savedCreator);
   const [joined, setJoined] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -108,7 +109,7 @@ export default function CustomerLaunchWaitlist() {
       <CreatorLaunchCountdown audience="customer" />
       <div className="mb-6"><LockScreenWallpaper /></div>
       {!joined && <div className="mb-6 space-y-2"><p className="text-3xl font-semibold text-foreground">$10 <span className="text-base">/ year for life</span></p><p className="text-sm text-foreground/80">Join before launch for half the standard $20 yearly entry to the global twerking feed.</p><p className="text-xs text-foreground/70">365 days per paid pass. Nothing due today. Creator libraries use separate Bit-Tokens.</p></div>}
-      {!joined && userId && <section className="mb-6 text-left" aria-label="Verify before receiving your ticket"><p className="mb-4 text-sm text-foreground">Before receiving a DTT ticket, submit your private ID and face check for DTT’s adult-identity review.</p><CreatorIdVerification userId={userId} audience="customer" onApproved={() => setIdentityApproved(true)} /></section>}
+      {!joined && userId && <section className="mb-6 text-left" aria-label="Verify before receiving your ticket"><p className="mb-4 text-sm text-foreground">A DTT adult-identity approval is required before your ticket. Customer ID photos and face videos are intended for deletion immediately after a pass/fail decision, within 24 hours.</p><CreatorIdVerification userId={userId} audience="customer" onApproved={identityReady} /></section>}
       {ticket && <article ref={ticketRef} tabIndex={-1} aria-label="DTT founding customer ticket" className="dtt-waitlist-ticket mb-6 overflow-hidden text-left">
         <div className="border-b border-dashed border-primary/50 px-5 py-4">
           <p className="font-display text-lg font-bold text-primary notranslate" translate="no">DTT™</p>

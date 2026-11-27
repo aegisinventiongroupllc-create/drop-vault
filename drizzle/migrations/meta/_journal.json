@@ -981,6 +981,20 @@
       "when": 1795746029673,
       "tag": "0139_retain_existing_customer_tickets_and_identity_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1795746643008,
+      "tag": "0140_harden_private_identity_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 141,
+      "version": "7",
+      "when": 1795746783039,
+      "tag": "0141_minimal_encrypted_customer_age_audit",
+      "breakpoints": true
     }
   ]
 }

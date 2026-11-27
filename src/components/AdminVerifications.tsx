@@ -74,15 +74,20 @@ export default function AdminVerifications() {
       catch { if (active) setImageError("Could not load private documents. Close and retry."); }
     };
     void sign();
-    const timer = setInterval(sign, 240000);
+    const timer = setInterval(sign, 45000);
     return () => { active = false; clearInterval(timer); };
-  }, [open]);
+  }, [open, audience]);
+  useEffect(() => {
+    if (access === "admin") return;
+    setRows([]); setOpen(null); setUrls({}); setNotes("");
+  }, [access]);
   const decide = async (status: "approved" | "rejected" | "flagged") => {
     if (!open || saving) return;
     setSaving(true);
     try {
       const data = await call({ action: "decide", id: open.id, status, notes, confirmed, face_confirmed: faceConfirmed, residence_country: residenceConfirmed ? residenceCountry : null, residence_confirmed: residenceConfirmed });
       toast.success(status === "approved" ? "Adult identity approved" : status === "flagged" ? "Submission flagged for review" : "Submission declined");
+      if (audience === "customer" && data.cleanup === "pending") toast.error("Decision saved, but customer evidence deletion needs attention. New collection remains paused.");
       if (audience === "creator" && status !== "flagged" && data.notification !== "sent") toast.warning("Decision saved. Email was not sent; the account can read the result in DTT.");
       setOpen(null); await load();
     } catch (error) { toast.error(error instanceof Error ? error.message : "Decision failed"); }
@@ -99,7 +104,7 @@ export default function AdminVerifications() {
   if (access === "loading") return <p className="text-muted-foreground">Checking administrator access…</p>;
   if (access !== "admin") return <section className="space-y-3 py-6"><h2 className="font-bold">CREATOR VERIFICATIONS</h2><p className="text-muted-foreground">{access === "signed-out" ? "Your administrator session has expired. Return to administrator access to reopen your dashboard." : "This account does not have administrator privileges."}</p>{access === "signed-out" && <Button asChild variant="outline"><Link to="/admin-access">RETURN TO ADMIN ACCESS</Link></Button>}</section>;
   return <section className="space-y-5">
-    <header className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold text-lg">DTT AGE VERIFICATION</h2><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>void exportPage()} disabled={loading || !rows.length}>EXPORT THIS PAGE</Button><Button variant="outline" onClick={load} disabled={loading}>REFRESH</Button></div></header>
+    <header className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold text-lg">DTT AGE VERIFICATION</h2><div className="flex flex-wrap gap-2">{audience === "creator" && <Button variant="outline" onClick={()=>void exportPage()} disabled={loading || !rows.length}>EXPORT THIS PAGE</Button>}<Button variant="outline" onClick={load} disabled={loading}>REFRESH</Button></div></header>
     <div className="border-y border-border py-3 space-y-1"><p className="font-semibold text-sm">Human review queue</p><p className="text-sm text-muted-foreground">Private documents and guided face videos are human-review evidence, not specialist-certified identity or liveness. Review the clear ID and movements before approving. Customers receive tickets only after adult-identity approval; creator content still needs clearance.</p></div>
     <div className="flex gap-2">{(["creator","customer"] as const).map(value => <Button key={value} variant={audience === value ? "neon" : "outline"} onClick={() => { setAudience(value); setOffset(0); setOpen(null); }}>{value === "creator" ? "CREATOR REVIEW" : "CUSTOMER REVIEW"}</Button>)}</div>
     <div className="flex flex-wrap gap-2">{["pending","flagged","approved","rejected","all"].map(value => <Button key={value} variant={filter === value ? "neon" : "outline"} size="sm" onClick={() => { setFilter(value); setOffset(0); }}>{value === "rejected" ? "DECLINED" : value.toUpperCase()}</Button>)}</div>

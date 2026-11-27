@@ -31,15 +31,25 @@ export default function CreatorIdVerification({ userId, onApproved, audience = "
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [collectionReady, setCollectionReady] = useState(false);
   const initialized = useRef(false);
   useEffect(() => {
     let active = true;
     const load = async () => {
       const { data: profile, error: profileError } = await supabase.from("profiles").select("verification_status,verification_reviewer_notes,legal_first_name,legal_last_name,date_of_birth,display_name").eq("user_id", userId).maybeSingle();
       const review = audience === "customer" ? await supabase.from("dtt_identity_reviews").select("status,reviewer_notes,legal_first_name,legal_last_name,date_of_birth").eq("user_id", userId).eq("audience", "customer").order("submitted_at", { ascending: false }).limit(1).maybeSingle() : null;
+      const { data: collection, error: collectionError } = await supabase.rpc("my_customer_age_collection_status");
+      const audit = audience === "customer" ? await supabase.functions.invoke("customer-age-status", { body: {} }) : null;
       const error = profileError ?? review?.error;
       const data = profile ? { ...profile, ...(audience === "customer" ? { verification_status: review?.data?.status ?? "unsubmitted", verification_reviewer_notes: review?.data?.reviewer_notes ?? null, legal_first_name: review?.data?.legal_first_name ?? "", legal_last_name: review?.data?.legal_last_name ?? "", date_of_birth: review?.data?.date_of_birth ?? null } : {}) } : null;
       if (!active) return;
+      setCollectionReady(!collectionError && collection && typeof collection === "object" && !Array.isArray(collection) && collection.collection_ready === true);
+      if (audience === "customer" && !audit?.error && audit?.data?.decision) {
+        const decision = audit.data.decision;
+        setStatus(decision.status === "approved" && decision.expires_on >= new Date().toISOString().slice(0,10) ? "approved" : "rejected");
+        setNotes(decision.status === "rejected" ? "Your age check was declined. Identity images and face video have been deleted." : null);
+        setLoading(false); return;
+      }
       if (error) toast.error("Could not load identity status");
       if (data) {
         setStatus(data.verification_status as Status); setNotes(data.verification_reviewer_notes);
@@ -68,6 +78,7 @@ export default function CreatorIdVerification({ userId, onApproved, audience = "
     setFiles(current => ({ ...current, [slot]: file }));
   };
   const submit = async () => {
+    if (!collectionReady) { toast.error("New identity submissions are paused while privacy safeguards are finalized."); return; }
     const age = identityAge(dob);
     if (name.trim().length < 2 || name.trim().length > 160 || age === null || age < 18 || !files.front || !files.back || !files.selfie || !validFaceReview(faceVideo) || !faceConsent || !expires || !/^[A-Z]{2}$/.test(issuingCountry) || !documentNumber.trim()) { toast.error("Complete the document details, three clear photos and private face check."); return; }
     setBusy(true);
@@ -104,6 +115,7 @@ export default function CreatorIdVerification({ userId, onApproved, audience = "
   const canContinue = canContinueVerification(step, details, files) && (step < 2 || (validFaceReview(faceVideo) && faceConsent));
   if (loading) return <p className="text-muted-foreground">Loading verification…</p>;
   if (status === "approved") return <div className="border border-success rounded-md p-4"><h3 className="font-bold text-success">DTT Age Verification · Approved</h3><p className="text-sm text-muted-foreground">{audience === "customer" ? "Your adult identity was approved by DTT. You can now join the customer waiting list and receive your ticket." : "Your documents were approved by DTT. Content uploads are available subject to account requirements."}</p></div>;
+  if (!collectionReady && !["pending", "flagged"].includes(status)) return <section className="space-y-3 border-y border-border py-4"><h3 className="font-semibold">DTT Age Verification</h3><p className="text-sm text-muted-foreground">New identity submissions are paused while DTT finalizes private review and deletion safeguards. Please do not send ID photos by email.</p><Button variant="outline" onClick={() => window.dispatchEvent(new Event("focus"))}>CHECK AVAILABILITY</Button></section>;
   return <div className="space-y-4">
     <header className="space-y-2"><h3 className="font-semibold text-foreground">DTT Age Verification</h3><p className="text-sm text-muted-foreground">4 steps. Have a clear, current state ID, government photo ID or passport ready.</p><ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1"><li>Type your name and birthday exactly as on your ID</li><li>Photograph both sides of your ID; for a passport, use the photo-details page and signature page</li><li>Take a holding-ID photo with your dated DTT note, then record the guided face movements</li><li>Check everything and submit — DTT reviews it privately</li></ol></header>
     {status === "pending" || status === "flagged" ? <div className="text-gold"><p>{status === "flagged" ? "Your submission needs further review." : "Your submission is pending review."} {audience === "customer" ? "Your ticket becomes available after DTT approves your adult identity." : "Public publishing remains locked."}</p>{notes && <p className="whitespace-pre-wrap">{notes}</p>}<Button variant="outline" className="mt-3" onClick={() => window.dispatchEvent(new Event("focus"))}>CHECK REVIEW STATUS</Button></div> : <>

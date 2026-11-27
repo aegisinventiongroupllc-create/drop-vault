@@ -1574,6 +1574,21 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_age_audits: {
+        Row: {
+          encrypted_decision: string
+          user_id: string
+        }
+        Insert: {
+          encrypted_decision: string
+          user_id: string
+        }
+        Update: {
+          encrypted_decision?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customer_launch_waitlist: {
         Row: {
           country: string
@@ -3302,6 +3317,11 @@ export type Database = {
           user_id: string
         }[]
       }
+      dtt_evidence_referenced: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
+      dtt_identity_collection_ready: { Args: never; Returns: boolean }
       dtt_review_evidence_referenced: {
         Args: { _path: string }
         Returns: boolean
@@ -3309,6 +3329,10 @@ export type Database = {
       fifth_video_storage_access: {
         Args: { _bucket: string; _path: string }
         Returns: boolean
+      }
+      finalize_customer_age_review: {
+        Args: { _encrypted: string; _id: string }
+        Returns: undefined
       }
       get_active_teasers: {
         Args: never
@@ -3553,6 +3577,7 @@ export type Database = {
         Args: { _payment_id: string; _request_id: string }
         Returns: boolean
       }
+      my_customer_age_collection_status: { Args: never; Returns: Json }
       my_customer_entry_offer: { Args: never; Returns: Json }
       my_customer_launch_waitlist: {
         Args: { _action?: string; _country?: string; _language?: string }

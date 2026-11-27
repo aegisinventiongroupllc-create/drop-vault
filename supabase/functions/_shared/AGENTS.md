@@ -1,4 +1,5 @@
 # Shared security rules
+- Customer cleanup signs no media, accepts only server-selected customer paths, encrypts minimal account-bound decisions, and finalizes only after Storage deletion; never targets creator records. Why: retries must not expose identity or erase statutory evidence.
 - Admin-code login is complete only after account-token exchange and server-role verification; old code tabs restore that session before private views mount. Why: avoid a second account login without allowing passcode-only identity access.
 - Signup notices use verified auth events or authenticated account IDs, server-read milestones and per-account/event email idempotency; browser problems are allowlisted and labeled unverified, with no raw error data; sending never gates signup. Why: prevent spoofed identities, repeated notices and false success reports.
 - Customer entry checkout rejects pre-launch attempts and resolves lifetime annual waitlist pricing server-side; receipt verification matches exact invoiced price and credit rechecks discount eligibility. Why: preserve paid access without trusting client discounts or early purchases.

@@ -1,8 +1,10 @@
 # Roadmap
 
 ## Sensitive identity safeguards and investor plan v4 — November 27
-- [ ] Review and harden identity storage, immutable evidence, review authorization, access auditing, response minimization and camera cleanup; test with isolated fixtures, not real IDs.
-- [ ] Update investor plan for customer/creator human review, ordered lists and privacy readiness; preserve pricing and founder story once; visually inspect every page of version 4.
+- [x] Added customer-only immediate deletion/finalization and account-bound AES-GCM timestamp/status/expiration audit; customer export disabled, creator evidence excluded. Owner's 7-year/5-year dissolution policy recorded separately, subject to qualified legal confirmation; no biometric templates.
+- [x] Hardened identity buckets (private, 10MB, allowlisted types), immutable fields/linkage, approval evidence checks, audited admin access, 60-second links, no-store responses and camera track/chunk cleanup. Server collection and uploads fail closed. Thirty checks passed; signed-in phone status readback confirmed pause/no upload controls and privileged cleanup denial, no page errors. Quick scans found no new issues; completed deep scan covers prior saved version only. Review/status/cleanup functions deployed; frontend not published.
+- [x] Created investor plan v4 with customer/creator review, lists, privacy requirements, unchanged economics and founder story once. Visually inspected all 15 pages and fixed split paragraph/orphaned table row; grouped plan versions in Files.
+- [ ] Collection reopening blocked: managed scheduling repair succeeded but no callback scheduling tool exists in this session; authenticated retry endpoint is deployed but unscheduled. Need reliable monitored retries to meet 24-hour ceiling, backup/restore deletion lifecycle, creator statutory retention/legal notice review and synthetic administrator decision→deletion→ticket end-to-end verification. No real IDs collected or approved.
 
 ## Identity-verified waiting lists and founding clarification — November 27
 - [x] New customer tickets require server-recorded manual adult/face approval; existing ticket identities and country updates preserved. Private account/email/ticket linkage reused, administrator list now displays ticket number. DTT now, Persona later; sandbox never approves.
