@@ -11,7 +11,6 @@ import { CREATOR_SIGNUP_URL } from "@/lib/foundingInvitation";
 import { customerWaitlistTicket, type CustomerWaitlistTicket } from "@/lib/customerWaitlistTicket";
 import { createCustomerTicketImage, saveCustomerTicketImage } from "@/lib/customerTicketImage";
 import GalaxyReel from "./GalaxyReel";
-import MiniGlobe from "./MiniGlobe";
 import { ENTRY_GLOBE } from "./EntryPassGlobe";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./ui/dialog";
 import { shouldCelebrateWaitlistJoin } from "@/lib/waitlistCelebration";
@@ -91,8 +90,8 @@ export default function CustomerLaunchWaitlist() {
     window.location.assign(CREATOR_SIGNUP_URL);
   };
   return <main className="dtt-customer-waitlist relative isolate min-h-[100dvh] bg-background text-foreground">
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-20"><GalaxyReel scope="brb" seconds={300} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} /><div className="absolute inset-0 flex items-center justify-center opacity-75" style={{ transform: "translateZ(0)" }}><MiniGlobe size={320} speed={0.05} lowPower lights backdrop={false} cameraDistance={3.8} /></div></div>
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background/40" />
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-20"><GalaxyReel scope="brb" seconds={300} styleOverride="cluster" toneOverride={ENTRY_GLOBE.tone} /></div>
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background/50" />
     <div className="mx-auto max-w-md px-5 pb-10 pt-16 text-center">
       <p className="text-xs font-semibold text-primary">DROP THAT THING™</p>
       <h1 className="mt-3 text-2xl font-semibold text-foreground">{joined ? "You’re on the list." : "Your front-row start."}</h1>
