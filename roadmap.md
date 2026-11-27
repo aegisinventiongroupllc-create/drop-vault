@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sensitive identity safeguards and investor plan v4 — November 27
+- [ ] Review and harden identity storage, immutable evidence, review authorization, access auditing, response minimization and camera cleanup; test with isolated fixtures, not real IDs.
+- [ ] Update investor plan for customer/creator human review, ordered lists and privacy readiness; preserve pricing and founder story once; visually inspect every page of version 4.
+
 ## Identity-verified waiting lists and founding clarification — November 27
 - [x] New customer tickets require server-recorded manual adult/face approval; existing ticket identities and country updates preserved. Private account/email/ticket linkage reused, administrator list now displays ticket number. DTT now, Persona later; sandbox never approves.
 - [x] Added private silent recorded face evidence to new customer/creator submissions: left/right 3 seconds each, up/down 2 seconds each, with initial 2-second face view, explicit consent and manual confirmation. Private 10MB storage, immutable evidence, owner/admin-only reads; no certified liveness claims.
