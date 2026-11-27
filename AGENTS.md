@@ -1,4 +1,5 @@
 # Project architecture rules
+- Investor slides use a separate informational route, fixed-resolution scaling and a shared registry for viewing, presenting and printing; they never query accounts or grant marketplace access. Why: keep investor sharing separate from protected product flows.
 - Email-field admin shortcuts open the dashboard only after restoring server-verified administrator access; otherwise open protected sign-in and never grant privileges. Why: convenience must not expose administrative records.
 - Pages use pink EntryPassGlobe; personal globes only in country picker, color designer, signed-in idle. Why: branding.
 - ShareQrCode preserves finder patterns, central branding, high correction, outer glow and quiet-zone PNG exports. Why: protect scanning and motion accessibility.

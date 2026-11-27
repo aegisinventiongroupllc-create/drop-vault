@@ -25,6 +25,7 @@ import EntryPassGate from "./components/EntryPassGate";
 import PersonaTest from "./pages/PersonaTest";
 import FoundingCreators from "./pages/FoundingCreators";
 import EmailVerification from "./components/EmailVerification";
+import InvestorPresentation from "./pages/InvestorPresentation";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,9 @@ const App = () => (
             <AutoTranslator />
             <LanguageTransition />
             <SiteLanguagePicker />
+            <Routes>
+              <Route path="/investors" element={<InvestorPresentation />} />
+              <Route path="*" element={<>
             <VipFogMachine />
             <BeRightBack />
             <LaunchIntro />
@@ -71,6 +75,8 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </GeoGate>
+              </>} />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </I18nProvider>

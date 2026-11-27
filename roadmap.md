@@ -1,5 +1,9 @@
 # Roadmap
 
+## Concise investor presentation — November 27
+- [x] Built an 11-slide DTT-branded presentation at /investors with customer/creator benefits, itemized menu pricing, conditional VIP scenarios, trust, growth, Space City and founder invitation; speaker notes retain detail.
+- [x] Desktop navigation, overview, saved notes and fullscreen passed; phone swipe and no horizontal overflow passed, no page errors. All 11 exported pages inspected, corrected VIP footer overlap and language control intrusion. Build OK; marketplace access unchanged. Not published.
+
 ## Investor plan customer experience — November 27
 - [x] Expanded customer signup, entry/library pricing, discovery, dashboard, request checkout/status and personal-world perks; founder story remains once.
 - [x] Added first-person openness to help, feedback and new ideas. Saved investor plan v3; visually checked all 13 pages, fixed crowded table headers and verified pricing text.
