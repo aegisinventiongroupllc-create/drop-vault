@@ -3113,6 +3113,7 @@ export type Database = {
         Returns: boolean
       }
       can_upload_request_delivery: { Args: { _name: string }; Returns: boolean }
+      can_view_feed: { Args: { _uid: string }; Returns: boolean }
       claim_founding_slot: { Args: { _creator_id: string }; Returns: undefined }
       claim_vip_invoice: { Args: { _checkout: string }; Returns: boolean }
       comment_author: { Args: { _id: string }; Returns: string }
