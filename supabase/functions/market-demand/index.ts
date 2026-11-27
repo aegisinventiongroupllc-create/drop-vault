@@ -25,6 +25,19 @@ Deno.serve(async (req) => {
       : { data: false };
     if (isAdmin !== true) return json({ error: "Unauthorized" }, 401);
 
+    // Save a visitor-interest request (signed-in administrators only).
+    if (req.method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      const keyword = typeof body?.keyword === "string" ? body.keyword.trim().slice(0, 200) : "";
+      if (!keyword) return json({ error: "A request is required" }, 400);
+      const { error: insertError } = await supabase.from("market_demand").insert({ keyword, user_email: user!.email ?? null });
+      if (insertError) {
+        console.error("market-demand insert failed", insertError);
+        return json({ error: "Could not save request" }, 500);
+      }
+      return json({ ok: true });
+    }
+
     const { data, error } = await supabase
       .from("market_demand")
       .select("keyword, search_count, created_at")
