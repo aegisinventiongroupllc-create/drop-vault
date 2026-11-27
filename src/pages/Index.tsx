@@ -253,7 +253,21 @@ const Index = () => {
       setAuthReady(true);
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      const signedInId = session?.user?.id;
+      if (event === "SIGNED_IN" && signedInId) {
+        const flag = `dtt_admin_routed_${signedInId}`;
+        const previewing = localStorage.getItem("dtt_admin_view_as_creator") === "1" || localStorage.getItem("dtt_admin_view_as_customer") === "1";
+        if (!previewing && sessionStorage.getItem(flag) !== "1") {
+          setTimeout(() => {
+            void supabase.rpc("has_role", { _user_id: signedInId, _role: "admin" }).then(({ data }) => {
+              if (data !== true) return;
+              try { sessionStorage.setItem(flag, "1"); } catch { /* ignore */ }
+              navigate("/admin-access");
+            });
+          }, 0);
+        }
+      }
       // Defer Supabase calls to avoid deadlocks inside the callback
       handleSession(session?.user?.id ?? null, session?.user?.email ?? null, true);
     });

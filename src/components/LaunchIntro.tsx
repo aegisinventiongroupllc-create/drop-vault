@@ -255,7 +255,7 @@ export default function LaunchIntro() {
           <div className="dtt-intro-launch" data-intro-keep>
             <p className="font-display text-sm font-bold text-primary">{countdown.complete ? "HAPPY NEW YEAR!" : "NEW YEAR’S LAUNCH"}</p>
             {!countdown.complete && <div role="timer" aria-label="New Year's launch countdown, New York midnight" className="mx-auto mt-2 grid max-w-xs grid-cols-4 gap-3 tabular-nums">
-              {([[countdown.days, "DAYS"], [countdown.hours, "HOURS"], [countdown.minutes, "MINUTES"], [countdown.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span className="block text-xl font-bold text-foreground">{String(value).padStart(2, "0")}</span><span className="text-[9px] text-foreground/80">{label}</span></div>)}
+              {([[countdown.days, "DAYS"], [countdown.hours, "HOURS"], [countdown.minutes, "MINUTES"], [countdown.seconds, "SECONDS"]] as const).map(([value, label]) => <div key={label}><span className="diamond-digit block text-3xl font-extrabold">{String(value).padStart(2, "0")}</span><span className="text-[9px] text-foreground/80">{label}</span></div>)}
             </div>}
             <p className="mt-2 text-[10px] text-foreground/80">January 1, 2027 · Midnight in New York</p>
           </div>
