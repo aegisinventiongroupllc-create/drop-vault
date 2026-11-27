@@ -123,3 +123,14 @@ export function isAdminUnlocked(): boolean {
     return false;
   }
 }
+
+/** Headers for admin-only server calls: the signed-in account session is what the server checks. */
+export async function adminRequestHeaders(): Promise<Record<string, string>> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  const { data: { session } } = await supabase.auth.getSession();
+  return {
+    "Content-Type": "application/json",
+    apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+  };
+}

@@ -5,26 +5,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-passcode",
 };
 
-const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE") ?? "";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Admin-only: demand data is private.
-  const passcode = req.headers.get("x-admin-passcode") ?? "";
-  if (!ADMIN_PASSCODE || passcode !== ADMIN_PASSCODE) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+    const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Admin-only: the caller must be signed in to an account holding the admin role.
+    // The access code alone never opens these records.
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } };
+    const { data: isAdmin } = user
+      ? await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
+      : { data: false };
+    if (isAdmin !== true) return json({ error: "Unauthorized" }, 401);
 
     const { data, error } = await supabase
       .from("market_demand")

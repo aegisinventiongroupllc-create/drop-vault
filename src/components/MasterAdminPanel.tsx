@@ -27,7 +27,7 @@ import {
 } from "@/lib/paymentSplit";
 
 import {
-  ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY, getAdminPasscode, verifyAdminPasscode,
+  ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY, getAdminPasscode, adminRequestHeaders, verifyAdminPasscode,
 } from "@/lib/adminSession";
 
 export { ADMIN_OVERRIDE_KEY, ADMIN_PASSCODE_KEY };
@@ -111,10 +111,9 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
 
   const callFinance = async (payload: Record<string, unknown>) => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const passcode = getAdminPasscode();
     const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-finance`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
+      headers: await adminRequestHeaders(),
       body: JSON.stringify(payload),
     });
     return await res.json();
@@ -252,7 +251,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const url = `https://${projectId}.supabase.co/functions/v1/legal-logs?search=${encodeURIComponent(search)}`;
       const res = await fetch(url, {
-        headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() },
+        headers: await adminRequestHeaders(),
       });
       const data = await res.json();
       setLegalLogs(Array.isArray(data) ? data : []);
@@ -733,7 +732,7 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
                 setDemandLoading(true);
                 try {
                   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/market-demand`, { headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() } });
+                  const res = await fetch(`https://${projectId}.supabase.co/functions/v1/market-demand`, { headers: await adminRequestHeaders() });
                   const data = await res.json();
                   setDemandKeywords(Array.isArray(data) ? data : []);
                 } catch { setDemandKeywords([]); }

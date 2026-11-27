@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAdminPasscode } from "@/lib/adminSession";
+import { getAdminPasscode, adminRequestHeaders } from "@/lib/adminSession";
 
 interface Suggestion {
   id: string; role: string | null; original_text: string; english_text: string | null;
@@ -16,7 +16,7 @@ const AdminSuggestions = () => {
     try {
       const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/admin-finance`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": getAdminPasscode() },
+        headers: await adminRequestHeaders(),
         body: JSON.stringify({ action: "suggestions" }),
       });
       const d = await res.json();
