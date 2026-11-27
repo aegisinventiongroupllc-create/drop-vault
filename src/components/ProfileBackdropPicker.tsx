@@ -41,7 +41,7 @@ export default function ProfileBackdropPicker({ creator = false }: { creator?: b
         setAvatar(identity.data?.avatar_config);
         setSelected(setting.data?.design_id ?? "beach"); setSaved(setting.data?.design_id ?? null); setPreviousPath(setting.data?.upload_path ?? null);
         if (setting.data?.upload_path) {
-          const result = await supabase.storage.from("profile-backdrops").createSignedUrl(setting.data.upload_path, 600);
+          const result = await supabase.storage.from("profile-backdrops").createSignedUrl(setting.data.upload_path, 60);
           if (result.error) throw result.error;
           if (active) setPreview(result.data.signedUrl);
         }

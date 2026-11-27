@@ -173,9 +173,10 @@ const ProfileAvatar = ({ config, className, label, previewUrl, creatorPhotoPath 
     const cached = creatorPhotoCache.get(creatorPhotoPath);
     if (cached) { setCreatorPhotoUrl(cached); return; }
     let active = true;
-    void supabase.storage.from("creator-profile-photos").createSignedUrl(creatorPhotoPath, 3600).then(({ data }) => {
+    void supabase.storage.from("creator-profile-photos").createSignedUrl(creatorPhotoPath, 60).then(({ data }) => {
       if (!active || !data?.signedUrl) return;
       creatorPhotoCache.set(creatorPhotoPath, data.signedUrl);
+      setTimeout(() => creatorPhotoCache.delete(creatorPhotoPath), 50000);
       setCreatorPhotoUrl(data.signedUrl);
     });
     return () => { active = false; };

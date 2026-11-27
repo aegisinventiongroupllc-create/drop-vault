@@ -13,13 +13,16 @@ Deno.serve(async req=>{
   const db=createClient(url,key);const {data:claims,error}=await db.auth.getClaims(token);if(error||!claims?.claims?.sub)return json({error:'Sign in required'},401);
   const parsed=schema.safeParse(await req.json());if(!parsed.success)return json({error:'Invalid media request'},400);
   const caller=createClient(url,Deno.env.get('SUPABASE_ANON_KEY')??'',{global:{headers:{Authorization:`Bearer ${token}`}}});
+  const {data:pass}=await db.from('entry_passes').select('expires_at').eq('user_id',claims.claims.sub).eq('status','active').order('expires_at',{ascending:false}).limit(1).maybeSingle();
+  const passLeft=pass?.expires_at?Math.floor((Date.parse(pass.expires_at)-Date.now())/1000):60;
+  const linkSeconds=Math.max(1,Math.min(60,Number.isFinite(passLeft)?passLeft:1));
   const items=await Promise.all(parsed.data.paths.map(async path=>{
    if(path.includes('..'))return {path,signedUrl:null};
    // Original-object RLS checks entry access, ownership and current content clearance.
-   const {data,error}=await caller.storage.from('teasers').createSignedUrl(path,300);
+   const {data,error}=await caller.storage.from('teasers').createSignedUrl(path,linkSeconds);
    if(error||!data?.signedUrl)return {path,signedUrl:null};
-   try{return {path,signedUrl:await deliveryUrl(db,'teasers',path,300)??data.signedUrl};}catch{return {path,signedUrl:null};}
+   try{return {path,signedUrl:await deliveryUrl(db,'teasers',path,linkSeconds)??data.signedUrl};}catch{return {path,signedUrl:null};}
   }));
-  return json({items,link_seconds:300});
+  return json({items,link_seconds:linkSeconds});
  }catch{return json({error:'Playback unavailable'},503);}
 });

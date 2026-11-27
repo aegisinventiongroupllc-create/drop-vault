@@ -40,7 +40,7 @@ const CreatorProfilePhotoGallery = ({ creatorId, uploadAllowed = false, onPrepar
     await Promise.all(rows.map(async (photo) => {
       const cached = signedUrlCache.get(photo.storage_path);
       if (cached) { nextUrls[photo.id] = cached; return; }
-      const { data: signed } = await supabase.storage.from("creator-profile-photos").createSignedUrl(photo.storage_path, 3600);
+      const { data: signed } = await supabase.storage.from("creator-profile-photos").createSignedUrl(photo.storage_path, 60);
       if (signed?.signedUrl) {
         signedUrlCache.set(photo.storage_path, signed.signedUrl);
         nextUrls[photo.id] = signed.signedUrl;

@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     if (ban) return json({ error: "Account is restricted" }, 403);
     const path = request.delivery_path;
     if (!path || !path.startsWith(`${request.creator_id}/${body.request_id}/`) || path.includes("..")) return json({ error: "Video unavailable" }, 404);
-    let seconds = 60;
+    let seconds = 30;
     if (uid !== request.creator_id) {
       const {data:cleared,error:clearanceError}=await admin.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:path});
       if(clearanceError||cleared!==true)return json({error:'Participant review required'},403);

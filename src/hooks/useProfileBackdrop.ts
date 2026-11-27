@@ -17,11 +17,11 @@ export function useProfileBackdrop(userId?: string | null) {
       if (cancelled || error) return;
       let next = profileBackdropImage(data?.design_id);
       if (data?.upload_path) {
-        const signed = await supabase.storage.from("profile-backdrops").createSignedUrl(data.upload_path, 600);
+        const signed = await supabase.storage.from("profile-backdrops").createSignedUrl(data.upload_path, 60);
         if (signed.error) return;
         next = signed.data.signedUrl;
         if (timer) clearTimeout(timer);
-        timer = setTimeout(() => void load(), 540000);
+        timer = setTimeout(() => void load(), 50000);
       } else if (parseCreatorBackdrop(data?.design_id)) next = creatorBackdropImage(data?.design_id);
       if (!cancelled) setImage(next ?? profileBackdropImage("beach"));
     }
