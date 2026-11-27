@@ -237,6 +237,10 @@ const MasterAdminPanel = ({ onBack }: { onBack: () => void }) => {
       setError(false);
       fetchLiveCreators();
     } else {
+      // Signed out: send the admin to the two-step sign-in instead of a bare "wrong code".
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { window.location.assign("/admin-access"); return; }
       setError(true);
     }
   };

@@ -19,9 +19,10 @@ const RoleSelection = ({ onSelect }: RoleSelectionProps) => {
   const handleSelect = async (role: UserRole) => {
     const trimmed = email.trim();
     // Staff access code (verified on the server, never stored in the app)
-    if (trimmed && !trimmed.includes("@") && (await verifyAdminPasscode(trimmed))) {
+    if (/^\d{3,12}$/.test(trimmed)) {
+      // A code alone never signs in; without an admin session, go to the two-step admin sign-in.
       setError("");
-      navigate("/admin-portal");
+      navigate((await verifyAdminPasscode(trimmed)) ? "/admin-portal" : "/admin-access");
       return;
     }
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
