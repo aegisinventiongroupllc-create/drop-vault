@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
 import { bunnyApi, UUID } from '../_shared/bunnyStream.ts';
-const schema = z.object({ action: z.enum(['start','complete','cancel','delete']), bucket: z.enum(['vault','teasers']), path: z.string().min(1).max(300), media_id: z.string().uuid().optional() });
+const schema = z.object({ action: z.enum(['start','complete','cancel','delete']), bucket: z.enum(['vault','teasers','request-deliveries']), path: z.string().min(1).max(300), media_id: z.string().uuid().optional() });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type':'application/json', 'Cache-Control':'no-store' } });
 Deno.serve(async req => {
  if (req.method === 'OPTIONS') return new Response('ok',{headers:corsHeaders});
@@ -22,7 +22,17 @@ Deno.serve(async req => {
   const {data:withdrawn,error:wErr} = await db.from('creator_consent_withdrawals').select('id').eq('creator_id',uid).maybeSingle();
   if (wErr) return json({error:'Upload unavailable'},503);
   if (withdrawn) return json({error:'Consent withdrawn: streaming copies are archived'},403);
-  if (!path.startsWith(`${uid}/`) || path.includes('..') || path.split('/').length !== 2) return json({error:'Owned original required'},403);
+  const requestDelivery = bucket === 'request-deliveries';
+  if (!path.startsWith(`${uid}/`) || path.includes('..') || path.split('/').length !== (requestDelivery ? 3 : 2)) return json({error:'Owned original required'},403);
+  if (requestDelivery) {
+    if (!['start','complete'].includes(action)) return json({error:'Customer deliveries must be retained'},403);
+    const requestId = path.split('/')[1];
+    if (!UUID.test(requestId)) return json({error:'Owned request required'},403);
+    const {data:request,error:requestError} = await db.from('custom_requests').select('creator_id,status,delivery_path').eq('id',requestId).maybeSingle();
+    if (requestError || request?.creator_id !== uid || !['accepted','paid','completed'].includes(request?.status ?? '') || (request?.delivery_path && request.delivery_path !== path)) return json({error:'Owned agreed request required'},403);
+    const {data:cleared,error:clearanceError} = await db.rpc('content_is_cleared',{_bucket:bucket,_path:path});
+    if (clearanceError || cleared !== true) return json({error:'Participant approval required'},403);
+  }
   // Use the caller session for the existing audited creator gate.
   const caller = createClient(url,Deno.env.get('SUPABASE_ANON_KEY') ?? '',{global:{headers:{Authorization:`Bearer ${token}`}}});
   const {data:eligible,error:gateError} = await caller.rpc('can_upload_creator_media',{_creator_id:uid});

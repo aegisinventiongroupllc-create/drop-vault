@@ -14,6 +14,7 @@ export interface CustomRequestReceipt {
 }
 
 export interface PayableRequest {
+  pricing_mode?: string;
   id: string;
   customer_id: string;
   status: string;
@@ -24,7 +25,8 @@ export interface PayableRequest {
 export function priceAgreedRequest(request: PayableRequest | null, userId: string): { base_usd: number; amount_usd: number } | null {
   if (!request || request.customer_id !== userId || request.status !== "accepted") return null;
   const base = Number(request.amount_usd);
-  if (!Number.isFinite(base) || base <= 0 || base > MAX_CUSTOM_REQUEST_BASE_USD) return null;
+  const max = request.pricing_mode === "menu_usd" ? 99999999.99 : MAX_CUSTOM_REQUEST_BASE_USD;
+  if (!Number.isFinite(base) || base <= 0 || base > max || (request.pricing_mode === "menu_usd" && base < 25) || Math.abs(base * 100 - Math.round(base * 100)) > 0.00001) return null;
   return { base_usd: base, amount_usd: Math.round((base + CUSTOM_REQUEST_FEES_USD) * 100) / 100 };
 }
 
@@ -38,7 +40,7 @@ export function verifyCustomRequestInvoice(receipt: CustomRequestReceipt, value:
   const paid = Number(invoice.amount_paid);
   const due = Number(invoice.amount_to_pay);
   return !!receipt.payment_id && !!receipt.order_id && !!receipt.request_id && !!receipt.user_id
-    && Number.isFinite(base) && base > 0 && base <= MAX_CUSTOM_REQUEST_BASE_USD
+    && Number.isFinite(base) && base > 0 && base <= 99999999.99
     && Math.abs(total - (base + CUSTOM_REQUEST_FEES_USD)) < 0.001
     && receipt.currency === "USD"
     && invoiceKey(invoice.uuid) === invoiceKey(receipt.payment_id)

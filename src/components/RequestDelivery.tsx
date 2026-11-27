@@ -6,6 +6,7 @@ import { watermarkCreatorMedia } from "@/lib/mediaWatermark";
 import { uploadBrandedFile } from '@/lib/resumableUpload';
 import { canStageRequest, requestAccessActive, requestVideoLinkSeconds, REQUEST_RENEWAL_TOKENS } from "@/lib/requestDelivery";
 import type { CustomRequestRow } from "@/hooks/useCustomRequests";
+import ProtectedVideo from "@/components/ProtectedVideo";
 
 export default function RequestDelivery({ request, role, onChange }: { request: CustomRequestRow; role: "creator" | "customer"; onChange: () => void }) {
   const input = useRef<HTMLInputElement>(null);
@@ -21,6 +22,11 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
     const timer = window.setInterval(() => { tick((v) => v + 1); if (!requestAccessActive(request.delivery_access_until)) setVideo(null); }, 1000);
     return () => window.clearInterval(timer);
   }, [request.delivery_access_until, role]);
+
+  const prepareStreaming = async (path: string) => {
+    const { error } = await supabase.functions.invoke("bunny-upload", { body: { action: "start", bucket: "request-deliveries", path } });
+    if (error) toast({ title: "Private delivery saved", description: "The streaming copy could not be prepared. Retry from this request; the protected original is retained.", variant: "destructive" });
+  };
 
   const upload = async (file: File) => {
     if (!file.type.startsWith("video/")) { toast({ title: "Choose a video", variant: "destructive" }); return; }
@@ -43,6 +49,7 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
       }
       const result = await supabase.rpc("attach_request_delivery", { _request_id: request.id, _path: stagedPath });
       if (result.error) throw result.error;
+      await prepareStreaming(stagedPath);
       stagedPath = null;
       toast({ title: request.status === "paid" ? "Request delivered — 14-day access started" : "Video saved — waiting for confirmed payment" });
       onChange();
@@ -84,7 +91,7 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
         try{
           const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error('Sign in required');
           const {data:objects,error}=await supabase.storage.from('request-deliveries').list(`${user.id}/${request.id}`,{limit:100});if(error)throw error;
-          for(const object of objects??[]){const path=`${user.id}/${request.id}/${object.name}`;const {data}=await supabase.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:path});if(data===true){const attached=await supabase.rpc('attach_request_delivery',{_request_id:request.id,_path:path});if(attached.error)throw attached.error;onChange();return;}}
+          for(const object of objects??[]){const path=`${user.id}/${request.id}/${object.name}`;const {data}=await supabase.rpc('content_is_cleared',{_bucket:'request-deliveries',_path:path});if(data===true){const attached=await supabase.rpc('attach_request_delivery',{_request_id:request.id,_path:path});if(attached.error)throw attached.error;await prepareStreaming(path);onChange();return;}}
           throw new Error('No approved staged video found. Complete participant review first.');
         }catch(e){toast({title:'Not attached',description:e instanceof Error?e.message:'Please retry',variant:'destructive'});}finally{setBusy(false);}
       }}>ATTACH APPROVED STAGED VIDEO</Button>
@@ -96,10 +103,11 @@ export default function RequestDelivery({ request, role, onChange }: { request: 
   return <div className="mt-3 space-y-2">
     <p className="text-xs text-muted-foreground">{role === "creator" && request.status !== "completed" ? "Video ready — awaiting confirmed payment" : active ? `Access until ${new Date(request.delivery_access_until || "").toLocaleString()}` : "14-day access expired"}</p>
     <div className="flex flex-wrap gap-2">
+      {role === "creator" && <Button variant="outline" size="sm" disabled={busy} onClick={async () => { if (!request.delivery_path) return; setBusy(true); await prepareStreaming(request.delivery_path); setBusy(false); }}>RETRY STREAMING COPY</Button>}
       {(role === "creator" || active) && <Button variant="outline" size="sm" disabled={busy} onClick={() => void watch()}>WATCH REQUEST</Button>}
       {role === "customer" && request.status === "completed" && !active && <Button variant="neon" size="sm" disabled={busy} onClick={() => void action("renew")}>RENEW 14 DAYS — {REQUEST_RENEWAL_TOKENS} BT</Button>}
       {role === "creator" && request.status === "completed" && <Button variant="outline" size="sm" disabled={busy} onClick={() => void action("archive")}>CLEAR FROM MY WORKSPACE</Button>}
     </div>
-    {video && <video src={video} controls autoPlay playsInline controlsList="nodownload" className="w-full aspect-video rounded-lg bg-background" onError={() => { setVideo(null); toast({ title: "Video playback failed. Try opening it again.", variant: "destructive" }); }} />}
+    {video && <ProtectedVideo src={video} controls autoPlay playsInline controlsList="nodownload" className="w-full aspect-video rounded-lg bg-background" onError={() => { setVideo(null); toast({ title: "Video playback failed. Try opening it again.", variant: "destructive" }); }} />}
   </div>;
 }

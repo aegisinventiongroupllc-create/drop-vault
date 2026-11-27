@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { deliveryUrl } from "../_shared/bunnyStream.ts";
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
 Deno.serve(async (req) => {
@@ -30,6 +31,8 @@ Deno.serve(async (req) => {
       if (request.status !== "completed" || !Number.isFinite(remaining) || remaining <= 0) return json({ error: "14-day access expired or payment not confirmed" }, 403);
       seconds = Math.min(seconds, remaining);
     }
+    const streaming = await deliveryUrl(admin, "request-deliveries", path, seconds);
+    if (streaming) return json({ url: streaming });
     const signed = await admin.storage.from("request-deliveries").createSignedUrl(path, seconds);
     if (signed.error) return json({ error: "Video unavailable" }, 404);
     return json({ url: signed.data.signedUrl });

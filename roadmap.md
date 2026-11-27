@@ -1,5 +1,11 @@
 # Roadmap
 
+## Creator-set custom request menus — November 27
+- [x] Add verified-creator menu controls (six options, $25 minimum), open offers, 85/15 dollar checkout plus the confirmed $5 buyer fee, and receipt-only paid orders with selected turnaround days; vault/feed and existing Elite token requests preserved. Bunny request copies retain original private files and 30-second signing; no media or payments fabricated.
+- [x] Add onboarding perks and versioned investor plan without repeated founder reasoning. Real signed-in unapproved write denied; isolated phone/desktop menu save/reload and $46/$39.10/$6.90/$51 review checked with no page errors. Deployed functions and database tests passed; request publication after final commit.
+- [x] Include Pro/Elite launch-night gross-sales and break-even scenarios before token purchases: 500/$1,500 Pro plus 500/$3,500 Elite = $2.5M hypothetical gross sales, not guaranteed demand or profit. All 11 PDF pages inspected; fixed split comparison table, stranded closing text and split launch-night section.
+- [ ] Genuine approved-creator menu save → customer payment → cleared video playback requires an approved creator session, consenting content and owner-authorized live payment; available session is an unapproved customer. No account approvals or funds changed. New copy's professionally reviewed translations remain outstanding.
+
 ## Creator signup to owner approval — November 22
 - [ ] Walk creator account setup and private ID submission, then read the submission in the owner's review queue on phone and desktop.
 - [ ] Fix any reproduced blockers, test failed/retried submissions and approval restrictions, and verify saved status after reload.

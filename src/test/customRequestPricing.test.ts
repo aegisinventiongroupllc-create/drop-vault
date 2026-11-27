@@ -11,6 +11,9 @@ import {
 // The customer pays a $1 DTT fee and a $4 card-processing cover on top of the
 // base, and those fees never reduce the creator's share.
 describe("Custom request economy", () => {
+  it("protects the creator's 85% on a $46 menu option", () => {
+    expect(calculateCustomRequestSplit(46)).toMatchObject({ creatorShare: 39.1, platformShare: 6.9, invoiceTotal: 51 });
+  });
   it("splits the base 85/15", () => {
     expect(CUSTOM_REQUEST_CREATOR_PERCENT).toBe(85);
     expect(CUSTOM_REQUEST_PLATFORM_PERCENT).toBe(15);

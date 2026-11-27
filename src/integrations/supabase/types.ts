@@ -1182,6 +1182,33 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_request_menus: {
+        Row: {
+          creator_id: string
+          enabled: boolean
+          items: Json
+          open_requests: boolean
+          open_turnaround_days: number
+          updated_at: string
+        }
+        Insert: {
+          creator_id: string
+          enabled?: boolean
+          items?: Json
+          open_requests?: boolean
+          open_turnaround_days?: number
+          updated_at?: string
+        }
+        Update: {
+          creator_id?: string
+          enabled?: boolean
+          items?: Json
+          open_requests?: boolean
+          open_turnaround_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_split_settings: {
         Row: {
           creator_id: string
@@ -1474,11 +1501,15 @@ export type Database = {
           fulfilled_at: string | null
           fulfillment_deadline: string | null
           id: string
+          menu_snapshot: Json | null
           origin_country: string | null
           payment_id: string | null
           platform_share_usd: number
+          pricing_mode: string
+          request_nonce: string | null
           status: string
           tokens: number
+          turnaround_days: number
           updated_at: string
         }
         Insert: {
@@ -1500,11 +1531,15 @@ export type Database = {
           fulfilled_at?: string | null
           fulfillment_deadline?: string | null
           id?: string
+          menu_snapshot?: Json | null
           origin_country?: string | null
           payment_id?: string | null
           platform_share_usd?: number
+          pricing_mode?: string
+          request_nonce?: string | null
           status?: string
           tokens?: number
+          turnaround_days?: number
           updated_at?: string
         }
         Update: {
@@ -1526,11 +1561,15 @@ export type Database = {
           fulfilled_at?: string | null
           fulfillment_deadline?: string | null
           id?: string
+          menu_snapshot?: Json | null
           origin_country?: string | null
           payment_id?: string | null
           platform_share_usd?: number
+          pricing_mode?: string
+          request_nonce?: string | null
           status?: string
           tokens?: number
+          turnaround_days?: number
           updated_at?: string
         }
         Relationships: []
@@ -3131,6 +3170,16 @@ export type Database = {
         Args: { _bucket: string; _path: string }
         Returns: boolean
       }
+      create_menu_request: {
+        Args: {
+          _creator: string
+          _description: string
+          _item_index: number
+          _nonce: string
+          _offer: number
+        }
+        Returns: string
+      }
       creator_request_split_percent: {
         Args: { _creator_id: string }
         Returns: number
@@ -3449,6 +3498,10 @@ export type Database = {
       renew_subscription_atomic: {
         Args: { _expected_expiry: string; _subscription_id: string }
         Returns: string
+      }
+      request_menu_creator_approved: {
+        Args: { _creator: string }
+        Returns: boolean
       }
       reserve_vip_checkout: {
         Args: {

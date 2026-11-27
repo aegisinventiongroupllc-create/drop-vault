@@ -31,6 +31,14 @@ describe.skipIf(!db)('Bunny private delivery records',()=>{
  });
 });
 describe('Bunny playback boundaries',()=>{
+ it('signs a custom delivery for no more than 30 seconds',async()=>{
+  vi.stubGlobal('Deno',{env:{get:()=> 'non-secret-test-fixture'}});
+  const now=Math.floor(Date.now()/1000);
+  const url=await bunnyPlaybackUrl('00000000-0000-4000-8000-000000000001',30);
+  const expiry=Number(url.match(/expires=(\d+)/)?.[1]);
+  expect(expiry-now).toBeGreaterThanOrEqual(30);expect(expiry-now).toBeLessThanOrEqual(31);
+  vi.unstubAllGlobals();
+ });
  it('keeps legacy objects on existing delivery',async()=>{
   const query={select:()=>query,eq:()=>query,maybeSingle:async()=>({data:null,error:null})};
   expect(await deliveryUrl({from:()=>query},'vault','owner/old.mp4',300)).toBeNull();

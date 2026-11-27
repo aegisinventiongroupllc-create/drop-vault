@@ -939,6 +939,34 @@
       "when": 1795740246662,
       "tag": "0133_restrict_feed_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 134,
+      "version": "7",
+      "when": 1795744158752,
+      "tag": "0134_creator_request_menu_pricing",
+      "breakpoints": true
+    },
+    {
+      "idx": 135,
+      "version": "7",
+      "when": 1795744264076,
+      "tag": "0135_protect_menu_order_negotiation",
+      "breakpoints": true
+    },
+    {
+      "idx": 136,
+      "version": "7",
+      "when": 1795744362821,
+      "tag": "0136_bunny_private_request_delivery_support",
+      "breakpoints": true
+    },
+    {
+      "idx": 137,
+      "version": "7",
+      "when": 1795744527933,
+      "tag": "0137_revoke_inherited_menu_anonymous_grants",
+      "breakpoints": true
     }
   ]
 }

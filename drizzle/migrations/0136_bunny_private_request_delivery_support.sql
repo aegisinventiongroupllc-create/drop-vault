@@ -1,0 +1,2 @@
+ALTER TABLE public.bunny_video_deliveries DROP CONSTRAINT bunny_video_deliveries_bucket_check;
+ALTER TABLE public.bunny_video_deliveries ADD CONSTRAINT bunny_video_deliveries_bucket_check CHECK (bucket IN ('teasers','vault','request-deliveries'));

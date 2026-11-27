@@ -1,0 +1,1 @@
+REVOKE ALL ON public.creator_request_menus FROM anon;

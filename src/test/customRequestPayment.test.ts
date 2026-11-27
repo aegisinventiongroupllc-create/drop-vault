@@ -9,6 +9,11 @@ const receipt = { payment_id: "ABC", order_id: "dttreq-1-r", request_id: "r", us
 const paid = { uuid: "INV-ABC", order_id: "dttreq-1-r", fiat_currency: "USD", test_mode: false, status: "paid", amount_in_fiat: 105, amount_paid: 1, amount_to_pay: 1 };
 
 describe("custom request pricing", () => {
+  it("allows arbitrary approved menu amounts without the legacy token ceiling", () => {
+    expect(priceAgreedRequest({ id: "r", customer_id: uid, status: "accepted", amount_usd: 46.37, pricing_mode: "menu_usd" }, uid)).toEqual({ base_usd: 46.37, amount_usd: 51.37 });
+    expect(priceAgreedRequest({ id: "r", customer_id: uid, status: "accepted", amount_usd: 20000, pricing_mode: "menu_usd" }, uid)).toEqual({ base_usd: 20000, amount_usd: 20005 });
+    expect(priceAgreedRequest({ id: "r", customer_id: uid, status: "accepted", amount_usd: 24.99, pricing_mode: "menu_usd" }, uid)).toBeNull();
+  });
   it("prices only accepted requests owned by the payer at agreed base + $5", () => {
     expect(priceAgreedRequest({ id: "r", customer_id: uid, status: "accepted", amount_usd: 100 }, uid)).toEqual({ base_usd: 100, amount_usd: 105 });
     expect(priceAgreedRequest({ id: "r", customer_id: uid, status: "pending", amount_usd: 100 }, uid)).toBeNull();

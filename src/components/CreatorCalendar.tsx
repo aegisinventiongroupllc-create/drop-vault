@@ -72,7 +72,7 @@ export default function CreatorCalendar({ userId, onRequests, onMedia }: { userI
     </div>
     <section className="border-t border-border pt-4"><h3 className="font-semibold text-foreground">Reminders due</h3><ul>{due.map(itemRow)}</ul>{!due.length && <p className="text-sm text-muted-foreground mt-2">No reminders due.</p>}</section>
     <section className="border-t border-gold/30 pt-4"><h3 className="font-semibold text-gold">Request deadlines & payment status</h3>
-      <p className="text-xs text-muted-foreground mt-1">Delivery is due 48 hours after verified payment. Planned tasks do not change payment or delivery deadlines.</p>
+      <p className="text-xs text-muted-foreground mt-1">Menu requests use the agreed turnaround days after verified payment; existing token requests use 48 hours. Planned tasks do not change payment or delivery deadlines.</p>
       {[...paid, ...agreed].map(event => <div key={event.id} className="border-b border-border py-3 flex flex-wrap items-center gap-2"><div className="flex-1 min-w-0"><p translate="no" className="text-sm break-words">{event.title}</p><p className={`text-xs ${event.type === 'delivery' && Date.parse(event.at) < Date.now() ? 'text-destructive' : 'text-gold'}`}>{event.label}{event.type === 'delivery' && <> · <span translate="no">{format(new Date(event.at), 'PPp')}</span>{Date.parse(event.at) < Date.now() && ' · Overdue'}</>}</p></div><Button variant="outline" size="sm" onClick={onRequests}>Open request</Button></div>)}
       {!events.length && <p className="text-sm text-muted-foreground mt-2">No agreed requests or active delivery deadlines.</p>}
     </section>

@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       requestId = typeof body?.request_id === "string" ? body.request_id : "";
       if (!/^[0-9a-f-]{36}$/i.test(requestId)) return json({ error: "Choose an accepted request to pay" }, 400);
       const { data: request } = await server.from("custom_requests")
-        .select("id,customer_id,status,amount_usd").eq("id", requestId).maybeSingle();
+        .select("id,customer_id,status,amount_usd,pricing_mode").eq("id", requestId).maybeSingle();
       requestPrice = priceAgreedRequest(request, userId);
       if (!requestPrice) return json({ error: "This request is not ready for payment" }, 409);
     }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import WalletIndicator from "@/components/WalletIndicator";
 import CreatorMediaGrid from "@/components/CreatorMediaGrid";
 import CustomRequestModal from "@/components/CustomRequestModal";
+import CreatorRequestMenu from "@/components/CreatorRequestMenu";
 import { supabase } from "@/integrations/supabase/client";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
@@ -491,6 +492,7 @@ const CreatorProfile = ({ creatorName, onBack }: { creatorName: string; onBack: 
       </div>}
 
       {/* Top 10 Fans leaderboard + gated messaging */}
+      {creatorId && <CreatorRequestMenu creatorId={creatorId} />}
       {creatorId && <TopFansSection creatorId={creatorId} creatorName={creatorName} />}
 
       <LegalFooter />

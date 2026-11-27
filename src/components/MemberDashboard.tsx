@@ -481,7 +481,7 @@ const MemberDashboard = ({ balance, bitCents = 0, onBuyTokens, vault, preference
 
       <LegalFooter />
 
-      {payRequest && <BuyTokensModal mode="custom_request" request={{ id: payRequest.id, amountUsd: Number(payRequest.amount_usd) }} onClose={() => setPayRequest(null)} onPurchase={() => { void refreshReqs(); }} />}
+      {payRequest && <BuyTokensModal mode="custom_request" request={{ id: payRequest.id, amountUsd: Number(payRequest.amount_usd), turnaroundDays: payRequest.turnaround_days, creatorPercent: payRequest.pricing_mode === "menu_usd" ? 85 : Number(payRequest.creator_share_usd) / Number(payRequest.amount_usd) > 0.89 ? 90 : 85 }} onClose={() => setPayRequest(null)} onPurchase={() => { void refreshReqs(); }} />}
 
       {showBuyModal && (
         <BuyTokensModal onClose={() => { setShowBuyModal(false); setRenewCreator(null); }} onPurchase={onBuyTokens} />

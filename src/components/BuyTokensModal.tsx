@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { affirmAgeConsent } from "@/lib/ageConsent";
 import { RefundDisputeNotice, REFUND_SUMMARY, DISPUTE_SUMMARY } from "@/components/RefundDisputeNotice";
 import { useCustomerEntryOffer } from "@/hooks/useCustomerEntryOffer";
+import RequestPriceSummary from "@/components/RequestPriceSummary";
 
 const FINAL_SALE_TEXT = `I agree to the DTT Refund Policy and understand that digital access begins only after payment is verified. ${REFUND_SUMMARY} My purchase consent may be retained with the transaction record and shared with the payment processor to resolve a dispute.`;
 
@@ -17,7 +18,7 @@ interface BuyTokensModalProps {
   onClose: () => void;
   onPurchase: (tokens: number) => void;
   mode?: "tokens" | "entry_pass" | "custom_request";
-  request?: { id: string; amountUsd: number };
+  request?: { id: string; amountUsd: number; turnaroundDays?: number; creatorPercent?: 85 | 90 };
 }
 
 interface Checkout {
@@ -313,7 +314,7 @@ const BuyTokensModal = ({ onClose, onPurchase, mode = "tokens", request }: BuyTo
                 <span className="text-foreground">Total charged today</span>
                 <span className="text-primary">${isEntryPass ? entryPrice : invoiceAmount}</span>
               </div>
-              {isRequest && request && <p className="text-xs text-muted-foreground">${request.amountUsd.toFixed(2)} agreed price + $1 DTT fee + $4 processing allowance. This allowance is DTT pricing, not a verified provider charge. Delivery is due within 48 hours after verified payment; delivered media access lasts 14 days.</p>}
+              {isRequest && request && <RequestPriceSummary amount={request.amountUsd} creatorPercent={request.creatorPercent} days={request.turnaroundDays} />}
               {!isRequest && !isEntryPass && <><p className="text-xs text-muted-foreground">Each token has $20 spending value. No additional DTT checkout fee.</p>{invoiceAmount < quantity * TOKEN_INVOICE_USD && <p className="text-xs text-primary">Bundle savings: ${quantity * TOKEN_INVOICE_USD - invoiceAmount}</p>}<details className="text-xs text-muted-foreground"><summary className="cursor-pointer py-2 text-foreground">Price breakdown</summary><p>Includes ${quantity * TOKEN_BASE_VALUE_USD} token value and ${invoiceAmount - quantity * TOKEN_BASE_VALUE_USD} in service and processing. Included amounts are DTT pricing, not verified provider charges. Any separate wallet or provider charge must be shown before payment.</p></details></>}
             </div>
 

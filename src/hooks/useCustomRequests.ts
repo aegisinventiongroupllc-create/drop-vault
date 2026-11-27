@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomRequestRow {
+  pricing_mode?: string;
+  turnaround_days?: number;
   delivery_path: string | null;
   delivery_uploaded_at: string | null;
   delivery_access_until: string | null;

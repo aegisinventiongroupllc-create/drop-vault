@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({ invoke: vi.fn(), affirm: vi.fn(), insert: vi.f
 vi.mock("@/lib/ageConsent", () => ({ affirmAgeConsent: mocks.affirm }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {
   functions: { invoke: mocks.invoke },
+  rpc: vi.fn(async () => ({ data: null, error: null })),
   auth: { getSession: vi.fn(async () => ({ data: { session: { user: { id: "customer" } } } })), getUser: vi.fn(async () => ({ data: { user: { id: "customer" } } })) },
   from: vi.fn(() => ({ insert: mocks.insert })),
   channel: vi.fn(() => ({ on: vi.fn().mockReturnThis(), subscribe: vi.fn().mockReturnThis() })),

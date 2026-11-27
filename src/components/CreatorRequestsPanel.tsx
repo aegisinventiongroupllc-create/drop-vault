@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import RequestDelivery from "@/components/RequestDelivery";
+import CreatorRequestMenuBuilder from "@/components/CreatorRequestMenuBuilder";
 
 function timeLeft(iso: string | null) {
   if (!iso) return null;
@@ -90,7 +91,7 @@ const CreatorRequestsPanel = () => {
   };
 
   const handleCounter = async (req: CustomRequestRow) => {
-    const usd = Number(counterPrice) * TOKEN_BASE_VALUE_USD;
+    const usd = Number(counterPrice) * (req.pricing_mode === "menu_usd" ? 1 : TOKEN_BASE_VALUE_USD);
     if (!counterPrice || usd <= 0) return;
     setBusy(true);
     const { error } = await counterRequest(req.id, usd, counterMsg);
@@ -121,6 +122,7 @@ const CreatorRequestsPanel = () => {
 
   return (
     <div className="space-y-4">
+      <CreatorRequestMenuBuilder />
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-1">
           <FileText className="w-5 h-5 text-primary" />
@@ -236,16 +238,16 @@ const CreatorRequestsPanel = () => {
                   {respondingTo === req.id && (
                     <div className="mt-3 bg-secondary/50 border border-border rounded-xl p-3 space-y-3">
                       <div>
-                        <label className="text-[10px] font-bold text-muted-foreground tracking-wider">YOUR PRICE (BIT-TOKENS, max 500)</label>
+                        <label className="text-[10px] font-bold text-muted-foreground tracking-wider">{req.pricing_mode === "menu_usd" ? "YOUR PRICE ($, minimum 25)" : "YOUR PRICE (BIT-TOKENS, max 500)"}</label>
                         <input
-                          type="number" min={1} max={500}
+                          type="number" min={req.pricing_mode === "menu_usd" ? 25 : 1} max={req.pricing_mode === "menu_usd" ? undefined : 500} step={req.pricing_mode === "menu_usd" ? "0.01" : "1"}
                           value={counterPrice}
                           onChange={(e) => setCounterPrice(e.target.value)}
                           placeholder="e.g. 30"
                           className="w-full bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
                         />
                         {counterPrice && Number(counterPrice) > 0 && (
-                          <p className="text-[10px] text-muted-foreground mt-1">= ${Number(counterPrice) * TOKEN_BASE_VALUE_USD} USD</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">= ${Number(counterPrice) * (req.pricing_mode === "menu_usd" ? 1 : TOKEN_BASE_VALUE_USD)} USD</p>
                         )}
                       </div>
                       <div>
@@ -259,7 +261,7 @@ const CreatorRequestsPanel = () => {
                       </div>
                       <div className="flex gap-2">
                         <Button variant="gold" size="sm" className="flex-1" onClick={() => handleCounter(req)} disabled={busy || !counterPrice}>
-                          SEND COUNTER — {counterPrice || "?"} BT
+                          SEND COUNTER — {counterPrice || "?"} {req.pricing_mode === "menu_usd" ? "USD" : "BT"}
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setRespondingTo(null)}>CANCEL</Button>
                       </div>

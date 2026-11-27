@@ -5,7 +5,7 @@ export function requestAccessActive(until: string | null, now = Date.now()): boo
 }
 export function requestVideoLinkSeconds(until: string | null, now = Date.now()): number {
   if (!requestAccessActive(until, now) || until === null) return 0;
-  return Math.max(0, Math.min(60, Math.floor((new Date(until).getTime() - now) / 1000)));
+  return Math.max(0, Math.min(30, Math.floor((new Date(until).getTime() - now) / 1000)));
 }
 export function canStageRequest(status: string, path: string | null): boolean {
   return (status === "accepted" || status === "paid") && path === null;
