@@ -1,3 +1,4 @@
+import NewsFeed from "@/components/NewsFeed";
 import FoundingCongrats from "@/components/FoundingCongrats";
 import DttFutureAnnouncement from "@/components/DttFutureAnnouncement";
 import ContentEmojiReactions from "@/components/ContentEmojiReactions";
@@ -65,7 +66,7 @@ const VAULT_CONTENT: { id: string; type: "video" | "photo"; title: string; views
 // Real follower list — empty at launch
 const FOLLOWERS_LIST: string[] = [];
 
-type Section = "overview" | "verification" | "requests" | "media" | "messages" | "calendar" | "drafts";
+type Section = "feed" | "overview" | "verification" | "requests" | "media" | "messages" | "calendar" | "drafts";
 
 const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSignInPreview }: { onBack: () => void; adminPreview?: boolean; onFeed?: () => void; onSignInPreview?: () => void }) => {
   const [showMyPage, setShowMyPage] = useState(false);
@@ -104,7 +105,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
   const [reactionRevision, setReactionRevision] = useState(0);
   // Globe menu: the Be Right Back globe picks the section; sign-in starts on the globe.
   useEffect(() => {
-    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["overview", "verification", "requests", "media", "messages", "calendar", "drafts"].includes(id)) { setActiveSection((prev) => { if (prev !== id) setSectionHistory((h) => [...h.slice(-19), prev]); return id as Section; }); window.scrollTo({ top: 0 }); } };
+    const go = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (["feed", "overview", "verification", "requests", "media", "messages", "calendar", "drafts"].includes(id)) { setActiveSection((prev) => { if (prev !== id) setSectionHistory((h) => [...h.slice(-19), prev]); return id as Section; }); window.scrollTo({ top: 0 }); } };
     window.addEventListener(GLOBE_NAV_EVENT, go);
     if (!adminPreview) window.dispatchEvent(new Event(GLOBE_OPEN_EVENT));
     return () => window.removeEventListener(GLOBE_NAV_EVENT, go);
@@ -561,6 +562,7 @@ const CreatorAnalyticsDashboard = ({ onBack, adminPreview = false, onFeed, onSig
       {!adminPreview && <PersonalSkyBackdrop />}
       <CreatorLaunchCountdown compact />
       {!uploadEligible && <div className="mx-4 mt-4 border border-gold/40 rounded-md p-3"><p className="text-sm font-semibold text-gold">{kycStatus === "rejected" ? "Account Verification Declined — Publishing and draft uploads are unavailable." : "Private creator setup — Complete identity review first. Eligible accounts can prepare private drafts; publishing also requires age-at-recording evidence and content-specific consent for everyone appearing."}</p><div className="flex flex-wrap gap-3"><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("verification")}>OPEN IDENTITY VERIFICATION</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("drafts")}>PRIVATE DRAFTS</Button><Button variant="link" className="h-auto p-0 mt-2" onClick={() => setActiveSection("overview")}>VIP WAITING LIST</Button></div></div>}
+      {activeSection === "feed" && <NewsFeed role="creator" />}
       {activeSection === "drafts" && authUserId && <div className="px-4"><CreatorDrafts userId={authUserId} approved={uploadEligible} /></div>}
       {authUserId && <FoundingCongrats userId={authUserId} />}
       <CreatorWelcomeBack summary={rewardPreview ?? welcomeBack.summary} preview={rewardPreview !== null} onDismiss={dismissReward} onAnalytics={() => {

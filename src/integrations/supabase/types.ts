@@ -1778,6 +1778,105 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_post_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_posts: {
+        Row: {
+          caption: string
+          country_code: string
+          created_at: string
+          creator_category: string
+          creator_id: string
+          id: string
+          media_id: string | null
+          vault_preview: boolean
+        }
+        Insert: {
+          caption?: string
+          country_code: string
+          created_at?: string
+          creator_category: string
+          creator_id: string
+          id?: string
+          media_id?: string | null
+          vault_preview?: boolean
+        }
+        Update: {
+          caption?: string
+          country_code?: string
+          created_at?: string
+          creator_category?: string
+          creator_id?: string
+          id?: string
+          media_id?: string | null
+          vault_preview?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "creator_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       founding_creators: {
         Row: {
           country: string
@@ -3104,6 +3203,32 @@ export type Database = {
         Returns: number
       }
       get_creator_vip_status: { Args: { _creator_id: string }; Returns: Json }
+      get_feed_posts: {
+        Args: {
+          _category: string
+          _country: string
+          _offset?: number
+          _tab: string
+        }
+        Returns: {
+          avatar_config: Json
+          caption: string
+          comments: number
+          country_code: string
+          created_at: string
+          creator_category: string
+          creator_id: string
+          display_name: string
+          id: string
+          liked: boolean
+          likes: number
+          media_id: string
+          media_path: string
+          media_type: string
+          profile_photo_path: string
+          vault_preview: boolean
+        }[]
+      }
       get_founding_creators_public: {
         Args: never
         Returns: {

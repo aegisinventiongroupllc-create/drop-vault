@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BarChart3, CalendarDays, Crown, FileText, Flame, Gem, Heart, Inbox, MessageCircle, ShieldCheck } from "lucide-react";
+import { Newspaper, BarChart3, CalendarDays, Crown, FileText, Flame, Gem, Heart, Inbox, MessageCircle, ShieldCheck } from "lucide-react";
 import { GLOBE_DESTINATIONS, orbitPositions, type GlobeRole } from "@/lib/globeMenu";
 
-const ICONS: Record<string, typeof Flame> = { flame: Flame, drafts: FileText, calendar: CalendarDays, requests: Inbox, verify: ShieldCheck, analytics: BarChart3, messages: MessageCircle, heart: Heart, gem: Gem, crown: Crown };
+const ICONS: Record<string, typeof Flame> = { flame: Flame, drafts: FileText, calendar: CalendarDays, requests: Inbox, verify: ShieldCheck, analytics: BarChart3, messages: MessageCircle, heart: Heart, gem: Gem, crown: Crown, feed: Newspaper };
 
 interface Props { role: GlobeRole | null; tone: string; size: number; children: ReactNode; onPick: (id: string) => void }
 

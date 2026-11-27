@@ -6,6 +6,7 @@ export const GLOBE_OPEN_EVENT = "dtt-brb-preview";
 
 export const GLOBE_DESTINATIONS: Record<GlobeRole, GlobeDestination[]> = {
   creator: [
+    { id: "feed", label: "FEED", icon: "feed" },
     { id: "media", label: "MEDIA", icon: "flame" },
     { id: "drafts", label: "DRAFTS", icon: "drafts" },
     { id: "calendar", label: "CALENDAR", icon: "calendar" },
@@ -15,6 +16,7 @@ export const GLOBE_DESTINATIONS: Record<GlobeRole, GlobeDestination[]> = {
     { id: "messages", label: "MESSAGES", icon: "messages" },
   ],
   customer: [
+    { id: "feed", label: "FEED", icon: "feed" },
     { id: "library", label: "LIBRARY", icon: "heart" },
     { id: "permanent", label: "VAULT", icon: "gem" },
     { id: "requests", label: "REQUESTS", icon: "requests" },
