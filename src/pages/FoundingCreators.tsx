@@ -68,9 +68,9 @@ export default function FoundingCreators() {
         <h2 id="founding-offer" className="mt-2 text-3xl font-bold">{FOUNDING_OFFER.creatorPercent}% creator share. For life.</h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
-            <p>The first {FOUNDING_OFFER.placesPerCategory} qualifying approved creators in each category per country receive a lifetime {FOUNDING_OFFER.creatorPercent}/{FOUNDING_OFFER.platformPercent} split on eligible vault earnings.</p>
-            <p>There are 20 founding places per country across DTT’s four creator categories. Places depend on approved eligibility and remaining availability—not simply signing up.</p>
-            <p>Joining is not a reserved founding place or a VIP pass. Pro and Elite passes are separate paid products.</p>
+            <p>Ahead of the January 1, 2027 public launch, eligible pre-launch creator signups may reserve up to 20 Founding Creator spots per country: the first {FOUNDING_OFFER.placesPerCategory} qualifying approved creators in each of DTT’s four categories.</p>
+            <p>Founding Creators receive a {FOUNDING_OFFER.creatorPercent}% creator / {FOUNDING_OFFER.platformPercent}% platform revenue split on eligible Bit-Token vault transactions for life. Custom requests and other transaction types follow their separately disclosed rates.</p>
+            <p>Signing up alone does not guarantee a spot or a VIP pass; identity, age, residence, category and content-clearance requirements and remaining availability apply. Pro and Elite passes are separate paid products. DTT has no recurring subscriptions or pay-per-view fees.</p>
           </div>
           <div className="border-l-2 border-gold pl-5">
             <p className="text-lg font-semibold text-foreground">What 91% means</p>

@@ -82,7 +82,7 @@ const AgeVerification = ({ onVerified }: { onVerified: () => void }) => {
           <h1 className="font-display text-2xl font-bold tracking-wider text-foreground mb-2">
             {t.age_title}<span className="text-primary notranslate" translate="no">THING™</span>
           </h1>
-          <p className="text-sm leading-relaxed text-foreground">This site contains adult material. You must be at least 18 years of age (or the age of majority in your jurisdiction) to enter.</p>
+          <p className="text-sm leading-relaxed text-foreground">Drop That Thing™ is an 18+ adult creator marketplace operated by DTT Media LLC. By entering, you certify that you are at least 18 years of age (or the age of majority in your jurisdiction) and agree to our Terms of Service and Privacy Policy.</p>
         </div>
 
         <div className="flex items-start gap-3 text-left bg-secondary/50 border border-border rounded-lg p-3 w-full">
